@@ -14,6 +14,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "base/unixtime.h"
 #include "data/data_peer_values.h"
 #include "apiwrap.h"
+#include "lumina/lumina_settings.h"
 
 namespace Api {
 namespace {
@@ -111,6 +112,9 @@ bool SendProgressManager::updated(const Key &key, bool doing) {
 void SendProgressManager::send(const Key &key, int progress) {
 	if (skipRequest(key)) {
 		return;
+	}
+	if (Lumina::Settings::Instance().stealthTyping()) {
+		return; // LuminaGram: suppress typing / send-action broadcasts.
 	}
 	using Type = SendProgressType;
 	const auto action = [&]() -> MTPsendMessageAction {

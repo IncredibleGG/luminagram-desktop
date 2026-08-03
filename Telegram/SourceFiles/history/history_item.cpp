@@ -38,6 +38,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "apiwrap.h"
 #include "media/audio/media_audio.h"
 #include "core/application.h"
+#include "lumina/lumina_settings.h"
 #include "window/window_controller.h"
 #include "window/window_session_controller.h"
 #include "core/click_handler_types.h"
@@ -3066,6 +3067,11 @@ bool HistoryItem::forbidsForward() const {
 }
 
 bool HistoryItem::forbidsSaving() const {
+	// LuminaGram: optionally allow local save/copy/download from restricted
+	// chats. Off by default; only affects local device actions.
+	if (Lumina::Settings::Instance().allowSaveRestricted()) {
+		return false;
+	}
 	if (forbidsForward()) {
 		return true;
 	} else if (const auto invoice = _media ? _media->invoice() : nullptr) {

@@ -9,13 +9,13 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include "apiwrap.h"
 #include "api/api_transcribes.h"
+#include "boxes/translate_box.h" // Ui::ChooseTranslateTo.
 #include "core/application.h"
 #include "core/core_settings.h"
 #include "data/data_changes.h"
 #include "data/data_channel.h"
 #include "data/data_flags.h"
 #include "data/data_peer.h"
-#include "data/data_peer_values.h" // Data::AmPremiumValue.
 #include "data/data_session.h"
 #include "history/history.h"
 #include "history/history_item.h"
@@ -23,6 +23,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "history/view/history_view_element.h"
 #include "iv/iv_rich_page.h"
 #include "lang/translate_provider.h"
+#include "lumina/lumina_translate_gating.h"
 #include "main/main_session.h"
 #include "spellcheck/platform/platform_language.h"
 
@@ -34,6 +35,29 @@ constexpr auto kEnoughForTranslation = 6;
 constexpr auto kMaxCheckInBunch = 100;
 constexpr auto kRequestLengthLimit = 24 * 1024;
 constexpr auto kRequestCountLimit = 20;
+
+// LuminaGram: trMode == "all" turns a freshly offered language into an actual
+// whole-chat translation without waiting for the user to press the translate
+// bar. It runs off Data::HistoryUpdate::Flag::TranslateFrom and nothing else,
+// which is what keeps it from fighting the user: pressing "Show original"
+// clears translatedTo and fires TranslatedTo, never TranslateFrom, so the
+// decision is not retaken on the next repaint. In the default "manual" mode
+// Lumina::ShouldAutoTranslate() is false and this is inert.
+void AutoTranslateIfNeeded(not_null<History*> history) {
+	if (history->translatedTo()
+		|| !history->translateOfferedFrom()
+		|| !Lumina::ShouldAutoTranslate(history)) {
+		return;
+	}
+	const auto to = Ui::ChooseTranslateTo(history);
+	if (!to) {
+		return;
+	}
+	history->translateTo(to);
+	if (const auto migrated = history->migrateFrom()) {
+		migrated->translateTo(to);
+	}
+}
 
 } // namespace
 
@@ -69,7 +93,7 @@ void TranslateTracker::setup() {
 	using namespace rpl::mappers;
 	_trackingLanguage = rpl::combine(
 		Core::App().settings().translateChatEnabledValue(),
-		Data::AmPremiumValue(&_history->session()),
+		Lumina::ChatTranslationUnlockedValue(&_history->session()),
 		std::move(autoTranslationValue),
 		_1 && (_2 || _3));
 	_trackingLanguage.value() | rpl::on_next([=](bool tracking) {
@@ -78,6 +102,12 @@ void TranslateTracker::setup() {
 			recognizeCollected();
 			trackSkipLanguages();
 			trackTranslationDisabled();
+			_history->session().changes().historyFlagsValue(
+				_history,
+				Data::HistoryUpdate::Flag::TranslateFrom
+			) | rpl::on_next([=] {
+				AutoTranslateIfNeeded(_history);
+			}, _trackingLifetime);
 		} else {
 			checkRecognized({});
 			stopAndRevert();
@@ -485,8 +515,11 @@ void TranslateTracker::trackTranslationDisabled() {
 		PeerFlag::TranslationDisabled
 	) | rpl::skip(1) | rpl::on_next([=] {
 		using TranslationFlag = PeerData::TranslationFlag;
-		if (_history->peer->translationFlag() == TranslationFlag::Disabled
-			&& _history->translatedTo()) {
+		const auto disabled = (_history->peer->translationFlag()
+			== TranslationFlag::Disabled);
+		if (!disabled) {
+			AutoTranslateIfNeeded(_history);
+		} else if (_history->translatedTo()) {
 			stopAndRevert();
 		}
 	}, _trackingLifetime);

@@ -26,6 +26,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "iv/iv_rich_page.h"
 #include "lang/lang_instance.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_translate_readlang.h"
 #include "main/main_session.h"
 #include "mtproto/sender.h"
 #include "spellcheck/platform/platform_language.h"
@@ -548,7 +549,7 @@ object_ptr<BoxContent> ChooseTranslateToBox(
 		Fn<void(LanguageId)> callback) {
 	auto &settings = Core::App().settings();
 	auto selected = std::vector<LanguageId>{
-		settings.translateTo(),
+		Lumina::ReadLanguageOr(settings.translateTo()),
 	};
 	for (const auto &id : settings.skipTranslationLanguages()) {
 		if (id != selected.front()) {
@@ -563,6 +564,7 @@ object_ptr<BoxContent> ChooseTranslateToBox(
 		Expects(!ids.empty());
 
 		const auto id = ids.front();
+		Lumina::NoteReadLanguageChosen(id);
 		Core::App().settings().setTranslateTo(id);
 		Core::App().saveSettingsDelayed();
 		callback(id);
@@ -588,11 +590,19 @@ LanguageId ChooseTranslateTo(
 	return ChooseTranslateTo(history->translateOfferedFrom(), savedTo, skip);
 }
 
+// LuminaGram's explicit read-language override stands in for the language the
+// user last picked, rather than short-circuiting the whole resolution: the
+// fallback below - do not offer to translate a chat into the language it is
+// already written in - is just as wanted for a pinned language as it is for a
+// remembered one, and keeping the shape means every caller, and the per-chat
+// memory built on `offeredFrom`, behaves exactly as before. With no override
+// set ReadLanguageOr() returns `savedTo` and this is stock tdesktop.
 LanguageId ChooseTranslateTo(
 		LanguageId offeredFrom,
 		LanguageId savedTo,
 		const std::vector<LanguageId> &skip) {
-	return (offeredFrom != savedTo) ? savedTo : skip.front();
+	const auto to = Lumina::ReadLanguageOr(savedTo);
+	return (offeredFrom != to) ? to : skip.front();
 }
 
 } // namespace Ui

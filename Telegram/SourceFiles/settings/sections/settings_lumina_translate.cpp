@@ -7,9 +7,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "settings/sections/settings_lumina_translate.h"
 
+#include "lumina/lumina_translate_settings.h"
 #include "ui/wrap/vertical_layout.h"
 #include "ui/rp_widget.h"
-#include "ui/vertical_list.h"
 
 namespace Settings {
 
@@ -35,19 +35,15 @@ rpl::producer<QString> LuminaTranslate::title() {
 // F-02 sub-page contract: this body stays an ordered list of one call per
 // feature, each declared in that feature's own `lumina/*.h`. Nothing else
 // belongs here, so that no two feature owners ever edit the same lines.
-// Planned owners, in the order their rows should appear:
-//   W1-B provider config, API keys, languages, mode, read scope;
-//   W1-C tracker / entry-point gating and the per-chat translate toggle;
-//   W1-D read language override;
-//   W2-A translate-before-send pipeline and send-side scope;
-//   W2-C dual-language display;
-//   W2-D live inline send-translation preview.
+//
+// Every preference this page shows - provider config, API keys, both language
+// pickers, translate mode and both scopes - is declared, defaulted and
+// rendered by lumina/lumina_translate_settings. The waves that act on those
+// values (W1-C gating, W1-D read-language override, W2-A send pipeline, W2-C
+// dual-language display, W2-D send preview) read them through that header's
+// accessors and add no rows of their own here.
 void LuminaTranslate::setupContent(not_null<Ui::VerticalLayout*> container) {
-	Ui::AddSkip(container);
-	Ui::AddDividerText(
-		container,
-		rpl::single(u"Translation provider, languages and send-side "
-			"translation options will appear here."_q));
+	Lumina::AddTranslateRows(container, controller());
 }
 
 } // namespace Settings

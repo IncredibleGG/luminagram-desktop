@@ -18,6 +18,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "data/data_document.h"
 #include "history/history.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_translate_readlang.h"
 #include "main/main_session.h"
 #include "settings/settings_credits_graphics.h" // CreditsEntryBoxStyleOverrides
 #include "ui/widgets/labels.h"
@@ -341,18 +342,25 @@ void TranslateBar::setup(not_null<History*> history) {
 	}, lifetime());
 
 	_overridenTo = history->translatedTo();
+
+	// Ui::ChooseTranslateTo() already applies LuminaGram's read-language
+	// override, but nothing here would notice it changing: the last term makes
+	// the bar recompute its target - and re-translate an open chat through the
+	// filter below - the moment the override is edited in settings.
 	_to = rpl::combine(
 		Core::App().settings().translateToValue(),
 		Core::App().settings().skipTranslationLanguagesValue(),
 		history->session().changes().historyFlagsValue(
 			history,
 			Data::HistoryUpdate::Flag::TranslateFrom),
-		_overridenTo.value()
+		_overridenTo.value(),
+		Lumina::ReadLanguageCodeValue()
 	) | rpl::map([=](
 			LanguageId to,
 			const std::vector<LanguageId> &skip,
 			const auto &,
-			LanguageId overridenTo) {
+			LanguageId overridenTo,
+			const auto &) {
 		return overridenTo
 			? overridenTo
 			: Ui::ChooseTranslateTo(history, to, skip);

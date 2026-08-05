@@ -12,6 +12,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "boxes/about_box.h"
 #include "boxes/share_box.h"
 #include "boxes/star_gift_box.h"
+#include "boxes/translate_box.h"
 #include "chat_helpers/compose/compose_show.h"
 #include "chat_helpers/message_field.h"
 #include "chat_helpers/share_message_phrase_factory.h"
@@ -60,6 +61,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/vertical_list.h"
 #include "ui/controls/feature_list.h"
 #include "ui/ui_utility.h"
+#include "lumina/lumina_translate_gating.h"
 #include "main/main_app_config.h"
 #include "main/main_session.h"
 #include "main/main_session_settings.h"
@@ -1045,21 +1047,59 @@ void Filler::addExportChat() {
 		&st::menuIconExport);
 }
 
+// LuminaGram: upstream ships this as a one-way "Translate" row, shown only
+// while the chat has translation hidden, and gated on Telegram Premium. It
+// becomes a checked toggle for the chat instead - the per-chat switch the
+// manual translation mode needs - reusing this row rather than adding a
+// top-bar icon, which would cost three widgets for the same one bit of state.
+// The Premium gate moves to Lumina::ChatTranslationUnlocked(), which relaxes
+// it only while a non-Telegram provider is selected.
 void Filler::addTranslate() {
-	if (_peer->translationFlag() != PeerData::TranslationFlag::Disabled
-		|| !_peer->session().premium()
-		|| !Core::App().settings().translateChatEnabled()) {
+	if (!_peer
+		|| !Core::App().settings().translateChatEnabled()
+		|| !Lumina::ChatTranslationUnlocked(&_peer->session())) {
 		return;
 	}
 	const auto history = _peer->owner().historyLoaded(_peer);
-	if (!history
-		|| !history->translateOfferedFrom()
-		|| history->translatedTo()) {
+	if (!history || !history->translateOfferedFrom()) {
 		return;
 	}
-	_addAction(tr::lng_context_translate(tr::now), [=] {
-		history->peer->saveTranslationDisabled(false);
-	}, &st::menuIconTranslate);
+	const auto translating = history->translatedTo().known();
+	const auto setTranslating = [=](bool enabled) {
+		const auto peer = history->peer;
+		using Flag = PeerData::TranslationFlag;
+		if (enabled && (peer->translationFlag() == Flag::Disabled)) {
+			peer->saveTranslationDisabled(false);
+		}
+		const auto to = enabled
+			? Ui::ChooseTranslateTo(history)
+			: LanguageId();
+		history->translateTo(to);
+		if (const auto migrated = history->migrateFrom()) {
+			migrated->translateTo(to);
+		}
+	};
+	const auto text = tr::lng_context_translate(tr::now);
+	_addAction(PeerMenuCallback::Args{
+		.text = text,
+		.handler = [=] { setTranslating(!translating); },
+		.icon = &st::menuIconTranslate,
+		.make = [=](not_null<Ui::PopupMenu*> menu) {
+			auto item = base::make_unique_q<Menu::ItemWithCheck>(
+				menu->menu(),
+				menu->menu()->st(),
+				Ui::CreateChild<QAction>(menu->menu().get()),
+				nullptr,
+				nullptr);
+			item->action()->setText(text);
+			item->init(translating);
+			item->checkView()->checkedChanges(
+			) | rpl::on_next([=](bool checked) {
+				setTranslating(checked);
+			}, item->lifetime());
+			return item;
+		},
+	});
 }
 
 void Filler::addReport() {

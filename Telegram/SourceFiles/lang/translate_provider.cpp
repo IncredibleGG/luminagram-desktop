@@ -16,6 +16,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "history/history_item.h"
 #include "lang/translate_mtproto_provider.h"
 #include "lang/translate_url_provider.h"
+#include "lumina/lumina_translate_providers.h"
 #include "platform/platform_translate_provider.h"
 
 namespace {
@@ -41,6 +42,9 @@ std::unique_ptr<TranslateProvider> CreateTranslateProvider(
 	if (Core::App().settings().usePlatformTranslation()
 		&& Platform::IsTranslateProviderAvailable()) {
 		return Platform::CreateTranslateProvider();
+	}
+	if (auto lumina = Lumina::CreateTranslateProvider(session)) {
+		return lumina;
 	}
 	return CreateMTProtoTranslateProvider(session);
 }

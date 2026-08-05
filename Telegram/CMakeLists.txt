@@ -1808,6 +1808,14 @@ PRIVATE
     lumina/lumina_send_pipeline.h
     lumina/lumina_settings.cpp
     lumina/lumina_settings.h
+    lumina/lumina_translate_gating.cpp
+    lumina/lumina_translate_gating.h
+    lumina/lumina_translate_providers.cpp
+    lumina/lumina_translate_providers.h
+    lumina/lumina_translate_readlang.cpp
+    lumina/lumina_translate_readlang.h
+    lumina/lumina_translate_settings.cpp
+    lumina/lumina_translate_settings.h
     settings/sections/settings_folders.cpp
     settings/sections/settings_folders.h
     settings/sections/settings_global_ttl.cpp

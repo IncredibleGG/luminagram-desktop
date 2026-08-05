@@ -12,10 +12,10 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "boxes/premium_preview_box.h"
 #include "boxes/translate_box.h"
 #include "core/application.h"
-#include "data/data_peer_values.h"
 #include "lang/lang_cloud_manager.h"
 #include "lang/lang_instance.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_translate_gating.h"
 #include "main/main_session.h"
 #include "platform/platform_translate_provider.h"
 #include "settings/settings_common.h"
@@ -1610,7 +1610,8 @@ void LanguageBox::setupTop(not_null<Ui::VerticalLayout*> container) {
 	}
 
 	using namespace rpl::mappers;
-	auto premium = Data::AmPremiumValue(&_controller->session());
+	auto unlocked = Lumina::ChatTranslationUnlockedValue(
+		&_controller->session());
 	const auto translateChat = container->add(object_ptr<Ui::SettingsButton>(
 		container,
 		tr::lng_translate_settings_chat(),
@@ -1618,24 +1619,25 @@ void LanguageBox::setupTop(not_null<Ui::VerticalLayout*> container) {
 	))->toggleOn(rpl::merge(
 		rpl::combine(
 			Core::App().settings().translateChatEnabledValue(),
-			rpl::duplicate(premium),
+			rpl::duplicate(unlocked),
 			_1 && _2),
 		_translateChatTurnOff.events()));
 	_translateChatsToggle = translateChat;
-	std::move(premium) | rpl::on_next([=](bool value) {
+	std::move(unlocked) | rpl::on_next([=](bool value) {
 		translateChat->setToggleLocked(!value);
 	}, translateChat->lifetime());
 
 	translateChat->toggledValue(
 	) | rpl::filter([=](bool checked) {
-		const auto premium = _controller->session().premium();
-		if (checked && !premium) {
+		const auto unlocked = Lumina::ChatTranslationUnlocked(
+			&_controller->session());
+		if (checked && !unlocked) {
 			ShowPremiumPreviewToBuy(
 				_controller,
 				PremiumFeature::RealTimeTranslation);
 			_translateChatTurnOff.fire(false);
 		}
-		return premium
+		return unlocked
 			&& (checked != Core::App().settings().translateChatEnabled());
 	}) | rpl::on_next([=](bool checked) {
 		Core::App().settings().setTranslateChatEnabled(checked);

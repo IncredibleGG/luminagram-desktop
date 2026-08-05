@@ -159,6 +159,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "menu/menu_timecode_action.h"
 #include "mtproto/mtproto_config.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_send_pipeline.h"
 #include "settings/business/settings_quick_replies.h"
 #include "settings/settings_credits_graphics.h"
 #include "storage/localimageloader.h"
@@ -5642,46 +5643,81 @@ void HistoryWidget::sendTextWithTags(
 		return;
 	}
 
-	const auto nextLocalMessageId = session().data().nextLocalMessageId();
-	const auto hasText = !message.textWithTags.text.trimmed().isEmpty();
+	// LuminaGram: the composer send seam (F-06). It sits after the slowmode /
+	// Stars / ephemeral checks and after the payment-approved re-entry above,
+	// but before the field is cleared, the draft is saved or a local message
+	// id is minted, so an interceptor can still hold or drop the send with
+	// nothing to undo. `sendPending` owns the message, which keeps the text
+	// reference given to the interceptors alive as long as they hold it.
+	const auto pending = std::make_shared<Api::MessageToSend>(
+		std::move(message));
+	const auto sendPending = crl::guard(this, [=] {
+		// Unlike the section widgets, HistoryWidget is reused across chats
+		// instead of being destroyed, so crl::guard above does NOT catch the
+		// case where an interceptor held this send while the user switched to
+		// another chat. The message carries its own destination and is still
+		// correct, but every composer side effect below would hit the wrong
+		// chat's field, draft and keyboard. `sameChat` is always true when no
+		// interceptor is registered: `message` was built by
+		// prepareSendAction(), which takes `_history` as it is right here.
+		const auto history = pending->action.history;
+		const auto sameChat = (_history == history.get());
+		const auto nextLocalMessageId = session().data().nextLocalMessageId();
+		const auto hasText = !pending->textWithTags.text.trimmed().isEmpty();
 
-	if (hasText
-		&& message.webPage.url.isEmpty()
-		&& (_field->document()->size().height() <= _field->height())) {
-		controller()->sendingAnimation().appendSending({
-			.type = Ui::MessageSendingAnimationFrom::Type::Text,
-			.localId = nextLocalMessageId,
-			.globalStartGeometry = _field->mapToGlobal(Rect(_field->size())),
-		});
+		if (sameChat
+			&& hasText
+			&& pending->webPage.url.isEmpty()
+			&& (_field->document()->size().height() <= _field->height())) {
+			controller()->sendingAnimation().appendSending({
+				.type = Ui::MessageSendingAnimationFrom::Type::Text,
+				.localId = nextLocalMessageId,
+				.globalStartGeometry = _field->mapToGlobal(
+					Rect(_field->size())),
+			});
+		}
+
+		// Just a flag not to drop reply info if we're not sending anything.
+		_justMarkingAsRead = sameChat
+			&& !hasText
+			&& pending->webPage.url.isEmpty();
+		session().api().sendMessage(std::move(*pending), nextLocalMessageId);
+		_justMarkingAsRead = false;
+
+		if (sameChat) {
+			clearFieldText();
+			if (_preview) {
+				_preview->apply({ .removed = true });
+			}
+			saveDraftWithTextNow();
+
+			hideSelectorControlsAnimated();
+
+			setInnerFocus();
+
+			if (!_keyboard->hasMarkup()
+				&& _keyboard->forceReply()
+				&& !_kbReplyTo) {
+				toggleKeyboard();
+			}
+		}
+		session().changes().historyUpdated(
+			history,
+			(options.scheduled
+				? Data::HistoryUpdate::Flag::ScheduledSent
+				: Data::HistoryUpdate::Flag::MessageSent));
+		if (done) {
+			done();
+		}
+	});
+	if (!Lumina::InterceptSend(
+			pending->action.history,
+			pending->textWithTags,
+			pending->action.options,
+			sendPending)) {
+		return;
 	}
-
-	// Just a flag not to drop reply info if we're not sending anything.
-	_justMarkingAsRead = !hasText
-		&& message.webPage.url.isEmpty();
-	session().api().sendMessage(std::move(message), nextLocalMessageId);
-	_justMarkingAsRead = false;
-
-	clearFieldText();
-	if (_preview) {
-		_preview->apply({ .removed = true });
-	}
-	saveDraftWithTextNow();
-
-	hideSelectorControlsAnimated();
-
-	setInnerFocus();
-
-	if (!_keyboard->hasMarkup() && _keyboard->forceReply() && !_kbReplyTo) {
-		toggleKeyboard();
-	}
-	session().changes().historyUpdated(
-		_history,
-		(options.scheduled
-			? Data::HistoryUpdate::Flag::ScheduledSent
-			: Data::HistoryUpdate::Flag::MessageSent));
-	if (done) {
-		done();
-	}
+	sendPending();
 }
 
 void HistoryWidget::sendWithTextOverride(

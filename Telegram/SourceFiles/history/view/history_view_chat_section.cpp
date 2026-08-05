@@ -93,6 +93,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "info/profile/info_profile_values.h"
 #include "iv/editor/iv_editor_session.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_send_pipeline.h"
 #include "styles/style_chat.h"
 #include "styles/style_chat_helpers.h"
 #include "styles/style_info.h"
@@ -1662,40 +1663,58 @@ void ChatWidget::sendTextWithTags(
 		}
 	}
 
-	const auto nextLocalMessageId = session().data().nextLocalMessageId();
-	const auto hasText = !message.textWithTags.text.trimmed().isEmpty();
+	// LuminaGram: the composer send seam (F-06). It sits after the slowmode /
+	// Stars / ephemeral checks and after the payment-approved re-entry above,
+	// but before the compose controls are cleared and before a local message
+	// id is minted, so an interceptor can still hold or drop the send with
+	// nothing to undo. `sendPending` owns the message, which keeps the text
+	// reference given to the interceptors alive as long as they hold it.
+	const auto pending = std::make_shared<Api::MessageToSend>(
+		std::move(message));
+	const auto sendPending = crl::guard(this, [=] {
+		const auto nextLocalMessageId = session().data().nextLocalMessageId();
+		const auto hasText = !pending->textWithTags.text.trimmed().isEmpty();
 
-	if (const auto field = _composeControls->fieldForMention(); field
-		&& hasText
-		&& message.webPage.url.isEmpty()
-		&& (field->document()->size().height() <= field->height())) {
-		controller()->sendingAnimation().appendSending({
-			.type = Ui::MessageSendingAnimationFrom::Type::Text,
-			.localId = nextLocalMessageId,
-			.globalStartGeometry = field->mapToGlobal(
-				Rect(field->size())),
-		});
+		if (const auto field = _composeControls->fieldForMention(); field
+			&& hasText
+			&& pending->webPage.url.isEmpty()
+			&& (field->document()->size().height() <= field->height())) {
+			controller()->sendingAnimation().appendSending({
+				.type = Ui::MessageSendingAnimationFrom::Type::Text,
+				.localId = nextLocalMessageId,
+				.globalStartGeometry = field->mapToGlobal(
+					Rect(field->size())),
+			});
+		}
+
+		session().api().sendMessage(std::move(*pending), nextLocalMessageId);
+
+		_composeControls->clear();
+		if (_repliesRootId) {
+			session().sendProgressManager().update(
+				_history,
+				_repliesRootId,
+				Api::SendProgressType::Typing,
+				-1);
+		}
+
+		//_saveDraftText = true;
+		//_saveDraftStart = crl::now();
+		//onDraftSave();
+
+		finishSending();
+		if (done) {
+			done();
+		}
+	});
+	if (!Lumina::InterceptSend(
+			pending->action.history,
+			pending->textWithTags,
+			pending->action.options,
+			sendPending)) {
+		return;
 	}
-
-	session().api().sendMessage(std::move(message), nextLocalMessageId);
-
-	_composeControls->clear();
-	if (_repliesRootId) {
-		session().sendProgressManager().update(
-			_history,
-			_repliesRootId,
-			Api::SendProgressType::Typing,
-			-1);
-	}
-
-	//_saveDraftText = true;
-	//_saveDraftStart = crl::now();
-	//onDraftSave();
-
-	finishSending();
-	if (done) {
-		done();
-	}
+	sendPending();
 }
 
 void ChatWidget::sendWithTextOverride(

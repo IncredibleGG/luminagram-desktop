@@ -1786,6 +1786,26 @@ PRIVATE
     settings/settings_experimental.h
     settings/sections/settings_luminagram.cpp
     settings/sections/settings_luminagram.h
+    settings/sections/settings_lumina_appearance.cpp
+    settings/sections/settings_lumina_appearance.h
+    settings/sections/settings_lumina_chat.cpp
+    settings/sections/settings_lumina_chat.h
+    settings/sections/settings_lumina_chat_list.cpp
+    settings/sections/settings_lumina_chat_list.h
+    settings/sections/settings_lumina_privacy.cpp
+    settings/sections/settings_lumina_privacy.h
+    settings/sections/settings_lumina_security.cpp
+    settings/sections/settings_lumina_security.h
+    settings/sections/settings_lumina_tools.cpp
+    settings/sections/settings_lumina_tools.h
+    settings/sections/settings_lumina_translate.cpp
+    settings/sections/settings_lumina_translate.h
+    lumina/lumina_message_menu.cpp
+    lumina/lumina_message_menu.h
+    lumina/lumina_profile_rows.cpp
+    lumina/lumina_profile_rows.h
+    lumina/lumina_send_pipeline.cpp
+    lumina/lumina_send_pipeline.h
     lumina/lumina_settings.cpp
     lumina/lumina_settings.h
     settings/sections/settings_folders.cpp

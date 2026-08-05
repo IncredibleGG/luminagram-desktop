@@ -60,6 +60,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "storage/localimageloader.h"
 #include "inline_bots/inline_bot_result.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_send_pipeline.h"
 #include "styles/style_chat.h"
 #include "styles/style_chat_helpers.h"
 #include "styles/style_boxes.h"
@@ -741,18 +742,37 @@ void ScheduledWidget::send(Api::SendOptions options) {
 	message.textWithTags = _composeControls->getTextWithAppliedMarkdown();
 	message.webPage = webPageDraft;
 
-	session().api().sendMessage(std::move(message));
+	// LuminaGram: the composer send seam (F-06). This composer runs its own
+	// send checks in the no-argument send() above, before the schedule box, so
+	// by the time we get here they have all passed and the only thing left is
+	// the request itself. Still before the compose controls are cleared, so an
+	// interceptor can hold or drop the send with nothing to undo.
+	// `sendPending` owns the message, which keeps the text reference given to
+	// the interceptors alive as long as they hold it.
+	const auto pending = std::make_shared<Api::MessageToSend>(
+		std::move(message));
+	const auto sendPending = crl::guard(this, [=] {
+		session().api().sendMessage(std::move(*pending));
 
-	_composeControls->cancelForward();
-	_composeControls->clear();
-	//_saveDraftText = true;
-	//_saveDraftStart = crl::now();
-	//onDraftSave();
+		_composeControls->cancelForward();
+		_composeControls->clear();
+		//_saveDraftText = true;
+		//_saveDraftStart = crl::now();
+		//onDraftSave();
 
-	_composeControls->hidePanelsAnimated();
+		_composeControls->hidePanelsAnimated();
 
-	//if (_previewData && _previewData->pendingTill) previewCancel();
-	_composeControls->focus();
+		//if (_previewData && _previewData->pendingTill) previewCancel();
+		_composeControls->focus();
+	});
+	if (!Lumina::InterceptSend(
+			pending->action.history,
+			pending->textWithTags,
+			pending->action.options,
+			sendPending)) {
+		return;
+	}
+	sendPending();
 }
 
 void ScheduledWidget::sendVoice(const Controls::VoiceToSend &data) {

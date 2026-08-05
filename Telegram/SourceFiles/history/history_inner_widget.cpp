@@ -125,6 +125,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "data/data_histories.h"
 #include "data/data_changes.h"
 #include "dialogs/ui/dialogs_video_userpic.h"
+#include "lumina/lumina_message_menu.h"
 #include "styles/style_chat.h"
 #include "styles/style_menu_icons.h"
 
@@ -3774,6 +3775,23 @@ void HistoryInner::showContextMenu(QContextMenuEvent *e, bool showFromTouch) {
 			addSelectMessageAction(Element::Moused()->data());
 		}
 	}
+
+	// LuminaGram: the single seam for every fork-added message-menu row. It
+	// sits where AddMessageActions() ends in the other builder, that is right
+	// before the emoji-packs / who-reacted tail. `leaderOrSelf` is the item
+	// the surrounding upstream code acts on here (the album leader when the
+	// cursor is over an album part), and the copy restrictions are resolved
+	// at this call site because HistoryInner keeps those helpers private.
+	const auto luminaRequest = Lumina::HistoryInnerMenuRequest{
+		.controller = _controller,
+		.item = leaderOrSelf,
+		.asGroup = asGroup,
+		.hasSelection = (isUponSelected == 2 || isUponSelected == -2),
+		.copyRestricted = hasCopyRestriction(leaderOrSelf),
+		.copyMediaRestricted = (leaderOrSelf
+			&& hasCopyMediaRestriction(leaderOrSelf)),
+	};
+	Lumina::FillMessageMenu(_menu.get(), luminaRequest, this);
 
 	if (_dragStateItem) {
 		const auto view = viewByItem(_dragStateItem);

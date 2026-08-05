@@ -72,6 +72,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "inline_bots/bot_attach_web_view.h"
 #include "iv/iv_instance.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_profile_rows.h"
 #include "main/main_session.h"
 #include "menu/menu_mute.h"
 #include "settings/settings_common.h"
@@ -1730,6 +1731,20 @@ Section DetailsFiller::makeInfo() {
 			return false;
 		});
 
+		Lumina::AddUserInfoRows({
+			.container = result,
+			.controller = controller,
+			.addInfoOneLine = [&](
+					v::text::data label,
+					rpl::producer<TextWithEntities> text,
+					QString contextCopyText) {
+				return addInfoOneLine(
+					std::move(label),
+					std::move(text),
+					contextCopyText);
+			},
+		}, user);
+
 		if (!user->isBot()) {
 			tracker.track(result->add(
 				CreateBirthday(result, controller, user),
@@ -1841,6 +1856,20 @@ Section DetailsFiller::makeInfo() {
 				QString()
 			).text->setLinksTrusted();
 		}
+
+		Lumina::AddChatInfoRows({
+			.container = result,
+			.controller = controller,
+			.addInfoOneLine = [&](
+					v::text::data label,
+					rpl::producer<TextWithEntities> text,
+					QString contextCopyText) {
+				return addInfoOneLine(
+					std::move(label),
+					std::move(text),
+					contextCopyText);
+			},
+		}, _peer, _topic);
 
 		const auto about = addInfoLine(tr::lng_info_about_label(), _topic
 			? rpl::single(TextWithEntities())

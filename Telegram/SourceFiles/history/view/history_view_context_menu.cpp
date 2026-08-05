@@ -105,6 +105,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "media/audio/media_audio.h"
 #include "media/player/media_player_instance.h"
 #include "spellcheck/spellcheck_types.h"
+#include "lumina/lumina_message_menu.h"
 #include "apiwrap.h"
 #include "styles/style_chat.h"
 #include "styles/style_chat_helpers.h"
@@ -1120,6 +1121,8 @@ void AddMessageActions(
 	if (request.item && request.selectedItems.empty()) {
 		AddEphemeralAboutAction(menu, request.item);
 	}
+	// LuminaGram: the single seam for every fork-added message-menu row.
+	Lumina::FillMessageMenu(menu, request, list);
 	AddRescheduleAction(menu, request, list);
 }
 

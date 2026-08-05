@@ -1081,6 +1081,13 @@ win:
     SET CHERE_INVOKING=enabled_from_arguments
     SET MSYS2_PATH_TYPE=inherit
 
+    rem LuminaGram: NASM 3.02 (what msys64 ships as of 2026-07) segfaults with 0xC0000005
+    rem while emitting CodeView debug info for 12 of libvpx hand-written .asm files. The
+    rem Debug configuration custom build step passes -gcv8; patch it out of the vcxproj
+    rem generator before configure runs. Costs only assembly-level debug info for libvpx.
+    rem Verified on VS2026 + MSVC 14.44: all 12 files assemble cleanly without it.
+    sed -i "s/ -gcv8//g" build/make/gen_msvs_vcxproj.sh
+
 win32:
     SET "TOOLCHAIN=x86-win32-vs17"
 win64:

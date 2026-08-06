@@ -301,6 +301,19 @@ void EnsureSubscribed() {
 void SetOutgoingOriginalLookup(
 		Fn<QString(not_null<const HistoryItem*>)> lookup) {
 	OutgoingLookup() = std::move(lookup);
+
+	// This is reached from dynamic initialisation (lumina_translate_originals'
+	// Registrar), i.e. before QApplication exists. Reading a preference here
+	// would construct Lumina::Settings, whose save timer is a base::Timer and
+	// therefore a QObject - constructing one before the application does not
+	// survive. It crashed the app before it could even open its log.
+	//
+	// Checking the candidate set first costs nothing and keeps the whole
+	// preference layer out of static init: at that point nothing is laid out,
+	// so there is never anything to refresh anyway.
+	if (Candidates().empty()) {
+		return;
+	}
 	if (FeatureActive()) {
 		RefreshLoadedBubbles();
 	}

@@ -42,6 +42,12 @@ enum class Store {
 // `*.corrupt` rather than dropped, so nothing is ever silently destroyed.
 class Settings final {
 public:
+	// !! NOT SAFE BEFORE QApplication EXISTS. The first call constructs the
+	// store, and _saveTimer is a base::Timer, which is a QObject. Calling this
+	// from a namespace-scope initialiser crashes the app before it can even
+	// open its log - which is exactly what a Wave 2 registrar did. Register
+	// callbacks from static init if you must, but never read a preference
+	// there.
 	[[nodiscard]] static Settings &Instance();
 
 	[[nodiscard]] bool getBool(const QString &key, bool def = false) const;

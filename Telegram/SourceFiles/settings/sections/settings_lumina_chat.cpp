@@ -9,7 +9,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include "lumina/lumina_quick_replies_settings.h"
 #include "lumina/lumina_undo_send_settings.h"
-#include "lumina/lumina_select_author_settings.h"
+#include "lumina/lumina_select_author.h"
 #include "lumina/lumina_message_actions_settings.h"
 #include "lumina/lumina_ai_editor.h"
 #include "lumina/lumina_link_preview_settings.h"

@@ -29,6 +29,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "history/history_unread_things.h"
 #include "lang/lang_keys.h"
 #include "lottie/lottie_single_player.h"
+#include "lumina/lumina_translate_send.h"
 #include "ui/chat/chat_style.h"
 #include "ui/chat/chat_theme.h"
 #include "ui/effects/path_shift_gradient.h"
@@ -763,6 +764,7 @@ FillMenuResult FillSendMenu(
 				details); },
 			&icons.menuWhenOnline);
 	}
+	Lumina::AddSendMenuTranslateRow(menu, details);
 
 	if ((type != Type::Disabled)
 		&& ((details.spoiler != SpoilerState::None)

@@ -160,6 +160,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "mtproto/mtproto_config.h"
 #include "lang/lang_keys.h"
 #include "lumina/lumina_send_pipeline.h"
+#include "lumina/lumina_translate_preview_bar.h"
 #include "settings/business/settings_quick_replies.h"
 #include "settings/settings_credits_graphics.h"
 #include "storage/localimageloader.h"
@@ -371,6 +372,11 @@ HistoryWidget::HistoryWidget(
 	setAcceptDrops(true);
 
 	session().downloaderTaskFinished() | rpl::on_next([=] {
+		update();
+	}, lifetime());
+
+	Lumina::TranslatePreviewRefreshRequests() | rpl::on_next([=] {
+		updateControlsGeometry();
 		update();
 	}, lifetime());
 
@@ -7173,6 +7179,22 @@ void HistoryWidget::moveFieldControls() {
 		left += _sendAs->width();
 	}
 	const auto fieldTop = bottom - fieldHeight() - st::historySendPadding;
+	if (const auto previewHeight = Lumina::TranslatePreviewBarHeight(this)) {
+		const auto replyBarShown = _editMsgId
+			|| _replyTo
+			|| readyToForward()
+			|| _kbReplyTo
+			|| _previewDrawPreview
+			|| _suggestOptions;
+		Lumina::MoveTranslatePreviewBar(
+			this,
+			0,
+			fieldTop
+				- st::historySendPadding
+				- (replyBarShown ? st::historyReplyHeight : 0)
+				- previewHeight,
+			width());
+	}
 	_field->moveToLeft(left, fieldTop);
 	_richDraftPreview->moveToLeft(left, fieldTop);
 	if (_fieldDisabled) {
@@ -7820,6 +7842,17 @@ void HistoryWidget::resizeEvent(QResizeEvent *e) {
 void HistoryWidget::updateControlsGeometry() {
 	const auto width = this->width();
 
+	Lumina::RefreshTranslatePreviewBar({
+		.parent = this,
+		.field = _field.data(),
+		.history = _history,
+		.editing = editingMessage(),
+		.layoutChanged = crl::guard(this, [=] {
+			updateControlsGeometry();
+			update();
+		}),
+	});
+
 	_topBar->resizeToWidth(width);
 	_topBar->moveToLeft(0, 0);
 
@@ -8194,6 +8227,7 @@ void HistoryWidget::updateHistoryGeometry(
 			newScrollHeight -= _kbScroll->height();
 		}
 	}
+	newScrollHeight -= Lumina::TranslatePreviewBarHeight(this);
 	if (newScrollHeight <= 0) {
 		return;
 	}
@@ -8623,6 +8657,7 @@ int HistoryWidget::computeMaxFieldHeight() const {
 			|| _previewDrawPreview)
 			? st::historyReplyHeight
 			: 0)
+		- Lumina::TranslatePreviewBarHeight(this)
 		- (2 * st::historySendPadding)
 		- st::historyReplyHeight; // at least this height for history.
 	return std::min(st::historyComposeFieldMaxHeight, available);
@@ -10825,9 +10860,16 @@ void HistoryWidget::drawField(Painter &p, const QRect &rect) {
 		backy -= st::historyReplyHeight;
 		backh += st::historyReplyHeight;
 	}
+	const auto luminaPreviewHeight = Lumina::TranslatePreviewBarHeight(this);
 	p.setInactive(
 		controller()->isGifPausedAtLeastFor(Window::GifPauseReason::Any));
-	p.fillRect(myrtlrect(0, backy, width(), backh), st::historyReplyBg);
+	p.fillRect(
+		myrtlrect(
+			0,
+			backy - luminaPreviewHeight,
+			width(),
+			backh + luminaPreviewHeight),
+		st::historyReplyBg);
 
 	const auto media = (!_previewDrawPreview && drawMsgText)
 		? drawMsgText->media()

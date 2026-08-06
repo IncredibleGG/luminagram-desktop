@@ -424,8 +424,10 @@ void AddScopeRows(not_null<Ui::VerticalLayout*> container) {
 	Ui::AddSkip(container);
 	Ui::AddDividerText(
 		container,
-		rpl::single(u"Scope only limits \"In every chat\". A chat outside "
-			"it can still be translated by hand."_q));
+		rpl::single(u"Chats outside the scope are left alone in both "
+			"directions: they are not translated as you read them, and "
+			"messages you send there go out untranslated. You can still "
+			"translate any single message by hand."_q));
 }
 
 void AddProviderRows(

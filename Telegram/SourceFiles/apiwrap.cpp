@@ -71,6 +71,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "base/random.h"
 #include "base/call_delayed.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_translate_originals.h"
 #include "mainwidget.h"
 #include "boxes/add_contact_box.h"
 #include "mtproto/mtproto_config.h"
@@ -4653,6 +4654,12 @@ void ApiWrap::sendMessage(
 			randomId,
 			peer->id,
 			sending.text);
+
+		// LuminaGram: the one place an outgoing message's id is minted, and
+		// therefore the only place a translate-before-send original can be
+		// bound to the message it was translated into (W2-B). A no-op unless
+		// the send pipeline armed one for this chat.
+		Lumina::NoteOutgoingText(_session, newId, sending.text);
 
 		MTPstring msgText(MTP_string(sending.text));
 		auto flags = NewMessageFlags(peer);

@@ -87,6 +87,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "iv/editor/iv_editor_session.h"
 #include "iv/iv_rich_page.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_translate_preview_bar.h"
 #include "main/main_app_config.h"
 #include "main/main_session.h"
 #include "main/main_session_settings.h"
@@ -2274,6 +2275,12 @@ void ComposeControls::init() {
 		updateWrappingVisibility();
 	}, _wrap->lifetime());
 
+	Lumina::TranslatePreviewRefreshRequests(
+	) | rpl::on_next([=] {
+		updateHeight();
+		updateControlsGeometry(_wrap->size());
+	}, _wrap->lifetime());
+
 	if (_botCommandStart) {
 		_botCommandStart->setAccessibleName(tr::lng_bot_commands_start(tr::now));
 		_botCommandStart->setClickedCallback([=] { setText({ "/" }); });
@@ -4027,6 +4034,17 @@ void ComposeControls::updateControlsGeometry(QSize size) {
 	// (_commentsShown) (_attachToggle|_replaceMedia) (_sendAs) -- _inlineResults ------ _tabbedPanel -- _fieldBarCancel (_starsReaction)
 	// (_attachDocument|_attachPhoto) _field (_ttlInfo) (_scheduled) (_silent|_botCommandStart) _tabbedSelectorToggle _send
 
+	Lumina::RefreshTranslatePreviewBar({
+		.parent = _wrap.get(),
+		.field = _field,
+		.history = _history,
+		.editing = isEditingMessage(),
+		.layoutChanged = crl::guard(_wrap.get(), [=] {
+			updateHeight();
+			updateControlsGeometry(_wrap->size());
+		}),
+	});
+
 	const auto oldComposeHeight = shouldShowRichDraftPreview()
 		? _richDraftPreview->height()
 		: _field->height();
@@ -4103,6 +4121,18 @@ void ComposeControls::updateControlsGeometry(QSize size) {
 	_header->moveToLeft(
 		0,
 		fieldTop - _st.padding.top() - _header->height());
+
+	const auto previewHeight = Lumina::TranslatePreviewBarHeight(_wrap.get());
+	if (previewHeight) {
+		const auto headerHeight = _header->isDisplayed()
+			? _header->height()
+			: 0;
+		Lumina::MoveTranslatePreviewBar(
+			_wrap.get(),
+			0,
+			fieldTop - _st.padding.top() - headerHeight - previewHeight,
+			size.width());
+	}
 
 	auto right = 0;
 	if (_starsReaction) {
@@ -4643,7 +4673,8 @@ void ComposeControls::toggleTabbedSelectorMode() {
 }
 
 void ComposeControls::updateHeight() {
-	const auto height = (_header->isDisplayed() ? _header->height() : 0)
+	const auto height = Lumina::TranslatePreviewBarHeight(_wrap.get())
+		+ (_header->isDisplayed() ? _header->height() : 0)
 		+ _st.padding.top()
 		+ (shouldShowRichDraftPreview()
 			? _richDraftPreview->height()

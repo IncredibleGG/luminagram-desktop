@@ -33,6 +33,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "data/data_session.h"
 #include "iv/iv_cached_media.h"
 #include "iv/iv_rich_page.h"
+#include "lumina/lumina_dual_language_line.h"
 #include "base/unixtime.h"
 #include "boxes/premium_preview_box.h"
 #include "core/application.h"
@@ -2016,6 +2017,7 @@ void Element::validateText() {
 		_media = nullptr;
 		_textItem = item;
 		clearRichPage();
+		Lumina::ClearDualLanguage(this);
 		if (!storyMention) {
 			if (_text.isEmpty()) {
 				setTextWithLinks(tr::italic(storyUnsupported
@@ -2040,6 +2042,7 @@ void Element::validateText() {
 			setTextWithLinks(summary.result);
 		}
 		clearRichPage();
+		Lumina::ClearDualLanguage(this);
 		return;
 	} else {
 		_flags &= ~Flag::SummaryShown;
@@ -2050,11 +2053,15 @@ void Element::validateText() {
 			setTextWithLinks({});
 		}
 		clearRichPage();
+		Lumina::ClearDualLanguage(this);
 		return;
 	}
+	const auto dual = Lumina::ValidateDualLanguage(this, _textItem);
 	const auto &text = _textItem->_text;
 	auto richPage = std::shared_ptr<const Iv::RichPage>();
-	if (!summaryShownChanged && _text.isEmpty() == text.empty()) {
+	if (!summaryShownChanged
+		&& !dual.changed
+		&& _text.isEmpty() == text.empty()) {
 	} else if (_flags & Flag::ServiceMessage) {
 		const auto contextDependentText = contextDependentServiceText();
 		const auto &markedText = contextDependentText.text.empty()
@@ -2087,6 +2094,8 @@ void Element::validateText() {
 		const auto unavailable = item->computeUnavailableReason();
 		if (!unavailable.isEmpty()) {
 			setTextWithLinks(tr::italic(unavailable));
+		} else if (dual.overrideMainText) {
+			setTextWithLinks(dual.mainText);
 		} else {
 			setTextWithLinks(_textItem->translatedTextWithLocalEntities());
 			richPage = _textItem->translatedRichPage();
@@ -3250,6 +3259,7 @@ QPoint Element::mediaTopLeft() const {
 }
 
 Element::~Element() {
+	Lumina::ForgetDualLanguage(this);
 	setReactions(nullptr);
 
 	// Delete media while owner still exists.

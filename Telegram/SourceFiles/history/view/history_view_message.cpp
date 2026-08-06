@@ -34,6 +34,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "iv/markdown/iv_markdown_prepare_links.h"
 #include "iv/iv_instance.h"
 #include "iv/iv_rich_page.h"
+#include "lumina/lumina_dual_language_line.h"
 #include "boxes/premium_preview_box.h"
 #include "boxes/share_box.h"
 #include "boxes/peers/tag_info_box.h"
@@ -1551,6 +1552,10 @@ QSize Message::performCountOptimalSize() {
 				accumulate_max(maxWidth, summaryHeaderWidth);
 				accumulate_max(nonTextMax, summaryHeaderWidth);
 			}
+			if (const auto dual = Lumina::DualLanguageMaxWidth(this)) {
+				accumulate_max(maxWidth, dual);
+				accumulate_max(nonTextMax, dual);
+			}
 			if (check) {
 				accumulate_max(maxWidth, check->maxWidth());
 				accumulate_max(nonTextMax, check->maxWidth());
@@ -1952,6 +1957,10 @@ void Message::draw(Painter &p, const PaintContext &context) const {
 			trect.setHeight(trect.height()
 				- (_bottomInfo.height() - st::msgDateFont->height));
 		}
+		const auto dualHeight = Lumina::DualLanguageHeight(this);
+		if (dualHeight) {
+			trect.setHeight(trect.height() - dualHeight);
+		}
 		auto textSelection = context.selection;
 		auto highlightRange = context.highlight.range;
 		const auto mediaHeight = mediaDisplayed ? media->height() : 0;
@@ -2011,6 +2020,15 @@ void Message::draw(Painter &p, const PaintContext &context) const {
 		}
 		if (drawOnlyText) {
 			p.restore();
+		}
+		if (dualHeight && drawText) {
+			Lumina::PaintDualLanguage(
+				p,
+				this,
+				context,
+				trect.x(),
+				trect.y() + trect.height(),
+				trect.width());
 		}
 		if (mediaDisplayed && !_invertMedia) {
 			paintMedia(trect.y() + trect.height() - mediaHeight);
@@ -3951,6 +3969,9 @@ TextState Message::textState(
 					visibleTextLength() + visibleMediaTextLength());
 			}
 		}
+		if (const auto dualHeight = Lumina::DualLanguageHeight(this)) {
+			trect.setHeight(trect.height() - dualHeight);
+		}
 
 		auto checkBottomInfoState = [&] {
 			if (mediaOnBottom
@@ -4873,7 +4894,17 @@ SelectedQuote Message::selectedQuote(TextSelection selection) const {
 	const auto item = textItem ? textItem : data().get();
 	const auto &translated = item->translatedText();
 	const auto &original = item->originalText();
+	// The `&translated != &original` test below already keeps quoting off an
+	// incoming message shown translated, and dual-language display does not
+	// change that: the item still carries a translation, so the pointers
+	// still differ. Outgoing translate-before-send messages are the new case
+	// and the dangerous one - there is no translation component, so that test
+	// passes, while Element::text() is the stored original and the item's own
+	// text is the translation that was actually sent. FindSelectedQuote()
+	// would map offsets from one string onto the other and produce a quote
+	// that is not in the message.
 	if (&translated != &original
+		|| Lumina::DualLanguageMainTextIsExternal(this)
 		|| selection.empty()
 		|| selection == FullSelection) {
 		return {};
@@ -4911,7 +4942,8 @@ TextSelection Message::selectionFromQuote(
 	const auto item = quote.item;
 	const auto &translated = item->translatedText();
 	const auto &original = item->originalText();
-	if (&translated != &original) {
+	if (&translated != &original
+		|| Lumina::DualLanguageMainTextIsExternal(this)) {
 		return {};
 	} else if (hasVisibleText()) {
 		const auto media = this->media();
@@ -6585,6 +6617,10 @@ int Message::resizeContentGetHeight(int newWidth) {
 				- st::msgPadding.left()
 				- st::msgPadding.right());
 		}
+		newHeight += Lumina::DualLanguageResizeToWidth(
+			this,
+			contentWidth - st::msgPadding.left() - st::msgPadding.right(),
+			needInfoDisplay() && !reactionsInBubble);
 		if (needInfoDisplay()) {
 			newHeight += (bottomInfoHeight - st::msgDateFont->height);
 		}
@@ -6930,6 +6966,12 @@ void Message::refreshInfoSkipBlock(HistoryItem *textItem) {
 		} else if (media && media->isDisplayed() && !_invertMedia) {
 			return false;
 		} else if (_reactions) {
+			return false;
+		} else if (Lumina::DualLanguageShown(this)) {
+			// The dual-language sub-line takes the place of the last text
+			// line, so a skip block on the main text would only leave a gap
+			// in the middle of the bubble. The room for the time is reserved
+			// as a whole extra row instead, in resizeContentGetHeight().
 			return false;
 		}
 		return true;

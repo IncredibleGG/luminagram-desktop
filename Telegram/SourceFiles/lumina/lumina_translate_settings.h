@@ -103,19 +103,17 @@ void SetDualLanguageDisplay(bool value);
 [[nodiscard]] QString TranslateReadLanguage();
 void SetTranslateReadLanguage(const QString &code);
 
-// The read-side scope, mirroring Android's user / chat dialog split.
-// Lumina::TranslateScopeAllows() in lumina_translate_gating.h is what the read
-// path consults; these two exist for the rows that write them.
+// The scope, mirroring Android's user / chat dialog split.
+// Lumina::TranslateScopeAllows() in lumina_translate_gating.h is what both
+// paths consult; these two exist for the rows that write them.
 //
-// Read side ONLY on desktop, and the page says so: the "Where it applies"
-// divider promises "Scope only limits \"In every chat\"", which is Android's
-// own help text (LuminaTranslateScopeInfo). Android's code then contradicts
-// that string - ChatActivityEnterView.luminaTbsInScope() gates
-// translate-before-send on the same two keys as well, so a user with
-// "Groups" off silently loses send translation in groups without any UI
-// saying so. Do not port that. If W2-A decides it wants a send-side scope
-// after all, it needs its own pair of keys, or this divider text has to
-// change with it.
+// BOTH directions on desktop: a chat outside the scope is left alone by the
+// read side and by translate-before-send alike. Android's code does the same
+// (ChatActivityEnterView.luminaTbsInScope()), but its help string claims the
+// scope only limits automatic reading, so a user with "Groups" off there
+// silently loses send translation with nothing saying so. The behaviour is
+// worth keeping - it is what "where it applies" means - so the string is what
+// changed: the divider below states plainly that the scope covers both.
 [[nodiscard]] bool TranslateScopePrivate();
 void SetTranslateScopePrivate(bool value);
 [[nodiscard]] bool TranslateScopeGroup();

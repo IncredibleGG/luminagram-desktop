@@ -1806,14 +1806,22 @@ PRIVATE
     lumina/lumina_profile_rows.h
     lumina/lumina_send_pipeline.cpp
     lumina/lumina_send_pipeline.h
+    lumina/lumina_dual_language_line.cpp
+    lumina/lumina_dual_language_line.h
     lumina/lumina_settings.cpp
     lumina/lumina_settings.h
     lumina/lumina_translate_gating.cpp
     lumina/lumina_translate_gating.h
+    lumina/lumina_translate_originals.cpp
+    lumina/lumina_translate_originals.h
+    lumina/lumina_translate_preview_bar.cpp
+    lumina/lumina_translate_preview_bar.h
     lumina/lumina_translate_providers.cpp
     lumina/lumina_translate_providers.h
     lumina/lumina_translate_readlang.cpp
     lumina/lumina_translate_readlang.h
+    lumina/lumina_translate_send.cpp
+    lumina/lumina_translate_send.h
     lumina/lumina_translate_settings.cpp
     lumina/lumina_translate_settings.h
     settings/sections/settings_folders.cpp

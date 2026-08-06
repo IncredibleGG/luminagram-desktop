@@ -20,6 +20,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/rp_widget.h"
 #include "ui/widgets/fields/input_field.h"
 #include "styles/style_chat.h"
+#include "styles/style_lumina.h"
 #include "styles/style_chat_helpers.h"
 
 namespace Lumina {
@@ -389,8 +390,8 @@ void PreviewBar::paint() {
 		return;
 	}
 	const auto top = st::msgReplyPadding.top();
-	const auto originalFont = st::msgServiceNameFont;
-	const auto translationFont = st::msgDateFont;
+	const auto originalFont = st::luminaPreviewOriginalFont;
+	const auto translationFont = st::luminaPreviewTranslationFont;
 
 	p.setPen(st::historyComposeAreaFg);
 	p.setFont(originalFont);

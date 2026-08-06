@@ -1,0 +1,23 @@
+/*
+This file is part of LuminaGram,
+a fork of Telegram Desktop.
+
+For license and copyright information please follow this link:
+https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+*/
+using "ui/basic.style";
+using "ui/chat/chat.style";
+
+// Dual-language display: what the user wrote is the main text at the normal
+// message size, and the translation sits beneath it a size smaller. The size
+// difference is the point of the feature, so it is expressed here rather than
+// borrowed from an unrelated widget's style, which would silently follow that
+// widget the next time upstream changes it.
+luminaTranslationTextStyle: TextStyle(defaultTextStyle) {
+	font: font(12px);
+}
+
+// The same relationship in the composer's send preview, which paints with a
+// font rather than a TextStyle.
+luminaPreviewOriginalFont: semiboldFont;
+luminaPreviewTranslationFont: font(12px);

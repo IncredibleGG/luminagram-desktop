@@ -212,6 +212,21 @@ void Unhook(uint64 session) {
 	}
 }
 
+// Deleting a message must delete the plaintext we kept for it. Without this
+// the text the user typed outlives the message it belongs to by the whole
+// retention window, in a file that also holds their API keys - the one place
+// where "it expires eventually" is not a good enough answer.
+void Forget(uint64 session, FullMsgId id) {
+	auto &state = Current();
+	const auto key = Key{ session, id };
+	if (!state.map.remove(key)) {
+		return;
+	}
+	if (Persistable(key)) {
+		Save();
+	}
+}
+
 [[nodiscard]] bool Rekey(uint64 session, FullMsgId newId, MsgId oldId) {
 	auto &state = Current();
 	if (!oldId || !newId.msg || oldId == newId.msg) {
@@ -251,6 +266,10 @@ void EnsureHooked(not_null<Main::Session*> session) {
 		if (const auto item = session->data().message(change.newId)) {
 			RefreshDualLanguage(item);
 		}
+	}, session->lifetime());
+	session->data().itemRemoved(
+	) | rpl::on_next([=](not_null<const HistoryItem*> item) {
+		Forget(unique, item->fullId());
 	}, session->lifetime());
 	session->lifetime().add([=] {
 		Unhook(unique);

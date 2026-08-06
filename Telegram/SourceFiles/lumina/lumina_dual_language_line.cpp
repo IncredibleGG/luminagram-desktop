@@ -21,6 +21,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/painter.h"
 #include "ui/text/text.h"
 #include "styles/style_chat.h"
+#include "styles/style_lumina.h"
 #include "styles/style_chat_helpers.h"
 
 #include <rpl/lifetime.h>
@@ -338,7 +339,7 @@ DualLanguageUpdate ValidateDualLanguage(
 		line.source = source.sub;
 		line.original = source.original;
 		line.external = source.external;
-		line.text.setText(st::whenReadStyle, source.sub, kSubLineOptions);
+		line.text.setText(st::luminaTranslationTextStyle, source.sub, kSubLineOptions);
 		lines.emplace(view.get(), std::move(line));
 		return {
 			.mainText = ComputeMainText(item, source),
@@ -353,7 +354,7 @@ DualLanguageUpdate ValidateDualLanguage(
 		line.external = source.external;
 		line.width = 0;
 		line.height = 0;
-		line.text.setText(st::whenReadStyle, source.sub, kSubLineOptions);
+		line.text.setText(st::luminaTranslationTextStyle, source.sub, kSubLineOptions);
 		changed = true;
 	}
 	// The main text of an outgoing bubble comes from outside the item, so

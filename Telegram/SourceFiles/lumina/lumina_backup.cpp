@@ -94,9 +94,15 @@ void Wipe(bytes::vector &data) {
 	if (a.size() != b.size()) {
 		return false;
 	}
+	// Indexed through constData() rather than operator[]: Qt 5.15's overload
+	// set takes int and uint, and a qsizetype argument converts equally well
+	// to both, so a[i] does not compile here. It also avoids the bounds check
+	// and the non-const detach, which is what a constant-time compare wants.
+	const auto first = a.constData();
+	const auto second = b.constData();
 	auto difference = 0;
 	for (auto i = qsizetype(); i != a.size(); ++i) {
-		difference |= (uchar(a[i]) ^ uchar(b[i]));
+		difference |= (uchar(first[i]) ^ uchar(second[i]));
 	}
 	return (difference == 0);
 }

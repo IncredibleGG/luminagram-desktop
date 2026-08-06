@@ -7,6 +7,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "ui/controls/compose_ai_button_factory.h"
 
+#include "lumina/lumina_ai_editor.h"
+
 #include "base/options.h"
 #include "boxes/compose_ai_box.h"
 #include "core/mime_type.h"
@@ -37,6 +39,7 @@ bool HasEnoughLinesForAi(
 		not_null<Main::Session*> session,
 		not_null<Ui::InputField*> field) {
 	if (HideAiButtonOption.value()
+		|| !Lumina::OfficialAiEditorAvailable()
 		|| session->data().aiComposeTones().list().empty()) {
 		return false;
 	}

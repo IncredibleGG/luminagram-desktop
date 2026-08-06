@@ -66,20 +66,24 @@ namespace {
 			u"پیش از ارسال» ابتدا ترجمه را کنار متن اصلی نشان می‌دهد تا "
 			u"بتوانید هر کدام را بفرستید؛ اگر خاموش باشد، ترجمه بی‌درنگ "
 			u"ارسال می‌شود."_q },
+		{ u"LuminaTranslateModeHeader"_q, u"ترجمهٔ پیام‌های دریافتی"_q },
+		{ u"LuminaTranslateModeAll"_q, u"در همهٔ گفتگوها"_q },
+		{ u"LuminaTranslateModeManual"_q,
+			u"فقط گفتگوهایی که خودم روشن می‌کنم"_q },
+		{ u"LuminaTranslateModeInfo"_q, u"با گزینهٔ «فقط گفتگوهایی که خودم "
+			u"روشن می‌کنم»، یک گفتگو را باز کنید و دکمهٔ «ترجمه» در بالای آن "
+			u"را بزنید تا برای همان گفتگو روشن شود؛ بقیهٔ گفتگوها دست‌نخورده "
+			u"می‌مانند. «در همهٔ گفتگوها» برای هر پیام یک درخواست به سرویس "
+			u"ترجمهٔ شما می‌فرستد — اگر کلید شما سهمیه‌ای است، آن را روی "
+			u"«فقط گفتگوهایی که خودم روشن می‌کنم» بگذارید."_q },
 		{ u"LuminaTranslateReceiveHeader"_q, u"دریافت"_q },
 		{ u"LuminaDualLanguageDisplay"_q,
 			u"نمایش هم‌زمان متن اصلی و ترجمه"_q },
 		{ u"LuminaTranslateReadLang"_q, u"زبان خواندن"_q },
 		{ u"LuminaTranslateReadLangFollow"_q, u"زبان برنامه"_q },
-		{ u"LuminaTranslateModeHeader"_q, u"ترجمهٔ پیام‌های دریافتی"_q },
-		{ u"LuminaTranslateModeAll"_q, u"در همهٔ گفتگوها"_q },
-		{ u"LuminaTranslateModeManual"_q,
-			u"فقط گفتگوهایی که خودم روشن می‌کنم"_q },
 		{ u"LuminaTranslateReceiveInfo"_q, u"پیام‌های دریافتی متن اصلی خود "
 			u"را در اندازهٔ کامل نگه می‌دارند و ترجمه زیر آن نمایش داده "
-			u"می‌شود. «در همهٔ گفتگوها» برای هر پیام یک درخواست به سرویس "
-			u"ترجمهٔ شما می‌فرستد — اگر کلید شما سهمیه‌ای است، آن را روی "
-			u"«فقط گفتگوهایی که خودم روشن می‌کنم» بگذارید."_q },
+			u"می‌شود."_q },
 		{ u"LuminaTranslateScopeHeader"_q, u"دامنهٔ اعمال"_q },
 		{ u"LuminaTranslateScopePrivate"_q, u"گفتگوهای خصوصی"_q },
 		{ u"LuminaTranslateScopeGroup"_q, u"گروه‌ها و کانال‌ها"_q },
@@ -99,6 +103,29 @@ namespace {
 		{ u"LuminaTranslatePromptCustom"_q, u"سفارشی"_q },
 		{ u"LuminaTranslateFallbackTelegram"_q,
 			u"بازگشت به Telegram در صورت خطای این سرویس"_q },
+		{ u"LuminaTranslateTest"_q, u"آزمایش ترجمه"_q },
+		{ u"LuminaTranslateTestRunning"_q, u"در حال آزمایش…"_q },
+		{ u"LuminaTranslateTestSuccess"_q, u"ترجمه کار می‌کند."_q },
+		{ u"LuminaTranslateTestFailed"_q, u"آزمایش ناموفق بود"_q },
+		{ u"LuminaTranslateNoKey"_q, u"کلید API لازم است"_q },
+		{ u"LuminaTranslateTestKeyRejected"_q, u"دسترسی به سرویس ممکن نشد، "
+			u"یا سرویس این کلید API را نپذیرفت. اول کلید را بررسی کنید، سپس "
+			u"نشانی پایه و اتصال خود را."_q },
+		{ u"LuminaTranslateTestNetwork"_q, u"دسترسی به سرویس ممکن نشد. "
+			u"اتصال اینترنت و تنظیمات پروکسی خود را بررسی کنید و دوباره "
+			u"تلاش کنید."_q },
+		{ u"LuminaTranslateTestQuota"_q, u"سرویس این درخواست را رد کرد: "
+			u"درخواست‌ها بیش از حد زیاد است، یا سهمیهٔ این کلید تمام شده "
+			u"است. بعداً دوباره تلاش کنید."_q },
+		{ u"LuminaTranslateTestQuotaKeyed"_q, u"سرویس این درخواست را رد کرد: "
+			u"این کلید API را نپذیرفت، یا سهمیهٔ کلید تمام شده است، یا "
+			u"درخواست‌ها بیش از حد زیاد بوده است. اول کلید را بررسی کنید، "
+			u"سپس بعداً دوباره تلاش کنید."_q },
+		{ u"LuminaTranslateTestBadResponse"_q, u"سرویس چیزی فرستاد که "
+			u"LuminaGram نتوانست بخواند، یا اصلاً چیزی نفرستاد. نشانی پایه و "
+			u"مدل را بررسی کنید."_q },
+		{ u"LuminaTranslateTestUnavailable"_q, u"این سرویس اینجا اجرا "
+			u"نمی‌شود. در بالا سرویس دیگری انتخاب کنید."_q },
 		{ u"LuminaTranslateProviderSecurityInfo"_q, u"کلیدها فقط روی همین "
 			u"دستگاه و در فایلی جدا از بقیهٔ تنظیمات نگهداری می‌شوند و هرگز "
 			u"به Telegram فرستاده نمی‌شوند. هر چیزی که ترجمه می‌کنید به "

@@ -7,6 +7,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "api/api_compose_with_ai.h"
 
+#include "lumina/lumina_ai_editor.h"
+
 #include "api/api_text_entities.h"
 #include "apiwrap.h"
 #include "base/options.h"
@@ -203,6 +205,9 @@ void TriggerAiApplyInPlace(
 		not_null<Ui::InputField*> field,
 		TextWithEntities fullFieldText,
 		Fn<void(TextWithTags textWithTags, int cursor)> applyToField) {
+	if (!Lumina::OfficialAiEditorAvailable()) {
+		return;
+	}
 	const auto slug = AiApplyBoundSlug();
 	if (slug.isEmpty()) {
 		show->showToast(tr::lng_ai_compose_apply_unbound(tr::now));

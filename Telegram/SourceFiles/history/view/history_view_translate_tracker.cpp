@@ -36,6 +36,19 @@ constexpr auto kMaxCheckInBunch = 100;
 constexpr auto kRequestLengthLimit = 24 * 1024;
 constexpr auto kRequestCountLimit = 20;
 
+// LuminaGram: how many recognised messages an offer needs while
+// Lumina::AutoTranslateOfferSkip() is in force. One, because "translate
+// received messages: every chat" means the first one too, and waiting for
+// kEnoughForTranslation is how a short conversation ends up never translated
+// at all. It is not zero: a message whose language was not recognised, and a
+// message that is only emoji and spaces (dropped in add() before it ever
+// reaches recognition), both count for nothing here, so a chat that has said
+// nothing recognisable yet still offers nothing and asks the provider for
+// nothing.
+constexpr auto kEnoughForAutoTranslation = 1;
+
+using AutoOfferSkip = std::optional<std::vector<LanguageId>>;
+
 // LuminaGram: trMode == "all" turns a freshly offered language into an actual
 // whole-chat translation without waiting for the user to press the translate
 // bar. It runs off Data::HistoryUpdate::Flag::TranslateFrom and nothing else,
@@ -82,6 +95,30 @@ void TranslateTracker::setup() {
 	const auto peer = _history->peer;
 	peer->updateFull();
 
+	// The revocation half of Lumina::AutoTranslateOfferSkip(). An offer this
+	// file made on relaxed terms has to disappear the moment the terms are
+	// withdrawn, and checkRecognized() alone will not do it: below
+	// kEnoughForTranslation messages it deliberately keeps whatever offer is
+	// already there, which is what carries a real offer across a chat being
+	// reopened. So the whole policy, and not just the languages in it, goes
+	// through distinct_until_changed(): what arrives here is the transition,
+	// and nullopt is "upstream's rules again" - the one edge on which a
+	// relaxed offer is dropped, and the only one on which anything is dropped
+	// at all.
+	const auto autoTranslateOfferChanged = [=](const AutoOfferSkip &now) {
+		const auto wasOfferedFrom = _history->translateOfferedFrom();
+		const auto wasTranslatedTo = _history->translatedTo();
+		if (!now && wasOfferedFrom) {
+			_history->translateOfferFrom({});
+		}
+		checkRecognized();
+		if (wasTranslatedTo
+			&& wasOfferedFrom
+			&& !_history->translateOfferedFrom()) {
+			stopAndRevert();
+		}
+	};
+
 	const auto channel = peer->asChannel();
 	auto autoTranslationValue = (channel
 		? (channel->flagsValue() | rpl::type_erased)
@@ -108,6 +145,18 @@ void TranslateTracker::setup() {
 			) | rpl::on_next([=] {
 				AutoTranslateIfNeeded(_history);
 			}, _trackingLifetime);
+			// skip(1) drops the current value, which is not a change;
+			// trackSkipLanguages() has already evaluated it by then.
+			rpl::single(
+				rpl::empty
+			) | rpl::then(
+				Lumina::AutoTranslatePolicyChanges()
+			) | rpl::map([=] {
+				return Lumina::AutoTranslateOfferSkip(_history);
+			}) | rpl::distinct_until_changed(
+			) | rpl::skip(1) | rpl::on_next(
+				autoTranslateOfferChanged,
+				_trackingLifetime);
 		} else {
 			checkRecognized({});
 			stopAndRevert();
@@ -508,6 +557,16 @@ void TranslateTracker::trackSkipLanguages() {
 	}, _trackingLifetime);
 }
 
+// PeerData::translationFlag() is Unknown until the peer's full info comes back
+// from the server, and setup() only asks for it. Lumina::ShouldAutoTranslate()
+// requires Enabled, so on a chat opened right after launch the first
+// checkRecognized() runs while the answer is still in flight and finds no
+// policy - and nothing re-runs it afterwards, because finishBunch() only calls
+// it when a bunch actually added new messages and a repaint of the same
+// messages adds none. That is a chat that recognised its language, opted into
+// automatic translation and then sat there. So the offer is re-evaluated here,
+// where the flag finally arrives, and only while the policy is in force: with
+// the master opt-in off this is the upstream handler unchanged.
 void TranslateTracker::trackTranslationDisabled() {
 	using PeerFlag = Data::PeerUpdate::Flag;
 	_history->session().changes().peerFlagsValue(
@@ -518,6 +577,9 @@ void TranslateTracker::trackTranslationDisabled() {
 		const auto disabled = (_history->peer->translationFlag()
 			== TranslationFlag::Disabled);
 		if (!disabled) {
+			if (Lumina::AutoTranslateOfferSkip(_history)) {
+				checkRecognized();
+			}
 			AutoTranslateIfNeeded(_history);
 		} else if (_history->translatedTo()) {
 			stopAndRevert();
@@ -529,15 +591,35 @@ void TranslateTracker::checkRecognized() {
 	checkRecognized(Core::App().settings().skipTranslationLanguages());
 }
 
+// LuminaGram: while Lumina::AutoTranslateOfferSkip() holds a value, this chat
+// is one the user asked to have translated automatically, and both of the
+// guesses upstream makes about whether an offer is wanted at all are replaced.
+// Only then:
+//
+//  * the skip list becomes the one language an offer would be pointless for,
+//    the read language itself, instead of every language tdesktop assumes the
+//    user knows - which by default holds the interface language, so a peer
+//    writing it was the case that produced no offer, no translation and no
+//    explanation;
+//  * the count threshold becomes kEnoughForAutoTranslation, so a conversation
+//    shorter than kEnoughForTranslation is translated too.
+//
+// The "don't change offer by small amount of messages" branch is kept for the
+// unrelaxed case unchanged: it is what carries an offer across a chat being
+// reopened with only a few messages loaded, and dropping it would make offers
+// flicker for everyone. Withdrawing a relaxed offer is a transition, not a
+// count, and is handled where the policy is watched in setup().
 void TranslateTracker::checkRecognized(const std::vector<LanguageId> &skip) {
 	if (!_trackingLanguage.current()) {
 		_history->translateOfferFrom({});
 		return;
 	}
+	const auto automatic = Lumina::AutoTranslateOfferSkip(_history);
+	const auto &effectiveSkip = automatic ? *automatic : skip;
 	auto languages = base::flat_map<LanguageId, int>();
 	for (const auto &[id, entry] : _itemsForRecognize) {
 		if (const auto id = std::get_if<LanguageId>(&entry.id)) {
-			if (*id && !ranges::contains(skip, *id)) {
+			if (*id && !ranges::contains(effectiveSkip, *id)) {
 				++languages[*id];
 			}
 		}
@@ -545,7 +627,9 @@ void TranslateTracker::checkRecognized(const std::vector<LanguageId> &skip) {
 	using namespace base;
 	const auto count = int(_itemsForRecognize.size());
 	constexpr auto p = &flat_multi_map_pair_type<LanguageId, int>::second;
-	const auto threshold = (count > kEnoughForRecognition)
+	const auto threshold = automatic
+		? kEnoughForAutoTranslation
+		: (count > kEnoughForRecognition)
 		? (count * kEnoughForTranslation / kEnoughForRecognition)
 		: _allLoaded
 		? std::min(count, kEnoughForTranslation)
@@ -555,7 +639,7 @@ void TranslateTracker::checkRecognized(const std::vector<LanguageId> &skip) {
 		0,
 		ranges::plus(),
 		p);
-	if (count < kEnoughForTranslation) {
+	if (!automatic && count < kEnoughForTranslation) {
 		// Don't change offer by small amount of messages.
 	} else if (translatable >= threshold) {
 		_history->translateOfferFrom(

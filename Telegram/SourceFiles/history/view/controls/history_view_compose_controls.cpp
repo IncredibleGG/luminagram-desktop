@@ -87,6 +87,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "iv/editor/iv_editor_session.h"
 #include "iv/iv_rich_page.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_ai_editor.h"
 #include "lumina/lumina_translate_preview_bar.h"
 #include "main/main_app_config.h"
 #include "main/main_session.h"
@@ -3704,7 +3705,8 @@ void ComposeControls::initVoiceRecordBar() {
 				return false;
 			});
 		}
-		_field
+		Lumina::OfficialAiEditorAvailable()
+			&& _field
 			&& _field->isVisible()
 			&& Data::CanSendTexts(_history->peer)
 			&& request->check(Command::ComposeAiApplyInPlace, 1)
@@ -3744,6 +3746,11 @@ void ComposeControls::initAiButton() {
 		tr::lng_ai_compose_tooltip(tr::rich),
 		"ai_compose_tooltip_hidden"_cs,
 		[=] { return _wrap->width(); });
+
+	Lumina::OfficialAiEditorAvailableValue(
+	) | rpl::on_next([=] {
+		updateAiButtonVisibility();
+	}, _wrap->lifetime());
 }
 
 void ComposeControls::initSendAsFileButton() {
@@ -4231,7 +4238,8 @@ void ComposeControls::updateControlsVisibility() {
 }
 
 void ComposeControls::updateAiButtonVisibility() {
-	const auto hidden = !hasEnoughLinesForAi()
+	const auto hidden = !Lumina::OfficialAiEditorAvailable()
+		|| !hasEnoughLinesForAi()
 		|| !_wrap->isVisible()
 		|| _recording.current()
 		|| !_field->isVisible();
@@ -4335,6 +4343,9 @@ bool ComposeControls::updateLikeShown() {
 }
 
 void ComposeControls::showAiComposeBox() {
+	if (!Lumina::OfficialAiEditorAvailable()) {
+		return;
+	}
 	const auto text = prepareTextForEditMsg();
 	if (text.text.isEmpty()) {
 		return;
@@ -4373,7 +4384,7 @@ void ComposeControls::showAiComposeBox() {
 }
 
 void ComposeControls::triggerAiApplyInPlace() {
-	if (!_session) {
+	if (!_session || !Lumina::OfficialAiEditorAvailable()) {
 		return;
 	}
 	const auto field = _field;

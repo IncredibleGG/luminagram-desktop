@@ -14,6 +14,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "history/history.h"
 #include "lumina/lumina_settings.h"
 #include "lumina/lumina_translate_providers.h" // UsingOwnProvider.
+#include "lumina/lumina_translate_readlang.h" // ReadLanguageOr.
 #include "main/main_session.h"
 
 namespace Lumina {
@@ -109,11 +110,36 @@ bool TranslateScopeAllows(not_null<PeerData*> peer) {
 bool ShouldAutoTranslate(not_null<History*> history) {
 	const auto peer = history->peer;
 	using Flag = PeerData::TranslationFlag;
-	return AutoTranslateEverything()
+	return TranslationFeatureEnabled()
+		&& AutoTranslateEverything()
 		&& TranslateScopeAllows(peer)
 		&& (peer->translationFlag() == Flag::Enabled)
 		&& Core::App().settings().translateChatEnabled()
 		&& ChatTranslationUnlocked(&history->session());
+}
+
+std::optional<std::vector<LanguageId>> AutoTranslateOfferSkip(
+		not_null<History*> history) {
+	if (!ShouldAutoTranslate(history)) {
+		return std::nullopt;
+	}
+	const auto to = ReadLanguageOr(Core::App().settings().translateTo());
+	auto result = std::vector<LanguageId>();
+	if (to) {
+		result.push_back(to);
+	}
+	return result;
+}
+
+rpl::producer<> AutoTranslatePolicyChanges() {
+	const auto &settings = Settings::Instance();
+	return rpl::merge(
+		settings.changesFor(FeatureEnabledKey()),
+		settings.changesFor(ModeKey()),
+		settings.changesFor(ScopePrivateKey()),
+		settings.changesFor(ScopeGroupKey()),
+		TranslateProviderChanges(),
+		ReadLanguageCodeValue() | rpl::skip(1) | rpl::to_empty);
 }
 
 } // namespace Lumina

@@ -106,6 +106,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "media/player/media_player_instance.h"
 #include "spellcheck/spellcheck_types.h"
 #include "lumina/lumina_message_menu.h"
+#include "lumina/lumina_translate_selection.h"
 #include "apiwrap.h"
 #include "styles/style_chat.h"
 #include "styles/style_chat_helpers.h"
@@ -1521,9 +1522,20 @@ void FillContextMenuItems(
 			}
 		}, &st::menuIconCopy);
 	}
+	// The row the user asks for by hand, over text they picked themselves, so
+	// it states the on-demand policy directly instead of going through
+	// Ui::SkipTranslate() - which reads as "should this be hidden" and carries
+	// stock's reasons for hiding it.
+	//
+	// `item` rather than `view`: a touch-triggered menu sets overSelection
+	// from the selection alone and can arrive with no element and no item
+	// under the finger, and the box needs a peer to translate into a language
+	// and to show the result against.
 	if (request.overSelection
-		&& !Ui::SkipTranslate(list->getSelectedText().rich)) {
-		const auto owner = &view->history()->owner();
+		&& item
+		&& Lumina::OnDemandTranslateAllowed(
+			list->getSelectedText().rich.text)) {
+		const auto owner = &item->history()->owner();
 		result->addAction(tr::lng_context_translate_selected(tr::now), [=] {
 			if (const auto item = owner->message(itemId)) {
 				list->controller()->show(Box(

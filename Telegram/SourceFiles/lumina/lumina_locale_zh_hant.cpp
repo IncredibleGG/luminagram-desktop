@@ -67,17 +67,19 @@ namespace {
 			u"會在每個聊天第一次詢問要用哪個語言，之後就記住。開啟「傳送前"
 			u"確認」時，會先把譯文與原文並排顯示，讓你選擇要傳送哪一個；"
 			u"關閉時譯文會直接傳送出去。"_q },
+		{ u"LuminaTranslateModeHeader"_q, u"翻譯收到的訊息"_q },
+		{ u"LuminaTranslateModeAll"_q, u"所有聊天"_q },
+		{ u"LuminaTranslateModeManual"_q, u"只在我開啟的聊天"_q },
+		{ u"LuminaTranslateModeInfo"_q, u"選「只在我開啟的聊天」時，到某個"
+			u"聊天頂部點「翻譯」按鈕即可為該聊天開啟，其他聊天不受影響。"
+			u"「所有聊天」會為每一則訊息向你的翻譯服務送出一次請求；如果"
+			u"金鑰是按用量計費的，請維持「只在我開啟的聊天」。"_q },
 		{ u"LuminaTranslateReceiveHeader"_q, u"接收"_q },
 		{ u"LuminaDualLanguageDisplay"_q, u"同時顯示原文與譯文"_q },
 		{ u"LuminaTranslateReadLang"_q, u"閱讀語言"_q },
 		{ u"LuminaTranslateReadLangFollow"_q, u"介面語言"_q },
-		{ u"LuminaTranslateModeHeader"_q, u"翻譯收到的訊息"_q },
-		{ u"LuminaTranslateModeAll"_q, u"所有聊天"_q },
-		{ u"LuminaTranslateModeManual"_q, u"只在我開啟的聊天"_q },
 		{ u"LuminaTranslateReceiveInfo"_q, u"收到的訊息會以原本的大小保留"
-			u"原文，譯文顯示在下方。「所有聊天」會為每一則訊息向你的翻譯服務"
-			u"送出一次請求；如果金鑰是按用量計費的，請維持「只在我開啟的"
-			u"聊天」。"_q },
+			u"原文，譯文顯示在下方。"_q },
 		{ u"LuminaTranslateScopeHeader"_q, u"適用範圍"_q },
 		{ u"LuminaTranslateScopePrivate"_q, u"私人聊天"_q },
 		{ u"LuminaTranslateScopeGroup"_q, u"群組與頻道"_q },
@@ -96,6 +98,25 @@ namespace {
 		{ u"LuminaTranslatePromptCustom"_q, u"自訂"_q },
 		{ u"LuminaTranslateFallbackTelegram"_q,
 			u"這個服務失敗時改用 Telegram"_q },
+		{ u"LuminaTranslateTest"_q, u"測試翻譯"_q },
+		{ u"LuminaTranslateTestRunning"_q, u"測試中…"_q },
+		{ u"LuminaTranslateTestSuccess"_q, u"翻譯可以正常運作。"_q },
+		{ u"LuminaTranslateTestFailed"_q, u"測試失敗"_q },
+		{ u"LuminaTranslateNoKey"_q, u"需要 API 金鑰"_q },
+		{ u"LuminaTranslateTestKeyRejected"_q, u"無法連線到這個服務，或是"
+			u"服務拒絕了這組 API 金鑰。請先檢查金鑰，再檢查基礎 URL 與你的"
+			u"網路連線。"_q },
+		{ u"LuminaTranslateTestNetwork"_q, u"無法連線到這個服務。請檢查你的"
+			u"網路連線與代理伺服器設定，然後再試一次。"_q },
+		{ u"LuminaTranslateTestQuota"_q, u"服務拒絕了這次請求：請求太過"
+			u"頻繁，或這組金鑰的額度已經用完。請稍後再試。"_q },
+		{ u"LuminaTranslateTestQuotaKeyed"_q, u"服務拒絕了這次請求：服務"
+			u"拒絕了這組 API 金鑰，或這組金鑰的額度已經用完，也可能是請求"
+			u"太過頻繁。請先檢查金鑰，然後稍後再試。"_q },
+		{ u"LuminaTranslateTestBadResponse"_q, u"服務回覆了 LuminaGram 無法"
+			u"解讀的內容，或根本沒有內容。請檢查基礎 URL 與模型。"_q },
+		{ u"LuminaTranslateTestUnavailable"_q, u"這個服務無法在這裡執行。"
+			u"請在上面改選其他服務。"_q },
 		{ u"LuminaTranslateProviderSecurityInfo"_q, u"金鑰只會保存在這台裝置"
 			u"上，存放在與其他設定分開的檔案裡，絕不會傳送給 Telegram。你"
 			u"翻譯的所有內容都會送到這裡選擇的服務，請挑一個你信任的。"_q },

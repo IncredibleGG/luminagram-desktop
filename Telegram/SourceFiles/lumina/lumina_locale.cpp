@@ -101,19 +101,22 @@ struct Registration {
 			"\"Confirm before sending\" shows the translation next to the "
 			"original first, so you can send either one; with it off the "
 			"translation goes out straight away."_q },
+		{ u"LuminaTranslateModeHeader"_q, u"Translate incoming messages"_q },
+		{ u"LuminaTranslateModeAll"_q, u"In every chat"_q },
+		{ u"LuminaTranslateModeManual"_q, u"Only chats I turn on"_q },
+		{ u"LuminaTranslateModeInfo"_q, u"With \"Only chats I turn on\", open "
+			"a chat and use the Translate button at the top of it to switch "
+			"translation on there; every other chat is left alone. \"In every "
+			"chat\" sends one request per message to your translation service "
+			"- on a metered key, leave this on \"Only chats I turn on\"."_q },
 		{ u"LuminaTranslateReceiveHeader"_q, u"Receiving"_q },
 		{ u"LuminaDualLanguageDisplay"_q,
 			u"Show original and translation together"_q },
 		{ u"LuminaTranslateReadLang"_q, u"Read in"_q },
 		{ u"LuminaTranslateReadLangFollow"_q, u"Interface language"_q },
-		{ u"LuminaTranslateModeHeader"_q, u"Translate incoming messages"_q },
-		{ u"LuminaTranslateModeAll"_q, u"In every chat"_q },
-		{ u"LuminaTranslateModeManual"_q, u"Only chats I turn on"_q },
 		{ u"LuminaTranslateReceiveInfo"_q, u"Incoming messages keep their "
 			"original text in full size, with the translation shown "
-			"underneath. \"In every chat\" sends one request per message to "
-			"your translation service - on a metered key, leave it on \"Only "
-			"chats I turn on\"."_q },
+			"underneath."_q },
 		{ u"LuminaTranslateScopeHeader"_q, u"Where it applies"_q },
 		{ u"LuminaTranslateScopePrivate"_q, u"Private chats"_q },
 		{ u"LuminaTranslateScopeGroup"_q, u"Groups and channels"_q },
@@ -135,6 +138,36 @@ struct Registration {
 		{ u"LuminaTranslatePromptCustom"_q, u"Custom"_q },
 		{ u"LuminaTranslateFallbackTelegram"_q,
 			u"Fall back to Telegram when this service fails"_q },
+
+		// The provider test. Every failure has to name the thing to go and
+		// change: "it doesn't translate" covers a service that was never
+		// reachable, a key that was never saved, a key the service turned
+		// down and a quota that ran out, and those are four different
+		// afternoons.
+		{ u"LuminaTranslateTest"_q, u"Test translation"_q },
+		{ u"LuminaTranslateTestRunning"_q, u"Testing..."_q },
+		{ u"LuminaTranslateTestSuccess"_q, u"Translation works."_q },
+		{ u"LuminaTranslateTestFailed"_q, u"Test failed"_q },
+		{ u"LuminaTranslateNoKey"_q, u"API key required"_q },
+		{ u"LuminaTranslateTestKeyRejected"_q, u"The service could not be "
+			"reached, or it turned this API key down. Check the key first, "
+			"then the base URL and your connection."_q },
+		{ u"LuminaTranslateTestNetwork"_q, u"The service could not be "
+			"reached. Check your internet connection and any proxy, then try "
+			"again."_q },
+		{ u"LuminaTranslateTestQuota"_q, u"The service refused the request - "
+			"too many requests, or this key's quota is used up. Try again "
+			"later."_q },
+		{ u"LuminaTranslateTestQuotaKeyed"_q, u"The service refused the "
+			"request - it turned this API key down, the key's quota is used "
+			"up, or there were too many requests. Check the key first, then "
+			"try again later."_q },
+		{ u"LuminaTranslateTestBadResponse"_q, u"The service answered with "
+			"something LuminaGram could not read, or with nothing at all. "
+			"Check the base URL and the model."_q },
+		{ u"LuminaTranslateTestUnavailable"_q, u"This service cannot run "
+			"here. Choose another one above."_q },
+
 		{ u"LuminaTranslateProviderSecurityInfo"_q, u"Keys are kept on this "
 			"device only, in a separate file from the rest of the settings, "
 			"and are never sent to Telegram. Everything you translate is sent "
@@ -155,6 +188,12 @@ struct Registration {
 		// The translate-before-send preview bar above the composer.
 		{ u"LuminaTranslatePreviewTranslating"_q, u"Translating..."_q },
 		{ u"LuminaTranslatePreviewFailed"_q, u"Translation unavailable"_q },
+
+		// The per-chat translate button in the chat top bar. Both texts name
+		// what pressing the button will do, not what the chat is doing now,
+		// because that is what a screen reader reads out before the press.
+		{ u"LuminaTranslateChatToggle"_q, u"Translate this chat"_q },
+		{ u"LuminaTranslateChatShowOriginal"_q, u"Show original"_q },
 
 		// Names of the languages LuminaGram can translate into, in the order
 		// the pickers show them. These are the ones Telegram's own language

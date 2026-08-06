@@ -80,19 +80,23 @@ namespace {
 			u"«Confirmar antes de enviar» muestra primero la traducción junto "
 			u"al original, para que puedas enviar cualquiera de los dos; si "
 			u"está desactivado, la traducción se envía directamente."_q },
+		{ u"LuminaTranslateModeHeader"_q, u"Traducir mensajes entrantes"_q },
+		{ u"LuminaTranslateModeAll"_q, u"En todos los chats"_q },
+		{ u"LuminaTranslateModeManual"_q, u"Solo los chats que yo active"_q },
+		{ u"LuminaTranslateModeInfo"_q, u"Con «Solo los chats que yo active», "
+			u"abre un chat y usa el botón «Traducir» de la parte superior "
+			u"para activarlo ahí; los demás chats quedan intactos. «En todos "
+			u"los chats» envía una petición por mensaje a tu servicio de "
+			u"traducción: si tu clave tiene cuota limitada, déjalo en «Solo "
+			u"los chats que yo active»."_q },
 		{ u"LuminaTranslateReceiveHeader"_q, u"Recepción"_q },
 		{ u"LuminaDualLanguageDisplay"_q,
 			u"Mostrar el original y la traducción juntos"_q },
 		{ u"LuminaTranslateReadLang"_q, u"Idioma de lectura"_q },
 		{ u"LuminaTranslateReadLangFollow"_q, u"Idioma de la interfaz"_q },
-		{ u"LuminaTranslateModeHeader"_q, u"Traducir mensajes entrantes"_q },
-		{ u"LuminaTranslateModeAll"_q, u"En todos los chats"_q },
-		{ u"LuminaTranslateModeManual"_q, u"Solo los chats que yo active"_q },
 		{ u"LuminaTranslateReceiveInfo"_q, u"Los mensajes entrantes conservan "
-			u"su texto original a tamaño completo, con la traducción debajo. "
-			u"«En todos los chats» envía una petición por mensaje a tu "
-			u"servicio de traducción: si tu clave tiene cuota limitada, "
-			u"déjalo en «Solo los chats que yo active»."_q },
+			u"su texto original a tamaño completo, con la traducción "
+			u"debajo."_q },
 		{ u"LuminaTranslateScopeHeader"_q, u"Alcance"_q },
 		{ u"LuminaTranslateScopePrivate"_q, u"Chats privados"_q },
 		{ u"LuminaTranslateScopeGroup"_q, u"Grupos y canales"_q },
@@ -115,6 +119,29 @@ namespace {
 		{ u"LuminaTranslatePromptCustom"_q, u"Personalizada"_q },
 		{ u"LuminaTranslateFallbackTelegram"_q,
 			u"Recurrir a Telegram cuando este servicio falle"_q },
+		{ u"LuminaTranslateTest"_q, u"Probar traducción"_q },
+		{ u"LuminaTranslateTestRunning"_q, u"Probando…"_q },
+		{ u"LuminaTranslateTestSuccess"_q, u"La traducción funciona."_q },
+		{ u"LuminaTranslateTestFailed"_q, u"La prueba falló"_q },
+		{ u"LuminaTranslateNoKey"_q, u"Se requiere una clave API"_q },
+		{ u"LuminaTranslateTestKeyRejected"_q, u"No se pudo contactar con el "
+			u"servicio, o rechazó esta clave API. Revisa primero la clave y "
+			u"después la URL base y tu conexión."_q },
+		{ u"LuminaTranslateTestNetwork"_q, u"No se pudo contactar con el "
+			u"servicio. Revisa tu conexión a internet y el proxy, si lo "
+			u"usas, e inténtalo de nuevo."_q },
+		{ u"LuminaTranslateTestQuota"_q, u"El servicio rechazó la petición: "
+			u"demasiadas peticiones, o la cuota de esta clave se agotó. "
+			u"Inténtalo más tarde."_q },
+		{ u"LuminaTranslateTestQuotaKeyed"_q, u"El servicio rechazó la "
+			u"petición: rechazó esta clave API, la cuota de la clave se "
+			u"agotó, o hubo demasiadas peticiones. Revisa primero la clave y "
+			u"vuelve a intentarlo más tarde."_q },
+		{ u"LuminaTranslateTestBadResponse"_q, u"El servicio respondió con "
+			u"algo que LuminaGram no pudo leer, o no respondió nada. Revisa "
+			u"la URL base y el modelo."_q },
+		{ u"LuminaTranslateTestUnavailable"_q, u"Este servicio no puede "
+			u"funcionar aquí. Elige otro más arriba."_q },
 		{ u"LuminaTranslateProviderSecurityInfo"_q, u"Las claves se guardan "
 			u"solo en este dispositivo, en un archivo aparte del resto de los "
 			u"ajustes, y nunca se envían a Telegram. Todo lo que traduzcas se "

@@ -24,6 +24,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "core/shortcuts.h"
 #include "core/application.h"
 #include "core/core_settings.h"
+#include "lumina/lumina_locale.h"
+#include "lumina/lumina_translate_toggle.h"
 #include "ui/controls/userpic_button.h"
 #include "ui/wrap/fade_wrap.h"
 #include "ui/widgets/buttons.h"
@@ -68,6 +70,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_dialogs.h"
 #include "styles/style_chat.h"
 #include "styles/style_info.h"
+#include "styles/style_lumina.h"
 
 #include <QtGui/QWindow>
 
@@ -124,6 +127,7 @@ TopBarWidget::TopBarWidget(
 , _cancelChoose(this, st::topBarCloseChoose)
 , _call(this, st::topBarCall)
 , _groupCall(this, st::topBarGroupCall)
+, _translateToggle(this, st::luminaTopBarTranslate)
 , _search(this, st::topBarSearch)
 , _infoToggle(this, st::topBarInfo)
 , _menuToggle(this, st::topBarMenuToggle)
@@ -156,6 +160,16 @@ TopBarWidget::TopBarWidget(
 		}
 	});
 	_groupCall->setClickedCallback([=] { groupCall(); });
+	_translateToggle->setClickedCallback([=] { toggleTranslate(); });
+
+	// LuminaGram: the translate toggle is the one child of this bar that has to
+	// start hidden. Every other button is shown or hidden by
+	// updateControlsVisibility(), which returns early while no chat is active
+	// yet, and a child created with a parent is shown when the parent is - so
+	// without this the button would appear on a top bar that is meant to be
+	// pixel-identical to stock, on a profile that never opted in.
+	_translateToggle->hide();
+
 	_menuToggle->addClickHandler([=](auto) { showPeerMenu(); });
 	_menuToggle->setAcceptBoth(true, true);
 	_infoToggle->setClickedCallback([=] { toggleInfoSection(); });
@@ -264,6 +278,7 @@ TopBarWidget::TopBarWidget(
 	_menuToggle->setAccessibleName(tr::lng_chat_menu(tr::now));
 	_back->setAccessibleName(tr::lng_go_back(tr::now));
 	_cancelChoose->setAccessibleName(tr::lng_cancel(tr::now));
+	updateTranslateToggleState();
 }
 
 TopBarWidget::~TopBarWidget() = default;
@@ -298,7 +313,10 @@ void TopBarWidget::connectingAnimationCallback() {
 }
 
 void TopBarWidget::refreshLang() {
-	InvokeQueued(this, [this] { updateControlsGeometry(); });
+	InvokeQueued(this, [this] {
+		updateTranslateToggleState();
+		updateControlsGeometry();
+	});
 }
 
 void TopBarWidget::call(Calls::StartOutgoingCallArgs args) {
@@ -321,6 +339,30 @@ void TopBarWidget::groupCall() {
 			_controller->startOrJoinGroupCall(peer, {});
 		}
 	}
+}
+
+void TopBarWidget::toggleTranslate() {
+	const auto history = _activeChat.key.history();
+	if (!history || !Lumina::ChatTranslateAvailable(history)) {
+		return;
+	}
+	Lumina::SetChatTranslating(history, !Lumina::ChatTranslating(history));
+}
+
+void TopBarWidget::updateTranslateToggleState() {
+	const auto history = _activeChat.key.history();
+	const auto translating = history && Lumina::ChatTranslating(history);
+	const auto iconOverride = translating
+		? &st::luminaTopBarTranslateActive
+		: nullptr;
+	const auto rippleOverride = translating
+		? &st::lightButtonBgOver
+		: nullptr;
+	_translateToggle->setIconOverride(iconOverride, iconOverride);
+	_translateToggle->setRippleColorOverride(rippleOverride);
+	_translateToggle->setAccessibleName(Lumina::Tr(translating
+		? u"LuminaTranslateChatShowOriginal"_q
+		: u"LuminaTranslateChatToggle"_q));
 }
 
 void TopBarWidget::showChooseMessagesForReport(Data::ReportInput input) {
@@ -921,6 +963,13 @@ void TopBarWidget::setActiveChat(
 			}) | rpl::on_next([=](const InteractionSeen &seen) {
 				handleEmojiInteractionSeen(seen.emoticon);
 			}, _activeChatLifetime);
+
+			Lumina::ChatTranslateStateChanges(
+				history
+			) | rpl::on_next([=] {
+				updateTranslateToggleState();
+				updateControlsVisibility();
+			}, _activeChatLifetime);
 		}
 
 		if (const auto topic = _activeChat.key.topic()) {
@@ -1232,6 +1281,10 @@ void TopBarWidget::updateControlsGeometry() {
 		_infoToggle->moveToRight(_rightTaken, otherButtonsTop);
 		_rightTaken += _infoToggle->width();
 	}
+	if (!_translateToggle->isHidden()) {
+		_translateToggle->moveToRight(_rightTaken, otherButtonsTop);
+		_rightTaken += _translateToggle->width();
+	}
 	if (!_call->isHidden() || !_groupCall->isHidden()) {
 		_call->moveToRight(_rightTaken, otherButtonsTop);
 		_groupCall->moveToRight(_rightTaken, otherButtonsTop);
@@ -1377,6 +1430,11 @@ void TopBarWidget::updateControlsVisibility() {
 	_groupCall->setVisible(historyMode
 		&& groupCallsEnabled
 		&& !_chooseForReportReason);
+	const auto translateHistory = _activeChat.key.history();
+	_translateToggle->setVisible(historyMode
+		&& !_chooseForReportReason
+		&& translateHistory
+		&& Lumina::ChatTranslateAvailable(translateHistory));
 
 	if (_membersShowArea) {
 		_membersShowArea->setVisible(!_chooseForReportReason);

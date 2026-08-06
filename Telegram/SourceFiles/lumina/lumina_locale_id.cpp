@@ -76,20 +76,25 @@ namespace {
 			u"terjemahan di samping teks asli lebih dulu, sehingga Anda bisa "
 			u"mengirim salah satunya; jika dimatikan, terjemahan langsung "
 			u"dikirim."_q },
+		{ u"LuminaTranslateModeHeader"_q, u"Terjemahkan pesan masuk"_q },
+		{ u"LuminaTranslateModeAll"_q, u"Di setiap obrolan"_q },
+		{ u"LuminaTranslateModeManual"_q,
+			u"Hanya obrolan yang saya aktifkan"_q },
+		{ u"LuminaTranslateModeInfo"_q, u"Dengan «Hanya obrolan yang saya "
+			u"aktifkan», buka sebuah obrolan lalu gunakan tombol "
+			u"«Terjemahkan» di bagian atasnya untuk mengaktifkannya di sana; "
+			u"obrolan lain dibiarkan apa adanya. «Di setiap obrolan» "
+			u"mengirim satu permintaan per pesan ke layanan terjemahan Anda "
+			u"— jika kunci Anda berkuota, biarkan pada «Hanya obrolan yang "
+			u"saya aktifkan»."_q },
 		{ u"LuminaTranslateReceiveHeader"_q, u"Penerimaan"_q },
 		{ u"LuminaDualLanguageDisplay"_q,
 			u"Tampilkan teks asli dan terjemahan bersamaan"_q },
 		{ u"LuminaTranslateReadLang"_q, u"Bahasa baca"_q },
 		{ u"LuminaTranslateReadLangFollow"_q, u"Bahasa antarmuka"_q },
-		{ u"LuminaTranslateModeHeader"_q, u"Terjemahkan pesan masuk"_q },
-		{ u"LuminaTranslateModeAll"_q, u"Di setiap obrolan"_q },
-		{ u"LuminaTranslateModeManual"_q,
-			u"Hanya obrolan yang saya aktifkan"_q },
 		{ u"LuminaTranslateReceiveInfo"_q, u"Pesan masuk tetap menampilkan "
-			u"teks aslinya dalam ukuran penuh, dengan terjemahan di bawahnya. "
-			u"«Di setiap obrolan» mengirim satu permintaan per pesan ke "
-			u"layanan terjemahan Anda — jika kunci Anda berkuota, biarkan pada "
-			u"«Hanya obrolan yang saya aktifkan»."_q },
+			u"teks aslinya dalam ukuran penuh, dengan terjemahan di "
+			u"bawahnya."_q },
 		{ u"LuminaTranslateScopeHeader"_q, u"Cakupan"_q },
 		{ u"LuminaTranslateScopePrivate"_q, u"Obrolan pribadi"_q },
 		{ u"LuminaTranslateScopeGroup"_q, u"Grup dan kanal"_q },
@@ -110,6 +115,28 @@ namespace {
 		{ u"LuminaTranslatePromptCustom"_q, u"Kustom"_q },
 		{ u"LuminaTranslateFallbackTelegram"_q,
 			u"Gunakan Telegram bila layanan ini gagal"_q },
+		{ u"LuminaTranslateTest"_q, u"Uji terjemahan"_q },
+		{ u"LuminaTranslateTestRunning"_q, u"Menguji…"_q },
+		{ u"LuminaTranslateTestSuccess"_q, u"Terjemahan berfungsi."_q },
+		{ u"LuminaTranslateTestFailed"_q, u"Pengujian gagal"_q },
+		{ u"LuminaTranslateNoKey"_q, u"Perlu kunci API"_q },
+		{ u"LuminaTranslateTestKeyRejected"_q, u"Layanan tidak dapat "
+			u"dihubungi, atau layanan menolak kunci API ini. Periksa kunci "
+			u"terlebih dahulu, lalu URL dasar dan koneksi Anda."_q },
+		{ u"LuminaTranslateTestNetwork"_q, u"Layanan tidak dapat dihubungi. "
+			u"Periksa koneksi internet dan proksi Anda, lalu coba lagi."_q },
+		{ u"LuminaTranslateTestQuota"_q, u"Layanan menolak permintaan ini: "
+			u"terlalu banyak permintaan, atau kuota kunci ini sudah habis. "
+			u"Coba lagi nanti."_q },
+		{ u"LuminaTranslateTestQuotaKeyed"_q, u"Layanan menolak permintaan "
+			u"ini: layanan menolak kunci API ini, kuota kunci sudah habis, "
+			u"atau permintaannya terlalu banyak. Periksa kuncinya dulu, lalu "
+			u"coba lagi nanti."_q },
+		{ u"LuminaTranslateTestBadResponse"_q, u"Layanan menjawab dengan "
+			u"sesuatu yang tidak dapat dibaca LuminaGram, atau tidak "
+			u"menjawab sama sekali. Periksa URL dasar dan modelnya."_q },
+		{ u"LuminaTranslateTestUnavailable"_q, u"Layanan ini tidak dapat "
+			u"dijalankan di sini. Pilih layanan lain di atas."_q },
 		{ u"LuminaTranslateProviderSecurityInfo"_q, u"Kunci hanya disimpan di "
 			u"perangkat ini, dalam berkas terpisah dari pengaturan lainnya, "
 			u"dan tidak pernah dikirim ke Telegram. Semua yang Anda "

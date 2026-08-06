@@ -1800,6 +1800,8 @@ PRIVATE
     settings/sections/settings_lumina_tools.h
     settings/sections/settings_lumina_translate.cpp
     settings/sections/settings_lumina_translate.h
+    lumina/lumina_ai_editor.cpp
+    lumina/lumina_ai_editor.h
     lumina/lumina_clipboard_guard.cpp
     lumina/lumina_clipboard_guard.h
     lumina/lumina_clipboard_guard_settings.cpp
@@ -1865,10 +1867,14 @@ PRIVATE
     lumina/lumina_translate_providers.h
     lumina/lumina_translate_readlang.cpp
     lumina/lumina_translate_readlang.h
+    lumina/lumina_translate_selection.cpp
+    lumina/lumina_translate_selection.h
     lumina/lumina_translate_send.cpp
     lumina/lumina_translate_send.h
     lumina/lumina_translate_settings.cpp
     lumina/lumina_translate_settings.h
+    lumina/lumina_translate_toggle.cpp
+    lumina/lumina_translate_toggle.h
     lumina/lumina_update_settings.cpp
     lumina/lumina_update_settings.h
     lumina/lumina_vault.cpp

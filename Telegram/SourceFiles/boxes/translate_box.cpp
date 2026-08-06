@@ -27,6 +27,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "lang/lang_instance.h"
 #include "lang/lang_keys.h"
 #include "lumina/lumina_translate_readlang.h"
+#include "lumina/lumina_translate_selection.h"
 #include "main/main_session.h"
 #include "mtproto/sender.h"
 #include "spellcheck/platform/platform_language.h"
@@ -244,7 +245,8 @@ void SetupRichArticleBody(
 			page)) {
 		return false;
 	}
-	state->to = ChooseTranslateTo(peer->owner().history(peer));
+	state->to = Lumina::OnDemandTranslateTo(
+		ChooseTranslateTo(peer->owner().history(peer)));
 
 	box->setWidth(st::boxWideWidth);
 	box->addButton(tr::lng_box_ok(), [=] { box->closeBox(); });
@@ -418,7 +420,7 @@ void TranslateBox(
 		bool hasCopyRestriction) {
 	struct State {
 		State(not_null<Main::Session*> session)
-		: provider(CreateTranslateProvider(session)) {
+		: provider(Lumina::CreateOnDemandTranslateProvider(session)) {
 		}
 
 		std::unique_ptr<TranslateProvider> provider;
@@ -440,7 +442,8 @@ void TranslateBox(
 			}
 		}
 	}
-	state->to = ChooseTranslateTo(peer->owner().history(peer));
+	state->to = Lumina::OnDemandTranslateTo(
+		ChooseTranslateTo(peer->owner().history(peer)));
 	const auto request = std::make_shared<TranslateProviderRequest>(
 		PrepareTranslateProviderRequest(
 			state->provider.get(),
@@ -467,49 +470,41 @@ void TranslateBox(
 				[done = std::move(done)](TranslateProviderResult result) {
 					using ProviderError = TranslateProviderError;
 					using UiError = TranslateBoxContentError;
+					// TranslateBoxContent() shows whatever text it is handed
+					// and falls back to an error message only when there is
+					// none at all, so a provider that answers "no error, no
+					// text" - an exhausted quota replying with an empty body,
+					// a response whose only content was stripped - leaves the
+					// user looking at a blank box with nothing saying that
+					// anything went wrong. Treat empty as failed.
+					auto text = std::move(result.text);
+					if (text && text->text.trimmed().isEmpty()) {
+						text = std::nullopt;
+					}
+					const auto failed = !text
+						|| (result.error != ProviderError::None);
 					done(TranslateBoxContentResult{
-						.text = std::move(result.text),
+						.text = std::move(text),
 						.error = (result.error
 								== ProviderError::LocalLanguagePackMissing)
 							? UiError::LocalLanguagePackMissing
-							: (result.error == ProviderError::None)
-							? UiError::None
-							: UiError::Unknown,
+							: failed
+							? UiError::Unknown
+							: UiError::None,
 					});
 				});
 		},
 	});
 }
 
+// Every caller of this is a context-menu row the user has to reach for - the
+// message menu, the selection menu, the poll menu, the profile About row - so
+// the question it answers is LuminaGram's on-demand policy and nothing else.
+// See lumina/lumina_translate_selection.h for what that drops from the stock
+// version (the "Show Translate Button" setting, and the assume-the-user-reads-
+// this-language filter), what it keeps, and why.
 bool SkipTranslate(TextWithEntities textWithEntities) {
-	const auto &text = textWithEntities.text;
-	if (text.isEmpty()) {
-		return true;
-	}
-	if (!Core::App().settings().translateButtonEnabled()) {
-		return true;
-	}
-	constexpr auto kFirstChunk = size_t(100);
-	auto hasLetters = (text.size() >= kFirstChunk);
-	for (auto i = 0; i < kFirstChunk; i++) {
-		if (i >= text.size()) {
-			break;
-		}
-		if (text.at(i).isLetter()) {
-			hasLetters = true;
-			break;
-		}
-	}
-	if (!hasLetters) {
-		return true;
-	}
-#ifndef TDESKTOP_DISABLE_SPELLCHECK
-	const auto result = Platform::Language::Recognize(text);
-	const auto skip = Core::App().settings().skipTranslationLanguages();
-	return result.known() && ranges::contains(skip, result);
-#else
-	return false;
-#endif
+	return !Lumina::OnDemandTranslateAllowed(textWithEntities.text);
 }
 
 object_ptr<BoxContent> EditSkipTranslationLanguages() {

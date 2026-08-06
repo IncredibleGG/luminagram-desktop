@@ -7,6 +7,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "iv/editor/iv_editor_box.h"
 
+#include "lumina/lumina_ai_editor.h"
+
 #include <QtCore/QDir>
 
 #include "base/algorithm.h"
@@ -1707,7 +1709,8 @@ void WindowHost::Impl::setupWindow(ShowWindowDescriptor &&descriptor) {
 			}
 		});
 	}
-	if (!base::options::value<bool>(Ui::kOptionHideAiButton)) {
+	if (!base::options::value<bool>(Ui::kOptionHideAiButton)
+		&& Lumina::OfficialAiEditorAvailable()) {
 		const auto session = descriptor.session;
 		_aiPill = object_ptr<ToolbarPill>(
 			_bottom.data(),

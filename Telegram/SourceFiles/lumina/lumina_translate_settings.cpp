@@ -12,11 +12,14 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "lumina/lumina_settings.h"
 #include "lumina/lumina_translate_gating.h"
 #include "lumina/lumina_translate_providers.h"
+#include "main/main_session.h"
 #include "settings/settings_common.h"
 #include "ui/boxes/single_choice_box.h"
 #include "ui/layers/generic_box.h"
+#include "ui/toast/toast.h"
 #include "ui/vertical_list.h"
 #include "ui/widgets/buttons.h"
+#include "ui/widgets/checkbox.h"
 #include "ui/widgets/fields/input_field.h"
 #include "ui/wrap/slide_wrap.h"
 #include "ui/wrap/vertical_layout.h"
@@ -54,6 +57,21 @@ constexpr auto kPromptMaxLength = 4096;
 // enough to be worth a screenshot.
 constexpr auto kApiKeyTailShown = 4;
 constexpr auto kApiKeyDotsShown = 6;
+
+// The test result is the one toast on this page a user has to read rather than
+// glance at, and a failure names what to go and change, so it stays up much
+// longer than the 1.5s default.
+constexpr auto kTestToastDuration = crl::time(7000);
+
+// A service that answers a two-word sample with a paragraph - an LLM that
+// explained itself instead of translating, most often - is broken in a way the
+// toast should report, not inherit.
+constexpr auto kTestResultMaxLength = 200;
+
+enum class TranslateMode : uchar {
+	All,
+	Manual,
+};
 
 // The keys this file owns. The provider keys are deliberately absent: their
 // change stream comes from TranslateProviderChanges(), so the key names behind
@@ -220,6 +238,87 @@ struct LanguageEntry {
 	return QString(dots, QChar(0x2022)) + key.right(tail);
 }
 
+// The exact string Android's LuminaTranslateActivity.runProviderTest() sends,
+// so that the same key on the same service can be compared across the two
+// clients without reading either implementation.
+[[nodiscard]] QString TestSampleText() {
+	return u"Hello, world!"_q;
+}
+
+// The language the test asks for is the one the read side would ask for, so a
+// test that comes back sane is evidence about the setup the user actually has
+// - including whether the service honours their dialect.
+[[nodiscard]] QString TestTargetLanguage() {
+	const auto stored = NormalizeLanguageCode(TranslateReadLanguage());
+	return stored.isEmpty() ? InterfaceLanguageCode() : stored;
+}
+
+// `keyed` is true when the request went out carrying an API key. Two of these
+// errors mean different things depending on it, because ErrorForStatus() maps
+// every HTTP status onto three enumerators and a rejected key lands in two of
+// them: 401 in Network and 403 - DeepL's own answer for a key it does not
+// accept - in RateLimited.
+[[nodiscard]] QString TestFailureText(TranslateError error, bool keyed) {
+	const auto reason = [&] {
+		switch (error) {
+		case TranslateError::NoKey:
+			return Tr(u"LuminaTranslateNoKey"_q);
+		case TranslateError::RateLimited:
+			// ErrorForStatus() puts HTTP 403 in this bucket next to 429 and
+			// 456, and 403 is exactly what DeepL answers for a key it does
+			// not accept. So whenever a key was involved this has to name a
+			// rejected key as well - otherwise the single likeliest reason a
+			// user presses this row, a mistyped DeepL key, is answered with
+			// "try again later" and they wait instead of fixing it.
+			return keyed
+				? Tr(u"LuminaTranslateTestQuotaKeyed"_q)
+				: Tr(u"LuminaTranslateTestQuota"_q);
+		case TranslateError::Network:
+			// ErrorForStatus() in lumina_translate_providers.cpp folds every
+			// HTTP failure that is not a quota code into Network, so a key the
+			// service rejected arrives here indistinguishable from a host that
+			// never answered. Naming both possibilities is the most this can
+			// honestly say; splitting them would need the status code, which
+			// the provider layer deliberately does not carry out.
+			return keyed
+				? Tr(u"LuminaTranslateTestKeyRejected"_q)
+				: Tr(u"LuminaTranslateTestNetwork"_q);
+		case TranslateError::Unavailable:
+			return Tr(u"LuminaTranslateTestUnavailable"_q);
+		case TranslateError::BadResponse:
+		case TranslateError::None:
+			// None with an empty text is TranslateResult::failed() too: the
+			// service answered, and the answer had no translation in it.
+			return Tr(u"LuminaTranslateTestBadResponse"_q);
+		}
+		return Tr(u"LuminaTranslateTestUnavailable"_q);
+	}();
+	return Tr(u"LuminaTranslateTestFailed"_q) + u": "_q + reason;
+}
+
+[[nodiscard]] QString TestSuccessText(
+		const QString &sample,
+		const QString &translated) {
+	auto shown = translated.trimmed();
+	if (shown.size() > kTestResultMaxLength) {
+		shown = shown.left(kTestResultMaxLength) + QChar(0x2026);
+	}
+	return Tr(u"LuminaTranslateTestSuccess"_q)
+		+ u"\n"_q
+		+ sample
+		+ u" → "_q
+		+ shown;
+}
+
+void ShowTestToast(
+		not_null<Window::SessionController*> controller,
+		const QString &text) {
+	controller->showToast(Ui::Toast::Config{
+		.text = TextWithEntities{ text },
+		.duration = kTestToastDuration,
+	});
+}
+
 void AddToggleRow(
 		not_null<Ui::VerticalLayout*> container,
 		rpl::producer<QString> label,
@@ -347,24 +446,6 @@ void ShowProviderPicker(not_null<Window::SessionController*> controller) {
 	}));
 }
 
-void ShowModePicker(not_null<Window::SessionController*> controller) {
-	const auto options = std::vector<QString>{
-		Tr(u"LuminaTranslateModeAll"_q),
-		Tr(u"LuminaTranslateModeManual"_q),
-	};
-	const auto selected = AutoTranslateEverything() ? 0 : 1;
-	controller->show(Box([=](not_null<Ui::GenericBox*> box) {
-		SingleChoiceBox(box, {
-			.title = TrValue(u"LuminaTranslateModeHeader"_q),
-			.options = options,
-			.initialSelection = selected,
-			.callback = [=](int index) {
-				SetAutoTranslateEverything(index == 0);
-			},
-		});
-	}));
-}
-
 // `firstOption` is the special entry at the top of the list - "Recipient's
 // language" on the send side, "Interface language" on the read side - and
 // `firstValue` the code it stores ("auto" and "").
@@ -461,6 +542,56 @@ void AddSendRows(
 	Ui::AddDividerText(container, TrValue(u"LuminaTranslateSendInfo"_q));
 }
 
+// Android presents the mode as two radio options in a section of their own,
+// directly after the sending section (LuminaTranslateActivity.fillItems), and
+// so does this: a value row hid the fact that "only chats I turn on" is a
+// state the user is already in rather than an action they have not taken.
+void AddModeRows(not_null<Ui::VerticalLayout*> container) {
+	Ui::AddSkip(container);
+	Ui::AddSubsectionTitle(
+		container,
+		TrValue(u"LuminaTranslateModeHeader"_q));
+
+	const auto group = std::make_shared<Ui::RadioenumGroup<TranslateMode>>(
+		AutoTranslateEverything()
+			? TranslateMode::All
+			: TranslateMode::Manual);
+	const auto addOption = [&](TranslateMode value, const QString &key) {
+		const auto radio = container->add(
+			object_ptr<Ui::Radioenum<TranslateMode>>(
+				container,
+				group,
+				value,
+				QString(),
+				st::settingsSendType),
+			st::settingsSendTypePadding);
+		TrValue(key) | rpl::on_next([=](const QString &text) {
+			radio->setText(text);
+		}, radio->lifetime());
+	};
+	addOption(TranslateMode::All, u"LuminaTranslateModeAll"_q);
+	addOption(TranslateMode::Manual, u"LuminaTranslateModeManual"_q);
+
+	// Both directions, like every other row on this page: a value written
+	// anywhere else - the per-chat toggle, a restored backup - moves the
+	// radio, and moving the radio writes the value. They do not chase each
+	// other, because RadiobuttonGroup::setValue() returns early when the value
+	// it is handed is the one it already has.
+	FlagValue([] {
+		return AutoTranslateEverything();
+	}) | rpl::on_next([=](bool everything) {
+		group->setValue(everything
+			? TranslateMode::All
+			: TranslateMode::Manual);
+	}, container->lifetime());
+	group->changes() | rpl::on_next([](TranslateMode value) {
+		SetAutoTranslateEverything(value == TranslateMode::All);
+	}, container->lifetime());
+
+	Ui::AddSkip(container);
+	Ui::AddDividerText(container, TrValue(u"LuminaTranslateModeInfo"_q));
+}
+
 void AddReceiveRows(
 		not_null<Ui::VerticalLayout*> container,
 		not_null<Window::SessionController*> controller) {
@@ -491,15 +622,6 @@ void AddReceiveRows(
 				TranslateReadLanguage(),
 				[](QString code) { SetTranslateReadLanguage(code); });
 		});
-	AddValueRow(
-		container,
-		TrValue(u"LuminaTranslateModeHeader"_q),
-		[] {
-			return AutoTranslateEverything()
-				? Tr(u"LuminaTranslateModeAll"_q)
-				: Tr(u"LuminaTranslateModeManual"_q);
-		},
-		[=] { ShowModePicker(controller); });
 	Ui::AddSkip(container);
 	Ui::AddDividerText(container, TrValue(u"LuminaTranslateReceiveInfo"_q));
 }
@@ -521,6 +643,95 @@ void AddScopeRows(not_null<Ui::VerticalLayout*> container) {
 		[](bool value) { SetTranslateScopeGroup(value); });
 	Ui::AddSkip(container);
 	Ui::AddDividerText(container, TrValue(u"LuminaTranslateScopeInfo"_q));
+}
+
+// One in-flight test, owned by the page. Destroying it destroys the engine,
+// which is what cancels a request the user walked away from: the engine
+// contract in lumina_translate_providers.h says a destroyed engine's callbacks
+// never run, so nothing here has to be guarded against the page going away.
+// The stream carries the label text rather than a change signal, so that
+// nothing subscribed to it has to reach back into this struct: the state is
+// owned by the page's lifetime, which a QWidget destroys before it deletes its
+// children, and a row still alive for those few moments must not read it.
+struct TestState {
+	rpl::event_stream<QString> label;
+
+	// Which run owns `engine` right now. The deferred release below compares
+	// it, so a run that has already been replaced can never drop the engine a
+	// later run is still waiting on - which would strand the row on "Testing"
+	// with `running` stuck true and the button dead for the rest of the page.
+	int generation = 0;
+	bool running = false;
+
+	// Last, so that it is destroyed first: whatever the engine does on the way
+	// out, the rest of this struct is still there while it does it.
+	std::unique_ptr<TranslateEngine> engine;
+};
+
+// Android's ITEM_TEST, and the whole reason this section is worth having: a
+// service that silently does nothing is otherwise indistinguishable from a
+// service that is not selected, a key that was never saved, and a chat that
+// simply has translation off.
+void AddTestRow(
+		not_null<Ui::VerticalLayout*> container,
+		not_null<Window::SessionController*> controller) {
+	const auto state = container->lifetime().make_state<TestState>();
+	const auto button = ::Settings::AddButtonWithLabel(
+		container,
+		TrValue(u"LuminaTranslateTest"_q),
+		rpl::single(QString()) | rpl::then(state->label.events()),
+		st::settingsButtonNoIcon);
+	button->setClickedCallback([=] {
+		if (state->running) {
+			return;
+		}
+		const auto provider = CurrentProvider();
+		const auto keyed = provider.needsKey;
+		if (keyed && ProviderApiKey(provider.id).isEmpty()) {
+			ShowTestToast(
+				controller,
+				TestFailureText(TranslateError::NoKey, false));
+			return;
+		}
+
+		// MakeTranslateEngine() and deliberately not
+		// MakeCurrentTranslateEngine(): the latter wraps the selection in the
+		// Telegram fallback, which is right for a message and wrong for a
+		// test - it would answer "it works" for a service that never replied,
+		// which is exactly the confusion this row exists to end.
+		auto engine = MakeTranslateEngine(provider.id, &controller->session());
+		if (!engine) {
+			ShowTestToast(
+				controller,
+				TestFailureText(TranslateError::Unavailable, false));
+			return;
+		}
+		state->engine = std::move(engine);
+		state->running = true;
+		const auto generation = ++state->generation;
+		state->label.fire(Tr(u"LuminaTranslateTestRunning"_q));
+
+		const auto sample = TestSampleText();
+		state->engine->translate(sample, TestTargetLanguage(), [=](
+				TranslateResult result) {
+			state->running = false;
+			state->label.fire(QString());
+			ShowTestToast(controller, result.failed()
+				? TestFailureText(result.error, keyed)
+				: TestSuccessText(sample, result.text));
+
+			// This runs inside the engine's own network reply, so the engine
+			// cannot be dropped from here - that would delete the reply, and
+			// with it the lambda currently executing. Release it from a later
+			// main thread turn, guarded by the row: if the page closed first
+			// this never runs, and the engine died with the page anyway.
+			crl::on_main(button, [=] {
+				if (state->generation == generation) {
+					state->engine = nullptr;
+				}
+			});
+		});
+	});
 }
 
 void AddProviderRows(
@@ -621,6 +832,8 @@ void AddProviderRows(
 		TrValue(u"LuminaTranslateFallbackTelegram"_q),
 		[] { return TranslateFallbackToTelegram(); },
 		[](bool value) { SetTranslateFallbackToTelegram(value); });
+
+	AddTestRow(container, controller);
 
 	Ui::AddSkip(container);
 	Ui::AddDividerText(
@@ -768,6 +981,7 @@ void AddTranslateRows(
 	Ui::AddSkip(container);
 	Ui::AddDividerText(container, TrValue(u"LuminaTranslateEnableInfo"_q));
 	AddSendRows(container, controller);
+	AddModeRows(container);
 	AddReceiveRows(container, controller);
 	AddScopeRows(container);
 	AddProviderRows(container, controller);

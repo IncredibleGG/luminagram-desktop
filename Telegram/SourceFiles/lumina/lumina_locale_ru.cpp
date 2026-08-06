@@ -76,20 +76,24 @@ namespace {
 			u"«Подтверждать перед отправкой» сначала показывает перевод рядом "
 			u"с оригиналом, чтобы вы могли отправить любой из них; если этот "
 			u"параметр выключен, перевод уходит сразу."_q },
+		{ u"LuminaTranslateModeHeader"_q,
+			u"Переводить входящие сообщения"_q },
+		{ u"LuminaTranslateModeAll"_q, u"Во всех чатах"_q },
+		{ u"LuminaTranslateModeManual"_q, u"Только выбранные мной чаты"_q },
+		{ u"LuminaTranslateModeInfo"_q, u"В режиме «Только выбранные мной "
+			u"чаты» откройте чат и нажмите кнопку «Перевод» вверху, чтобы "
+			u"включить перевод в нём; остальные чаты остаются нетронутыми. В "
+			u"режиме «Во всех чатах» на каждое сообщение уходит отдельный "
+			u"запрос к вашему сервису перевода — с платным ключом лучше "
+			u"оставить «Только выбранные мной чаты»."_q },
 		{ u"LuminaTranslateReceiveHeader"_q, u"Получение"_q },
 		{ u"LuminaDualLanguageDisplay"_q,
 			u"Показывать оригинал и перевод вместе"_q },
 		{ u"LuminaTranslateReadLang"_q, u"Язык чтения"_q },
 		{ u"LuminaTranslateReadLangFollow"_q, u"Как язык приложения"_q },
-		{ u"LuminaTranslateModeHeader"_q,
-			u"Переводить входящие сообщения"_q },
-		{ u"LuminaTranslateModeAll"_q, u"Во всех чатах"_q },
-		{ u"LuminaTranslateModeManual"_q, u"Только выбранные мной чаты"_q },
 		{ u"LuminaTranslateReceiveInfo"_q, u"Входящие сообщения сохраняют "
 			u"исходный текст в полном размере, а перевод показывается под "
-			u"ним. В режиме «Во всех чатах» на каждое сообщение уходит "
-			u"отдельный запрос к вашему сервису перевода — с платным ключом "
-			u"лучше оставить «Только выбранные мной чаты»."_q },
+			u"ним."_q },
 		{ u"LuminaTranslateScopeHeader"_q, u"Область применения"_q },
 		{ u"LuminaTranslateScopePrivate"_q, u"Личные чаты"_q },
 		{ u"LuminaTranslateScopeGroup"_q, u"Группы и каналы"_q },
@@ -110,6 +114,29 @@ namespace {
 		{ u"LuminaTranslatePromptCustom"_q, u"Свой"_q },
 		{ u"LuminaTranslateFallbackTelegram"_q,
 			u"Использовать Telegram при сбое этого сервиса"_q },
+		{ u"LuminaTranslateTest"_q, u"Проверить перевод"_q },
+		{ u"LuminaTranslateTestRunning"_q, u"Проверка…"_q },
+		{ u"LuminaTranslateTestSuccess"_q, u"Перевод работает."_q },
+		{ u"LuminaTranslateTestFailed"_q, u"Проверка не удалась"_q },
+		{ u"LuminaTranslateNoKey"_q, u"Требуется ключ API"_q },
+		{ u"LuminaTranslateTestKeyRejected"_q, u"Сервис недоступен или "
+			u"отклонил этот ключ API. Сначала проверьте ключ, затем базовый "
+			u"URL и подключение."_q },
+		{ u"LuminaTranslateTestNetwork"_q, u"Не удалось связаться с "
+			u"сервисом. Проверьте подключение к интернету и настройки прокси, "
+			u"затем попробуйте снова."_q },
+		{ u"LuminaTranslateTestQuota"_q, u"Сервис отклонил запрос: слишком "
+			u"много обращений или квота этого ключа исчерпана. Попробуйте "
+			u"позже."_q },
+		{ u"LuminaTranslateTestQuotaKeyed"_q, u"Сервис отклонил запрос: он "
+			u"отклонил этот ключ API, квота ключа исчерпана или обращений "
+			u"было слишком много. Сначала проверьте ключ, затем попробуйте "
+			u"позже."_q },
+		{ u"LuminaTranslateTestBadResponse"_q, u"Сервис ответил тем, что "
+			u"LuminaGram не смог прочитать, или не ответил вовсе. Проверьте "
+			u"базовый URL и модель."_q },
+		{ u"LuminaTranslateTestUnavailable"_q, u"Этот сервис здесь не "
+			u"работает. Выберите другой выше."_q },
 		{ u"LuminaTranslateProviderSecurityInfo"_q, u"Ключи хранятся только "
 			u"на этом устройстве, в отдельном файле от остальных настроек, и "
 			u"никогда не отправляются в Telegram. Всё, что вы переводите, "

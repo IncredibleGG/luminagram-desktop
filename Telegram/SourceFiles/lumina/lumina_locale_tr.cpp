@@ -75,19 +75,22 @@ namespace {
 			u"«Göndermeden önce onayla» çeviriyi önce orijinalin yanında "
 			u"gösterir, böylece ikisinden birini gönderebilirsiniz; kapalıyken "
 			u"çeviri doğrudan gönderilir."_q },
+		{ u"LuminaTranslateModeHeader"_q, u"Gelen mesajları çevir"_q },
+		{ u"LuminaTranslateModeAll"_q, u"Her sohbette"_q },
+		{ u"LuminaTranslateModeManual"_q, u"Yalnızca açtığım sohbetler"_q },
+		{ u"LuminaTranslateModeInfo"_q, u"«Yalnızca açtığım sohbetler» "
+			u"seçiliyken bir sohbeti açın ve üstündeki «Çevir» düğmesine "
+			u"basarak o sohbette çeviriyi açın; diğer sohbetlere "
+			u"dokunulmaz. «Her sohbette» seçeneği çeviri hizmetinize mesaj "
+			u"başına bir istek gönderir; kotalı bir anahtar kullanıyorsanız "
+			u"«Yalnızca açtığım sohbetler» seçeneğinde bırakın."_q },
 		{ u"LuminaTranslateReceiveHeader"_q, u"Alma"_q },
 		{ u"LuminaDualLanguageDisplay"_q,
 			u"Orijinali ve çeviriyi birlikte göster"_q },
 		{ u"LuminaTranslateReadLang"_q, u"Okuma dili"_q },
 		{ u"LuminaTranslateReadLangFollow"_q, u"Arayüz dili"_q },
-		{ u"LuminaTranslateModeHeader"_q, u"Gelen mesajları çevir"_q },
-		{ u"LuminaTranslateModeAll"_q, u"Her sohbette"_q },
-		{ u"LuminaTranslateModeManual"_q, u"Yalnızca açtığım sohbetler"_q },
 		{ u"LuminaTranslateReceiveInfo"_q, u"Gelen mesajlar orijinal metnini "
-			u"tam boyutta korur, çeviri ise altında gösterilir. «Her "
-			u"sohbette» seçeneği çeviri hizmetinize mesaj başına bir istek "
-			u"gönderir; kotalı bir anahtar kullanıyorsanız «Yalnızca açtığım "
-			u"sohbetler» seçeneğinde bırakın."_q },
+			u"tam boyutta korur, çeviri ise altında gösterilir."_q },
 		{ u"LuminaTranslateScopeHeader"_q, u"Kapsam"_q },
 		{ u"LuminaTranslateScopePrivate"_q, u"Özel sohbetler"_q },
 		{ u"LuminaTranslateScopeGroup"_q, u"Gruplar ve kanallar"_q },
@@ -109,6 +112,29 @@ namespace {
 		{ u"LuminaTranslatePromptCustom"_q, u"Özel"_q },
 		{ u"LuminaTranslateFallbackTelegram"_q,
 			u"Bu hizmet başarısız olursa Telegram'a geri dön"_q },
+		{ u"LuminaTranslateTest"_q, u"Çeviriyi test et"_q },
+		{ u"LuminaTranslateTestRunning"_q, u"Test ediliyor…"_q },
+		{ u"LuminaTranslateTestSuccess"_q, u"Çeviri çalışıyor."_q },
+		{ u"LuminaTranslateTestFailed"_q, u"Test başarısız"_q },
+		{ u"LuminaTranslateNoKey"_q, u"API anahtarı gerekli"_q },
+		{ u"LuminaTranslateTestKeyRejected"_q, u"Hizmete ulaşılamadı ya da "
+			u"hizmet bu API anahtarını kabul etmedi. Önce anahtarı, sonra "
+			u"temel URL'yi ve bağlantınızı denetleyin."_q },
+		{ u"LuminaTranslateTestNetwork"_q, u"Hizmete ulaşılamadı. İnternet "
+			u"bağlantınızı ve varsa vekil sunucu ayarlarınızı denetleyip "
+			u"yeniden deneyin."_q },
+		{ u"LuminaTranslateTestQuota"_q, u"Hizmet isteği geri çevirdi: çok "
+			u"fazla istek gönderildi ya da bu anahtarın kotası doldu. Daha "
+			u"sonra yeniden deneyin."_q },
+		{ u"LuminaTranslateTestQuotaKeyed"_q, u"Hizmet isteği geri çevirdi: "
+			u"bu API anahtarını kabul etmedi, anahtarın kotası doldu ya da "
+			u"çok fazla istek gönderildi. Önce anahtarı denetleyin, sonra "
+			u"daha sonra yeniden deneyin."_q },
+		{ u"LuminaTranslateTestBadResponse"_q, u"Hizmet, LuminaGram'ın "
+			u"okuyamadığı bir yanıt verdi ya da hiçbir şey döndürmedi. Temel "
+			u"URL'yi ve modeli denetleyin."_q },
+		{ u"LuminaTranslateTestUnavailable"_q, u"Bu hizmet burada "
+			u"çalışamıyor. Yukarıdan başka bir hizmet seçin."_q },
 		{ u"LuminaTranslateProviderSecurityInfo"_q, u"Anahtarlar yalnızca bu "
 			u"cihazda, diğer ayarlardan ayrı bir dosyada saklanır ve hiçbir "
 			u"zaman Telegram'a gönderilmez. Çevirdiğiniz her şey burada "

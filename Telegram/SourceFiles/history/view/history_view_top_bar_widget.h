@@ -154,6 +154,8 @@ private:
 
 	void call(Calls::StartOutgoingCallArgs);
 	void groupCall();
+	void toggleTranslate();
+	void updateTranslateToggleState();
 	void showGroupCallMenu(not_null<PeerData*> peer);
 	void showCallMenu();
 	void toggleInfoSection();
@@ -244,6 +246,7 @@ private:
 
 	object_ptr<Ui::IconButton> _call;
 	object_ptr<Ui::IconButton> _groupCall;
+	object_ptr<Ui::IconButton> _translateToggle;
 	object_ptr<Ui::IconButton> _search;
 	object_ptr<Ui::IconButton> _infoToggle;
 	object_ptr<Ui::IconButton> _menuToggle;

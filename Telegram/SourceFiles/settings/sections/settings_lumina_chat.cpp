@@ -7,6 +7,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "settings/sections/settings_lumina_chat.h"
 
+#include "lumina/lumina_ai_editor.h"
 #include "lumina/lumina_link_preview_settings.h"
 #include "lumina/lumina_voice_confirm_settings.h"
 #include "lumina/lumina_text_replace_settings.h"
@@ -71,6 +72,7 @@ rpl::producer<QString> LuminaChat::title() {
 //   W4-E undo-send window;
 //   W4-F confirm before sending voice / video messages.
 void LuminaChat::setupContent(not_null<Ui::VerticalLayout*> container) {
+	Lumina::AddAiEditorRows(container, controller());
 	Lumina::AddTextReplaceRows(container, controller());
 	Lumina::AddVoiceConfirmRows(container, controller());
 	Lumina::AddLinkPreviewRows(container, controller());

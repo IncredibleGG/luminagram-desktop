@@ -7,7 +7,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #pragma once
 
+#include "spellcheck/spellcheck_types.h" // LanguageId.
+
 #include <rpl/producer.h>
+
+#include <optional>
+#include <vector>
 
 class History;
 class PeerData;
@@ -104,6 +109,60 @@ namespace Lumina {
 // translate bar, the per-chat row in the chat menu, and the channel-side
 // automatic translation Telegram itself performs through
 // ChannelDataFlag::AutoTranslation.
+//
+// TranslationFeatureEnabled() is part of it and not merely implied by
+// ChatTranslationUnlocked(): that one is also satisfied by Premium alone, so
+// without the master opt-in here a Premium account carrying a trMode of "all"
+// from an earlier opt-in would keep translating chats by itself after turning
+// the feature off.
 [[nodiscard]] bool ShouldAutoTranslate(not_null<History*> history);
+
+// The read side's language-detection policy, and the answer to "translate
+// received messages: every chat did nothing".
+//
+// Upstream only ever OFFERS to translate a chat once two independent guesses
+// agree that the user cannot read it: the recognised language must not be in
+// Core::Settings::skipTranslationLanguages() - the languages tdesktop assumes
+// the user knows, which by default is the interface language plus the system
+// one - and enough of the loaded messages must be in it
+// (kEnoughForTranslation in history/view/history_view_translate_tracker.cpp).
+// Both guesses are right for a translate BAR the user still has to press.
+// Neither survives "translate received messages: every chat": a peer writing
+// the user's own language is filtered out by the skip list, so nothing is ever
+// offered, ShouldAutoTranslate() is never reached, and the read language never
+// gets a say - the setting says every chat and means no chat. Android hit
+// exactly this and answered it by translating immediately once the user has
+// asked for automatic translation.
+//
+// So this returns the skip list the detector should use INSTEAD of the user's
+// own, and its presence is also the signal to translate from the first
+// recognised message rather than waiting for the count threshold. It is
+// nullopt for every chat ShouldAutoTranslate() does not cover, which is every
+// configuration this fork ships by default, and there the detector must use
+// upstream's inputs untouched.
+//
+// The list it returns is not the empty one: bypassing "languages you know" is
+// about the languages the user did not choose, and the read language itself is
+// not one of them. Offering a chat's language when it already IS the target
+// would buy one provider request per message to translate German into German.
+// The target is resolved exactly the way Ui::ChooseTranslateTo() resolves it -
+// the explicit read-language override when there is one, else
+// Core::Settings::translateTo(), which itself falls back to the interface
+// language - so the detector and the thing that acts on it cannot disagree
+// about what "the read language" is.
+[[nodiscard]] std::optional<std::vector<LanguageId>> AutoTranslateOfferSkip(
+	not_null<History*> history);
+
+// Fires when anything AutoTranslateOfferSkip() reads may have changed: the
+// master opt-in, the mode, either scope key, the read language, the selected
+// provider. A consumer must re-read rather than assume, because the provider
+// stream covers API key edits as well.
+//
+// The rest of what that predicate reads already has a stream the read side
+// watches, and duplicating them here would only add wakeups:
+// Core::Settings::translateChatEnabledValue() and
+// ChatTranslationUnlockedValue() through the tracker's own tracking flag, and
+// PeerUpdate::Flag::TranslationDisabled through its per-peer subscription.
+[[nodiscard]] rpl::producer<> AutoTranslatePolicyChanges();
 
 } // namespace Lumina

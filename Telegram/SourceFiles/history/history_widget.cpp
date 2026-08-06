@@ -159,6 +159,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "menu/menu_timecode_action.h"
 #include "mtproto/mtproto_config.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_ai_editor.h"
 #include "lumina/lumina_send_pipeline.h"
 #include "lumina/lumina_translate_caption.h"
 #include "lumina/lumina_translate_preview_bar.h"
@@ -1391,6 +1392,11 @@ void HistoryWidget::initAiButton() {
 		updateAiButtonVisibility();
 		showAiComposeBox();
 	});
+
+	Lumina::OfficialAiEditorAvailableValue(
+	) | rpl::on_next([=] {
+		updateAiButtonVisibility();
+	}, lifetime());
 
 	_aiTooltipManager = std::make_unique<HistoryView::Controls::AiTooltipManager>(
 		this,
@@ -5167,6 +5173,9 @@ void HistoryWidget::setupSendMenu(
 }
 
 void HistoryWidget::showAiComposeBox() {
+	if (!Lumina::OfficialAiEditorAvailable()) {
+		return;
+	}
 	const auto text = prepareTextForEditMsg();
 	if (text.text.isEmpty()) {
 		return;

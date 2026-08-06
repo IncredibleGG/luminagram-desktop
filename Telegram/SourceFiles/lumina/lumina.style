@@ -7,6 +7,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 using "ui/basic.style";
 using "ui/chat/chat.style";
+using "info/info.style";
 
 // Dual-language display: what the user wrote is the main text at the normal
 // message size, and the translation sits beneath it a size smaller. The size
@@ -21,3 +22,23 @@ luminaTranslationTextStyle: TextStyle(defaultTextStyle) {
 // font rather than a TextStyle.
 luminaPreviewOriginalFont: semiboldFont;
 luminaPreviewTranslationFont: font(12px);
+
+// The per-chat translate button in the chat top bar. It stands in the same row
+// as the call, search and info buttons, so it inherits topBarSearch and changes
+// nothing but the glyph: the 40x54 hit area, the ripple and the colours have to
+// be the ones its neighbours use, or it reads as a foreign control dropped into
+// that row. The glyph is the one the chat menu's translate row already draws,
+// so the two entry points onto the same switch look like the same feature.
+//
+// iconPosition is recomputed rather than inherited because that glyph is 24px
+// where the top bar's own icons are 32px; inheriting topBarSearch's (4px, 11px)
+// would hang it up and to the left of every button beside it.
+luminaTopBarTranslate: IconButton(topBarSearch) {
+	icon: icon {{ "menu/translate", menuIconFg }};
+	iconOver: icon {{ "menu/translate", menuIconFgOver }};
+	iconPosition: point(8px, 15px);
+}
+
+// The same glyph in the accent colour, shown while this chat is being
+// translated - the treatment topBarInfoActive already gives the info button.
+luminaTopBarTranslateActive: icon {{ "menu/translate", windowActiveTextFg }};

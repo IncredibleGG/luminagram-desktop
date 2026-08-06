@@ -147,6 +147,16 @@ struct TranslateLanguage {
 
 // The whole sub-page, in the F-02 sub-page shape: the section .cpp holds this
 // one call and nothing else.
+//
+// Sections, in Android's order (LuminaTranslateActivity.fillItems), under the
+// desktop-only master opt-in: sending, mode, receiving, scope, service.
+//
+// The service section ends in a test action that really does translate a
+// sample through the selected engine - deliberately without the Telegram
+// fallback, which would report success for a service that never answered - and
+// names the failure it got. It is the only thing on this page that answers "is
+// my key actually working", so it is the one row that must not be dropped in a
+// later cleanup.
 void AddTranslateRows(
 	not_null<Ui::VerticalLayout*> container,
 	not_null<Window::SessionController*> controller);

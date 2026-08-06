@@ -76,20 +76,24 @@ namespace {
 			u"tradução ao lado do original primeiro, para você enviar "
 			u"qualquer uma das duas; com a opção desativada, a tradução é "
 			u"enviada na hora."_q },
+		{ u"LuminaTranslateModeHeader"_q, u"Traduzir mensagens recebidas"_q },
+		{ u"LuminaTranslateModeAll"_q, u"Em todas as conversas"_q },
+		{ u"LuminaTranslateModeManual"_q,
+			u"Somente as conversas que eu ativar"_q },
+		{ u"LuminaTranslateModeInfo"_q, u"Com «Somente as conversas que eu "
+			u"ativar», abra uma conversa e use o botão «Traduzir» no topo "
+			u"dela para ligar a tradução ali; as demais ficam intactas. «Em "
+			u"todas as conversas» envia uma requisição por mensagem ao seu "
+			u"serviço de tradução — com uma chave paga por uso, deixe em "
+			u"«Somente as conversas que eu ativar»."_q },
 		{ u"LuminaTranslateReceiveHeader"_q, u"Recebimento"_q },
 		{ u"LuminaDualLanguageDisplay"_q,
 			u"Mostrar o original e a tradução juntos"_q },
 		{ u"LuminaTranslateReadLang"_q, u"Idioma de leitura"_q },
 		{ u"LuminaTranslateReadLangFollow"_q, u"Seguir idioma do app"_q },
-		{ u"LuminaTranslateModeHeader"_q, u"Traduzir mensagens recebidas"_q },
-		{ u"LuminaTranslateModeAll"_q, u"Em todas as conversas"_q },
-		{ u"LuminaTranslateModeManual"_q,
-			u"Somente as conversas que eu ativar"_q },
 		{ u"LuminaTranslateReceiveInfo"_q, u"As mensagens recebidas mantêm o "
 			u"texto original em tamanho normal, com a tradução exibida "
-			u"abaixo. «Em todas as conversas» envia uma requisição por "
-			u"mensagem ao seu serviço de tradução — com uma chave paga por "
-			u"uso, deixe em «Somente as conversas que eu ativar»."_q },
+			u"abaixo."_q },
 		{ u"LuminaTranslateScopeHeader"_q, u"Onde se aplica"_q },
 		{ u"LuminaTranslateScopePrivate"_q, u"Conversas privadas"_q },
 		{ u"LuminaTranslateScopeGroup"_q, u"Grupos e canais"_q },
@@ -110,6 +114,29 @@ namespace {
 		{ u"LuminaTranslatePromptCustom"_q, u"Personalizado"_q },
 		{ u"LuminaTranslateFallbackTelegram"_q,
 			u"Usar o Telegram quando este serviço falhar"_q },
+		{ u"LuminaTranslateTest"_q, u"Testar tradução"_q },
+		{ u"LuminaTranslateTestRunning"_q, u"Testando…"_q },
+		{ u"LuminaTranslateTestSuccess"_q, u"A tradução funciona."_q },
+		{ u"LuminaTranslateTestFailed"_q, u"Falha no teste"_q },
+		{ u"LuminaTranslateNoKey"_q, u"Chave de API necessária"_q },
+		{ u"LuminaTranslateTestKeyRejected"_q, u"Não foi possível alcançar o "
+			u"serviço, ou ele recusou esta chave de API. Verifique primeiro "
+			u"a chave e depois a URL base e sua conexão."_q },
+		{ u"LuminaTranslateTestNetwork"_q, u"Não foi possível alcançar o "
+			u"serviço. Verifique sua conexão com a internet e o proxy, se "
+			u"houver, e tente de novo."_q },
+		{ u"LuminaTranslateTestQuota"_q, u"O serviço recusou a requisição: "
+			u"requisições demais, ou a cota desta chave acabou. Tente mais "
+			u"tarde."_q },
+		{ u"LuminaTranslateTestQuotaKeyed"_q, u"O serviço recusou a "
+			u"requisição: ele rejeitou esta chave de API, a cota da chave "
+			u"acabou, ou houve requisições demais. Confira primeiro a chave "
+			u"e depois tente mais tarde."_q },
+		{ u"LuminaTranslateTestBadResponse"_q, u"O serviço respondeu com "
+			u"algo que o LuminaGram não conseguiu ler, ou não respondeu "
+			u"nada. Verifique a URL base e o modelo."_q },
+		{ u"LuminaTranslateTestUnavailable"_q, u"Este serviço não pode "
+			u"funcionar aqui. Escolha outro acima."_q },
 		{ u"LuminaTranslateProviderSecurityInfo"_q, u"As chaves ficam "
 			u"somente neste dispositivo, em um arquivo separado do resto das "
 			u"configurações, e nunca são enviadas ao Telegram. Tudo o que "

@@ -75,19 +75,23 @@ namespace {
 			u"يتذكّرها. ويعرض خيار «التأكيد قبل الإرسال» الترجمة بجانب النص "
 			u"الأصلي أولاً، لتتمكن من إرسال أيّهما شئت؛ وعند إيقافه تُرسَل "
 			u"الترجمة مباشرةً."_q },
+		{ u"LuminaTranslateModeHeader"_q, u"ترجمة الرسائل الواردة"_q },
+		{ u"LuminaTranslateModeAll"_q, u"في كل الدردشات"_q },
+		{ u"LuminaTranslateModeManual"_q, u"الدردشات التي أُفعّلها فقط"_q },
+		{ u"LuminaTranslateModeInfo"_q,
+			u"مع خيار «الدردشات التي أُفعّلها فقط»، افتح محادثة واضغط زر "
+			u"«الترجمة» في الأعلى لتفعيلها في تلك المحادثة، وتبقى بقية "
+			u"الدردشات كما هي. ويرسل خيار «في كل الدردشات» طلبًا واحدًا لكل "
+			u"رسالة إلى خدمة الترجمة لديك — فإذا كان مفتاحك محدود الاستخدام، "
+			u"فأبقِه على «الدردشات التي أُفعّلها فقط»."_q },
 		{ u"LuminaTranslateReceiveHeader"_q, u"الاستقبال"_q },
 		{ u"LuminaDualLanguageDisplay"_q,
 			u"عرض النص الأصلي والترجمة معًا"_q },
 		{ u"LuminaTranslateReadLang"_q, u"لغة القراءة"_q },
 		{ u"LuminaTranslateReadLangFollow"_q, u"لغة الواجهة"_q },
-		{ u"LuminaTranslateModeHeader"_q, u"ترجمة الرسائل الواردة"_q },
-		{ u"LuminaTranslateModeAll"_q, u"في كل الدردشات"_q },
-		{ u"LuminaTranslateModeManual"_q, u"الدردشات التي أُفعّلها فقط"_q },
 		{ u"LuminaTranslateReceiveInfo"_q,
 			u"تحتفظ الرسائل الواردة بنصها الأصلي بالحجم الكامل، مع عرض الترجمة "
-			u"تحته. ويرسل خيار «في كل الدردشات» طلبًا واحدًا لكل رسالة إلى "
-			u"خدمة الترجمة لديك — فإذا كان مفتاحك محدود الاستخدام، فأبقِه على "
-			u"«الدردشات التي أُفعّلها فقط»."_q },
+			u"تحته."_q },
 		{ u"LuminaTranslateScopeHeader"_q, u"النطاق"_q },
 		{ u"LuminaTranslateScopePrivate"_q, u"الدردشات الخاصة"_q },
 		{ u"LuminaTranslateScopeGroup"_q, u"المجموعات والقنوات"_q },
@@ -109,6 +113,29 @@ namespace {
 		{ u"LuminaTranslatePromptCustom"_q, u"مخصص"_q },
 		{ u"LuminaTranslateFallbackTelegram"_q,
 			u"الرجوع إلى Telegram عند فشل هذه الخدمة"_q },
+		{ u"LuminaTranslateTest"_q, u"اختبار الترجمة"_q },
+		{ u"LuminaTranslateTestRunning"_q, u"جارٍ الاختبار…"_q },
+		{ u"LuminaTranslateTestSuccess"_q, u"الترجمة تعمل."_q },
+		{ u"LuminaTranslateTestFailed"_q, u"فشل الاختبار"_q },
+		{ u"LuminaTranslateNoKey"_q, u"مفتاح API مطلوب"_q },
+		{ u"LuminaTranslateTestKeyRejected"_q,
+			u"تعذّر الوصول إلى الخدمة، أو أنها رفضت مفتاح API هذا. تحقق من "
+			u"المفتاح أولًا، ثم من الرابط الأساسي ومن اتصالك."_q },
+		{ u"LuminaTranslateTestNetwork"_q,
+			u"تعذّر الوصول إلى الخدمة. تحقق من اتصالك بالإنترنت ومن أي وكيل "
+			u"بروكسي، ثم أعد المحاولة."_q },
+		{ u"LuminaTranslateTestQuota"_q,
+			u"رفضت الخدمة الطلب: طلبات كثيرة جدًا، أو نفدت حصة هذا المفتاح. "
+			u"أعد المحاولة لاحقًا."_q },
+		{ u"LuminaTranslateTestQuotaKeyed"_q,
+			u"رفضت الخدمة الطلب: فقد رفضت مفتاح API هذا، أو نفدت حصة "
+			u"المفتاح، أو كانت الطلبات كثيرة جدًا. تحقق من المفتاح أولًا، ثم "
+			u"أعد المحاولة لاحقًا."_q },
+		{ u"LuminaTranslateTestBadResponse"_q,
+			u"ردّت الخدمة بشيء لم يستطع LuminaGram قراءته، أو لم تردّ بشيء "
+			u"على الإطلاق. تحقق من الرابط الأساسي ومن النموذج."_q },
+		{ u"LuminaTranslateTestUnavailable"_q,
+			u"لا يمكن تشغيل هذه الخدمة هنا. اختر خدمة أخرى في الأعلى."_q },
 		{ u"LuminaTranslateProviderSecurityInfo"_q,
 			u"تُحفظ المفاتيح على هذا الجهاز فقط، في ملف منفصل عن بقية "
 			u"الإعدادات، ولا تُرسَل إلى Telegram أبدًا. وكل ما تترجمه يُرسَل "

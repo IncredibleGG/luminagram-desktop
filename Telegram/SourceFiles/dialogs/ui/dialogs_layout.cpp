@@ -33,6 +33,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "history/view/history_view_send_action.h"
 #include "lang/lang_keys.h"
 #include "lottie/lottie_icon.h"
+#include "lumina/lumina_muted_badge.h"
 #include "main/main_session.h"
 #include "storage/localstorage.h"
 #include "support/support_helper.h"
@@ -166,6 +167,23 @@ int PaintBadges(
 		bool displayPinnedIcon,
 		int pinnedIconTop,
 		bool narrow) {
+	// `badgesState` is a by-value copy, and that is what makes this the only
+	// safe place for Lumina::ShowMutedCount: the same BadgesState, built by the
+	// same Dialogs::BadgesForUnread(), also feeds the taskbar / dock / launcher
+	// counter, so un-muting the flag at its source would change that number
+	// instead of a colour. Here it cannot escape this one paint call, and the
+	// flag only ever picks a brush - no width in this function depends on it.
+	//
+	// Gated on `unread` because that is exactly where `unreadMuted` is read,
+	// and because BadgesForUnread() leaves the flag set on a row with nothing
+	// unread at all (`counter <= counterMuted` is trivially true at zero) -
+	// without the gate every visible row would pay a preference lookup per
+	// frame for a flag it never uses.
+	if (badgesState.unread) {
+		badgesState.unreadMuted = Lumina::UnreadBadgeMuted(
+			badgesState.unreadMuted);
+	}
+
 	const auto paintIconBadge = [&](
 			const style::ThreeStateIcon &icons,
 			bool muted,

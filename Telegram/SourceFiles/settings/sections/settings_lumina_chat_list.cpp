@@ -7,6 +7,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "settings/sections/settings_lumina_chat_list.h"
 
+#include "lumina/lumina_muted_badge_settings.h"
+#include "lumina/lumina_dialogs_badges_settings.h"
+#include "lumina/lumina_dialogs_visibility_settings.h"
 #include "lumina/lumina_locale.h"
 #include "ui/wrap/vertical_layout.h"
 #include "ui/rp_widget.h"
@@ -45,10 +48,9 @@ rpl::producer<QString> LuminaChatList::title() {
 //   W5-C muted chats' unread badge in the accent colour;
 //   W6-A compact chat-list rows.
 void LuminaChatList::setupContent(not_null<Ui::VerticalLayout*> container) {
-	Ui::AddSkip(container);
-	Ui::AddDividerText(
-		container,
-		Lumina::TrValue(u"LuminaChatListPlaceholder"_q));
+	Lumina::AddDialogsVisibilityRows(container, controller());
+	Lumina::AddChatListDotRows(container, controller());
+	Lumina::AddMutedBadgeRows(container, controller());
 }
 
 } // namespace Settings

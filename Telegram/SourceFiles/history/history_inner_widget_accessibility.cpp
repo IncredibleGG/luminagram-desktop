@@ -23,6 +23,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "history/history_item.h"
 #include "history/history_item_components.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_time_format.h"
 #include "ui/text/format_values.h"
 
 namespace HistoryView {
@@ -313,7 +314,7 @@ QString MessageAccessibilityName(
 	statusParts.push_back(
 		tr::lng_schedule_at(tr::now)
 		+ u" "_q
-		+ QLocale().toString(dateTime.time(), QLocale::ShortFormat));
+		+ Lumina::FormatMessageTime(dateTime.time()));
 	if (const auto views = item->Get<HistoryMessageViews>()) {
 		if (views->views.count >= 0) {
 			statusParts.push_back(
@@ -720,7 +721,7 @@ QString MessageSubItemValue(
 		const auto dateTime = view->dateTime();
 		return tr::lng_schedule_at(tr::now)
 			+ u" "_q
-			+ QLocale().toString(dateTime.time(), QLocale::ShortFormat);
+			+ Lumina::FormatMessageTime(dateTime.time());
 	}
 	case MessageSubItem::Reactions: {
 		const auto &reactions = data->reactions();
@@ -1118,7 +1119,7 @@ QString MessageSubItemValue(
 		}
 		if (fwd->originalDate) {
 			const auto dt = base::unixtime::parse(fwd->originalDate);
-			return QLocale().toString(dt, QLocale::ShortFormat);
+			return Lumina::FormatMessageDateTime(dt);
 		}
 		return {};
 	}

@@ -160,6 +160,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "mtproto/mtproto_config.h"
 #include "lang/lang_keys.h"
 #include "lumina/lumina_ai_editor.h"
+#include "lumina/lumina_quick_replies.h"
 #include "lumina/lumina_send_pipeline.h"
 #include "lumina/lumina_translate_caption.h"
 #include "lumina/lumina_translate_preview_bar.h"
@@ -1511,6 +1512,14 @@ void HistoryWidget::initTabbedSelector() {
 			toggleTabbedSelectorMode();
 		}
 	});
+
+	// LuminaGram: the reply-template chooser (W6-D). Android long-presses this
+	// same button; desktop has no long press, so it answers a right click.
+	// Nothing is offered until the user has created a template.
+	Lumina::InstallReplyTemplatesMenu(
+		_tabbedSelectorToggle.data(),
+		_field.data(),
+		controller());
 
 	const auto selector = controller()->tabbedSelector();
 

@@ -1542,9 +1542,6 @@ void LanguageBox::showFinished() {
 	if (_controller && !_highlightId.isEmpty()) {
 		if (const auto window = Core::App().findWindow(this)) {
 			window->checkHighlightControl(
-				u"language/show-button"_q,
-				_showButtonToggle.data());
-			window->checkHighlightControl(
 				u"language/translate-chats"_q,
 				_translateChatsToggle.data());
 			window->checkHighlightControl(
@@ -1558,34 +1555,30 @@ void LanguageBox::setupTop(not_null<Ui::VerticalLayout*> container) {
 	if (!_controller) {
 		return;
 	}
-	const auto translateEnabled = container->add(
-		object_ptr<Ui::SettingsButton>(
-			container,
-			tr::lng_translate_settings_show(),
-			st::settingsButtonNoIcon))->toggleOn(
-				rpl::single(Core::App().settings().translateButtonEnabled()));
-	_showButtonToggle = translateEnabled;
-
-	translateEnabled->toggledValue(
-	) | rpl::filter([](bool checked) {
-		return (checked != Core::App().settings().translateButtonEnabled());
-	}) | rpl::on_next([=](bool checked) {
-		Core::App().settings().setTranslateButtonEnabled(checked);
-		Core::App().saveSettingsDelayed();
-	}, translateEnabled->lifetime());
-
+	// Upstream opens this block with a "Show Translate Button" switch over
+	// Core::Settings::translateButtonEnabled(). LuminaGram has nothing left
+	// for it to switch: the Translate row in the message, selection, poll and
+	// About menus asks Lumina::OnDemandTranslateAllowed() instead (see
+	// lumina/lumina_translate_selection.h for why), and no other reader of
+	// that setting is left anywhere in the tree, so the switch only decided
+	// whether the two rows below it were on screen. Relabelling it could not
+	// help - on Windows Platform::IsTranslateProviderAvailable() is false, so
+	// there the row governed nothing but the visibility of a row that
+	// "Translate Entire Chats" also shows. The rows therefore stand on their
+	// own: the platform translator, which is in force whether or not it is
+	// visible (Ui::CreateTranslateProvider(), lang/translate_provider.cpp,
+	// consults it ahead of the LuminaGram provider), and the skip list, which
+	// no longer hides the on-demand row (Ui::SkipTranslate() stopped reading
+	// it) and now belongs to whole-chat translation - it decides which chats
+	// are offered a translate bar, and seeds Ui::ChooseTranslateToBox(). It is
+	// reachable from the translate bar's menu as well as from here, so
+	// following "Translate Entire Chats" alone does not strand it. The setting
+	// itself stays in Core::Settings, unread, because its slot in the saved
+	// settings stream cannot be removed.
 	if (Platform::IsTranslateProviderAvailable()) {
-		const auto platformTranslateWrap = container->add(
-			object_ptr<Ui::SlideWrap<Ui::VerticalLayout>>(
-				container,
-				object_ptr<Ui::VerticalLayout>(container)));
-		platformTranslateWrap->toggle(
-			translateEnabled->toggled(),
-			anim::type::instant);
-		platformTranslateWrap->toggleOn(translateEnabled->toggledValue());
-		const auto platformTranslateEnabled = platformTranslateWrap->entity()->add(
+		const auto platformTranslateEnabled = container->add(
 			object_ptr<Ui::SettingsButton>(
-				platformTranslateWrap->entity(),
+				container,
 				Platform::IsMac()
 					? tr::lng_translate_settings_use_platform_mac()
 					: tr::lng_translate_settings_use_platform_linux(),
@@ -1601,11 +1594,11 @@ void LanguageBox::setupTop(not_null<Ui::VerticalLayout*> container) {
 			Core::App().saveSettingsDelayed();
 		}, platformTranslateEnabled->lifetime());
 		if (Platform::IsMac()) {
-			Ui::AddSkip(platformTranslateWrap->entity());
+			Ui::AddSkip(container);
 			Ui::AddDividerText(
-				platformTranslateWrap->entity(),
+				container,
 				tr::lng_translate_settings_use_platform_mac_about());
-			Ui::AddSkip(platformTranslateWrap->entity());
+			Ui::AddSkip(container);
 		}
 	}
 
@@ -1650,12 +1643,9 @@ void LanguageBox::setupTop(not_null<Ui::VerticalLayout*> container) {
 			container,
 			object_ptr<Ui::VerticalLayout>(container)));
 	translateSkipWrap->toggle(
-		translateEnabled->toggled(),
+		translateChat->toggled(),
 		anim::type::normal);
-	translateSkipWrap->toggleOn(rpl::combine(
-		translateEnabled->toggledValue(),
-		translateChat->toggledValue(),
-		rpl::mappers::_1 || rpl::mappers::_2));
+	translateSkipWrap->toggleOn(translateChat->toggledValue());
 	const auto translateSkip = Settings::AddButtonWithLabel(
 		translateSkipWrap->entity(),
 		tr::lng_translate_settings_choose(),

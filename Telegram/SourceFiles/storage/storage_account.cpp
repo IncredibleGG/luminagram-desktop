@@ -39,6 +39,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "data/data_user.h"
 #include "data/data_drafts.h"
 #include "export/export_settings.h"
+#include "lumina/lumina_recent_limits.h"
 #include "webview/webview_interface.h"
 #include "window/themes/window_theme.h"
 
@@ -2518,6 +2519,9 @@ void Account::importOldRecentStickers() {
 			(SetFlag::Installed | SetFlag::Special),
 			kDefaultStickerInstallDate)).first->second.get();
 
+	const auto recentLimit = Lumina::RecentStickersLimit(
+		_owner->session().serverConfig().stickersRecentLimit);
+
 	QMap<uint64, bool> read;
 	while (!stickers.stream.atEnd()) {
 		quint64 id, access;
@@ -2566,9 +2570,7 @@ void Account::importOldRecentStickers() {
 			custom->stickers.push_back(doc);
 			++custom->count;
 		}
-		if (qAbs(value) > 1
-			&& (recent.size()
-				< _owner->session().serverConfig().stickersRecentLimit)) {
+		if (qAbs(value) > 1 && (recent.size() < recentLimit)) {
 			recent.push_back(qMakePair(doc, qAbs(value)));
 		}
 	}

@@ -57,6 +57,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "main/main_domain.h"
 #include "main/main_session.h"
 #include "main/main_session_settings.h"
+#include "lumina/lumina_dialogs_visibility.h"
 #include "api/api_authorizations.h"
 #include "api/api_chat_filters.h"
 #include "apiwrap.h"
@@ -1807,6 +1808,10 @@ void Widget::setupStories() {
 	_stories->widthValue() | rpl::on_next([=] {
 		updateLockUnlockPosition();
 	}, lifetime());
+
+	Lumina::HideStoriesChanges() | rpl::on_next([=] {
+		updateStoriesVisibility();
+	}, _stories->lifetime());
 }
 
 void Widget::storiesToggleExplicitExpand(bool expand) {
@@ -2012,7 +2017,8 @@ void Widget::updateHasFocus(not_null<QWidget*> focused) {
 }
 
 void Widget::toggleFiltersMenu(bool enabled) {
-	if (_layout == Layout::Child) {
+	const auto hiddenByLumina = Lumina::HideChatFolders();
+	if (_layout == Layout::Child || hiddenByLumina) {
 		enabled = false;
 	}
 	if (const auto id = controller()->windowId()
@@ -2070,6 +2076,14 @@ void Widget::toggleFiltersMenu(bool enabled) {
 		updateControlsGeometry();
 	} else {
 		_chatFilters = nullptr;
+		if (hiddenByLumina) {
+			// Nothing else recomputes the chat list geometry when the strip
+			// goes away, so the list would keep the gap the strip used to
+			// fill until the next resize. Kept inside the LuminaGram branch
+			// so that the paths this preference does not cause stay exactly
+			// as they were.
+			updateControlsGeometry();
+		}
 	}
 }
 
@@ -2765,6 +2779,7 @@ void Widget::updateStoriesVisibility() {
 		|| (widthAnimation && !suggestionsAnimation)
 		|| _childList
 		|| _stories->empty()
+		|| Lumina::HideStories()
 		|| (pulledDown && hiddenAnimated);
 	const auto hidden = hiddenInstant || hiddenAnimated;
 	const auto changed = (_stories->toggledHidden() != hidden);

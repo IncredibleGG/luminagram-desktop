@@ -52,6 +52,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "lang/lang_cloud_manager.h"
 #include "lang/lang_hardcoded.h"
 #include "lang/lang_instance.h"
+#include "lumina/lumina_undo_send.h"
 #include "lumina/lumina_vault.h"
 #include "inline_bots/bot_attach_web_view.h"
 #include "mainwidget.h"
@@ -339,6 +340,15 @@ void Application::run() {
 			MTP::details::unpause();
 		}
 	}, _lifetime);
+
+	// LuminaGram undo-send (W4-E). Registered from here rather than from a
+	// file-scope initializer the way the other send interceptors are, because
+	// the pipeline runs interceptors in registration order and this one has to
+	// be the last hold before the wire: readyToQuit() finishes a held send by
+	// invoking its continuation, which only reaches the composer if no other
+	// interceptor is left to hold the message for something the quit will not
+	// wait for. Dynamic initialization has all run by now, so this is last.
+	Lumina::SetupUndoSendPipeline();
 
 	DEBUG_LOG(("Application Info: inited..."));
 
@@ -1844,6 +1854,15 @@ void QuitAttempt() {
 }
 
 bool Application::readyToQuit() {
+	// LuminaGram undo-send (W4-E). A message still inside its undo window is
+	// sent now rather than dropped, and this has to happen BEFORE the
+	// isQuitPrevent() checks below: the flush only queues the request, and it
+	// is ApiWrap seeing that queued request that then holds the quit open
+	// until it is actually on the wire. Moving this line below the loop loses
+	// the message. No-op when nothing is held, and safe to re-enter - quitting
+	// asks more than once.
+	Lumina::FlushUndoSend();
+
 	auto prevented = false;
 	if (_calls->isQuitPrevent()) {
 		prevented = true;

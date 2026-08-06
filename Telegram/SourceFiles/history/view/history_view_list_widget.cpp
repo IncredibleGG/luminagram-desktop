@@ -72,6 +72,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/screen_reader_mode.h"
 #include "ui/ui_utility.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_select_author.h"
 #include "boxes/peers/edit_participant_box.h"
 #include "boxes/delete_messages_box.h"
 #include "boxes/moderate_messages_box.h"
@@ -1683,6 +1684,86 @@ void ListWidget::selectItemAsGroup(not_null<HistoryItem*> item) {
 		pushSelectedItems();
 		update();
 	}
+}
+
+bool ListWidget::luminaCanSelectFromAuthor(
+		not_null<HistoryItem*> item) const {
+	if (hasSelectRestriction()
+		|| !_delegate->listIsItemGoodForSelection(item)) {
+		return false;
+	} else if (!_selected.empty()) {
+		const auto first = session().data().message(_selected.begin()->first);
+		if (first && !first->inSameSelectionGroup(item)) {
+			return false;
+		}
+	}
+	return true;
+}
+
+Lumina::SelectFromAuthorResult ListWidget::luminaSelectFromAuthor(
+		not_null<HistoryItem*> start) {
+	auto result = Lumina::SelectFromAuthorResult();
+	if (!luminaCanSelectFromAuthor(start)) {
+		return result;
+	}
+
+	// changeSelectionAsGroup() DESELECTS a whole album when the album does
+	// not fit, which is right for a toggle and wrong for a pass that only
+	// ever adds: a part of that album the user had picked by hand would be
+	// dropped. So the fit is decided first, with the same arithmetic
+	// changeSelectionAsGroup() uses, and an album that cannot fit is simply
+	// skipped instead of being handed over.
+	const auto fits = [&](not_null<HistoryItem*> item) {
+		auto total = int(_selected.size());
+		if (const auto group = session().data().groups().find(item)) {
+			for (const auto &other : group->items) {
+				if (!isGoodForSelection(_selected, other, total)) {
+					return false;
+				}
+			}
+			return true;
+		}
+		return isGoodForSelection(_selected, item, total);
+	};
+	const auto select = [&](not_null<HistoryItem*> item) {
+		if (isSelectedAsGroup(_selected, item)) {
+			return true;
+		} else if (!fits(item)) {
+			return false;
+		}
+		const auto before = int(_selected.size());
+		changeSelectionAsGroup(_selected, item, SelectAction::Select);
+		result.added += int(_selected.size()) - before;
+		return true;
+	};
+
+	// The tapped message goes in before the walk, so that it survives even a
+	// chat where the author has more loaded messages than the cap allows.
+	if (!select(start)) {
+		result.limited = true;
+	}
+
+	// Newest first, so that what the cap keeps is the most recent part of the
+	// conversation. _items runs oldest to newest, except in an inverted list.
+	const auto count = int(_items.size());
+	for (auto i = 0; i != count; ++i) {
+		const auto view = _items[_inverted ? i : (count - 1 - i)].get();
+		const auto item = view->data();
+		if (!Lumina::ItemFromSameAuthor(item, start)
+			|| !_delegate->listIsItemGoodForSelection(item)) {
+			continue;
+		} else if (!select(item)) {
+			result.limited = true;
+		}
+	}
+
+	if (result.added > 0) {
+		clearTextSelection();
+		_accessibilitySelectionAnchor = nullptr;
+		pushSelectedItems();
+		update();
+	}
+	return result;
 }
 
 void ListWidget::showEditCaptionUploadLayer(not_null<HistoryItem*> item) {

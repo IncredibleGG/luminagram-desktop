@@ -9,6 +9,10 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include "api/api_common.h" // Api::SendOptions.
 
+#include <rpl/producer.h>
+
+#include <QtCore/QString>
+
 #include <memory>
 
 class History;
@@ -42,6 +46,11 @@ namespace Lumina {
 // is slow are all the text pipeline's answers, reached through the same
 // interceptor chain a typed message goes through, so the two cannot drift
 // apart or answer differently.
+//
+// Two things this file does decide, because they only exist on this path:
+// what a cancel says (SendCancelLabel() below), and the order media leaves a
+// chat in. Media sent while an earlier caption is still being translated waits
+// for it, per chat, so photo B never lands ahead of photo A.
 
 // Returns false if the send was taken over: `proceed` is then invoked later,
 // on the main thread, exactly once. Returns true to send now, unchanged -
@@ -60,13 +69,48 @@ namespace Lumina {
 // `proceed` must own the bundle it sends, that is capture the same
 // shared_ptr, because the caption being rewritten lives inside it.
 //
+// A send returning false may also be one that is simply waiting its turn: a
+// caption send is held for this chat and this one leaves right after it. The
+// caller cannot tell the two apart and does not need to - `proceed` is invoked
+// exactly once either way.
+//
 // Sends that are passed straight through, with no request, no delay and no
 // difference from upstream: the master opt-in is off; there is no caption; the
-// caption is empty; or the bundle carries more than one non-empty caption.
+// caption is empty; or the bundle carries more than one non-empty caption. In
+// particular a chat with nothing held costs one lookup in an empty map and
+// then takes exactly the path it took before this ordering existed.
 [[nodiscard]] bool InterceptSendFiles(
 	not_null<History*> history,
 	std::shared_ptr<Ui::PreparedBundle> bundle,
 	Api::SendOptions options,
 	Fn<void()> proceed);
+
+// The label for the cancel button on the translate-before-send confirm, which
+// is the one place in that pipeline where cancelling means two different
+// things.
+//
+// On the text path Cancel abandons the send and the composer still holds what
+// the user typed, so "Cancel" is exactly right. On the caption path there is
+// nothing to abandon: SendFilesBox has closed, the files exist only inside the
+// bundle this send is carrying, and losing a photo because a box was dismissed
+// is not acceptable - so the files go out with the caption as it was typed.
+// That behaviour is deliberate; the word "Cancel" on top of it is not, because
+// it promises that nothing will happen.
+//
+// `history` may be null, and the chat with nothing of ours held in it - which
+// is every text send - gets tr::lng_cancel() back unchanged.
+//
+// `original` is the text the box is confirming, that is the held send's own
+// text exactly as the pipeline trimmed it. Pass it: a chat can have a text send
+// held and a caption send queued behind it at the same time, and then the chat
+// alone would label that text send's Cancel as if it sent a caption. Leaving it
+// empty falls back to matching on the chat only, which is right for a caller
+// that genuinely does not know which send its box belongs to.
+//
+// Called from lumina_translate_send.cpp when it builds the confirm box, which
+// is the only file that knows a cancel button is being shown at all.
+[[nodiscard]] rpl::producer<QString> SendCancelLabel(
+	History *history,
+	const QString &original = QString());
 
 } // namespace Lumina

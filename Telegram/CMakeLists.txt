@@ -1802,10 +1802,34 @@ PRIVATE
     settings/sections/settings_lumina_translate.h
     lumina/lumina_ai_editor.cpp
     lumina/lumina_ai_editor.h
+    lumina/lumina_backup.cpp
+    lumina/lumina_backup.h
+    lumina/lumina_backup_settings.cpp
+    lumina/lumina_backup_settings.h
+    lumina/lumina_bookmarks.cpp
+    lumina/lumina_bookmarks.h
+    lumina/lumina_bookmarks_section.cpp
+    lumina/lumina_bookmarks_section.h
+    lumina/lumina_bookmarks_settings.cpp
+    lumina/lumina_bookmarks_settings.h
     lumina/lumina_clipboard_guard.cpp
     lumina/lumina_clipboard_guard.h
     lumina/lumina_clipboard_guard_settings.cpp
     lumina/lumina_clipboard_guard_settings.h
+    lumina/lumina_contact_note_box.cpp
+    lumina/lumina_contact_note_box.h
+    lumina/lumina_contact_notes.cpp
+    lumina/lumina_contact_notes.h
+    lumina/lumina_contact_notes_settings.cpp
+    lumina/lumina_contact_notes_settings.h
+    lumina/lumina_dialogs_badges.cpp
+    lumina/lumina_dialogs_badges.h
+    lumina/lumina_dialogs_badges_settings.cpp
+    lumina/lumina_dialogs_badges_settings.h
+    lumina/lumina_dialogs_visibility.cpp
+    lumina/lumina_dialogs_visibility.h
+    lumina/lumina_dialogs_visibility_settings.cpp
+    lumina/lumina_dialogs_visibility_settings.h
     lumina/lumina_dual_language_line.cpp
     lumina/lumina_dual_language_line.h
     lumina/lumina_exif_strip.cpp
@@ -1816,6 +1840,8 @@ PRIVATE
     lumina/lumina_fake_crash.h
     lumina/lumina_fake_crash_settings.cpp
     lumina/lumina_fake_crash_settings.h
+    lumina/lumina_forward_actions.cpp
+    lumina/lumina_forward_actions.h
     lumina/lumina_link_preview.cpp
     lumina/lumina_link_preview.h
     lumina/lumina_link_preview_settings.cpp
@@ -1835,26 +1861,82 @@ PRIVATE
     lumina/lumina_locale_tr.cpp
     lumina/lumina_locale_zh_hans.cpp
     lumina/lumina_locale_zh_hant.cpp
+    lumina/lumina_media_pause.cpp
+    lumina/lumina_media_pause.h
+    lumina/lumina_media_pause_settings.cpp
+    lumina/lumina_media_pause_settings.h
+    lumina/lumina_message_actions_settings.cpp
+    lumina/lumina_message_actions_settings.h
+    lumina/lumina_message_details.cpp
+    lumina/lumina_message_details.h
     lumina/lumina_message_menu.cpp
     lumina/lumina_message_menu.h
+    lumina/lumina_muted_badge.cpp
+    lumina/lumina_muted_badge.h
+    lumina/lumina_muted_badge_settings.cpp
+    lumina/lumina_muted_badge_settings.h
+    lumina/lumina_number_format.cpp
+    lumina/lumina_number_format.h
+    lumina/lumina_number_format_settings.cpp
+    lumina/lumina_number_format_settings.h
+    lumina/lumina_onboarding.cpp
+    lumina/lumina_onboarding.h
     lumina/lumina_panic_wipe.cpp
     lumina/lumina_panic_wipe.h
     lumina/lumina_panic_wipe_settings.cpp
     lumina/lumina_panic_wipe_settings.h
+    lumina/lumina_profile_card.cpp
+    lumina/lumina_profile_card.h
+    lumina/lumina_profile_card_settings.cpp
+    lumina/lumina_profile_card_settings.h
+    lumina/lumina_profile_chat_date.cpp
+    lumina/lumina_profile_chat_date.h
+    lumina/lumina_profile_dc_id.cpp
+    lumina/lumina_profile_dc_id.h
+    lumina/lumina_profile_extra_settings.cpp
+    lumina/lumina_profile_extra_settings.h
     lumina/lumina_profile_rows.cpp
     lumina/lumina_profile_rows.h
+    lumina/lumina_quick_replies.cpp
+    lumina/lumina_quick_replies.h
+    lumina/lumina_quick_replies_section.cpp
+    lumina/lumina_quick_replies_section.h
+    lumina/lumina_quick_replies_settings.cpp
+    lumina/lumina_quick_replies_settings.h
+    lumina/lumina_recent_limits.cpp
+    lumina/lumina_recent_limits.h
+    lumina/lumina_recent_limits_settings.cpp
+    lumina/lumina_recent_limits_settings.h
+    lumina/lumina_registration_date.cpp
+    lumina/lumina_registration_date.h
+    lumina/lumina_save_to_saved.cpp
+    lumina/lumina_save_to_saved.h
     lumina/lumina_scam_watch.cpp
     lumina/lumina_scam_watch.h
     lumina/lumina_scam_watch_settings.cpp
     lumina/lumina_scam_watch_settings.h
+    lumina/lumina_select_author.cpp
+    lumina/lumina_select_author.h
     lumina/lumina_send_pipeline.cpp
     lumina/lumina_send_pipeline.h
     lumina/lumina_settings.cpp
     lumina/lumina_settings.h
+    lumina/lumina_sticker_save.cpp
+    lumina/lumina_sticker_save.h
+    lumina/lumina_sticker_save_settings.cpp
+    lumina/lumina_sticker_save_settings.h
+    lumina/lumina_sticker_scale.cpp
+    lumina/lumina_sticker_scale.h
+    lumina/lumina_sticker_scale_settings.cpp
+    lumina/lumina_sticker_scale_settings.h
     lumina/lumina_text_replace.cpp
     lumina/lumina_text_replace.h
     lumina/lumina_text_replace_settings.cpp
     lumina/lumina_text_replace_settings.h
+    lumina/lumina_time_format.cpp
+    lumina/lumina_time_format.h
+    lumina/lumina_time_format_settings.cpp
+    lumina/lumina_time_format_settings.h
     lumina/lumina_translate_caption.cpp
     lumina/lumina_translate_caption.h
     lumina/lumina_translate_gating.cpp
@@ -1875,6 +1957,10 @@ PRIVATE
     lumina/lumina_translate_settings.h
     lumina/lumina_translate_toggle.cpp
     lumina/lumina_translate_toggle.h
+    lumina/lumina_undo_send.cpp
+    lumina/lumina_undo_send.h
+    lumina/lumina_undo_send_settings.cpp
+    lumina/lumina_undo_send_settings.h
     lumina/lumina_update_settings.cpp
     lumina/lumina_update_settings.h
     lumina/lumina_vault.cpp

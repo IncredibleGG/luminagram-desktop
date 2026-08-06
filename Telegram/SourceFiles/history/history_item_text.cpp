@@ -21,6 +21,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "history/history_item_components.h"
 #include "history/history_item_helpers.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_time_format.h"
 #include "ui/text/text.h"
 #include "ui/text/text_entity.h"
 #include "ui/text/text_options.h"
@@ -384,7 +385,7 @@ TextForMimeData HistorySelectedItemPlainWrappedText(
 		TextForMimeData &&body) {
 	auto result = TextForMimeData();
 	const auto time = u"[%1] "_q.arg(
-		QLocale().toString(ItemDateTime(item), QLocale::ShortFormat));
+		Lumina::FormatMessageDateTime(ItemDateTime(item)));
 	const auto author = item->author()->name();
 	const auto size = time.size() + author.size() + 2 + body.expanded.size();
 	result.reserve(size);
@@ -494,7 +495,7 @@ TextForMimeData HistorySelectedItemWrappedText(
 	}
 	auto result = TextForMimeData();
 	const auto time = u"[%1] "_q.arg(
-		QLocale().toString(ItemDateTime(item), QLocale::ShortFormat));
+		Lumina::FormatMessageDateTime(ItemDateTime(item)));
 	const auto author = item->author()->name();
 	const auto replyTo = tr::lng_context_copy_in_reply_to(
 		tr::now,

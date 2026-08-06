@@ -8,6 +8,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "lumina/lumina_link_safety_settings.h"
 
 #include "lumina/lumina_link_safety.h"
+#include "lumina/lumina_locale.h"
 #include "ui/widgets/buttons.h"
 #include "ui/wrap/vertical_layout.h"
 #include "ui/vertical_list.h"
@@ -18,7 +19,8 @@ namespace Lumina {
 namespace {
 
 // Recomputed from the store rather than from the toggle, so the row also
-// follows a value written by a backup restore through Settings::importAll().
+// follows a value written by a backup restore through Settings::importAll()
+// and by the panic wipe, which removes the key outright.
 [[nodiscard]] rpl::producer<bool> EnabledValue() {
 	return rpl::single(
 		rpl::empty
@@ -37,7 +39,7 @@ void AddLinkSafetyRows(
 	Ui::AddSkip(container);
 	const auto button = container->add(object_ptr<Ui::SettingsButton>(
 		container,
-		rpl::single(u"Link safety inspector"_q),
+		TrValue(u"LuminaLinkSafetyRow"_q),
 		st::settingsButtonNoIcon
 	))->toggleOn(EnabledValue());
 	button->toggledChanges(
@@ -45,14 +47,7 @@ void AddLinkSafetyRows(
 		SetLinkSafetyEnabled(value);
 	}, button->lifetime());
 	Ui::AddSkip(container);
-	Ui::AddDividerText(
-		container,
-		rpl::single(u"Ask before opening a link that hides its real "
-			"destination behind text before an @ sign, or that goes through "
-			"a known link shortener. The confirmation shows the full "
-			"address. Telegram Desktop already asks about look-alike and "
-			"punycode domains on its own. Nothing is checked online - no "
-			"address you open leaves this device."_q));
+	Ui::AddDividerText(container, TrValue(u"LuminaLinkSafetyInfo"_q));
 }
 
 } // namespace Lumina

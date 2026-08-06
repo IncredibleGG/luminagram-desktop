@@ -52,6 +52,22 @@ constexpr auto kWatchdogTimeout = crl::time(20000);
 // message typed much later is sent.
 constexpr auto kQuickToggleLifetime = crl::time(5 * 60 * 1000);
 
+// How many sends may wait behind a held one in the same chat. The queue is only
+// ever this long when the user sent several DIFFERENT messages inside a single
+// hold - a repeat of a message already held or queued is dropped rather than
+// queued - and past it a send goes out untranslated instead of waiting, because
+// losing it is not on the table and an unbounded queue is how one stalled chat
+// turns into a leak.
+constexpr auto kQueueLimit = 4;
+
+// The queue's own bound, and the counterpart of kWatchdogTimeout above. That
+// watchdog ends a request that is in flight; nothing ends a confirm box the
+// user opened and walked away from, and everything queued behind it would wait
+// exactly as long. Three watchdogs is longer than any legitimate chain of a
+// stalled request plus the one behind it, so this only ever fires on a hold
+// nothing else was going to end.
+constexpr auto kQueueGuardTimeout = kWatchdogTimeout * 3;
+
 [[nodiscard]] QString DialogLanguagesKey() {
 	return u"trSendLangDialog"_q;
 }
@@ -161,6 +177,53 @@ struct Request {
 		: nullptr;
 }
 
+// One send waiting behind another in the same chat. `text` points into the
+// Api::MessageToSend that `proceed` owns, exactly as Request::text does, so an
+// entry keeps `proceed` for as long as it keeps the pointer and dropping the
+// entry drops both together.
+//
+// `original` is kept because it is what a repeat send is recognised by, and
+// because the text object it points at belongs to that send alone: comparing
+// against the pointer would compare two different messages.
+struct Queued {
+	base::weak_ptr<History> history;
+	QString original;
+	TextWithTags *text = nullptr;
+	Fn<void()> proceed;
+};
+
+// `id` names this queue the way Request::generation names a request, and for
+// the same reason: the guard below fires as a main-thread event and then posts
+// its work, and a post cannot be cancelled. The queue it was armed for can
+// drain and be dropped in that gap, and a send arriving right after would build
+// a NEW queue under the same key - which the stale post would then empty, and
+// cut short a request that had only just started. A queue only answers to the
+// timer that was armed for it.
+struct Queue {
+	std::vector<Queued> entries;
+	base::Timer guard;
+	uint64 id = 0;
+};
+
+[[nodiscard]] base::flat_map<QString, std::unique_ptr<Queue>> &Queues() {
+	static auto result = base::flat_map<QString, std::unique_ptr<Queue>>();
+	return result;
+}
+
+void DrainQueue(const QString &key);
+
+// Draining is posted rather than run inline, because every terminal below is
+// reached with a message either just sent or just dropped, and the next send
+// must not start from inside that. Intercept() therefore queues behind a
+// non-empty queue as well as behind a held request, so nothing can slip into
+// the gap between a terminal and the drain it posted and arrive out of order.
+void ScheduleDrain(const QString &key) {
+	if (!Queues().contains(key)) {
+		return;
+	}
+	crl::on_main([key] { DrainQueue(key); });
+}
+
 [[nodiscard]] Window::SessionController *ResolveController(
 		not_null<History*> history) {
 	return history->session().tryResolveWindow(history->peer);
@@ -195,15 +258,21 @@ void FinishRequest(
 	const auto original = request->original;
 	const auto history = request->history.get();
 	Requests().remove(key);
+	ScheduleDrain(key);
 	if (!proceed) {
+		return;
+	} else if (!history) {
+		// The chat was destroyed while its send was held. `proceed` is guarded
+		// by the composer widget that made it, but the message it owns still
+		// names this History, so finishing the send would hand a destroyed chat
+		// to ApiWrap. Dropping it is the quiet failure, and there is nothing
+		// else to do with a message whose destination is gone.
 		return;
 	}
 	if (text && !translated.isEmpty() && (translated != original)) {
 		text->text = translated;
-		if (history) {
-			if (const auto hook = OriginalHook()) {
-				hook(history, translated, original);
-			}
+		if (const auto hook = OriginalHook()) {
+			hook(history, translated, original);
 		}
 	}
 	proceed();
@@ -215,6 +284,7 @@ void FinishRequest(
 void CancelRequest(const QString &key, uint64 generation) {
 	if (FindRequest(key, generation)) {
 		Requests().remove(key);
+		ScheduleDrain(key);
 	}
 }
 
@@ -502,42 +572,58 @@ void AskSendLanguage(
 	}
 }
 
-bool Intercept(
+// A queued send that is not going to be translated after all. The chat can have
+// gone while it waited, and then the send is dropped instead: see the note in
+// FinishRequest() above, which is the same situation.
+void SendAsTyped(Queued &entry) {
+	auto proceed = base::take(entry.proceed);
+	if (proceed && entry.history) {
+		proceed();
+	}
+}
+
+// The queue's watchdog. It fires on a hold that nothing else ended - in
+// practice a confirm box or a language picker the user walked away from - and
+// empties the chat: the held send first, so the order the user typed in
+// survives, then everything waiting behind it, all as typed.
+//
+// A box that was still open when this ran keeps its buttons, and they now find
+// no request to answer, so pressing one does nothing at all. That is the same
+// trade kWatchdogTimeout already makes and the file header describes: a message
+// the user pressed Send on a minute ago has to go out.
+void FlushQueue(const QString &key, uint64 id) {
+	// The queue goes first, and no queue of this id ends it: a chat that
+	// drained while the timer's work was already posted has a request in
+	// flight that started seconds ago, and cutting that one short would be the
+	// timer firing at a backlog that is no longer there - whether the queue is
+	// gone entirely or a later send has already built another one.
+	const auto i = Queues().find(key);
+	if ((i == Queues().end()) || (i->second->id != id)) {
+		return;
+	}
+	const auto queue = std::move(i->second);
+	Queues().erase(i);
+	const auto j = Requests().find(key);
+	if (j != Requests().end()) {
+		FinishRequest(key, j->second->generation, QString());
+	}
+	for (auto &entry : queue->entries) {
+		SendAsTyped(entry);
+	}
+}
+
+// Everything after the decision that this send is ours to translate: the W2-D
+// preview reuse, the target language, and the one-time per-chat confirm behind
+// it. Returns false when it did NOT take the send over - and only then is
+// `proceed` still untouched, which is what lets the caller either pass the
+// message on to the rest of the chain or, for a queued send that is long past
+// that point, simply send it as typed.
+[[nodiscard]] bool BeginRequest(
+		const QString &key,
 		not_null<History*> history,
 		TextWithTags &text,
-		Fn<void()> proceed) {
-	if (!TranslationFeatureEnabled()) {
-		return true;
-	}
-	const auto peer = history->peer;
-	const auto original = text.text.trimmed();
-
-	// A tagged message carries bold / mention / custom-emoji ranges as
-	// character offsets into this exact string. Replacing the string would
-	// leave every one of them pointing at the wrong characters, or past the
-	// end, and it fails silently rather than loudly. Dropping the user's
-	// formatting instead is no better, so a formatted message is sent as
-	// typed. This is checked before the quick toggle is consumed, so a
-	// "translate just this one" armed on a message that cannot be translated
-	// at all is still there for the next one.
-	if (original.isEmpty()
-		|| !text.tags.isEmpty()
-		|| !TranslateScopeAllows(peer)) {
-		return true;
-	}
-	const auto quick = PeekQuickToggle(peer->id.value);
-	if (!quick.value_or(TranslateBeforeSend())) {
-		ConsumeQuickToggle(peer->id.value);
-		return true;
-	}
-	const auto key = DialogKey(history);
-
-	// A send is already held for this chat. Ignore this one exactly as Android
-	// does: the composer still holds the text, so nothing is lost, and the
-	// watchdog guarantees the hold ends.
-	if (Requests().contains(key)) {
-		return false;
-	}
+		const QString &original,
+		Fn<void()> &proceed) {
 	const auto target = TranslateSendLanguageIsAuto()
 		? DialogSendLanguage(history)
 		: TranslateSendLanguage();
@@ -557,7 +643,6 @@ bool Intercept(
 			// process-lifetime static.
 			Preview() = PreviewCache();
 		}
-		ConsumeQuickToggle(peer->id.value);
 		const auto generation = CreateRequest(
 			key,
 			history,
@@ -569,13 +654,12 @@ bool Intercept(
 		} else {
 			StartTranslation(key, generation, target);
 		}
-		return false;
+		return true;
 	}
 	const auto controller = ResolveController(history);
 	if (!controller) {
-		return true;
+		return false;
 	}
-	ConsumeQuickToggle(peer->id.value);
 	const auto generation = CreateRequest(
 		key,
 		history,
@@ -583,6 +667,182 @@ bool Intercept(
 		original,
 		std::move(proceed));
 	AskSendLanguage(controller, history, key, generation);
+	return true;
+}
+
+// Recognises the same message arriving twice, and it is the whole reason a
+// second send can be queued at all without sending anything twice.
+//
+// The seam sits before the composer clears its field, so a chat with a send
+// held still shows that text and a second tap on Send offers it again. Queueing
+// it would put the same message on the wire twice; so would passing it through,
+// and passing it through is the shape this arrives in when the pipeline decides
+// the second tap is not even its business - a quick toggle consumed by the
+// first tap is enough to get there. Both are answered the same way: drop it.
+// Nothing is lost, because the identical message is already on its way out.
+[[nodiscard]] bool AlreadyHeld(const QString &key, const QString &original) {
+	const auto i = Requests().find(key);
+	if (i != Requests().end() && i->second->original == original) {
+		return true;
+	}
+	const auto j = Queues().find(key);
+	if (j == Queues().end()) {
+		return false;
+	}
+	for (const auto &entry : j->second->entries) {
+		if (entry.original == original) {
+			return true;
+		}
+	}
+	return false;
+}
+
+// Returns false when the queue is full, and only then is `proceed` untouched.
+[[nodiscard]] bool Enqueue(
+		const QString &key,
+		not_null<History*> history,
+		TextWithTags &text,
+		const QString &original,
+		Fn<void()> &proceed) {
+	auto i = Queues().find(key);
+	if (i == Queues().end()) {
+		// The guard is armed once, when the queue appears, so its deadline
+		// belongs to the entry that has waited longest, and it dies with the
+		// queue - which means it can only ever fire while something is still
+		// waiting. An entry queued just before it fires goes out as typed
+		// rather than translated; it is still in order and still sent.
+		i = Queues().emplace(key, std::make_unique<Queue>()).first;
+		const auto queue = i->second.get();
+
+		// The same counter the requests use. All either needs is a value no
+		// other live queue or request can carry.
+		const auto id = NextGeneration();
+		queue->id = id;
+		queue->guard.setCallback([=] {
+			// Firing destroys the queue and this timer with it, so the work
+			// cannot run inside the timer's own callback - and because the
+			// post that carries it cannot be cancelled, it names the queue it
+			// was armed for rather than only the chat.
+			crl::on_main([=] { FlushQueue(key, id); });
+		});
+		queue->guard.callOnce(kQueueGuardTimeout);
+	} else if (int(i->second->entries.size()) >= kQueueLimit) {
+		return false;
+	}
+	i->second->entries.push_back(Queued{
+		.history = base::make_weak(history),
+		.original = original,
+		.text = &text,
+		.proceed = std::move(proceed),
+	});
+	return true;
+}
+
+void StartQueued(const QString &key, Queued &entry) {
+	const auto history = entry.history.get();
+	if (history
+		&& entry.text
+		&& entry.proceed
+		&& BeginRequest(
+			key,
+			history,
+			*entry.text,
+			entry.original,
+			entry.proceed)) {
+		return;
+	}
+	SendAsTyped(entry);
+}
+
+void DrainQueue(const QString &key) {
+	while (!Requests().contains(key)) {
+		const auto i = Queues().find(key);
+		if (i == Queues().end()) {
+			return;
+		}
+		auto &entries = i->second->entries;
+		if (entries.empty()) {
+			Queues().erase(i);
+			return;
+		}
+		auto entry = std::move(entries.front());
+		entries.erase(entries.begin());
+		if (entries.empty()) {
+			Queues().erase(i);
+		}
+
+		// A send that starts a request of its own ends the loop - the next one
+		// waits for that request's terminal to post the next drain. A send that
+		// turns out not to be translatable after all went out inside
+		// StartQueued(), and the one behind it can go now.
+		StartQueued(key, entry);
+	}
+}
+
+bool Intercept(
+		not_null<History*> history,
+		TextWithTags &text,
+		Fn<void()> proceed) {
+	if (!TranslationFeatureEnabled()) {
+		return true;
+	}
+	const auto peer = history->peer;
+	const auto original = text.text.trimmed();
+
+	// A tagged message carries bold / mention / custom-emoji ranges as
+	// character offsets into this exact string. Replacing the string would
+	// leave every one of them pointing at the wrong characters, or past the
+	// end, and it fails silently rather than loudly. Dropping the user's
+	// formatting instead is no better, so a formatted message is sent as
+	// typed. This is checked before the quick toggle is consumed, so a
+	// "translate just this one" armed on a message that cannot be translated
+	// at all is still there for the next one.
+	if (original.isEmpty() || !text.tags.isEmpty()) {
+		return true;
+	}
+	const auto key = DialogKey(history);
+
+	// Before anything decides whether this send is ours, because a repeat is a
+	// repeat either way and passing one through is a double send just as much
+	// as queueing it would be.
+	if (AlreadyHeld(key, original)) {
+		return false;
+	}
+	if (!TranslateScopeAllows(peer)) {
+		return true;
+	}
+	const auto quick = PeekQuickToggle(peer->id.value);
+	if (!quick.value_or(TranslateBeforeSend())) {
+		ConsumeQuickToggle(peer->id.value);
+		return true;
+	}
+
+	// This chat already has a send held, or one waiting behind it. Android
+	// ignores the second send here, and on Android that costs nothing: its
+	// composer field was cleared when the first send started, so a second Send
+	// tap carries nothing. The desktop seam sits before the field is cleared,
+	// so a second send arrives with real text - and the AI editor and the
+	// flattened rich page pass text that exists nowhere else at all. Queue it.
+	//
+	// Not "send this one untranslated instead": the held request would complete
+	// afterwards and send the very same message a second time.
+	if (Requests().contains(key) || Queues().contains(key)) {
+		// A full queue is the one case where the message is passed straight
+		// through. It reaches the chat ahead of the ones still waiting, which
+		// is the price of never losing it, and it takes kQueueLimit different
+		// messages sent inside a single hold to get there.
+		if (!Enqueue(key, history, text, original, proceed)) {
+			return true;
+		}
+	} else if (!BeginRequest(key, history, text, original, proceed)) {
+		return true;
+	}
+
+	// The override is consumed by the send that read it, whether that send was
+	// started or queued, and never later: a queued send that consumed it when
+	// it finally ran would clear an override the user armed for a message they
+	// are still typing.
+	ConsumeQuickToggle(peer->id.value);
 	return false;
 }
 

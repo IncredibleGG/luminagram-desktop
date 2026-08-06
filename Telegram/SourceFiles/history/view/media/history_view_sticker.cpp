@@ -17,6 +17,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "history/view/media/history_view_media_common.h"
 #include "history/view/media/history_view_sticker_player.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_sticker_scale.h"
 #include "ui/image/image.h"
 #include "ui/chat/chat_style.h"
 #include "ui/effects/path_shift_gradient.h"
@@ -199,11 +200,29 @@ bool Sticker::readyToDrawAnimationFrame() {
 
 QSize Sticker::Size() {
 	const auto side = std::min(st::maxStickerSize, kMaxSizeFixed);
-	if (OptionStickerSize.value() > 0) [[unlikely]] {
+	const auto option = OptionStickerSize.value();
+	const auto percent = Lumina::AppliedStickerScale();
+	if (option > 0 || percent != Lumina::kStickerScaleDefault) [[unlikely]] {
+		// The two settings are orthogonal and compose in that order: the
+		// experimental option, when set, replaces the base side in
+		// unscaled pixels, and LuminaGram's percentage then scales
+		// whichever base is in effect - so with the percentage at 100 the
+		// option behaves exactly as it did on its own. The ceiling moves
+		// with them: the option alone could only ever shrink stickers, so
+		// `side` was ceiling enough, while a percentage above 100 grows
+		// them and is bounded instead by the 512px the sticker is drawn
+		// at, which is also the ceiling the app already applies at large
+		// interface scales.
+		const auto requested = (option > 0)
+			? style::ConvertScale(Lumina::ScaleStickerLength(option))
+			: Lumina::ScaleStickerLength(side);
+		const auto maximum = (percent > Lumina::kStickerScaleDefault)
+			? kMaxSizeFixed
+			: side;
 		const auto scaled = std::clamp(
-			style::ConvertScale(OptionStickerSize.value()),
+			requested,
 			style::ConvertScale(50),
-			side);
+			maximum);
 		return { scaled, scaled };
 	}
 	return { side, side };

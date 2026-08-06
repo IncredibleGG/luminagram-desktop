@@ -103,6 +103,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "main/main_domain.h"
 #include "main/main_session.h"
 #include "main/main_session_settings.h"
+#include "lumina/lumina_dialogs_visibility.h"
 #include "lumina/lumina_scam_watch.h"
 #include "lang/lang_keys.h"
 #include "apiwrap.h"
@@ -1562,7 +1563,9 @@ SessionController::SessionController(
 		uiShow(),
 		GifPauseReason::TabbedPanel))
 , _invitePeekTimer([=] { checkInvitePeek(); })
-, _activeChatsFilter(session->data().chatsFilters().defaultId())
+, _activeChatsFilter(Lumina::HideChatFolders()
+	? FilterId(0)
+	: session->data().chatsFilters().defaultId())
 , _openedFolder(window->id().folder())
 , _openedCommunity(window->id().community())
 , _defaultChatTheme(std::make_shared<Ui::ChatTheme>())
@@ -1661,8 +1664,14 @@ SessionController::SessionController(
 	rpl::merge(
 		enoughSpaceForFiltersValue() | rpl::skip(1) | rpl::to_empty,
 		Core::App().settings().chatFiltersHorizontalChanges() | rpl::to_empty,
-		session->data().chatsFilters().changed()
+		session->data().chatsFilters().changed(),
+		Lumina::HideChatFoldersChanges()
 	) | rpl::on_next([=] {
+		if (Lumina::HideChatFolders() && activeChatsFilterCurrent()) {
+			setActiveChatsFilter(
+				0,
+				{ anim::type::normal, anim::activation::background });
+		}
 		if (!_filtersActivated) {
 			processFiltersMenu();
 		}
@@ -1999,7 +2008,21 @@ void SessionController::setupShortcuts() {
 }
 
 void SessionController::toggleFiltersMenu(bool enabled) {
-	if (!_isPrimary || (!enabled == !_filters)) {
+	if (!_isPrimary) {
+		return;
+	} else if (enabled && Lumina::HideChatFolders()) {
+		// The caller was told to expect a side bar and will not get one, so
+		// report the change anyway: Window::Controller::setupSideBar() leaves
+		// the window's geometry constraints to be recounted by this signal,
+		// and takes its own else-branch only when Telegram's own folders
+		// setting is off - not when ours hides them.
+		enabled = false;
+		if (!_filters) {
+			_filtersMenuChanged.fire({});
+			return;
+		}
+	}
+	if (!enabled == !_filters) {
 		return;
 	} else if (enabled) {
 		_filters = std::make_unique<FiltersMenu>(
@@ -3295,6 +3318,12 @@ void SessionController::setActiveChatsFilter(
 		const SectionShow &params) {
 	if (!isPrimary()) {
 		return;
+	} else if (id && Lumina::HideChatFolders()) {
+		// Every way into a folder ends here - the two folder bars, the
+		// keyboard shortcuts, the horizontal swipe and the startup default -
+		// so this one clamp is what keeps the user out of a chat list they
+		// have no visible way back out of while the bars are hidden.
+		id = 0;
 	}
 	const auto changed = (activeChatsFilterCurrent() != id);
 	if (changed) {
@@ -4118,6 +4147,12 @@ bool CheckAndJumpToNearChatsFilter(
 		not_null<SessionController*> controller,
 		bool isNext,
 		bool jump) {
+	if (Lumina::HideChatFolders()) {
+		// Answering "there is nowhere to go" instead of silently going
+		// nowhere also keeps the chat list from offering its swipe-between-
+		// folders affordance, which asks this the same question first.
+		return false;
+	}
 	const auto id = controller->activeChatsFilterCurrent();
 	const auto session = &controller->session();
 	const auto list = &session->data().chatsFilters().list();

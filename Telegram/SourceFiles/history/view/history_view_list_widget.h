@@ -45,6 +45,10 @@ namespace Window {
 class SessionController;
 } // namespace Window
 
+namespace Lumina {
+struct SelectFromAuthorResult;
+} // namespace Lumina
+
 namespace Data {
 struct Group;
 struct Reaction;
@@ -353,6 +357,21 @@ public:
 	void cancelSelection();
 	void selectItem(not_null<HistoryItem*> item);
 	void selectItemAsGroup(not_null<HistoryItem*> item);
+
+	// LuminaGram (W4-C): "select all messages from this author". The row and
+	// every rule it obeys live in lumina/lumina_select_author.cpp; only these
+	// two calls are here, because the selection itself is private - the loaded
+	// slice, isGoodForSelection() and changeSelectionAsGroup() all are.
+	//
+	// luminaCanSelectFromAuthor() is the stock Select row's own guard, so the
+	// two rows appear and disappear together. luminaSelectFromAuthor() selects
+	// `start` and then every loaded message from the same sender, newest
+	// first, and reports whether MaxSelectedItems truncated the result.
+	[[nodiscard]] bool luminaCanSelectFromAuthor(
+		not_null<HistoryItem*> item) const;
+	Lumina::SelectFromAuthorResult luminaSelectFromAuthor(
+		not_null<HistoryItem*> start);
+
 	void showEditCaptionUploadLayer(not_null<HistoryItem*> item);
 
 	void touchScrollUpdated(const QPoint &screenPos);

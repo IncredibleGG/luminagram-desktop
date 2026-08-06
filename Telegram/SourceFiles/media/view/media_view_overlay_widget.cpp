@@ -14,6 +14,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "base/qt/qt_common_adapters.h"
 #include "base/timer_rpl.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_media_pause.h"
 #include "menu/menu_sponsored.h"
 #include "boxes/premium_preview_box.h"
 #include "calls/calls_instance.h"
@@ -485,6 +486,12 @@ struct OverlayWidget::Streamed {
 	bool withSound = false;
 	bool pausedBySeek = false;
 	bool resumeOnCallEnd = false;
+
+	// LuminaGram `autoPauseBgVideo`. Lives here rather than next to the
+	// window state so that it dies with the stream it belongs to: a new
+	// document, a quality switch or a restart all rebuild Streamed, and none
+	// of them may inherit a pending resume from the previous one.
+	bool pausedByBackground = false;
 };
 
 struct OverlayWidget::PipWrap {
@@ -782,6 +789,7 @@ OverlayWidget::OverlayWidget()
 				_windowed = true;
 				savePosition();
 			}
+			updateBackgroundVideoPause();
 		}
 		return base::EventFilterResult::Continue;
 	});
@@ -933,6 +941,12 @@ OverlayWidget::OverlayWidget()
 		} else {
 			playbackResumeOnCall();
 		}
+	}, lifetime());
+
+	Lumina::ApplicationBackgroundedValue(
+	) | rpl::on_next([=](bool backgrounded) {
+		_appBackgrounded = backgrounded;
+		updateBackgroundVideoPause();
 	}, lifetime());
 
 	_widget->setAttribute(Qt::WA_AcceptTouchEvents);
@@ -5320,6 +5334,7 @@ void OverlayWidget::playbackPauseResume() {
 	Expects(_streamed != nullptr);
 
 	_streamed->resumeOnCallEnd = false;
+	_streamed->pausedByBackground = false;
 	if (_streamed->instance.player().failed()) {
 		clearStreaming();
 		if (!canInitStreaming() || !initStreaming()) {
@@ -5583,12 +5598,15 @@ void OverlayWidget::applyVideoQuality(VideoQuality value) {
 	_streamingStartPaused = _streamedQualityChangeFinished
 		|| (_streamed && _streamed->instance.player().paused());
 	const auto wasFullScreen = _fullScreenVideo;
+	const auto wasPausedByBackground = _streamed
+		&& _streamed->pausedByBackground;
 	clearStreaming();
 	const auto time = _streamedPosition;
 	const auto startStreaming = StartStreaming(false, time);
 	if (!canInitStreaming() || !initStreaming(startStreaming)) {
 		redisplayContent();
 	} else {
+		_streamed->pausedByBackground = wasPausedByBackground;
 		if (_fullScreenVideo != wasFullScreen) {
 			_fullScreenVideo = wasFullScreen;
 			if (_streamed->controls) {
@@ -5832,6 +5850,49 @@ void OverlayWidget::playbackResumeOnCall() {
 
 	if (_streamed->resumeOnCallEnd) {
 		_streamed->resumeOnCallEnd = false;
+		_streamed->instance.resume();
+		updatePlaybackState();
+		playbackPauseMusic();
+	}
+}
+
+// LuminaGram `autoPauseBgVideo`. Called whenever anything the decision depends
+// on moves: the application gaining or losing activation, and the viewer
+// window changing state. `pausedByBackground` is what keeps this from fighting
+// the user - it is set only when this function is the one that paused, and any
+// manual play/pause clears it in playbackPauseResume(), which every route into
+// play/pause goes through, including the system media controls that can be
+// reached with the app in the background.
+//
+// Resuming deliberately ignores the preference: turning the toggle off never
+// strands a video this left paused.
+void OverlayWidget::updateBackgroundVideoPause() {
+	if (!_streamed) {
+		return;
+	}
+	const auto &player = _streamed->instance.player();
+	const auto usable = !player.failed()
+		&& !player.finished()
+		&& player.active();
+	const auto background = Lumina::ShouldPauseBackgroundVideo({
+		.applicationBackgrounded = _appBackgrounded,
+		.minimized = isMinimized(),
+		.windowed = _windowed,
+		.pictureInPicture = (_pip != nullptr) || _showAsPip,
+		.stories = (_stories != nullptr),
+	});
+	if (background) {
+		if (_streamed->pausedByBackground || !usable || player.paused()) {
+			return;
+		}
+		_streamed->pausedByBackground = true;
+		_streamed->instance.pause();
+		updatePlaybackState();
+	} else if (_streamed->pausedByBackground) {
+		_streamed->pausedByBackground = false;
+		if (!usable || !player.paused()) {
+			return;
+		}
 		_streamed->instance.resume();
 		updatePlaybackState();
 		playbackPauseMusic();

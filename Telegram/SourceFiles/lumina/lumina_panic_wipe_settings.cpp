@@ -8,6 +8,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "lumina/lumina_panic_wipe_settings.h"
 
 #include "lang/lang_keys.h"
+#include "lumina/lumina_locale.h"
 #include "lumina/lumina_panic_wipe.h"
 #include "ui/layers/generic_box.h"
 #include "ui/vertical_list.h"
@@ -23,44 +24,18 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 namespace Lumina {
 namespace {
 
-[[nodiscard]] QString PanicWipeAbout() {
-	return u"Logs every account on this device out and erases the local "
-		"message database, drafts and cached media, together with "
-		"LuminaGram's own settings, bookmarks, saved translations and API "
-		"keys. Your accounts and your messages stay on Telegram's servers. "
-		"Files you already downloaded are left where they are. This cannot "
-		"be undone."_q;
-}
-
-[[nodiscard]] QString PanicWipeConfirmText() {
-	return u"Every account on this device will be logged out. The local "
-		"message database, drafts and cached media will be erased, together "
-		"with LuminaGram's own settings, bookmarks, saved translations and "
-		"API keys.\n\n"
-
-		"Your accounts are not deleted. They stay on Telegram's servers, and "
-		"so do your messages - you can sign in again from anywhere.\n\n"
-
-		"Files that were already downloaded are NOT deleted. LuminaGram does "
-		"not touch your download folder, because it is usually your ordinary "
-		"Downloads folder and holds unrelated files. Move or delete anything "
-		"sensitive there yourself.\n\n"
-
-		"This cannot be undone."_q;
-}
-
 void PanicWipeBox(not_null<Ui::GenericBox*> box) {
-	box->setTitle(rpl::single(u"Panic wipe"_q));
+	box->setTitle(TrValue(u"LuminaSecurityPanicConfirmTitle"_q));
 
 	box->addRow(object_ptr<Ui::FlatLabel>(
 		box,
-		PanicWipeConfirmText(),
+		TrValue(u"LuminaSecurityPanicConfirmText"_q),
 		st::boxLabel));
 
 	const auto acknowledged = box->addRow(
 		object_ptr<Ui::Checkbox>(
 			box,
-			u"I understand this cannot be undone"_q,
+			TrValue(u"LuminaSecurityPanicConfirmAck"_q),
 			false,
 			st::defaultBoxCheckbox),
 		style::margins(
@@ -77,14 +52,15 @@ void PanicWipeBox(not_null<Ui::GenericBox*> box) {
 	// the only variant of this the user cannot misread.
 	//
 	// Cancel is added FIRST, against the usual convention of adding the
-	// confirm button first, and that inversion is load-bearing. Buttons are
-	// laid out right to left in the order they are added, so the first one
-	// added owns the right edge of the box. Adding "Wipe now" first would put
-	// it exactly where Cancel sat a moment earlier: tick the box, click again
-	// without moving the mouse, and the click that was aimed at Cancel wipes
-	// the device. Pinning Cancel to the right edge means no control ever
-	// changes meaning under a stationary cursor, and "Wipe now" only ever
-	// appears in space that was empty.
+	// confirm button first, and that inversion is load-bearing.
+	// BoxLayerWidget::updateButtonsPositions() lays buttons out with
+	// moveToRight() in the order they were added, so the first one added owns
+	// the right edge of the box. Adding "Wipe now" first would put it exactly
+	// where Cancel sat a moment earlier: tick the box, click again without
+	// moving the mouse, and the click that was aimed at Cancel wipes the
+	// device. Pinning Cancel to the right edge means no control ever changes
+	// meaning under a stationary cursor, and "Wipe now" only ever appears in
+	// space that was empty.
 	acknowledged->checkedValue(
 	) | rpl::on_next([=](bool checked) {
 		box->clearButtons();
@@ -92,10 +68,13 @@ void PanicWipeBox(not_null<Ui::GenericBox*> box) {
 			box->closeBox();
 		});
 		if (checked) {
-			box->addButton(rpl::single(u"Wipe now"_q), [=] {
-				box->closeBox();
-				PerformPanicWipe();
-			}, st::attentionBoxButton);
+			box->addButton(
+				TrValue(u"LuminaSecurityPanicConfirmButton"_q),
+				[=] {
+					box->closeBox();
+					PerformPanicWipe();
+				},
+				st::attentionBoxButton);
 		}
 	}, box->lifetime());
 }
@@ -110,16 +89,20 @@ void AddPanicWipeRows(
 		not_null<Ui::VerticalLayout*> container,
 		not_null<Window::SessionController*> controller) {
 	Ui::AddSkip(container);
-	Ui::AddSubsectionTitle(container, rpl::single(u"Panic wipe"_q));
+	Ui::AddSubsectionTitle(
+		container,
+		TrValue(u"LuminaSecurityPanicHeader"_q));
 	container->add(object_ptr<Ui::SettingsButton>(
 		container,
-		rpl::single(u"Panic wipe (Kaboom)"_q),
+		TrValue(u"LuminaSecurityPanicWipe"_q),
 		st::settingsAttentionButton
 	))->setClickedCallback([=] {
 		ShowPanicWipeConfirm(controller);
 	});
 	Ui::AddSkip(container);
-	Ui::AddDividerText(container, rpl::single(PanicWipeAbout()));
+	Ui::AddDividerText(
+		container,
+		TrValue(u"LuminaSecurityPanicWipeAbout"_q));
 }
 
 } // namespace Lumina

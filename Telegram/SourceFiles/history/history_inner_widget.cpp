@@ -126,6 +126,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "data/data_changes.h"
 #include "dialogs/ui/dialogs_video_userpic.h"
 #include "lumina/lumina_message_menu.h"
+#include "lumina/lumina_select_author.h"
 #include "styles/style_chat.h"
 #include "styles/style_menu_icons.h"
 
@@ -6024,6 +6025,87 @@ void HistoryInner::changeSelectionAsGroup(
 			removeFromSelection(toItems, other);
 		}
 	}
+}
+
+bool HistoryInner::luminaCanSelectFromAuthor(
+		not_null<HistoryItem*> item) const {
+	return item->canBeSelected()
+		&& !hasSelectRestriction()
+		&& (_selected.empty()
+			|| (*_selected.begin())->inSameSelectionGroup(item));
+}
+
+Lumina::SelectFromAuthorResult HistoryInner::luminaSelectFromAuthor(
+		not_null<HistoryItem*> start) {
+	auto result = Lumina::SelectFromAuthorResult();
+	if (!luminaCanSelectFromAuthor(start)) {
+		return result;
+	}
+
+	// changeSelectionAsGroup() DESELECTS a whole album when the album does
+	// not fit, which is right for a toggle and wrong for a pass that only
+	// ever adds: a part of that album the user had picked by hand would be
+	// dropped. So the fit is decided first, with the same arithmetic
+	// changeSelectionAsGroup() uses, and an album that cannot fit is simply
+	// skipped instead of being handed over.
+	const auto fits = [&](not_null<HistoryItem*> item) {
+		auto total = int(_selected.size());
+		if (const auto group = session().data().groups().find(item)) {
+			for (const auto &other : group->items) {
+				if (!goodForSelection(&_selected, other, total)) {
+					return false;
+				}
+			}
+		} else if (!goodForSelection(&_selected, item, total)) {
+			return false;
+		}
+		return (total <= MaxSelectedItems);
+	};
+	const auto select = [&](not_null<HistoryItem*> item) {
+		if (isSelectedAsGroup(&_selected, item)) {
+			return true;
+		} else if (!fits(item)) {
+			return false;
+		}
+		const auto before = int(_selected.size());
+		changeSelectionAsGroup(&_selected, item, SelectAction::Select);
+		result.added += int(_selected.size()) - before;
+		return true;
+	};
+
+	// The tapped message goes in before the walk, so that it survives even a
+	// chat where the author has more loaded messages than the cap allows.
+	if (!select(start)) {
+		result.limited = true;
+	}
+
+	// Newest first, and the migrated history after the current one, so that
+	// what the cap keeps is the most recent part of the conversation.
+	const auto scan = [&](not_null<History*> history) {
+		for (auto i = history->blocks.size(); i != 0;) {
+			const auto block = history->blocks[--i].get();
+			for (auto j = block->messages.size(); j != 0;) {
+				const auto item = block->messages[--j]->data();
+				if (!Lumina::ItemFromSameAuthor(item, start)) {
+					continue;
+				} else if (!select(item)) {
+					result.limited = true;
+				}
+			}
+		}
+	};
+	scan(_history);
+	if (_migrated) {
+		scan(_migrated);
+	}
+
+	if (result.added > 0) {
+		clearTextSelection();
+		_accessibilitySelectionAnchor = nullptr;
+		update();
+		_widget->updateTopBarSelection();
+	}
+	return result;
 }
 
 void HistoryInner::setAccessibilityFocusedItem(

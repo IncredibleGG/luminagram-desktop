@@ -20,6 +20,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "history/history.h"
 #include "history/history_item.h"
 #include "history/history_item_components.h"
+#include "lumina/lumina_recent_limits.h"
 #include "apiwrap.h"
 #include "storage/storage_account.h"
 #include "settings/sections/settings_premium.h"
@@ -281,9 +282,10 @@ void Stickers::incrementSticker(not_null<DocumentData*> document) {
 			break;
 		}
 	}
+	const auto recentLimit = Lumina::RecentStickersLimit(
+		session().serverConfig().stickersRecentLimit);
 	while (!recent.isEmpty()
-		&& (set->stickers.size() + recent.size()
-			> session().serverConfig().stickersRecentLimit)) {
+		&& (set->stickers.size() + recent.size() > recentLimit)) {
 		writeOldRecent = true;
 		recent.pop_back();
 	}
@@ -329,12 +331,17 @@ void Stickers::addSavedGif(
 	_savedGifs.push_front(document);
 	const auto session = &document->session();
 	const auto limits = Data::PremiumLimits(session);
-	if (_savedGifs.size() > limits.gifsCurrent()) {
+	const auto premiumLimit = limits.gifsCurrent();
+	const auto limit = Lumina::SavedGifsLimit(premiumLimit);
+	const auto trimmingAtPremiumLimit = (limit == premiumLimit);
+	if (_savedGifs.size() > limit) {
 		_savedGifs.pop_back();
-		MaybeShowPremiumToast(
-			show,
-			SavedGifsToast(limits),
-			LimitsPremiumRef("saved_gifs"));
+		if (trimmingAtPremiumLimit) {
+			MaybeShowPremiumToast(
+				show,
+				SavedGifsToast(limits),
+				LimitsPremiumRef("saved_gifs"));
+		}
 	}
 	session->local().writeSavedGifs();
 

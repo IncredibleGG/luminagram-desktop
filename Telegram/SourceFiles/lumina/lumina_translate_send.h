@@ -65,6 +65,46 @@ namespace Lumina {
 // than losing an addendum typed into a chat that visibly has not sent yet, and
 // a provider that answers nothing at all for 20 seconds is already the failure
 // case; this is the deliberate trade.
+//
+// A SECOND SEND IS QUEUED, NOT DROPPED
+//
+// Only one send per chat is held at a time. A second send arriving while the
+// first is still held used to be ignored, which is what Android does - and on
+// Android it costs nothing, because its composer field was cleared when the
+// first send started, so a second Send tap carries no text at all. Here the
+// seam sits before the field is cleared, so a second send arrives with real
+// text, and two callers pass text that exists nowhere else once it is dropped:
+// HistoryWidget::sendWithTextOverride (the AI editor, whose `done` callback is
+// what closes its box) and sendRichDraftWithoutFormatting (the flattened rich
+// page, which drops its draft immediately afterwards). Those messages were
+// gone for good and their callers were never told.
+//
+// So a second send waits behind the held one and runs when it finishes, in the
+// order it was sent. Three rules keep that from being worse than the drop it
+// replaces:
+//
+//  * a send whose text is already held or already queued for this chat is
+//    dropped rather than queued. That is a second tap on Send with the same
+//    text still sitting in the field - it is still sitting there precisely
+//    because the send is held - and queueing it would put the same message on
+//    the wire twice. It is also why a waiting send is never "just sent
+//    untranslated" instead: the held request would complete afterwards and
+//    send the very same message again.
+//  * the queue is bounded per chat, and past the bound a send is passed
+//    straight through untranslated. It reaches the chat ahead of the ones
+//    still waiting, which is the price of never losing it, and getting there
+//    takes five DIFFERENT messages sent inside a single hold.
+//  * the queue carries a watchdog of its own. The 20s one above bounds a
+//    request that is in flight; nothing bounds a confirm box the user walked
+//    away from, and everything queued behind it would wait exactly as long. So
+//    a backlog that is still waiting a minute later is flushed as typed - the
+//    held send first, then everything behind it, in order. A box still open at
+//    that point has nothing left to answer, and pressing its buttons does
+//    nothing; that is the same trade the 20s watchdog already makes.
+//
+// A held or queued send whose History has been destroyed is dropped silently
+// rather than finished: `proceed` is guarded by the composer widget that made
+// it, but the message it owns still names that History.
 
 // Registers the send interceptor. Idempotent, and already called from a
 // file-scope initializer in lumina_translate_send.cpp, so nothing has to call

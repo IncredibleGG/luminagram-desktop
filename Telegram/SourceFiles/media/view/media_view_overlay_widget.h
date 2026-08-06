@@ -272,6 +272,7 @@ private:
 	void playbackToggleFullScreen();
 	void playbackPauseOnCall();
 	void playbackResumeOnCall();
+	void updateBackgroundVideoPause();
 	void playbackPauseMusic();
 	void switchToPip();
 	[[nodiscard]] int topNotchSkip() const;
@@ -629,6 +630,7 @@ private:
 	bool _normalGeometryInited = false;
 	bool _fullscreen = true;
 	bool _windowed = false;
+	bool _appBackgrounded = false;
 
 	base::weak_ptr<Window::Controller> _openedFrom;
 	Main::Session *_session = nullptr;

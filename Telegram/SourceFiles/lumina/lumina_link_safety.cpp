@@ -11,6 +11,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "core/application.h"
 #include "core/click_handler_types.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_locale.h"
 #include "lumina/lumina_settings.h"
 #include "ui/boxes/confirm_box.h"
 #include "ui/layers/generic_box.h"
@@ -24,20 +25,13 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_calls.h" // groupCallBoxLabel
 #include "styles/style_layers.h"
 
+#include <QtCore/QStringList>
 #include <QtCore/QUrl>
 
 namespace Lumina {
 namespace {
 
 const auto kKeyEnabled = u"linkSafetyCheck"_q;
-
-const auto kWarnUserInfo = u"This link hides its real destination behind "
-	"the text placed before an @ sign. Only what follows the @ decides "
-	"where it goes."_q;
-const auto kWarnShortener = u"This is a link shortener. The real "
-	"destination stays hidden until the link opens."_q;
-
-const auto kBoxTitle = u"Open external link?"_q;
 
 // Registrable hosts, lower-case, without "www.". Carried over verbatim from
 // Android's LUMINA_URL_SHORTENERS so both clients warn about the same set.
@@ -74,6 +68,17 @@ const auto kBoxTitle = u"Open external link?"_q;
 	return result;
 }
 
+// The trailing dot is not decoration: "bit.ly." is a fully qualified name that
+// resolves to exactly the same host as "bit.ly", so a list lookup that keeps
+// it is a one-character bypass of the whole shortener list.
+[[nodiscard]] QString RegistrableHost(const QString &host) {
+	auto bare = host.toLower();
+	while (bare.endsWith(u"."_q)) {
+		bare.chop(1);
+	}
+	return bare.startsWith(u"www."_q) ? bare.mid(4) : bare;
+}
+
 // An invalid QUrl means "not our business": anything that does not parse, and
 // anything that is not plain http(s). Every other scheme has already been
 // handled by the branches above the gate in UiIntegration::handleUrlClick.
@@ -89,70 +94,86 @@ const auto kBoxTitle = u"Open external link?"_q;
 	return (scheme == u"http"_q || scheme == u"https"_q) ? parsed : QUrl();
 }
 
-// Bold the host, so that in an address whose userinfo imitates a domain the
-// part that actually decides the destination is the part that stands out.
+// A host with a punycode label, written as its ASCII punycode form.
 //
-// The search is confined to the authority - everything between "//" and the
-// first "/", "?" or "#" - and starts after the LAST "@" inside it. Both
-// details matter and stock's BoldDomainInUrl (click_handler_types.cpp:52)
-// gets them wrong: a plain indexOf() from the front bolds the decoration in
-// https://paypal.com@evil.example, and an "@" in the path or the query
-// (https://t.co/x?u=a@b) pushes the search past the host so nothing is bolded
-// at all.
-//
-// Both the encoded and the decoded host are tried, because the address shown
-// is the punycode-encoded one whenever it looked deceptive.
-[[nodiscard]] TextWithEntities HighlightHost(const QString &url) {
-	auto result = TextWithEntities{ .text = url };
-	const auto parsed = QUrl(url);
-	if (!parsed.isValid()) {
-		return result;
+// QUrl reports the host in ACE whichever way it was written, so the encoded
+// host alone cannot tell the two apart - and the two need telling apart,
+// because a host written in Unicode is already covered by stock (see the
+// header) and would get a second box. Testing whether the clicked string
+// contains the ACE host is the whole distinction, and it is exact: the ACE
+// form appears in the address only if that is how the address was written.
+// Testing the string for non-ASCII characters instead would misfire on a
+// Unicode path or query under an ASCII host.
+[[nodiscard]] bool HasWrittenPunycodeLabel(
+		const QUrl &parsed,
+		const QString &url) {
+	const auto host = parsed.host(QUrl::FullyEncoded).toLower();
+	if (host.isEmpty() || !url.contains(host, Qt::CaseInsensitive)) {
+		return false;
 	}
-	const auto separator = url.indexOf(u"//"_q);
-	const auto authorityFrom = (separator >= 0) ? int(separator) + 2 : 0;
-	auto authorityTill = int(url.size());
-	for (const auto delimiter : { '/', '?', '#' }) {
-		const auto found = url.indexOf(delimiter, authorityFrom);
-		if (found >= 0 && int(found) < authorityTill) {
-			authorityTill = int(found);
+	for (const auto &label : host.split(u"."_q)) {
+		if (label.startsWith(u"xn--"_q)) {
+			return true;
 		}
 	}
-	const auto authority = url.mid(
-		authorityFrom,
-		authorityTill - authorityFrom);
-	const auto at = authority.lastIndexOf('@');
-	const auto from = authorityFrom + ((at >= 0) ? (int(at) + 1) : 0);
-	for (const auto &host : {
-			parsed.host(QUrl::FullyEncoded),
-			parsed.host(QUrl::FullyDecoded) }) {
-		if (host.isEmpty()) {
-			continue;
-		}
-		const auto position = url.indexOf(host, from, Qt::CaseInsensitive);
-		if (position < 0 || int(position) + int(host.size()) > authorityTill) {
-			continue;
-		}
-		const auto skip = host.startsWith(u"www."_q) ? 4 : 0;
-		result.entities.push_back(EntityInText(
-			EntityType::Bold,
-			int(position) + skip,
-			int(host.size()) - skip));
-		break;
-	}
-	return result;
+	return false;
 }
 
+// The address as it is safe to print.
+//
 // The password is dropped before anything is displayed. toDisplayString()
-// already drops it, but the deceptive-address branch below falls back to
-// toEncoded(), which does not - and a box that prints a credential back at
-// the user is a worse outcome than the one being warned about.
+// already drops it, but both fallbacks below use toEncoded(), which does not
+// - and a box that prints a credential back at the user is a worse outcome
+// than the one being warned about.
+//
+// An address that carries userinfo is always shown in its encoded form, and
+// that is the whole point of this function. toDisplayString() decodes percent
+// escapes, so the userinfo of
+// https://paypal.com%2F%40evil.example@attacker.example/ decodes to
+// "paypal.com/@evil.example" and the printed string becomes
+// https://paypal.com/@evil.example@attacker.example/ - an address whose
+// authority now appears to end at "paypal.com", inside the one box that
+// exists to tell the user where the link really goes. Encoded, the escapes
+// stay escapes and the authority cannot be forged.
 [[nodiscard]] QString DisplayUrl(const QUrl &parsed) {
+	const auto hasUserInfo = !parsed.userInfo().isEmpty();
 	auto shown = parsed;
 	shown.setPassword(QString());
+	const auto encoded = QString::fromUtf8(shown.toEncoded());
+	if (hasUserInfo) {
+		return encoded;
+	}
 	const auto displayed = shown.toDisplayString();
-	return !UrlClickHandler::IsSuspicious(displayed)
-		? displayed
-		: QString::fromUtf8(shown.toEncoded());
+	return !UrlClickHandler::IsSuspicious(displayed) ? displayed : encoded;
+}
+
+// The host, on its own line, in bold.
+//
+// This replaces bolding the host inside the printed address. Locating a host
+// inside a URL string is guesswork that fails in exactly the cases the box
+// exists for: stock's BoldDomainInUrl (core/click_handler_types.cpp:52) bolds
+// the decoration in https://paypal.com@evil.example because it searches from
+// the front, and any search confined to the authority is defeated by an
+// escaped "/" in the userinfo, which moves where the authority appears to
+// end. A separate line taken straight from QUrl::host() cannot be pointed at
+// the wrong span, because it is not a span - it is the parser's own answer to
+// "where does this go".
+//
+// FullyEncoded, so a Unicode homograph host is shown as its punycode.
+[[nodiscard]] TextWithEntities DestinationLine(const QUrl &parsed) {
+	const auto host = parsed.host(QUrl::FullyEncoded);
+	if (host.isEmpty()) {
+		return TextWithEntities();
+	}
+	const auto caption = Tr(u"LuminaLinkSafetyDestination"_q);
+	auto result = TextWithEntities{
+		.text = caption + u"\n"_q + host,
+	};
+	result.entities.push_back(EntityInText(
+		EntityType::Bold,
+		int(caption.size()) + 1,
+		int(host.size())));
+	return result;
 }
 
 [[nodiscard]] QString JoinWarnings(const std::vector<QString> &warnings) {
@@ -166,9 +187,21 @@ const auto kBoxTitle = u"Open external link?"_q;
 	return result;
 }
 
+// FlatLabel::setMarkedText() parses with _labelMarkedOptions
+// (lib_ui/ui/widgets/labels.cpp:41), which carries TextParseLinks - so a host
+// or an address printed as marked text becomes a live link of its own. In an
+// ordinary confirmation that is merely odd; in the box that exists to warn
+// about this exact address it would be a one-click launcher sitting inside
+// the warning. Swallow the activation; selecting and the copy context menu
+// still work, they do not go through this filter.
+[[nodiscard]] Fn<bool(const ClickHandlerPtr&, Qt::MouseButton)> Inert() {
+	return [](const ClickHandlerPtr&, Qt::MouseButton) { return false; };
+}
+
 void FillBox(
 		not_null<Ui::GenericBox*> box,
 		const QString &displayUrl,
+		const TextWithEntities &destination,
 		const QString &warnings,
 		bool dark,
 		Fn<void()> open) {
@@ -177,27 +210,32 @@ void FillBox(
 		.confirmed = [=](Fn<void()> hide) { hide(); open(); },
 		.confirmText = tr::lng_open_link(),
 		.labelStyle = dark ? &st::groupCallBoxLabel : nullptr,
-		.title = kBoxTitle,
+		.title = TrValue(u"LuminaLinkSafetyTitle"_q),
 	});
 	const auto &st = dark ? st::groupCallBoxLabel : st::boxLabel;
-	box->addSkip(st.style.lineHeight - st::boxPadding.bottom());
+	const auto skip = st.style.lineHeight - st::boxPadding.bottom();
+	if (!destination.text.isEmpty()) {
+		box->addSkip(skip);
+		box->addRow(object_ptr<Ui::FlatLabel>(
+			box,
+			rpl::single(destination),
+			st)
+		)->setClickHandlerFilter(Inert());
+	}
+	box->addSkip(skip);
+
+	// The plain-QString overload on purpose: FlatLabel::setText() parses with
+	// _labelOptions, which has no TextParseLinks, so the address cannot become
+	// a handler in the first place. The filter above is only needed where bold
+	// forces marked text.
 	const auto label = box->addRow(object_ptr<Ui::FlatLabel>(
 		box,
-		rpl::single(HighlightHost(displayUrl)),
+		displayUrl,
 		st));
 	label->setSelectable(true);
+	label->setBreakEverywhere(true);
 	label->setContextCopyText(tr::lng_context_copy_link(tr::now));
-
-	// FlatLabel::setMarkedText() parses with _labelMarkedOptions
-	// (lib_ui/ui/widgets/labels.cpp:41), which carries TextParseLinks - so
-	// the address printed here becomes a live link of its own. In an
-	// ordinary confirmation that is merely odd; in the box that exists to
-	// warn about this exact address it would be a one-click launcher sitting
-	// inside the warning. Swallow the activation; selecting and the copy
-	// context menu still work, they do not go through this filter.
-	label->setClickHandlerFilter([](const ClickHandlerPtr&, Qt::MouseButton) {
-		return false;
-	});
+	label->setClickHandlerFilter(Inert());
 }
 
 } // namespace
@@ -215,10 +253,7 @@ rpl::producer<> LinkSafetyChanges() {
 }
 
 bool IsKnownUrlShortener(const QString &host) {
-	auto bare = host.toLower();
-	if (bare.startsWith(u"www."_q)) {
-		bare = bare.mid(4);
-	}
+	const auto bare = RegistrableHost(host);
 	return !bare.isEmpty() && Shorteners().contains(bare);
 }
 
@@ -229,10 +264,13 @@ std::vector<QString> LinkSafetyWarnings(const QString &url) {
 		return result;
 	}
 	if (!parsed.userInfo().isEmpty()) {
-		result.push_back(kWarnUserInfo);
+		result.push_back(Tr(u"LuminaLinkSafetyWarnMismatch"_q));
+	}
+	if (HasWrittenPunycodeLabel(parsed, url)) {
+		result.push_back(Tr(u"LuminaLinkSafetyWarnPunycode"_q));
 	}
 	if (IsKnownUrlShortener(parsed.host())) {
-		result.push_back(kWarnShortener);
+		result.push_back(Tr(u"LuminaLinkSafetyWarnShortener"_q));
 	}
 	return result;
 }
@@ -272,6 +310,7 @@ bool InterceptExternalUrl(const QString &url, const QVariant &context) {
 	auto box = Box(
 		FillBox,
 		DisplayUrl(parsed),
+		DestinationLine(parsed),
 		JoinWarnings(warnings),
 		my.dark,
 		Fn<void()>(open));

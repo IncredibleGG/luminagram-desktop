@@ -7,6 +7,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "settings/sections/settings_lumina_appearance.h"
 
+#include "lumina/lumina_media_pause_settings.h"
+#include "lumina/lumina_number_format_settings.h"
+#include "lumina/lumina_time_format_settings.h"
+#include "lumina/lumina_recent_limits_settings.h"
+#include "lumina/lumina_sticker_save_settings.h"
+#include "lumina/lumina_sticker_scale_settings.h"
 #include "lumina/lumina_locale.h"
 #include "ui/wrap/vertical_layout.h"
 #include "ui/rp_widget.h"
@@ -44,10 +50,12 @@ rpl::producer<QString> LuminaAppearance::title() {
 //   W5-H more retained recent stickers / GIFs;
 //   W4-A the `showBookmarks` toggle.
 void LuminaAppearance::setupContent(not_null<Ui::VerticalLayout*> container) {
-	Ui::AddSkip(container);
-	Ui::AddDividerText(
-		container,
-		Lumina::TrValue(u"LuminaAppearancePlaceholder"_q));
+	Lumina::AddStickerScaleRows(container, controller());
+	Lumina::AddStickerSaveRows(container, controller());
+	Lumina::AddRecentLimitsRows(container, controller());
+	Lumina::AddTimeFormatRows(container, controller());
+	Lumina::AddExactNumbersRows(container, controller());
+	Lumina::AddMediaPauseRows(container, controller());
 }
 
 } // namespace Settings

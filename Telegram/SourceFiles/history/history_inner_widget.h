@@ -33,6 +33,10 @@ namespace Data {
 struct Group;
 } // namespace Data
 
+namespace Lumina {
+struct SelectFromAuthorResult;
+} // namespace Lumina
+
 namespace HistoryView {
 class ElementDelegate;
 class EmojiInteractions;
@@ -187,6 +191,21 @@ public:
 	[[nodiscard]] auto getSelectedEphemeral() const
 		-> std::vector<not_null<HistoryItem*>>;
 	[[nodiscard]] bool hasSelectedItems() const;
+
+	// LuminaGram (W4-C): "select all messages from this author". The row and
+	// every rule it obeys live in lumina/lumina_select_author.cpp; only these
+	// two calls are here, because the selection itself is private - the loaded
+	// blocks, goodForSelection() and changeSelectionAsGroup() all are.
+	//
+	// luminaCanSelectFromAuthor() is the stock Select row's own guard, so the
+	// two rows appear and disappear together. luminaSelectFromAuthor() selects
+	// `start` and then every loaded message from the same sender, newest
+	// first, and reports whether MaxSelectedItems truncated the result.
+	[[nodiscard]] bool luminaCanSelectFromAuthor(
+		not_null<HistoryItem*> item) const;
+	Lumina::SelectFromAuthorResult luminaSelectFromAuthor(
+		not_null<HistoryItem*> start);
+
 	[[nodiscard]] HistoryView::SelectionModeResult inSelectionMode() const;
 	[[nodiscard]] HistoryView::SelectionModeResult inSelectionMode(
 		const Element *view) const;

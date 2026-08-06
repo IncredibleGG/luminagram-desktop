@@ -7,6 +7,10 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "settings/sections/settings_lumina_tools.h"
 
+#include "lumina/lumina_backup_settings.h"
+#include "lumina/lumina_profile_card_settings.h"
+#include "lumina/lumina_contact_notes_settings.h"
+#include "lumina/lumina_bookmarks_settings.h"
 #include "lumina/lumina_locale.h"
 #include "ui/wrap/vertical_layout.h"
 #include "ui/rp_widget.h"
@@ -43,10 +47,10 @@ rpl::producer<QString> LuminaTools::title() {
 //   W6-E encrypted local backup export / import;
 //   W6-G first-run onboarding card.
 void LuminaTools::setupContent(not_null<Ui::VerticalLayout*> container) {
-	Ui::AddSkip(container);
-	Ui::AddDividerText(
-		container,
-		Lumina::TrValue(u"LuminaToolsPlaceholder"_q));
+	Lumina::AddBookmarksRows(container, controller());
+	Lumina::AddContactNotesRows(container, controller());
+	Lumina::AddProfileCardRows(container, controller());
+	Lumina::AddBackupRows(container, controller());
 }
 
 } // namespace Settings

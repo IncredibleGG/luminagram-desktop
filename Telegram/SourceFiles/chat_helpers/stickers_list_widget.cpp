@@ -54,6 +54,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "apiwrap.h"
 #include "api/api_toggling_media.h" // Api::ToggleFavedSticker
 #include "api/api_premium.h"
+#include "lumina/lumina_sticker_save.h"
 #include "styles/style_chat_helpers.h"
 #include "styles/style_window.h"
 #include "styles/style_menu_icons.h"
@@ -2623,6 +2624,14 @@ base::unique_qptr<Ui::PopupMenu> StickersListWidget::fillContextMenu(
 				false);
 		}, &icons->menuRecentRemove);
 	}
+
+	Lumina::AddSaveStickerMenuRow(
+		menu.get(),
+		_show,
+		document,
+		((set.id == Data::Stickers::MegagroupSetId)
+			? _megagroupSet
+			: nullptr));
 
 	SendMenu::AttachSendMenuEffect(
 		menu,

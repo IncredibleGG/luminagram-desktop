@@ -7,6 +7,10 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "settings/sections/settings_lumina_chat.h"
 
+#include "lumina/lumina_quick_replies_settings.h"
+#include "lumina/lumina_undo_send_settings.h"
+#include "lumina/lumina_select_author_settings.h"
+#include "lumina/lumina_message_actions_settings.h"
 #include "lumina/lumina_ai_editor.h"
 #include "lumina/lumina_link_preview_settings.h"
 #include "lumina/lumina_voice_confirm_settings.h"
@@ -76,6 +80,10 @@ void LuminaChat::setupContent(not_null<Ui::VerticalLayout*> container) {
 	Lumina::AddTextReplaceRows(container, controller());
 	Lumina::AddVoiceConfirmRows(container, controller());
 	Lumina::AddLinkPreviewRows(container, controller());
+	Lumina::AddMessageActionsRows(container, controller());
+	Lumina::AddSelectAuthorRows(container, controller());
+	Lumina::AddUndoSendRows(container, controller());
+	Lumina::AddReplyTemplatesRows(container, controller());
 }
 
 } // namespace Settings

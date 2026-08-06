@@ -9,6 +9,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include "core/credits_amount.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_number_format.h"
 #include "ui/text/text.h"
 #include "base/qt/qt_common_adapters.h"
 #include "base/qt/qt_string_view.h"
@@ -917,7 +918,9 @@ int NonZeroPartToInt(QString value) {
 		: (value.isEmpty() ? 0 : value.toInt());
 }
 
-ShortenedCount FormatCountToShort(int64 number, bool onlyK) {
+namespace {
+
+[[nodiscard]] ShortenedCount ShortenCount(int64 number, bool onlyK) {
 	auto result = ShortenedCount{ number };
 	const auto abs = std::abs(number);
 	const auto shorten = [&](int64 divider, char multiplier) {
@@ -946,6 +949,23 @@ ShortenedCount FormatCountToShort(int64 number, bool onlyK) {
 	return result;
 }
 
+} // namespace
+
+ShortenedCount FormatCountToShort(int64 number, bool onlyK) {
+	// `shortened` stays false on the exact branch on purpose. Its two readers
+	// take it to mean "what is on screen is lossy": HistoryInner::tooltipText()
+	// offers the exact reaction count as a tooltip only for a shortened label,
+	// and FormatCreditsAmountToShort() below falls back to its own decimal
+	// formatting when shortening did not apply. Both are right to stand down
+	// here - the string already is the exact count.
+	return Lumina::ExactNumbersActive()
+		? ShortenedCount{
+			.number = number,
+			.string = FormatCountDecimal(number),
+		}
+		: ShortenCount(number, onlyK);
+}
+
 QString FormatCountDecimal(int64 number) {
 	return QLocale().toString(number);
 }
@@ -968,7 +988,15 @@ QString FormatExactCountDecimal(float64 number) {
 }
 
 ShortenedCount FormatCreditsAmountToShort(CreditsAmount amount) {
-	const auto attempt = FormatCountToShort(amount.whole());
+	// Deliberately not the preference-aware FormatCountToShort(): Stars and
+	// credits are out of the exact-numbers scope by the owner's decision, even
+	// though Android does include them. Note what the exclusion actually costs,
+	// because it is the opposite of the usual direction - this function is a
+	// chooser, not a formatter, and its fallback is already exact down to the
+	// fractional nanostars. Routing it through the preference would therefore
+	// have made a large amount read 1234567.89 rather than 1.2M, which is
+	// coherent, not broken; it is simply not what was asked for.
+	const auto attempt = ShortenCount(amount.whole(), false);
 	return attempt.shortened ? attempt : ShortenedCount{
 		.string = FormatCreditsAmountDecimal(amount),
 	};

@@ -34,6 +34,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "history/history.h"
 #include "history/history_item.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_dialogs_badges.h"
 #include "base/unixtime.h"
 #include "styles/style_dialogs.h"
 
@@ -395,7 +396,7 @@ void Row::updateCornerBadgeShown(
 		if (hasUnreadBadgesAbove) {
 			return kNoneLayer;
 		} else if (user
-			&& (Data::IsUserOnline(user, now)
+			&& (Lumina::CornerBadgeDotShown(user, now)
 				|| (!insideCommunity && user->linkedCommunityId()))) {
 			return kTopLayer;
 		} else if (channel
@@ -403,6 +404,15 @@ void Row::updateCornerBadgeShown(
 				|| Data::ChannelHasSubscriptionUntilDate(channel)
 				|| (!insideCommunity && channel->linkedCommunityId()))) {
 			return kTopLayer;
+		} else if (user && Data::IsUserOnline(user, now)) {
+			// The dot of an online contact was suppressed by
+			// Lumina::ChatListOnlineDot(). Falling through would hand this
+			// corner to whichever lower layer applies instead, so turning the
+			// dot off would make a self-destruct clock or a hidden-member
+			// badge appear on rows that show neither today. Android suppresses
+			// the same way: DialogCell.checkTtl() keeps testing isOnline()
+			// whatever the preference says.
+			return kNoneLayer;
 		} else if (hidden) {
 			return kHiddenLayer;
 		} else if (peer->messagesTTL()) {
@@ -413,6 +423,9 @@ void Row::updateCornerBadgeShown(
 	setCornerBadgeShown(nextLayer, std::move(updateCallback));
 	if ((nextLayer == kTopLayer) && user) {
 		peer->owner().watchForOffline(user, now);
+	}
+	if (user) {
+		Lumina::WatchCornerBadgeDot(user, now);
 	}
 }
 
@@ -613,9 +626,7 @@ void Row::PaintCornerBadgeFrame(
 	auto pen = QPen(Qt::transparent);
 	pen.setWidthF(stroke * topLayerProgress);
 	q.setPen(pen);
-	q.setBrush(data->active
-		? st::dialogsOnlineBadgeFgActive
-		: st::dialogsOnlineBadgeFg);
+	q.setBrush(Lumina::CornerBadgeDotBrush(peer, data->active != 0));
 	q.drawEllipse(QRectF(
 		photoSize - skip.x() - size,
 		photoSize - skip.y() - size,
@@ -721,6 +732,7 @@ void Row::paintUserpic(
 	}
 	auto key = peer ? peer->userpicUniqueKey(userpicView()) : InMemoryKey();
 	key.first += peer ? peer->messagesTTL() : 0;
+	key.first += Lumina::CornerBadgeDotCacheKeyPart(peer);
 	const auto frameIndex = videoUserpic ? videoUserpic->frameIndex() : -1;
 	const auto paletteVersionReal = style::PaletteVersion();
 	const auto paletteVersion = (paletteVersionReal & ((1 << 17) - 1));
@@ -738,7 +750,7 @@ void Row::paintUserpic(
 	const auto communityMember = peer
 		&& Data::PeerLinkedCommunityId(peer)
 		&& !(badgeChannel && Data::ChannelHasActiveCall(badgeChannel))
-		&& !(badgeUser && Data::IsUserOnline(badgeUser))
+		&& !(badgeUser && Lumina::CornerBadgeDotShown(badgeUser))
 		&& !subscribed
 		&& !insideCommunity;
 	if (keyChanged

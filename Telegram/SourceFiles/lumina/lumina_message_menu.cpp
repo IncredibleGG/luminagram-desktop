@@ -7,6 +7,11 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "lumina/lumina_message_menu.h"
 
+#include "lumina/lumina_select_author.h"
+#include "lumina/lumina_save_to_saved.h"
+#include "lumina/lumina_message_details.h"
+#include "lumina/lumina_forward_actions.h"
+#include "lumina/lumina_bookmarks.h"
 #include "history/history_inner_widget.h"
 #include "history/history_item.h"
 #include "history/view/history_view_context_menu.h"
@@ -84,45 +89,37 @@ void FillMessageMenu(
 void AddForwardNoAuthorRow(
 		not_null<Ui::PopupMenu*> menu,
 		const MessageMenuContext &context) {
-	// TODO (wave 4, W4-B): forward with Data::ForwardOptions::NoSenderNames.
-	// Guard on context.allowsForward and on CanHideForwardAuthor().
+	AddForwardNoAuthorMenuRow(menu, context);
 }
 
 void AddForwardNoCaptionRow(
 		not_null<Ui::PopupMenu*> menu,
 		const MessageMenuContext &context) {
-	// TODO (wave 4, W4-B): forward with NoNamesAndCaptions, which on the wire
-	// implies dropping the author too - label it accordingly. Hide it when the
-	// forwarded set carries no captions at all.
+	AddForwardNoCaptionMenuRow(menu, context);
 }
 
 void AddSaveToSavedRow(
 		not_null<Ui::PopupMenu*> menu,
 		const MessageMenuContext &context) {
-	// TODO (wave 4, W4-B): copy to Saved Messages without the "Forwarded from"
-	// header. Must stay behind context.allowsForward so that it cannot become
-	// a save-from-restricted-chat bypass, and must hide in Saved Messages.
+	AddSaveToSavedMenuRow(menu, context);
 }
 
 void AddMessageDetailsRow(
 		not_null<Ui::PopupMenu*> menu,
 		const MessageMenuContext &context) {
-	// TODO (wave 4, W4-B): show id, date, author and forward origin.
+	AddMessageDetailsMenuRow(menu, context);
 }
 
 void AddBookmarkRow(
 		not_null<Ui::PopupMenu*> menu,
 		const MessageMenuContext &context) {
-	// TODO (wave 4, W4-A): add / remove a local bookmark for this message.
+	AddBookmarkMenuRow(menu, context);
 }
 
 void AddSelectFromAuthorRow(
 		not_null<Ui::PopupMenu*> menu,
 		const MessageMenuContext &context) {
-	// TODO (wave 4, W4-C): select every loaded message from this author.
-	// Needs selection APIs that are private today, hence the context carries
-	// the owning widget (context.list / context.inner) rather than only the
-	// item.
+	FillSelectFromAuthorRow(menu, context);
 }
 
 } // namespace Lumina

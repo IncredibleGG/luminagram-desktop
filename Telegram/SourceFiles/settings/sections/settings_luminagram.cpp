@@ -7,6 +7,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "settings/sections/settings_luminagram.h"
 
+#include "lumina/lumina_onboarding.h"
 #include "lumina/lumina_update_settings.h"
 #include "lumina/lumina_locale.h"
 #include "settings/sections/settings_lumina_appearance.h"
@@ -62,6 +63,7 @@ rpl::producer<QString> LuminaGram::title() {
 
 void LuminaGram::setupContent() {
 	const auto content = Ui::CreateChild<Ui::VerticalLayout>(this);
+	Lumina::SetupFirstRunOnboarding(content, controller());
 	const auto showOther = showOtherMethod();
 
 	Ui::AddSkip(content);

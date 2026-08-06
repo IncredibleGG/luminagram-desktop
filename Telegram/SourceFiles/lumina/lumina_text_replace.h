@@ -139,6 +139,15 @@ inline constexpr auto kTextReplaceToMaxLength = 1024;
 // "/command" - ApiWrap::sendBotStart() reaches sendMessage() with exactly
 // that and nothing else, and it is machine-written text, not something the
 // user typed.
+//
+// It also refuses, after the fact, a substitution that would leave nothing
+// but whitespace. A rule whose `to` is empty is a perfectly ordinary "delete
+// this word" rule, and a message that IS that word rewrites to "". An empty
+// text does not send an empty message, it sends no message at all -
+// TextUtilities::CutPart() returns false and ApiWrap::sendMessage()'s loop
+// never runs - while the composer is cleared anyway, so the user's text
+// disappears with no message, no error and no draft. The original is sent
+// instead.
 void ApplyOutgoingTextReplacements(TextWithTags &textWithTags);
 
 } // namespace Lumina

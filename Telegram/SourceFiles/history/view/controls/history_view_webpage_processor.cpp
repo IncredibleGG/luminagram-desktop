@@ -194,6 +194,18 @@ WebpageProcessor::WebpageProcessor(
 , _resolver(std::make_shared<WebpageResolver>(&history->session()))
 , _parser(field)
 , _timer([=] {
+	// The latch below is only cleared when the field goes link-free, so
+	// toggling the preference with a link already typed did nothing either way:
+	// turning it on left the preview, turning it off left it removed.
+	Lumina::LinkPreviewOffByDefaultValue(
+	) | rpl::on_next([=](bool) {
+		_luminaDefaultChecked = false;
+		if (_luminaDefaultRemoved) {
+			_draft.removed = false;
+			_luminaDefaultRemoved = false;
+		}
+		checkPreview();
+	}, _lifetime);
 	if (!ShowWebPagePreview(_data) || _link.isEmpty()) {
 		return;
 	}

@@ -27,6 +27,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <rpl/lifetime.h>
 #include <rpl/producer.h>
 
+#include <algorithm>
+
 namespace Lumina {
 namespace {
 
@@ -110,16 +112,29 @@ struct Line {
 // web page, game, invoice, story mention and giveaway exclusions at once,
 // because every one of those is a HistoryItem::media() here.
 //
-// Excluding media and hideLinks() disposes of most of the difference between
-// translatedText() and translatedTextWithLocalEntities(): the hideLinks()
-// filter (which has a setHasHiddenLinks() side effect) is skipped, and so is
-// the own-media half of withLocalEntities(). The reply half is NOT covered -
-// see WithReplyTimestampLinks() below.
+// Excluding media disposes of the own-media half of
+// HistoryItem::withLocalEntities(), which is the larger half of the difference
+// between translatedText() and translatedTextWithLocalEntities(). The other
+// two halves are NOT covered and are reproduced instead of excluded, below:
+// the reply half of withLocalEntities() in WithReplyTimestampLinks(), and the
+// hideLinks() link filter in WithHiddenLinks().
+//
+// hideLinks() is deliberately NOT a rejection here, though it reads like the
+// safe choice. HistoryItem::hideLinks() is `!out() && peer->hideLinks()`, and
+// PeerData::hideLinks() (data_peer.cpp) answers TRUE while barSettings() is
+// still nullopt - which it is for every peer until its settings come back from
+// the server (PeerBarSetting::Unknown, data_peer.h). Rejecting on it would
+// therefore turn the whole incoming half of this feature off for a window
+// after every chat is opened, and permanently for any peer showing the report
+// spam bar - a stranger writing in a foreign language, i.e. exactly the chat
+// this feature exists for. Worse, nothing would bring it back: the only
+// re-layout on that transition is History::refreshHiddenLinksItems(), and that
+// only touches items whose hasHiddenLinks() flag is already set, which a
+// message with no links never has.
 [[nodiscard]] bool Renderable(not_null<HistoryItem*> item) {
 	return !item->isService()
 		&& !item->isSponsored()
 		&& !item->media()
-		&& !item->hideLinks()
 		&& !item->Has<HistoryMessageLogEntryOriginal>()
 		&& !item->Has<HistoryMessageFactcheck>()
 		&& !item->translatedRichPage()
@@ -239,12 +254,46 @@ struct Source {
 	return text;
 }
 
+// The link filter of HistoryItem::translatedTextWithLocalEntities(), applied
+// here because Renderable() no longer rejects hideLinks() messages - see the
+// note there. This mirrors history_item.cpp exactly, including the order (the
+// filter runs AFTER the withLocalEntities half) and the setHasHiddenLinks()
+// side effect, which is what History::refreshHiddenLinksItems() looks for when
+// the peer's bar settings finally arrive and the links are allowed back.
+//
+// The sub-line itself needs no filtering: it is parsed with
+// kSubLineOptions, which recognises no entities at all.
+[[nodiscard]] TextWithEntities WithHiddenLinks(
+		not_null<HistoryItem*> item,
+		TextWithEntities text) {
+	if (!item->hideLinks()) {
+		return text;
+	}
+	const auto isUrl = [](const EntityInText &entity) {
+		const auto type = entity.type();
+		return (type == EntityType::Mention)
+			|| (type == EntityType::Hashtag)
+			|| (type == EntityType::Cashtag)
+			|| (type == EntityType::Url)
+			|| (type == EntityType::CustomUrl);
+	};
+	const auto from = std::remove_if(
+		text.entities.begin(),
+		text.entities.end(),
+		isUrl);
+	if (from != text.entities.end()) {
+		text.entities.erase(from, text.entities.end());
+		item->setHasHiddenLinks(true);
+	}
+	return text;
+}
+
 [[nodiscard]] TextWithEntities ComputeMainText(
 		not_null<HistoryItem*> item,
 		const Source &source) {
-	return WithReplyTimestampLinks(item, source.external
+	return WithHiddenLinks(item, WithReplyTimestampLinks(item, source.external
 		? TextWithEntities{ source.original }
-		: item->originalText());
+		: item->originalText()));
 }
 
 bool DropLine(not_null<const Element*> view) {

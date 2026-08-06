@@ -143,6 +143,11 @@ namespace {
 		{ u"LuminaTranslatePreviewTranslating"_q, u"翻译中…"_q },
 		{ u"LuminaTranslatePreviewFailed"_q, u"无法翻译"_q },
 
+		// The per-chat translate button in the chat top bar. Both texts name
+		// what pressing the button will do, not what the chat is doing now.
+		{ u"LuminaTranslateChatToggle"_q, u"翻译此聊天"_q },
+		{ u"LuminaTranslateChatShowOriginal"_q, u"显示原文"_q },
+
 		// Names of the languages LuminaGram can translate into, in the order
 		// the pickers show them.
 		{ u"LuminaLangEn"_q, u"英语"_q },
@@ -227,6 +232,296 @@ namespace {
 		{ u"LuminaLangCy"_q, u"威尔士语"_q },
 		{ u"LuminaLangYi"_q, u"意第绪语"_q },
 		{ u"LuminaLangZu"_q, u"祖鲁语"_q },
+		{ u"LuminaAppearanceStickerSizeHeader"_q, u"贴纸大小"_q },
+		{ u"LuminaBackupCryptoFailed"_q, u"这个系统无法使用加密功能。"_q },
+		{ u"LuminaBackupDamaged"_q, u"备份文件已损坏，无法恢复。"_q },
+		{ u"LuminaBackupExport"_q, u"导出加密备份"_q },
+		{ u"LuminaBackupExportDone"_q, u"备份已保存。"_q },
+		{ u"LuminaBackupExportFailed"_q, u"无法创建备份文件。"_q },
+		{ u"LuminaBackupExportInfo"_q, u"把 LuminaGram 保存在这台设备上的"
+			u"所有内容——书签、备注、回复模板、文字替换以及全部设置——"
+			u"存入一个文件，并用你设定的口令加密。这个文件也包含私密的值："
+			u"翻译 API 密钥、保险箱与假崩溃密码，以及诱饵记事本里的笔记。"
+			u"任何内容都不会发送给 Telegram。请设置一个较长的口令并妥善"
+			u"保管：没有它就打不开这个文件，也没有任何办法找回。"_q },
+		{ u"LuminaBackupExportPassphraseTitle"_q, u"设置口令"_q },
+		{ u"LuminaBackupFileFilter"_q, u"LuminaGram 备份 (*.lgbak)"_q },
+		{ u"LuminaBackupImport"_q, u"导入备份"_q },
+		{ u"LuminaBackupImportFailed"_q, u"无法读取备份文件。"_q },
+		{ u"LuminaBackupImportInfo"_q, u"选择一个备份文件并输入它的口令，"
+			u"即可恢复你的 LuminaGram 数据。备份中带有的设置会覆盖这台设备"
+			u"上的设置；备份中没有的内容保持不变。无法通过校验的文件会在"
+			u"写入任何内容之前被拒绝，所以口令输错绝不会让你只恢复一半。"_q },
+		{ u"LuminaBackupImportSuccess"_q, u"备份已恢复。请重启 LuminaGram 以"
+			u"应用全部更改。"_q },
+		{ u"LuminaBackupInvalidFile"_q, u"这不是有效的 LuminaGram 备份"
+			u"文件。"_q },
+		{ u"LuminaBackupNewerFormat"_q, u"这个备份是由更新版本的 LuminaGram "
+			u"创建的。"_q },
+		{ u"LuminaBackupOpenCaption"_q, u"打开 LuminaGram 备份"_q },
+		{ u"LuminaBackupPassphraseHint"_q, u"口令"_q },
+		{ u"LuminaBackupPassphraseMismatch"_q, u"两次输入的口令不一致。"_q },
+		{ u"LuminaBackupPassphraseRepeatHint"_q, u"再次输入口令"_q },
+		{ u"LuminaBackupPassphraseTitle"_q, u"输入口令"_q },
+		{ u"LuminaBackupPassphraseTooShort"_q, u"请设置至少 4 个字符的"
+			u"口令。"_q },
+		{ u"LuminaBackupSaveCaption"_q, u"保存 LuminaGram 备份"_q },
+		{ u"LuminaBackupTitle"_q, u"加密备份"_q },
+		{ u"LuminaBackupUnauthenticated"_q, u"这个备份使用的是旧的无保护"
+			u"格式，无法检查口令是否正确，也无法检查文件是否被改动过。请用"
+			u"最新版本的 LuminaGram 重新制作备份。"_q },
+		{ u"LuminaBackupWrongPassphrase"_q, u"口令错误，或文件已被改动。"_q },
+		{ u"LuminaBookmark"_q, u"添加书签"_q },
+		{ u"LuminaBookmarkAdded"_q, u"已添加到书签"_q },
+		{ u"LuminaBookmarkChatUnavailable"_q, u"聊天不可用"_q },
+		{ u"LuminaBookmarkDeleteTitle"_q, u"删除书签？"_q },
+		{ u"LuminaBookmarkGone"_q, u"这个聊天在这台设备上已不可用。"_q },
+		{ u"LuminaBookmarkRemove"_q, u"移除书签"_q },
+		{ u"LuminaBookmarkRemoved"_q, u"已从书签移除"_q },
+		{ u"LuminaBookmarksAbout"_q, u"书签只是指向消息的记号，只保存在这台"
+			u"设备上，绝不会发送给 Telegram。移除书签不会影响消息本身。"_q },
+		{ u"LuminaBookmarksEmpty"_q, u"你还没有收藏任何消息。"_q },
+		{ u"LuminaBookmarksFull"_q, u"书签列表已满。请先移除一个书签，才能"
+			u"再添加。"_q },
+		{ u"LuminaBookmarksList"_q, u"已加书签的消息"_q },
+		{ u"LuminaBookmarksListAbout"_q, u"点击书签即可打开对应的消息，右键"
+			u"点击可以移除它。即使消息被删除，书签也会留在这个列表里。"_q },
+		{ u"LuminaBookmarksNone"_q, u"无"_q },
+		{ u"LuminaBookmarksTitle"_q, u"书签"_q },
+		{ u"LuminaChatListDensityTitle"_q, u"聊天列表密度"_q },
+		{ u"LuminaCompactListRows"_q, u"精简行高"_q },
+		{ u"LuminaCompactListRowsInfo"_q, u"缩短聊天列表每一行的高度，让屏幕"
+			u"上能显示更多聊天。头像与消息预览仍会显示。"_q },
+		{ u"LuminaChatListDotsTitle"_q, u"头像圆点"_q },
+		{ u"LuminaChatListOnlineDot"_q, u"在线圆点"_q },
+		{ u"LuminaChatListOnlineDotInfo"_q, u"在单聊头像上显示一个小绿点，"
+			u"表示对方当前在线。"_q },
+		{ u"LuminaChatListRecencyDot"_q, u"最近上线圆点"_q },
+		{ u"LuminaChatListRecencyDotInfo"_q, u"根据对方最后上线的时间为单聊"
+			u"头像圆点着色：当前在线为绿色，一小时内为黄色，一天内为橙色。"
+			u"更久或隐藏的最后上线时间则不显示圆点。绿色（在线）圆点仍由"
+			u"“在线圆点”开关控制。"_q },
+		{ u"LuminaChatListVisibilityAbout"_q, u"把文件夹栏从聊天列表中移除"
+			u"——旁边的竖栏和上方的横栏都会移除。隐藏文件夹标签时，你始终"
+			u"看到全部聊天：原本所在的文件夹会被退出，文件夹快捷键与在文件夹"
+			u"之间的滑动也不再起作用。隐藏动态只会移除聊天列表上方的那一行；"
+			u"动态本身以及其他打开动态的方式都不受影响。"_q },
+		{ u"LuminaChatListVisibilityTitle"_q, u"文件夹与动态"_q },
+		{ u"LuminaContactNote"_q, u"私密备注"_q },
+		{ u"LuminaContactNoteAbout"_q, u"只有你能看到这些内容。它保存在这台"
+			u"设备上，绝不会发送给 Telegram，也不会同步到你的其他设备。"_q },
+		{ u"LuminaContactNoteEmpty"_q, u"点击以添加私密备注"_q },
+		{ u"LuminaContactNoteHint"_q, u"备注（仅你可见）"_q },
+		{ u"LuminaContactNotesAbout"_q, u"在联系人资料页上添加私密备注和一组"
+			u"标签。两者都保存在这台设备上，绝不会发送给 Telegram，也不会"
+			u"同步到你的其他设备。Telegram 自己的联系人备注不受影响：只有在"
+			u"无法使用它的地方——机器人，以及不在你联系人中的人——才会提供"
+			u"私密备注，而标签在任何地方都会提供。"_q },
+		{ u"LuminaContactNotesClear"_q, u"删除所有私密备注"_q },
+		{ u"LuminaContactNotesClearText"_q, u"删除这台设备上保存的所有私密"
+			u"备注和标签吗？此操作无法撤销。"_q },
+		{ u"LuminaContactNotesClearTitle"_q, u"删除私密备注"_q },
+		{ u"LuminaContactNotesNone"_q, u"无"_q },
+		{ u"LuminaContactNotesTitle"_q, u"私密联系人备注"_q },
+		{ u"LuminaContactNotesToggle"_q, u"在资料页显示私密备注与标签"_q },
+		{ u"LuminaContactTags"_q, u"标签"_q },
+		{ u"LuminaContactTagsEmpty"_q, u"点击以添加标签"_q },
+		{ u"LuminaContactTagsHint"_q, u"标签，以逗号分隔"_q },
+		{ u"LuminaDetailsDate"_q, u"日期"_q },
+		{ u"LuminaDetailsForwardedFrom"_q, u"转发自"_q },
+		{ u"LuminaDetailsFrom"_q, u"来自"_q },
+		{ u"LuminaDetailsMessageId"_q, u"消息 ID"_q },
+		{ u"LuminaDetailsOriginalDate"_q, u"原始日期"_q },
+		{ u"LuminaExactNumbers"_q, u"显示精确数字（不使用 1.2K 缩写）"_q },
+		{ u"LuminaExactNumbersInfo"_q, u"显示完整计数，如 1,234,567，而非 "
+			u"1.2M 之类的缩写形式。已经绘制在屏幕上的计数会保持当前的"
+			u"形式，直到应用重启。"_q },
+		{ u"LuminaForwardNoAuthor"_q, u"转发时隐藏作者"_q },
+		{ u"LuminaForwardNoAuthorTitle"_q, u"转发时隐藏作者"_q },
+		{ u"LuminaForwardNoCaption"_q, u"转发时隐藏作者与说明文字"_q },
+		{ u"LuminaForwardNoCaptionTitle"_q, u"转发时隐藏作者与说明文字"_q },
+		{ u"LuminaHideStories"_q, u"隐藏动态"_q },
+		{ u"LuminaHideTabs"_q, u"隐藏文件夹标签"_q },
+		{ u"LuminaLinkSafetyDestination"_q, u"真实目标地址"_q },
+		{ u"LuminaLinkSafetyInfo"_q, u"在打开这几类链接前先询问：用“@”符号"
+			u"前的文字隐藏真实目标地址的链接、域名用 punycode 拼写的链接，"
+			u"以及通过已知短链接服务跳转的链接。确认框会显示真实的目标主机"
+			u"和完整网址。对于用其他字母系统书写的仿冒域名，Telegram Desktop "
+			u"本身已经会询问。所有检查都在本机进行——你打开的网址不会离开"
+			u"这台设备。"_q },
+		{ u"LuminaLinkSafetyRow"_q, u"链接安全检查"_q },
+		{ u"LuminaLinkSafetyTitle"_q, u"打开外部链接？"_q },
+		{ u"LuminaLinkSafetyWarnMismatch"_q, u"此链接通过“@”符号前的文字"
+			u"隐藏了真实目标地址。"_q },
+		{ u"LuminaLinkSafetyWarnPunycode"_q, u"此网址使用了编码（punycode）"
+			u"字符，可能在仿冒知名网站。"_q },
+		{ u"LuminaLinkSafetyWarnShortener"_q, u"这是一个短链接——真实目标"
+			u"地址在你打开前始终隐藏。"_q },
+		{ u"LuminaMediaAutoPauseBgVideo"_q, u"应用退到后台时暂停视频"_q },
+		{ u"LuminaMediaAutoPauseBgVideoInfo"_q, u"当你离开 LuminaGram 时，"
+			u"自动暂停正在播放的视频。最小化播放器同样会暂停。你特意放到"
+			u"独立窗口或画中画里的视频会继续播放，音乐和语音消息在你离开时"
+			u"也会继续播放。"_q },
+		{ u"LuminaMediaSaving"_q, u"媒体"_q },
+		{ u"LuminaMediaTitle"_q, u"媒体"_q },
+		{ u"LuminaMessageActionsInfo"_q, u"这些条目只出现在消息的右键菜单里。"
+			u"每一项都使用 Telegram 自己的转发功能，所以限制转发的聊天仍然"
+			u"受限。“转发时隐藏作者与说明文字”是按实际发出的内容命名的："
+			u"Telegram 无法在保留发送者的同时去掉说明文字，所以选择它会两者"
+			u"都去掉。“详情”只读取这台设备已经同步的内容——不会发出任何"
+			u"请求，也不会保存任何内容。"_q },
+		{ u"LuminaMessageDetails"_q, u"详情"_q },
+		{ u"LuminaOnboardingDualName"_q, u"两种语言同时显示"_q },
+		{ u"LuminaOnboardingDualText"_q, u"让原文和译文一起留在屏幕上，收到的"
+			u"消息和你发送的消息都可以。"_q },
+		{ u"LuminaOnboardingFooter"_q, u"在 LuminaGram 设置页里打开相应的分区"
+			u"即可设置这些功能。你可以随时从“工具”里再次查看这张卡片。"_q },
+		{ u"LuminaOnboardingGotIt"_q, u"知道了"_q },
+		{ u"LuminaOnboardingHeader"_q, u"关于"_q },
+		{ u"LuminaOnboardingIntro"_q, u"LuminaGram 在 Telegram Desktop 之上"
+			u"增加了自己的工具。下面的每个选项都只保存在这台电脑上，绝不会"
+			u"同步到 Telegram。"_q },
+		{ u"LuminaOnboardingRow"_q, u"LuminaGram 增加了什么"_q },
+		{ u"LuminaOnboardingRowAbout"_q, u"显示第一次打开 LuminaGram 设置时"
+			u"出现的欢迎卡片。它只介绍这里有些什么，不会开启任何功能。"_q },
+		{ u"LuminaOnboardingSafetyName"_q, u"安全检查"_q },
+		{ u"LuminaOnboardingSafetyText"_q, u"在打开地址与外表不符的链接前发出"
+			u"警告，在你粘贴加密货币地址时发现被掉包的地址，并移除你发送的"
+			u"照片中的位置信息。"_q },
+		{ u"LuminaOnboardingTitle"_q, u"欢迎使用 LuminaGram"_q },
+		{ u"LuminaOnboardingTranslateText"_q, u"用你自己的翻译服务翻译收到的"
+			u"消息，也可以在发送前翻译你输入的内容。"_q },
+		{ u"LuminaOnboardingVaultName"_q, u"伪装保险箱"_q },
+		{ u"LuminaOnboardingVaultText"_q, u"把 LuminaGram 藏在计算器或记事本"
+			u"后面，只有输入你的秘密密码才会打开真正的应用。"_q },
+		{ u"LuminaProfileCardAbout"_q, u"一张关于你自己的本地名片——你会说"
+			u"哪些语言、对什么感兴趣——可以复制后粘贴到聊天里。它只保存在"
+			u"这台设备上。"_q },
+		{ u"LuminaProfileCardBio"_q, u"简介"_q },
+		{ u"LuminaProfileCardBioHint"_q, u"简单介绍一下你自己"_q },
+		{ u"LuminaProfileCardCopied"_q, u"名片已复制"_q },
+		{ u"LuminaProfileCardCopy"_q, u"复制到剪贴板"_q },
+		{ u"LuminaProfileCardCopyInfo"_q, u"将名片生成为纯文本摘要。想要分享"
+			u"时，把它粘贴到任意聊天中即可。"_q },
+		{ u"LuminaProfileCardEdit"_q, u"我的名片"_q },
+		{ u"LuminaProfileCardEmptyShare"_q, u"请先填写你的名片"_q },
+		{ u"LuminaProfileCardHeader"_q, u"我的名片"_q },
+		{ u"LuminaProfileCardInfo"_q, u"此名片仅保存在本设备上，绝不会发送给 "
+			u"Telegram，也不会更改你的 Telegram 个人资料。"_q },
+		{ u"LuminaProfileCardInterests"_q, u"兴趣／标签"_q },
+		{ u"LuminaProfileCardInterestsHint"_q, u"例如：音乐、徒步、编程"_q },
+		{ u"LuminaProfileCardLanguages"_q, u"我会说的语言"_q },
+		{ u"LuminaProfileCardLanguagesHint"_q,
+			u"例如：中文、English、Español"_q },
+		{ u"LuminaProfileCardNotSet"_q, u"未设置"_q },
+		{ u"LuminaProfileCardTagline"_q, u"标语"_q },
+		{ u"LuminaProfileCardTaglineHint"_q, u"一句话介绍你自己"_q },
+		{ u"LuminaProfileCardTitle"_q, u"个人名片"_q },
+		{ u"LuminaProfileChatCreated"_q, u"创建于"_q },
+		{ u"LuminaProfileDcId"_q, u"数据中心"_q },
+		{ u"LuminaProfileDcIdValue"_q, u"DC{1}"_q },
+		{ u"LuminaProfileInfoHeader"_q, u"个人资料"_q },
+		{ u"LuminaProfileInfoInfo"_q, u"在资料页上增加几行信息，全部在这台"
+			u"设备上算出——不会向 Telegram 索取任何内容。部分账号的注册日期"
+			u"由 Telegram 自己提供；其余的则根据账号编号估算，并以“~”标出。"
+			u"数据中心指的是存放头像的那一个。创建日期是群组或频道建立的"
+			u"时间。"_q },
+		{ u"LuminaProfileRegistrationApprox"_q, u"~ {1}"_q },
+		{ u"LuminaProfileRegistrationDate"_q, u"注册日期"_q },
+		{ u"LuminaProfileShowChatDate"_q, u"显示创建日期"_q },
+		{ u"LuminaProfileShowDcId"_q, u"显示数据中心"_q },
+		{ u"LuminaProfileShowRegistrationDate"_q, u"显示注册日期"_q },
+		{ u"LuminaRecentLimitsInfo"_q, u"让这台设备不要过早丢弃最近使用的"
+			u"贴纸和收藏的 GIF，采用与 Android 版 LuminaGram 相同的上限："
+			u"最多 200 个最近贴纸和 500 个收藏的 GIF。你的账号里实际保存"
+			u"多少、同步到其他设备多少，仍由 Telegram 的服务器决定，所以"
+			u"这并不能让云端的列表变大——这台设备下次同步时，服务器上已经"
+			u"没有的内容在这里也会消失，通常只要几秒。开启时，Telegram "
+			u"Desktop 不再自行删除收藏的 GIF，因此它关于收藏 GIF 上限的 "
+			u"Premium 提示也不会再出现。除非你同时在“设置”›“高级”›"
+			u"“实验性设置”里开启“无限最近贴纸”，贴纸面板仍然只显示前 "
+			u"20 个最近使用的贴纸。"_q },
+		{ u"LuminaRecentLimitsRow"_q, u"保留更多最近贴纸与 GIF"_q },
+		{ u"LuminaReplyTemplatesAbout"_q, u"保存在这台设备上、可以插入到"
+			u"输入框的短文本。在聊天中右键点击表情按钮即可选择一条。模板"
+			u"绝不会发送给 Telegram。"_q },
+		{ u"LuminaReplyTemplatesAdd"_q, u"添加模板"_q },
+		{ u"LuminaReplyTemplatesEdit"_q, u"编辑模板"_q },
+		{ u"LuminaReplyTemplatesEmpty"_q, u"还没有模板。先添加一条，然后在"
+			u"聊天中右键点击表情按钮即可插入。"_q },
+		{ u"LuminaReplyTemplatesFull"_q, u"列表已满——请先删除一条模板，"
+			u"才能再添加。"_q },
+		{ u"LuminaReplyTemplatesInfo"_q, u"在聊天中右键点击表情按钮即可插入"
+			u"模板。在这里右键点击某条模板可以上移或下移；打开它可以编辑"
+			u"或删除。"_q },
+		{ u"LuminaReplyTemplatesList"_q, u"模板"_q },
+		{ u"LuminaReplyTemplatesManage"_q, u"管理模板…"_q },
+		{ u"LuminaReplyTemplatesMoveDown"_q, u"下移"_q },
+		{ u"LuminaReplyTemplatesMoveUp"_q, u"上移"_q },
+		{ u"LuminaReplyTemplatesNone"_q, u"无"_q },
+		{ u"LuminaReplyTemplatesPlaceholder"_q, u"模板内容"_q },
+		{ u"LuminaReplyTemplatesShow"_q, u"在聊天中提供模板"_q },
+		{ u"LuminaReplyTemplatesTitle"_q, u"回复模板"_q },
+		{ u"LuminaSaveSticker"_q, u"保存贴纸"_q },
+		{ u"LuminaSaveStickers"_q, u"保存贴纸"_q },
+		{ u"LuminaSaveStickersInfo"_q, u"在贴纸面板的右键菜单中添加“保存"
+			u"贴纸”一项。贴纸会保存到你其他下载文件所在的位置；当群组限制"
+			u"保存时，该群组自己的贴纸包不会显示这一项。"_q },
+		{ u"LuminaSaveToCloud"_q, u"保存到收藏夹"_q },
+		{ u"LuminaSaveToCloudTitle"_q, u"保存到收藏夹"_q },
+		{ u"LuminaSecurityPanicConfirmAck"_q, u"我明白此操作无法撤销"_q },
+		{ u"LuminaSecurityPanicConfirmButton"_q, u"立即清除"_q },
+		{ u"LuminaSecurityPanicConfirmText"_q, u"这台设备上的所有账号都会被"
+			u"登出。本地消息数据库、草稿和缓存的媒体都会被清除，LuminaGram "
+			u"自己的设置、书签、已保存的译文和 API 密钥也一并清除。\n\n你的"
+			u"账号不会被删除。它们和你的消息都留在 Telegram 的服务器上——"
+			u"你可以随时在任何地方重新登录。\n\n已经下载的文件不会被删除。"
+			u"LuminaGram 不会碰你的下载文件夹，因为那通常就是你普通的下载"
+			u"文件夹，里面还放着无关的文件。请自己移动或删除其中的敏感"
+			u"内容。\n\n此操作无法撤销。"_q },
+		{ u"LuminaSecurityPanicConfirmTitle"_q, u"紧急清除？"_q },
+		{ u"LuminaSecurityPanicHeader"_q, u"紧急清除"_q },
+		{ u"LuminaSecurityPanicWipe"_q, u"紧急清除 (Kaboom)"_q },
+		{ u"LuminaSecurityPanicWipeAbout"_q, u"登出这台设备上的所有账号，并"
+			u"清除本地消息数据库、草稿和缓存的媒体，以及 LuminaGram 自己的"
+			u"设置、书签、已保存的译文和 API 密钥。你的账号和消息仍留在 "
+			u"Telegram 的服务器上。已经下载的文件会留在原处。此操作无法"
+			u"撤销。"_q },
+		{ u"LuminaSelectFromAuthor"_q, u"选择该作者的全部消息"_q },
+		{ u"LuminaSelectFromAuthorAbout"_q, u"在群组的消息菜单中添加一项，"
+			u"用来选中你点击的发送者发出的所有消息。它只能选到这个窗口已经"
+			u"加载的消息——向上滚动加载更早的消息后再执行一次，才能把它们"
+			u"也包含进来。归属于聊天本身的消息，例如频道帖子和匿名管理员的"
+			u"帖子，不会出现这一项。"_q },
+		{ u"LuminaSelectFromAuthorLimit"_q,
+			u"一次最多只能选择 {1} 条消息。"_q },
+		{ u"LuminaSelectFromAuthorTitle"_q, u"选择该作者的全部消息"_q },
+		{ u"LuminaSendOriginalCaption"_q, u"发送原始说明文字"_q },
+		{ u"LuminaShowBookmarks"_q, u"显示书签菜单项"_q },
+		{ u"LuminaShowMessageDetails"_q, u"消息详情菜单"_q },
+		{ u"LuminaShowMutedCount"_q, u"始终显示未读计数"_q },
+		{ u"LuminaShowMutedCountInfo"_q, u"将已静音聊天的未读角标以正常"
+			u"强调色显示，而非静音灰色。"_q },
+		{ u"LuminaStickerSavedTo"_q, u"贴纸已保存到 {1}"_q },
+		{ u"LuminaStickerSizeChoice"_q, u"{1}%"_q },
+		{ u"LuminaStickerSizeChoiceDefault"_q, u"{1}%（默认）"_q },
+		{ u"LuminaStickerSizeInfo"_q, u"贴纸在聊天中绘制的大小——你发送的和"
+			u"你收到的都包括在内。动画表情、骰子和礼物贴纸保持各自原有的"
+			u"大小。Telegram Desktop 只会测量一次贴纸并把结果记下来，所以"
+			u"新的大小要到下次启动应用时才生效。"_q },
+		{ u"LuminaTimeWithSeconds"_q, u"在消息时间中显示秒"_q },
+		{ u"LuminaTimeWithSecondsAbout"_q, u"消息下方的时间、复制文本中的"
+			u"时间，以及屏幕阅读器朗读的时间都会包含秒。"_q },
+		{ u"LuminaUndoSendBulletin"_q, u"正在发送消息…"_q },
+		{ u"LuminaUndoSendTitle"_q, u"撤销发送"_q },
+		{ u"LuminaUndoSendUndo"_q, u"撤销"_q },
+		{ u"LuminaUndoSendWindow"_q, u"撤销发送窗口"_q },
+		{ u"LuminaUndoSendWindowInfo"_q, u"纯文字消息在真正发出之前，会先在"
+			u"“撤销”按钮后面暂缓 {1} 秒。这段时间里你的文字一直留在输入框"
+			u"中，只有消息真正发出后输入框才会清空，所以撤销只是让文字留在"
+			u"原处——不会先拿走再放回。再次发送、打开另一个聊天或退出应用，"
+			u"都会立刻把暂缓的消息发出去。媒体、语音、已编辑、转发和定时"
+			u"消息永远不会被暂缓，从论坛话题或评论串中发送的消息也不会。"_q },
 	};
 }
 

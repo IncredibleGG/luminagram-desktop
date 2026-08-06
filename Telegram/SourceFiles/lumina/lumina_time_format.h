@@ -54,9 +54,9 @@ namespace Lumina {
 // Android. Main thread only.
 [[nodiscard]] bool TimeWithSeconds();
 
-// Writes the preference and re-measures every message view. Any other writer
-// of the key - a settings import, say - must call RefreshMessageTimeLayouts()
-// itself, or already-loaded histories keep their old widths.
+// Writes the preference. The re-measure is driven by the preference CHANGING,
+// not by this setter, so a key written by any other route - a backup restore
+// through Lumina::Settings::importAll(), a second window - re-measures too.
 void SetTimeWithSeconds(bool value);
 
 [[nodiscard]] rpl::producer<bool> TimeWithSecondsValue();

@@ -7,6 +7,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "lumina/lumina_translate_settings.h"
 
+#include "base/timer.h"
 #include "lang/lang_keys.h"
 #include "lumina/lumina_locale.h"
 #include "lumina/lumina_settings.h"
@@ -67,6 +68,13 @@ constexpr auto kTestToastDuration = crl::time(7000);
 // explained itself instead of translating, most often - is broken in a way the
 // toast should report, not inherit.
 constexpr auto kTestResultMaxLength = 200;
+
+// How long the test row waits for an engine that may never answer. It has to
+// be comfortably longer than the 15s QNetworkRequest::setTransferTimeout()
+// that lumina_translate_providers.cpp puts on every HTTP request, so that an
+// engine which does report its own failure always gets to name it and this
+// only ever catches the case where nothing came back at all.
+constexpr auto kTestTimeoutMs = crl::time(25000);
 
 enum class TranslateMode : uchar {
 	All,
@@ -232,10 +240,17 @@ struct LanguageEntry {
 	if (key.isEmpty()) {
 		return Tr(u"LuminaTranslateApiKeyNotSet"_q);
 	}
+	// The tail is dropped entirely for a key too short to have one safely.
+	// Clamping it to the key's own length instead printed the whole secret
+	// into a settings row: a four character key came back as itself, and a
+	// five character one as a single dot followed by four real characters.
+	// The dot run is a fixed width for the same reason - a run that shrank
+	// with the key was reporting its length.
 	const auto length = int(key.size());
-	const auto tail = std::min(kApiKeyTailShown, length);
-	const auto dots = std::min(kApiKeyDotsShown, length - tail);
-	return QString(dots, QChar(0x2022)) + key.right(tail);
+	const auto tail = (length > kApiKeyTailShown + kApiKeyDotsShown)
+		? kApiKeyTailShown
+		: 0;
+	return QString(kApiKeyDotsShown, QChar(0x2022)) + key.right(tail);
 }
 
 // The exact string Android's LuminaTranslateActivity.runProviderTest() sends,
@@ -253,33 +268,48 @@ struct LanguageEntry {
 	return stored.isEmpty() ? InterfaceLanguageCode() : stored;
 }
 
-// `keyed` is true when the request went out carrying an API key. Two of these
-// errors mean different things depending on it, because ErrorForStatus() maps
-// every HTTP status onto three enumerators and a rejected key lands in two of
-// them: 401 in Network and 403 - DeepL's own answer for a key it does not
-// accept - in RateLimited.
-[[nodiscard]] QString TestFailureText(TranslateError error, bool keyed) {
+// `keyed` is true when the request went out carrying an API key, and `status`
+// is the HTTP status it came back with - 0 when it never got one, and also 0
+// for a failure that never reached HTTP at all.
+//
+// Both are needed because ErrorForStatus() maps every status onto three
+// enumerators, and the failures this row exists to tell apart land in only two
+// of them: a rejected key is 401, or on DeepL 403; an exhausted quota is 429
+// or 456, or again on DeepL 403; a host that never answered carries no status
+// whatsoever. The enum alone therefore cannot separate "your key is wrong"
+// from "your wifi is off", which is the single most common pair of afternoons
+// this row is pressed on.
+[[nodiscard]] QString TestFailureText(
+		TranslateError error,
+		bool keyed,
+		int status) {
 	const auto reason = [&] {
 		switch (error) {
 		case TranslateError::NoKey:
 			return Tr(u"LuminaTranslateNoKey"_q);
 		case TranslateError::RateLimited:
-			// ErrorForStatus() puts HTTP 403 in this bucket next to 429 and
-			// 456, and 403 is exactly what DeepL answers for a key it does
-			// not accept. So whenever a key was involved this has to name a
-			// rejected key as well - otherwise the single likeliest reason a
-			// user presses this row, a mistyped DeepL key, is answered with
-			// "try again later" and they wait instead of fixing it.
-			return keyed
+			// 429 and 456 are quota codes and nothing else, so they say so
+			// whether or not a key was involved. 403 is the ambiguous one: it
+			// is also what DeepL answers for a key it does not accept, so
+			// with a key in play it has to name the key first - otherwise the
+			// likeliest reason a user presses this row, a mistyped key, is
+			// answered with "try again later" and they wait instead of
+			// fixing it.
+			return (keyed && (status != 429) && (status != 456))
 				? Tr(u"LuminaTranslateTestQuotaKeyed"_q)
 				: Tr(u"LuminaTranslateTestQuota"_q);
 		case TranslateError::Network:
-			// ErrorForStatus() in lumina_translate_providers.cpp folds every
-			// HTTP failure that is not a quota code into Network, so a key the
-			// service rejected arrives here indistinguishable from a host that
-			// never answered. Naming both possibilities is the most this can
-			// honestly say; splitting them would need the status code, which
-			// the provider layer deliberately does not carry out.
+			// Everything that is not a quota code arrives here, so this is
+			// where the status earns its keep.
+			if (status == 401) {
+				return Tr(u"LuminaTranslateTestKeyRejected"_q);
+			} else if (!status || (status >= 500)) {
+				// Nothing answered at all, or the service answered that it
+				// is broken. Neither has anything to do with the key, and
+				// blaming the key here sends the user off to re-enter a key
+				// that was fine.
+				return Tr(u"LuminaTranslateTestNetwork"_q);
+			}
 			return keyed
 				? Tr(u"LuminaTranslateTestKeyRejected"_q)
 				: Tr(u"LuminaTranslateTestNetwork"_q);
@@ -383,7 +413,21 @@ void EditTextBox(
 			: Ui::InputField::Mode::SingleLine),
 		rpl::single(placeholder),
 		value));
-	field->setMaxLength(maxLength);
+
+	// Ui::InputField::setMaxLength() chops the text the field is ALREADY
+	// holding - lib_ui/ui/widgets/fields/input_field.cpp:2500-2517 runs
+	// chopByMaxLength() over the whole document the moment the limit is set.
+	// Applied to a stored value that is longer than the cap, that deletes the
+	// tail before the user has touched anything, the field then shows the
+	// truncated text as if that were what was stored, and Save writes the
+	// truncation back. A value that long can only have arrived from
+	// Settings::importAll() - a backup, or another client with a different
+	// limit - and it is still the user's text. Cap what they type, never what
+	// they already had; an over-long value stays intact and editable, and the
+	// cap starts applying again as soon as it fits.
+	if (int(value.size()) < maxLength) {
+		field->setMaxLength(maxLength);
+	}
 	box->setFocusCallback([=] {
 		field->setFocusFast();
 	});
@@ -663,6 +707,18 @@ struct TestState {
 	int generation = 0;
 	bool running = false;
 
+	// The only thing that can end a run the engine never answers. Every HTTP
+	// engine sets QNetworkRequest::setTransferTimeout() and therefore always
+	// reaches its callback, but the Telegram engine does not go over HTTP at
+	// all: Ui::CreateMTProtoTranslateProvider() sends through MTP::Sender,
+	// and an MTProto request made while the connection is down is queued
+	// rather than failed - neither .done() nor .fail() runs until it is sent.
+	// Without this, pressing Test on provider "Telegram" while offline left
+	// the row reading "Testing..." with `running` stuck true and the button
+	// dead for the rest of the page, which is the exact confusion the row
+	// exists to end.
+	base::Timer watchdog;
+
 	// Last, so that it is destroyed first: whatever the engine does on the way
 	// out, the rest of this struct is still there while it does it.
 	std::unique_ptr<TranslateEngine> engine;
@@ -690,7 +746,7 @@ void AddTestRow(
 		if (keyed && ProviderApiKey(provider.id).isEmpty()) {
 			ShowTestToast(
 				controller,
-				TestFailureText(TranslateError::NoKey, false));
+				TestFailureText(TranslateError::NoKey, false, 0));
 			return;
 		}
 
@@ -703,7 +759,7 @@ void AddTestRow(
 		if (!engine) {
 			ShowTestToast(
 				controller,
-				TestFailureText(TranslateError::Unavailable, false));
+				TestFailureText(TranslateError::Unavailable, false, 0));
 			return;
 		}
 		state->engine = std::move(engine);
@@ -711,13 +767,37 @@ void AddTestRow(
 		const auto generation = ++state->generation;
 		state->label.fire(Tr(u"LuminaTranslateTestRunning"_q));
 
+		// Armed before the request goes out, because an engine may answer
+		// from inside translate() itself - an unparseable base url makes
+		// SendHttp() call back synchronously - and the cancel below has to be
+		// able to disarm a timer that is already running.
+		//
+		// Dropping the engine from here is safe in a way that dropping it
+		// from the result callback is not: this runs from the event loop and
+		// not from inside a network reply, so there is no live reply object
+		// underneath. Destroying it is also what cancels the request, so a
+		// late answer can no longer arrive and contradict the toast.
+		state->watchdog.setCallback([=] {
+			if (!state->running || (state->generation != generation)) {
+				return;
+			}
+			state->running = false;
+			state->label.fire(QString());
+			state->engine = nullptr;
+			ShowTestToast(
+				controller,
+				TestFailureText(TranslateError::Network, keyed, 0));
+		});
+		state->watchdog.callOnce(kTestTimeoutMs);
+
 		const auto sample = TestSampleText();
 		state->engine->translate(sample, TestTargetLanguage(), [=](
 				TranslateResult result) {
+			state->watchdog.cancel();
 			state->running = false;
 			state->label.fire(QString());
 			ShowTestToast(controller, result.failed()
-				? TestFailureText(result.error, keyed)
+				? TestFailureText(result.error, keyed, result.httpStatus)
 				: TestSuccessText(sample, result.text));
 
 			// This runs inside the engine's own network reply, so the engine

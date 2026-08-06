@@ -12,6 +12,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "history/view/history_view_translate_tracker.h"
 #include "dialogs/dialogs_indexed_list.h"
 #include "history/history_inner_widget.h"
+#include "boxes/translate_box.h"
 #include "history/history_item.h"
 #include "history/history_item_components.h"
 #include "history/history_item_helpers.h"
@@ -4509,7 +4510,7 @@ void History::translateOfferFrom(LanguageId id) {
 		using Flag = PeerData::TranslationFlag;
 		if (peer->autoTranslation()
 			&& (peer->translationFlag() == Flag::Enabled)) {
-			translateTo(Core::App().settings().translateTo());
+			translateTo(Ui::ChooseTranslateTo(this));
 		}
 	} else {
 		_translation->offerFrom(id);

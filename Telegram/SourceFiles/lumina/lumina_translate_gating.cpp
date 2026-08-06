@@ -139,7 +139,21 @@ rpl::producer<> AutoTranslatePolicyChanges() {
 		settings.changesFor(ScopePrivateKey()),
 		settings.changesFor(ScopeGroupKey()),
 		TranslateProviderChanges(),
-		ReadLanguageCodeValue() | rpl::skip(1) | rpl::to_empty);
+		ReadLanguageCodeValue() | rpl::skip(1) | rpl::to_empty,
+		// The read language is an OVERRIDE: with none set, and that is the
+		// default, AutoTranslateOfferSkip() resolves the target through
+		// Core::Settings::translateTo(). Ui::ChooseTranslateToBox() writes
+		// that one on every pick and NoteReadLanguageChosen() is a no-op
+		// while there is no override, so without this term picking a new
+		// translate-to language moves the target the offer filter is built
+		// from and nothing re-evaluates the filter: a chat already offered
+		// in the new target keeps being offered - and in "all" mode keeps
+		// being translated into itself - while a chat in the old target is
+		// never offered at all. Both only correct themselves when some other
+		// key here changes or the chat is reopened.
+		Core::App().settings().translateToValue()
+			| rpl::skip(1)
+			| rpl::to_empty);
 }
 
 } // namespace Lumina

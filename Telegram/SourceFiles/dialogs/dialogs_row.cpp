@@ -35,6 +35,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "history/history_item.h"
 #include "lang/lang_keys.h"
 #include "lumina/lumina_dialogs_badges.h"
+#include "lumina/lumina_dialogs_style.h"
 #include "base/unixtime.h"
 #include "styles/style_dialogs.h"
 
@@ -346,13 +347,19 @@ const style::DialogRow &Row::ComputeSt(
 }
 
 void Row::recountHeight(float64 narrowRatio, FilterId filterId) {
-	const auto &st = ComputeSt(_id.entry(), filterId);
-	_height = ((&st == &st::defaultDialogRow) || !_id.history())
-		? st::defaultDialogRow.height
-		: anim::interpolate(
-			st.height,
-			st::defaultDialogRow.height,
-			narrowRatio);
+	// The identity test asks "is this the plain row style", so it has to be
+	// asked of what ComputeSt() actually returns - a codegen st::...DialogRow.
+	// Running ComputeSt() through Lumina::DialogRowStyle() first would answer
+	// "no" for every plain row the moment compact rows are on, which flips this
+	// branch into an interpolation towards the stock 62px height. So the
+	// question stays on the stock objects and only the heights come from the
+	// compact copies.
+	const auto &stock = ComputeSt(_id.entry(), filterId);
+	const auto &st = Lumina::DialogRowStyle(stock);
+	const auto &base = Lumina::DialogRowStyle(st::defaultDialogRow);
+	_height = ((&stock == &st::defaultDialogRow) || !_id.history())
+		? base.height
+		: anim::interpolate(st.height, base.height, narrowRatio);
 }
 
 uint64 Row::sortKey(FilterId filterId) const {
@@ -724,7 +731,12 @@ void Row::paintUserpic(
 	const auto limit = Ui::kOutlineSegmentsMax;
 	const auto storiesCount = std::min(storiesCountReal, limit);
 	const auto storiesUnreadCount = std::min(storiesUnreadCountReal, limit);
-	if (_cornerBadgeUserpic->frame.size() != frameSize) {
+	// A reallocated frame holds uninitialised pixels, so the repaint below has
+	// to be forced rather than left to the cache key: nothing else in that key
+	// moves when only context.st->photoSize does, which is exactly what happens
+	// when the compact chat-list preference is toggled under a live row.
+	const auto frameResized = (_cornerBadgeUserpic->frame.size() != frameSize);
+	if (frameResized) {
 		_cornerBadgeUserpic->frame = QImage(
 			frameSize,
 			QImage::Format_ARGB32_Premultiplied);
@@ -737,7 +749,8 @@ void Row::paintUserpic(
 	const auto paletteVersionReal = style::PaletteVersion();
 	const auto paletteVersion = (paletteVersionReal & ((1 << 17) - 1));
 	const auto active = context.active ? 1 : 0;
-	const auto keyChanged = (_cornerBadgeUserpic->key != key)
+	const auto keyChanged = frameResized
+		|| (_cornerBadgeUserpic->key != key)
 		|| (_cornerBadgeUserpic->paletteVersion != paletteVersion);
 	if (keyChanged) {
 		_cornerBadgeUserpic->cacheTTL = QImage();

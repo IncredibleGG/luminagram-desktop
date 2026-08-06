@@ -132,6 +132,11 @@ private:
 
 	std::array<QJsonObject, kStoreCount> _data;
 	std::array<bool, kStoreCount> _dirty = { false, false, false };
+	// A store whose file exists but could not be READ. Writing it would put an
+	// empty object over the user's real settings, so writeStore() refuses. Only
+	// the parse-failure path renames the file aside; an open failure (locked,
+	// permissions, transient I/O) has to leave the data exactly where it is.
+	std::array<bool, kStoreCount> _loadFailed = { false, false, false };
 	base::flat_map<QString, Store> _where;
 	base::Timer _saveTimer;
 	rpl::event_stream<QString> _changes;

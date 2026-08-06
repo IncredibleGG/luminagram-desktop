@@ -7,9 +7,18 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #pragma once
 
+#include "api/api_common.h" // Api::SendOptions.
+
 #include <QtCore/QString>
 
+#include <memory>
+
 class History;
+struct TextWithTags;
+
+namespace ChatHelpers {
+class Show;
+} // namespace ChatHelpers
 
 namespace Ui {
 class PopupMenu;
@@ -111,6 +120,68 @@ namespace Lumina {
 // it - it is public only so that an explicit init point can be added later
 // without changing anything else.
 void SetupTranslateSendPipeline();
+
+// !! THE CAPTION SEAM'S ENTRY POINT, AND THE REASON IT IS NOT
+// Lumina::InterceptSend().
+//
+// Same contract as InterceptSend(): returns false if this pipeline took the
+// send over, in which case `proceed` is invoked later, on the main thread,
+// exactly once, or never (which is how a cancel is spelled). Returns true to
+// send now, unchanged, with `proceed` untouched.
+//
+// The difference is what it does NOT do: it runs this pipeline alone instead of
+// the whole interceptor chain. A caption must not travel the chain, because
+// undo-send sits on it and lumina_undo_send.h states outright that media never
+// reaches that seam - and its behaviour is built on that:
+//
+//  * it raises an "Undo send" toast over a photo whose Undo cannot stop it.
+//    Dropping the hold drops `proceed`, and lumina_translate_caption.cpp then
+//    sends the files with the caption as typed, because losing a photo to a
+//    dismissed hold is not on the table. So Undo silently becomes "send it
+//    untranslated" instead of "do not send it";
+//  * its one-hold-at-a-time rule compares text, so a caption whose text matches
+//    a typed message still inside its own undo window makes that typed message
+//    be dropped rather than sent. That one is a lost message.
+//
+// Neither is reachable by a caption that never enters the chain. Routing a
+// caption through InterceptSend() reaches both whenever the send is translated
+// at all, because this pipeline's `proceed` IS the rest of the chain.
+//
+// If an interceptor is ever added that genuinely should see captions, it has to
+// be called from here rather than assumed.
+[[nodiscard]] bool InterceptCaptionSend(
+	not_null<History*> history,
+	TextWithTags &caption,
+	Api::SendOptions options,
+	Fn<void()> proceed);
+
+// Finishes every send this pipeline is holding, right now and synchronously,
+// each one as the user typed it - the same answer the 20s and 60s watchdogs
+// give. Safe when nothing is held, and safe to call repeatedly.
+//
+// !! It has to be called from Core::Application::readyToQuit(), and BEFORE
+// Lumina::FlushUndoSend() on the line below it, for two separate reasons:
+//
+//  * without it, a quit inside a hold drops the send. For a typed message that
+//    costs nothing - the seam sits before the composer clears its field, so the
+//    text is still there and goes to the local draft like any unsent text. For
+//    a caption send it is unrecoverable: SendFilesBox has already closed and
+//    the files exist nowhere but in the bundle the hold is carrying, so the
+//    photo is gone with no draft and no trace. A confirm box the user has not
+//    answered holds a send with no watchdog over it at all, so that window is
+//    not small.
+//  * before FlushUndoSend(), because finishing a send here hands it to the
+//    rest of the interceptor chain, and undo-send is registered last. Flushing
+//    undo-send first would leave whatever this releases sitting in a five
+//    second hold that the quit is not going to wait for.
+//
+// FlushTranslateSendsAndCaptions() is the one to call: it flushes this
+// pipeline and then the caption seam's own ordering queue
+// (lumina/lumina_translate_caption.h), in that order, so media the user sent
+// during a hold leaves behind the send it was waiting for rather than ahead of
+// it.
+void FlushTranslateSends();
+void FlushTranslateSendsAndCaptions();
 
 // Whether the next send in this chat would be translated, without consuming
 // anything: the master opt-in, the effective toggle (which the send-menu quick
@@ -219,6 +290,33 @@ void SetSendOriginalHook(SendOriginalHook hook);
 // to a plain text composer.
 void AddSendMenuTranslateRow(
 	not_null<Ui::PopupMenu*> menu,
+	const SendMenu::Details &details);
+
+// !! CALL THIS ONE INSTEAD, from menu/menu_send.cpp's FillSendMenu(), passing
+// the `maybeShow` it already has:
+//
+//     Lumina::AddSendMenuTranslateRow(menu, maybeShow, details);
+//
+// It adds the quick-toggle row above and, behind it, the only way a user has to
+// change this chat's send language once it has been answered. Without the
+// `show` the row cannot exist at all: SendMenu::Details carries a bare peer id
+// and no session, and guessing the session from the peer id is exactly the
+// cross-account mistake DialogKey() exists to prevent. `show` names the session
+// outright.
+//
+// Why it matters: trSendLang defaults to "auto", so the send language of a chat
+// is decided by the one-time confirm the pipeline shows on the first translated
+// send there, and SetDialogSendLanguage() then locks it. BeginRequest() finds a
+// non-empty target from that point on and never asks again. With no row that
+// reaches ShowDialogSendLanguagePicker(), a language accepted by mistake is
+// permanent for that chat - the only escape is setting a non-auto send language
+// globally in settings, which turns the per-chat lock off everywhere.
+//
+// The overload is separate so that the existing two-argument call site keeps
+// compiling; passing a null `show` gives exactly the old behaviour.
+void AddSendMenuTranslateRow(
+	not_null<Ui::PopupMenu*> menu,
+	const std::shared_ptr<ChatHelpers::Show> &show,
 	const SendMenu::Details &details);
 
 } // namespace Lumina

@@ -152,8 +152,9 @@ void AddValueRow(
 		"manager, and anyone who can read this device's files can read your "
 		"account. The vault appears the next time LuminaGram starts, and "
 		"closing the decoy quits LuminaGram. If you ever forget the code, "
-		"delete tdata/luminagram.json from your LuminaGram data folder to "
-		"turn the vault off."_q;
+		"delete tdata/luminagram.json and tdata/luminagram_private.json from "
+		"your LuminaGram data folder: the vault then turns itself off and "
+		"LuminaGram starts normally."_q;
 }
 
 void ShowModePicker(not_null<Window::SessionController*> controller) {
@@ -257,7 +258,11 @@ void AddVaultRows(
 		[] { return VaultSkinName(); },
 		[=] { ShowSkinPicker(controller); });
 
-	// The code itself is never shown on the page, only whether there is one.
+	// The row shows only whether a code exists; the code itself is legible
+	// inside the editor box, which is the same trade the fake-crash page
+	// makes for its duress code. A vault code the owner is no longer sure of
+	// is a vault they cannot open, and anyone who can reach this page is
+	// already looking at an unlocked LuminaGram.
 	AddValueRow(
 		details,
 		rpl::single(u"Secret code"_q),

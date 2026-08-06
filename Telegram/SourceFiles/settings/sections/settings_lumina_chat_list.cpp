@@ -9,6 +9,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include "lumina/lumina_muted_badge_settings.h"
 #include "lumina/lumina_dialogs_badges_settings.h"
+#include "lumina/lumina_dialogs_style_settings.h"
 #include "lumina/lumina_dialogs_visibility_settings.h"
 #include "lumina/lumina_locale.h"
 #include "ui/wrap/vertical_layout.h"
@@ -51,6 +52,7 @@ void LuminaChatList::setupContent(not_null<Ui::VerticalLayout*> container) {
 	Lumina::AddDialogsVisibilityRows(container, controller());
 	Lumina::AddChatListDotRows(container, controller());
 	Lumina::AddMutedBadgeRows(container, controller());
+	Lumina::AddCompactListRows(container, controller());
 }
 
 } // namespace Settings

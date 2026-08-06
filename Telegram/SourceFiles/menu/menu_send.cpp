@@ -764,7 +764,7 @@ FillMenuResult FillSendMenu(
 				details); },
 			&icons.menuWhenOnline);
 	}
-	Lumina::AddSendMenuTranslateRow(menu, details);
+	Lumina::AddSendMenuTranslateRow(menu, maybeShow, details);
 
 	if ((type != Type::Disabled)
 		&& ((details.spoiler != SpoilerState::None)

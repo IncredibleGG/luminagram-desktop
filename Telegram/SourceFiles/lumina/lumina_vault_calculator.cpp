@@ -338,8 +338,18 @@ void CalculatorWindow::backspace() {
 
 void CalculatorWindow::equals() {
 	// The unlock, and the only thing here that is not a calculator: the entry
-	// has to be exactly the secret code. Never log or echo it.
-	if (VaultCodeMatches(_expression)) {
+	// has to be exactly the secret code, and it has to have been TYPED.
+	// Never log or echo it.
+	//
+	// `_showingResult` is true exactly when `_expression` is a result this
+	// window computed rather than something the user entered - every input
+	// path (digit, oper, clear, backspace) clears it first. Without the check,
+	// a code of "12" is also opened by computing 5+7 and pressing equals
+	// twice, so anyone idly using the decoy can fall into the real app by
+	// arithmetic. The check cannot cost the owner their unlock: the only
+	// documented way in is to type the code, and typing always leaves
+	// `_showingResult` false.
+	if (!_showingResult && VaultCodeMatches(_expression)) {
 		finish(VaultOutcome::Unlock);
 		return;
 	}

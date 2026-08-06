@@ -24,6 +24,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "iv/iv_rich_page.h"
 #include "lang/translate_provider.h"
 #include "lumina/lumina_translate_gating.h"
+#include "lumina/lumina_translate_providers.h" // TranslateProviderChanges.
 #include "main/main_session.h"
 #include "spellcheck/platform/platform_language.h"
 
@@ -116,6 +117,20 @@ void TranslateTracker::setup() {
 			&& wasOfferedFrom
 			&& !_history->translateOfferedFrom()) {
 			stopAndRevert();
+		} else if (now) {
+			// checkRecognized() alone cannot be relied on to start the
+			// translation here. It only ever starts one through
+			// Data::HistoryUpdate::Flag::TranslateFrom, and
+			// HistoryTranslation::offerFrom() fires that flag only when the
+			// OFFERED LANGUAGE changes. Turning "translate received
+			// messages: every chat" on while looking at a chat upstream had
+			// already offered - a foreign-language chat with the translate
+			// bar showing, which is the likeliest chat to be looking at when
+			// turning it on - recomputes the same language, fires nothing,
+			// and leaves the chat untranslated until its detected language
+			// changes or it is reopened. Every switch connected, the feature
+			// still dead. So ask directly instead of via the update.
+			AutoTranslateIfNeeded(_history);
 		}
 	};
 
@@ -145,12 +160,58 @@ void TranslateTracker::setup() {
 			) | rpl::on_next([=] {
 				AutoTranslateIfNeeded(_history);
 			}, _trackingLifetime);
+			// EVERY input of Lumina::AutoTranslateOfferSkip() has to reach
+			// this stream, not only the ones that file owns.
+			// distinct_until_changed() keeps one remembered value per
+			// subscription and updates it only when a value actually flows
+			// through here, so an input that moves the answer WITHOUT waking
+			// this stream leaves that memory holding something the predicate
+			// no longer returns - and the next real change is then compared
+			// against a lie and dropped as "not a change".
+			//
+			// PeerData::translationFlag() is exactly such an input. It is
+			// Unknown until the peer's full info comes back, so a chat opened
+			// at launch subscribes here while the answer is still nullopt,
+			// and the flag arriving Enabled turns it into a real list through
+			// trackTranslationDisabled() - which does not pass through here.
+			// Turning "translate received messages: every chat" back OFF then
+			// maps to nullopt, compares equal to the remembered nullopt and is
+			// swallowed: the relaxed offer is never withdrawn, stopAndRevert()
+			// never runs, and the chat keeps translating every new message,
+			// one provider request each, after the switch that stops it was
+			// turned off. Both scope keys and the master opt-in fail the same
+			// way through the same remembered nullopt, and for a Premium
+			// account the master opt-in is the one that must work.
+			//
+			// translateChatEnabledValue() and ChatTranslationUnlockedValue()
+			// are here for the same reason. They usually move
+			// _trackingLanguage as well, which rebuilds this subscription and
+			// its memory from scratch - but not always: in a channel carrying
+			// ChannelDataFlag::AutoTranslation the tracking flag stays true on
+			// its own, and Premium lapsing underneath it would be one more
+			// silently remembered lie.
+			//
+			// None of the three needs skip(1). They emit their current value
+			// on subscribe, it maps to the same answer rpl::single() below
+			// already produced, and distinct_until_changed() collapses it;
+			// what they are here for is to keep the memory honest afterwards.
+			auto policyChanges = rpl::merge(
+				Lumina::AutoTranslatePolicyChanges(),
+				_history->session().changes().peerFlagsValue(
+					peer,
+					Data::PeerUpdate::Flag::TranslationDisabled
+				) | rpl::to_empty,
+				Core::App().settings().translateChatEnabledValue()
+					| rpl::to_empty,
+				Lumina::ChatTranslationUnlockedValue(&_history->session())
+					| rpl::to_empty);
+
 			// skip(1) drops the current value, which is not a change;
 			// trackSkipLanguages() has already evaluated it by then.
 			rpl::single(
 				rpl::empty
 			) | rpl::then(
-				Lumina::AutoTranslatePolicyChanges()
+				std::move(policyChanges)
 			) | rpl::map([=] {
 				return Lumina::AutoTranslateOfferSkip(_history);
 			}) | rpl::distinct_until_changed(
@@ -161,6 +222,39 @@ void TranslateTracker::setup() {
 			checkRecognized({});
 			stopAndRevert();
 		}
+	}, _lifetime);
+
+	// _provider is resolved once, in the constructor's initialiser list. That
+	// is a WHERE THE TEXT GOES decision, not a cached setting: with an open
+	// chat behind a settings window - a separate chat window, or simply
+	// coming back to the same one - picking a different service, or pasting
+	// the API key that was missing, changed the row on the settings page and
+	// nothing else. Every further message in that chat kept going to the
+	// engine that was current when the chat was opened, including the keyless
+	// Google one after the user had explicitly moved to Telegram. Rebuilding
+	// here is what makes the provider row mean anything while a chat is open.
+	//
+	// Order is load bearing. cancelSentRequest() first, because destroying
+	// the old provider destroys the QNetworkAccessManager that owns the reply
+	// in flight and the finished handler then never runs: without this
+	// _requestInProcess would stay true for the lifetime of the chat and
+	// requestSome() would refuse every later batch - the provider switch
+	// would turn translation off instead of redirecting it. It also puts the
+	// items it had taken back into a state the next paint bunch re-queues,
+	// through translationShowRequiresCheck(), so nothing is dropped; the
+	// requestSome() below covers whatever is still queued without waiting for
+	// that bunch.
+	//
+	// Safe to destroy the provider from here: every writer of the keys this
+	// stream watches is a settings row (SetCurrentProviderId,
+	// SetProviderApiKey and friends in lumina/lumina_translate_settings.cpp),
+	// so this never runs inside a reply callback owned by the object being
+	// destroyed.
+	Lumina::TranslateProviderChanges(
+	) | rpl::on_next([=] {
+		cancelSentRequest();
+		_provider = Ui::CreateTranslateProvider(&_history->session());
+		requestSome();
 	}, _lifetime);
 }
 
@@ -619,7 +713,21 @@ void TranslateTracker::checkRecognized(const std::vector<LanguageId> &skip) {
 	auto languages = base::flat_map<LanguageId, int>();
 	for (const auto &[id, entry] : _itemsForRecognize) {
 		if (const auto id = std::get_if<LanguageId>(&entry.id)) {
-			if (*id && !ranges::contains(effectiveSkip, *id)) {
+			// QLocale::C is what Qt hands back for a name it cannot parse,
+			// and CLD3 has labels Qt does not know ("bh", and the Latin
+			// transliteration entries). LanguageId::known() still says true
+			// for it and LanguageId::operator== normalises it to English
+			// (lib_spellcheck/spellcheck/spellcheck_types.h), so an
+			// unrecognised answer is counted as a recognised ENGLISH message.
+			// Upstream needs kEnoughForTranslation of those before it acts;
+			// under the automatic policy one is enough, which is a single
+			// mislabelled two-word message arming whole-chat translation of a
+			// chat that may well be in the read language already - and then
+			// one provider request per message in it. Only dropped where the
+			// threshold is 1; the unrelaxed path stays byte-for-byte upstream.
+			if (*id
+				&& (!automatic || (id->value != QLocale::C))
+				&& !ranges::contains(effectiveSkip, *id)) {
 				++languages[*id];
 			}
 		}

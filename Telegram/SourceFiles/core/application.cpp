@@ -52,6 +52,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "lang/lang_cloud_manager.h"
 #include "lang/lang_hardcoded.h"
 #include "lang/lang_instance.h"
+#include "lumina/lumina_settings.h"
+#include "lumina/lumina_translate_send.h"
 #include "lumina/lumina_undo_send.h"
 #include "lumina/lumina_vault.h"
 #include "inline_bots/bot_attach_web_view.h"
@@ -1861,7 +1863,11 @@ bool Application::readyToQuit() {
 	// until it is actually on the wire. Moving this line below the loop loses
 	// the message. No-op when nothing is held, and safe to re-enter - quitting
 	// asks more than once.
+	Lumina::FlushTranslateSendsAndCaptions();
 	Lumina::FlushUndoSend();
+	// The pref store batches writes for ~500ms; without this a setting
+	// changed in the last moment before quitting never reaches disk.
+	Lumina::Settings::Instance().saveNow();
 
 	auto prevented = false;
 	if (_calls->isQuitPrevent()) {

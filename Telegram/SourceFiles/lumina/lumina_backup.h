@@ -64,9 +64,15 @@ namespace Lumina {
 // ATOMICITY. Import decrypts, authenticates and fully parses the payload before
 // a single key is written, so a bad passphrase can never leave the store half
 // restored. The write itself then goes through Settings::importAll() followed
-// by saveNow(), and each of the three store files is replaced atomically by
-// QSaveFile. Keys the backup does not carry are left alone; keys it does carry
-// are overwritten - the same rule Android states in its own info text.
+// by saveNow(). Keys the backup does not carry are left alone; keys it does
+// carry are overwritten - the same rule Android states in its own info text.
+//
+// Each of the three store files is replaced atomically by QSaveFile, but the
+// three of them are not replaced atomically as a SET: if the second write fails
+// the first has already landed, and the on-disk profile is then part restored
+// and part original until a later saveNow() retries the rest. Memory stays
+// consistent throughout, so this is only visible after a crash or a kill
+// between the failed write and the retry.
 //
 // THREADING AND COST. Main thread, synchronous, and the key derivation is meant
 // to be expensive: expect a few hundred milliseconds of blocked UI per call.
@@ -121,8 +127,17 @@ struct BackupRead {
 [[nodiscard]] BackupRead ReadBackupFile(const QString &path);
 [[nodiscard]] BackupRead ReadBackupBytes(const QByteArray &content);
 
-// Authenticates, decrypts and applies. Returns BackupError::None only when the
-// store has actually been updated and flushed to disk.
+// Authenticates, decrypts and applies. BackupError::None means the in-memory
+// store has been updated and a flush was requested.
+//
+// !! IT DOES NOT MEAN THE FLUSH SUCCEEDED. Settings::saveNow() returns void and
+// only logs a store it could not write, so a read-only or full tdata directory
+// produces "Backup restored" while the three JSON files still hold the old
+// values - and Settings::saveNow() cancels the debounce timer without
+// rescheduling it, so nothing retries until the next unrelated write or the
+// destructor. Fixing this needs one change in lumina_settings: make saveNow()
+// return whether every dirty store was written, and return WriteFailed here
+// when it says no. See the comment at the saveNow() call in ApplyBackup().
 [[nodiscard]] BackupError ApplyBackup(
 	const BackupEnvelope &envelope,
 	const QString &passphrase);

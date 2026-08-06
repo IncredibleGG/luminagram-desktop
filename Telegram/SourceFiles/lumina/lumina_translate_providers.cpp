@@ -5,6 +5,7 @@ a fork of Telegram Desktop.
 For license and copyright information please follow this link:
 https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
+#include "lumina/lumina_translate_gating.h"
 #include "lumina/lumina_translate_providers.h"
 
 #include "base/random.h"
@@ -135,17 +136,20 @@ struct HttpHeader {
 
 // An empty `body` sends a GET, anything else a POST.
 //
-// `done` is handed the response body and nothing else, and nothing here is
-// ever logged: the url carries the text being translated, the headers carry
-// the user's API key, and an error body can echo either one back.
+// `done` is handed the response body, the mapped error and the raw HTTP status
+// - 0 when the request never got one - and nothing else. Nothing here is ever
+// logged: the url carries the text being translated, the headers carry the
+// user's API key, and an error body can echo either one back. The status is
+// the one detail that is safe to carry out and that ErrorForStatus() throws
+// away, and the settings test row needs it to name what actually went wrong.
 void SendHttp(
 		not_null<QNetworkAccessManager*> network,
 		const QUrl &url,
 		const std::vector<HttpHeader> &headers,
 		const QByteArray &body,
-		Fn<void(QByteArray, TranslateError)> done) {
+		Fn<void(QByteArray, TranslateError, int)> done) {
 	if (!url.isValid()) {
-		done(QByteArray(), TranslateError::Network);
+		done(QByteArray(), TranslateError::Network, 0);
 		return;
 	}
 	auto request = QNetworkRequest(url);
@@ -163,11 +167,11 @@ void SendHttp(
 		auto received = reply->readAll();
 		reply->deleteLater();
 		if (status >= 400) {
-			done(QByteArray(), ErrorForStatus(status));
+			done(QByteArray(), ErrorForStatus(status), status);
 		} else if (failure != QNetworkReply::NoError) {
-			done(QByteArray(), TranslateError::Network);
+			done(QByteArray(), TranslateError::Network, status);
 		} else {
-			done(std::move(received), TranslateError::None);
+			done(std::move(received), TranslateError::None, status);
 		}
 	});
 }
@@ -397,18 +401,21 @@ void GoogleWebEngine::requestPart(
 		QUrl(GoogleRequestUrl(part, wireCode)),
 		headers,
 		QByteArray(),
-		[=](QByteArray body, TranslateError error) {
+		[=](QByteArray body, TranslateError error, int status) {
 			if (batch->finished) {
 				return;
 			} else if (error != TranslateError::None) {
 				batch->finished = true;
-				batch->done({ .error = error });
+				batch->done({ .error = error, .httpStatus = status });
 				return;
 			}
 			const auto parsed = ParseGoogleWebResponse(body);
 			if (!parsed) {
 				batch->finished = true;
-				batch->done({ .error = TranslateError::BadResponse });
+				batch->done({
+					.error = TranslateError::BadResponse,
+					.httpStatus = status,
+				});
 				return;
 			}
 			batch->results[index] = parsed->text;
@@ -473,19 +480,25 @@ void DeepLEngine::translate(
 		QUrl(host + u"/v2/translate"_q),
 		headers,
 		body,
-		[done](QByteArray received, TranslateError error) {
+		[done](QByteArray received, TranslateError error, int status) {
 			if (error != TranslateError::None) {
-				done({ .error = error });
+				done({ .error = error, .httpStatus = status });
 				return;
 			}
 			const auto object = ParseJsonObject(received);
 			if (!object) {
-				done({ .error = TranslateError::BadResponse });
+				done({
+					.error = TranslateError::BadResponse,
+					.httpStatus = status,
+				});
 				return;
 			}
 			const auto list = object->value(u"translations"_q).toArray();
 			if (list.isEmpty()) {
-				done({ .error = TranslateError::BadResponse });
+				done({
+					.error = TranslateError::BadResponse,
+					.httpStatus = status,
+				});
 				return;
 			}
 			const auto first = list.at(0).toObject();
@@ -555,19 +568,25 @@ void LlmEngine::translate(
 		QUrl(baseUrl + u"/chat/completions"_q),
 		headers,
 		body,
-		[done](QByteArray received, TranslateError error) {
+		[done](QByteArray received, TranslateError error, int status) {
 			if (error != TranslateError::None) {
-				done({ .error = error });
+				done({ .error = error, .httpStatus = status });
 				return;
 			}
 			const auto object = ParseJsonObject(received);
 			if (!object) {
-				done({ .error = TranslateError::BadResponse });
+				done({
+					.error = TranslateError::BadResponse,
+					.httpStatus = status,
+				});
 				return;
 			}
 			const auto choices = object->value(u"choices"_q).toArray();
 			if (choices.isEmpty()) {
-				done({ .error = TranslateError::BadResponse });
+				done({
+					.error = TranslateError::BadResponse,
+					.httpStatus = status,
+				});
 				return;
 			}
 			const auto message = choices.at(0).toObject().value(
@@ -1068,7 +1087,10 @@ void TranslateText(
 
 std::unique_ptr<Ui::TranslateProvider> CreateTranslateProvider(
 		not_null<Main::Session*> session) {
-	if (!UsingOwnProvider()) {
+	// The master opt-in has to gate this too: without it a Premium account
+	// with the feature OFF still had its chat translations sent to Google
+	// instead of to Telegram, which is exactly what OFF must not do.
+	if (!TranslationFeatureEnabled() || !UsingOwnProvider()) {
 		return nullptr;
 	}
 	auto engine = MakeCurrentTranslateEngine(session);

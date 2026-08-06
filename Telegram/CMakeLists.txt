@@ -1826,6 +1826,10 @@ PRIVATE
     lumina/lumina_dialogs_badges.h
     lumina/lumina_dialogs_badges_settings.cpp
     lumina/lumina_dialogs_badges_settings.h
+    lumina/lumina_dialogs_style.cpp
+    lumina/lumina_dialogs_style.h
+    lumina/lumina_dialogs_style_settings.cpp
+    lumina/lumina_dialogs_style_settings.h
     lumina/lumina_dialogs_visibility.cpp
     lumina/lumina_dialogs_visibility.h
     lumina/lumina_dialogs_visibility_settings.cpp

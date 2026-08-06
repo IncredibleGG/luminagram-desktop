@@ -100,6 +100,16 @@ void EditFieldBox(
 		TrValue(info.hintKey),
 		CurrentProfileCard().*(info.value)));
 	field->setMaxLength(info.maxLength);
+	if (info.multiline) {
+		// Mode::MultiLine alone is not enough, and leaving the default here was
+		// a dead key: InputField starts at SubmitSettings::Enter, and in that
+		// mode keyPressEventInner() turns a plain Return into a _submits
+		// emission INSTEAD of a newline (input_field.cpp:4267-4293). With
+		// nothing subscribed to submits() on this branch, Enter in the bio
+		// produced neither a new line nor a save - it was swallowed outright.
+		// Same fix, and same reason, as lumina_contact_note_box.cpp.
+		field->setSubmitSettings(Ui::InputField::SubmitSettings::CtrlEnter);
+	}
 	box->setFocusCallback([=] {
 		field->setFocusFast();
 	});
@@ -113,9 +123,13 @@ void EditFieldBox(
 		SetProfileCard(std::move(card));
 		box->closeBox();
 	};
-	if (!info.multiline) {
-		field->submits() | rpl::on_next(save, field->lifetime());
-	}
+	// Subscribed for BOTH modes. A single-line field submits on Enter whatever
+	// the setting says (`enterSubmit` is unconditionally true off
+	// Mode::MultiLine, input_field.cpp:4267), and the multi-line bio submits on
+	// Ctrl+Enter because of the setSubmitSettings() above. Leaving the
+	// multi-line branch unsubscribed - which is what this was - meant the key
+	// was consumed and nothing happened at all.
+	field->submits() | rpl::on_next(save, field->lifetime());
 
 	box->addButton(tr::lng_settings_save(), save);
 	box->addButton(tr::lng_cancel(), [=] {

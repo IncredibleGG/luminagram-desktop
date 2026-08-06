@@ -161,6 +161,11 @@ namespace {
 		{ u"LuminaTranslatePreviewTranslating"_q, u"Перевод…"_q },
 		{ u"LuminaTranslatePreviewFailed"_q, u"Перевод недоступен"_q },
 
+		// The per-chat translate button in the chat top bar. Both texts name
+		// what pressing the button will do, not what the chat is doing now.
+		{ u"LuminaTranslateChatToggle"_q, u"Перевести этот чат"_q },
+		{ u"LuminaTranslateChatShowOriginal"_q, u"Показать оригинал"_q },
+
 		// Names of the languages LuminaGram can translate into.
 		{ u"LuminaLangEn"_q, u"Английский"_q },
 		{ u"LuminaLangZhTw"_q, u"Китайский (традиционный)"_q },
@@ -244,6 +249,437 @@ namespace {
 		{ u"LuminaLangCy"_q, u"Валлийский"_q },
 		{ u"LuminaLangYi"_q, u"Идиш"_q },
 		{ u"LuminaLangZu"_q, u"Зулу"_q },
+
+		// Appearance: sticker size.
+		{ u"LuminaAppearanceStickerSizeHeader"_q, u"Размер стикеров"_q },
+		{ u"LuminaStickerSizeChoiceDefault"_q, u"{1}% (по умолчанию)"_q },
+		{ u"LuminaStickerSizeInfo"_q, u"Насколько крупно стикеры "
+			u"рисуются в чатах — и отправленные, и полученные. "
+			u"Анимированные эмодзи, кубики и подарочные стикеры "
+			u"сохраняют свои собственные размеры. Telegram Desktop "
+			u"измеряет стикер один раз и запоминает результат, поэтому "
+			u"новый размер применяется при следующем запуске приложения."_q },
+
+		// Encrypted local backup.
+		{ u"LuminaBackupTitle"_q, u"Зашифрованная резервная копия"_q },
+		{ u"LuminaBackupExport"_q, u"Экспортировать зашифрованную копию"_q },
+		{ u"LuminaBackupExportInfo"_q, u"Сохраните всё, что LuminaGram "
+			u"хранит на этом устройстве — закладки, заметки, шаблоны "
+			u"ответов, замены текста и все настройки — в один файл, "
+			u"зашифрованный выбранной вами парольной фразой. В файл "
+			u"попадают и приватные значения: ключи API для перевода, "
+			u"коды сейфа и ложного сбоя, заметка-обманка. Ничего не "
+			u"отправляется в Telegram. Выберите длинную парольную фразу "
+			u"и храните её в надёжном месте — без неё файл нельзя "
+			u"открыть, и восстановить её невозможно."_q },
+		{ u"LuminaBackupImport"_q, u"Импортировать копию"_q },
+		{ u"LuminaBackupImportInfo"_q, u"Выберите файл резервной копии и "
+			u"введите его парольную фразу, чтобы восстановить данные "
+			u"LuminaGram. Настройки, которые есть в копии, заменяют "
+			u"настройки на этом устройстве; то, чего в ней нет, остаётся "
+			u"без изменений. Файл, который не удалось проверить, "
+			u"отклоняется до того, как что-либо будет записано, поэтому "
+			u"неверная парольная фраза никогда не оставит восстановление "
+			u"наполовину."_q },
+		{ u"LuminaBackupExportPassphraseTitle"_q,
+			u"Задайте парольную фразу"_q },
+		{ u"LuminaBackupPassphraseTitle"_q, u"Введите парольную фразу"_q },
+		{ u"LuminaBackupPassphraseHint"_q, u"Парольная фраза"_q },
+		{ u"LuminaBackupPassphraseRepeatHint"_q,
+			u"Повторите парольную фразу"_q },
+		{ u"LuminaBackupPassphraseMismatch"_q,
+			u"Парольные фразы не совпадают."_q },
+		{ u"LuminaBackupPassphraseTooShort"_q,
+			u"Выберите парольную фразу не короче 4 символов."_q },
+		{ u"LuminaBackupSaveCaption"_q,
+			u"Сохранить резервную копию LuminaGram"_q },
+		{ u"LuminaBackupOpenCaption"_q,
+			u"Открыть резервную копию LuminaGram"_q },
+		{ u"LuminaBackupFileFilter"_q,
+			u"Резервная копия LuminaGram (*.lgbak)"_q },
+		{ u"LuminaBackupExportDone"_q, u"Резервная копия сохранена."_q },
+		{ u"LuminaBackupExportFailed"_q,
+			u"Не удалось создать файл резервной копии."_q },
+		{ u"LuminaBackupImportSuccess"_q, u"Копия восстановлена. "
+			u"Перезапустите LuminaGram, чтобы применить все изменения."_q },
+		{ u"LuminaBackupImportFailed"_q,
+			u"Не удалось прочитать файл резервной копии."_q },
+		{ u"LuminaBackupInvalidFile"_q,
+			u"Это недействительный файл резервной копии LuminaGram."_q },
+		{ u"LuminaBackupDamaged"_q, u"Файл резервной копии повреждён, "
+			u"восстановить его не удалось."_q },
+		{ u"LuminaBackupWrongPassphrase"_q,
+			u"Неверная парольная фраза или файл был изменён."_q },
+		{ u"LuminaBackupNewerFormat"_q, u"Эта резервная копия создана "
+			u"более новой версией LuminaGram."_q },
+		{ u"LuminaBackupUnauthenticated"_q, u"Эта резервная копия "
+			u"сделана в старом незащищённом формате: её нельзя проверить "
+			u"ни на неверную парольную фразу, ни на изменения. Создайте "
+			u"новую копию в актуальной версии LuminaGram."_q },
+		{ u"LuminaBackupCryptoFailed"_q,
+			u"Шифрование недоступно в этой системе."_q },
+
+		// Bookmarks.
+		{ u"LuminaBookmarksTitle"_q, u"Закладки"_q },
+		{ u"LuminaBookmarksAbout"_q, u"Закладки — это указатели на "
+			u"сообщения; они хранятся только на этом устройстве и "
+			u"никогда не отправляются в Telegram. Удаление закладки не "
+			u"затрагивает само сообщение."_q },
+		{ u"LuminaShowBookmarks"_q, u"Показывать пункт меню «В закладки»"_q },
+		{ u"LuminaBookmarksList"_q, u"Сообщения в закладках"_q },
+		{ u"LuminaBookmarksListAbout"_q, u"Нажмите на закладку, чтобы "
+			u"открыть сообщение, или нажмите правой кнопкой, чтобы "
+			u"удалить её. Закладка остаётся в этом списке, даже если "
+			u"само сообщение удалено."_q },
+		{ u"LuminaBookmarksNone"_q, u"Нет"_q },
+		{ u"LuminaBookmarksEmpty"_q, u"У вас пока нет закладок."_q },
+		{ u"LuminaBookmarksFull"_q, u"Список закладок заполнен. Удалите "
+			u"закладку, чтобы добавить новую."_q },
+		{ u"LuminaBookmark"_q, u"В закладки"_q },
+		{ u"LuminaBookmarkAdded"_q, u"Добавлено в закладки"_q },
+		{ u"LuminaBookmarkRemove"_q, u"Убрать из закладок"_q },
+		{ u"LuminaBookmarkRemoved"_q, u"Удалено из закладок"_q },
+		{ u"LuminaBookmarkDeleteTitle"_q, u"Удалить закладку?"_q },
+		{ u"LuminaBookmarkChatUnavailable"_q, u"Чат недоступен"_q },
+		{ u"LuminaBookmarkGone"_q,
+			u"Этот чат больше недоступен на этом устройстве."_q },
+
+		// Chat list: folders, stories, badges and avatar dots.
+		{ u"LuminaChatListVisibilityTitle"_q, u"Папки и истории"_q },
+		{ u"LuminaHideTabs"_q, u"Скрыть вкладки папок"_q },
+		{ u"LuminaHideStories"_q, u"Скрыть истории"_q },
+		{ u"LuminaChatListVisibilityAbout"_q, u"Убирает панель папок из "
+			u"списка чатов — и вертикальную панель сбоку, и "
+			u"горизонтальную сверху. Пока вкладки папок скрыты, вы "
+			u"всегда видите все свои чаты: папка, в которой вы "
+			u"находились, покидается, а сочетания клавиш для папок и "
+			u"переключение между папками ничего не делают. Скрытие "
+			u"историй убирает только строку над списком чатов; сами "
+			u"истории и все остальные способы их открыть не меняются."_q },
+		{ u"LuminaShowMutedCount"_q,
+			u"Всегда показывать счётчик непрочитанных"_q },
+		{ u"LuminaShowMutedCountInfo"_q, u"Рисует счётчик непрочитанных "
+			u"у чатов без звука обычным акцентным цветом вместо "
+			u"приглушённого серого."_q },
+		{ u"LuminaChatListDensityTitle"_q, u"Плотность списка чатов"_q },
+		{ u"LuminaCompactListRows"_q, u"Компактные строки"_q },
+		{ u"LuminaCompactListRowsInfo"_q, u"Уменьшает высоту каждой строки "
+			u"списка чатов, чтобы на экране помещалось больше чатов. "
+			u"Аватары и превью сообщений остаются видимыми."_q },
+		{ u"LuminaChatListDotsTitle"_q, u"Точки на аватарах"_q },
+		{ u"LuminaChatListOnlineDot"_q, u"Точка «в сети»"_q },
+		{ u"LuminaChatListOnlineDotInfo"_q, u"Показывает маленькую "
+			u"зелёную точку на аватаре личных чатов, собеседник которых "
+			u"сейчас в сети."_q },
+		{ u"LuminaChatListRecencyDot"_q, u"Точка недавнего визита"_q },
+		{ u"LuminaChatListRecencyDotInfo"_q, u"Окрашивает точку на "
+			u"аватаре личных чатов в зависимости от того, как недавно "
+			u"собеседник был в сети: зелёная — сейчас в сети, жёлтая — в "
+			u"течение часа, оранжевая — в течение суток. Для более "
+			u"давнего или скрытого времени визита точка не показывается. "
+			u"Зелёную (в сети) точку по-прежнему включает переключатель "
+			u"«Точка в сети»."_q },
+
+		// Private contact notes and tags.
+		{ u"LuminaContactNotesTitle"_q, u"Личные заметки о контактах"_q },
+		{ u"LuminaContactNotesToggle"_q,
+			u"Личные заметки и теги в профилях"_q },
+		{ u"LuminaContactNotesAbout"_q, u"Добавляет в профиль человека "
+			u"личную заметку и список тегов. И то, и другое остаётся на "
+			u"этом устройстве, никогда не отправляется в Telegram и не "
+			u"синхронизируется с другими вашими устройствами. "
+			u"Собственные заметки о контактах в Telegram не "
+			u"затрагиваются: личная заметка предлагается там, где их нет "
+			u"— у ботов и у людей не из ваших контактов, — а теги "
+			u"предлагаются везде."_q },
+		{ u"LuminaContactNotesNone"_q, u"Нет"_q },
+		{ u"LuminaContactNotesClear"_q, u"Удалить все личные заметки"_q },
+		{ u"LuminaContactNotesClearTitle"_q, u"Удалить личные заметки"_q },
+		{ u"LuminaContactNotesClearText"_q, u"Удалить все личные заметки "
+			u"и теги, сохранённые на этом устройстве? Это действие "
+			u"нельзя отменить."_q },
+		{ u"LuminaContactNote"_q, u"Личная заметка"_q },
+		{ u"LuminaContactNoteAbout"_q, u"Это видите только вы. Заметка "
+			u"остаётся на этом устройстве, никогда не отправляется в "
+			u"Telegram и не синхронизируется с другими вашими "
+			u"устройствами."_q },
+		{ u"LuminaContactNoteEmpty"_q,
+			u"Нажмите, чтобы добавить личную заметку"_q },
+		{ u"LuminaContactNoteHint"_q, u"Заметка (видна только вам)"_q },
+		{ u"LuminaContactTags"_q, u"Теги"_q },
+		{ u"LuminaContactTagsEmpty"_q, u"Нажмите, чтобы добавить теги"_q },
+		{ u"LuminaContactTagsHint"_q, u"Теги через запятую"_q },
+
+		// Message actions: forwarding, details, saving, select from author.
+		{ u"LuminaMessageActionsInfo"_q, u"Эти пункты появляются только "
+			u"в контекстном меню сообщения. Каждый из них использует "
+			u"пересылку самого Telegram, поэтому чат с запретом "
+			u"пересылки остаётся защищённым. «Пересылать без автора и "
+			u"подписей» назван по тому, что действительно уходит: "
+			u"Telegram не умеет убирать подписи, сохраняя отправителя, "
+			u"поэтому этот вариант убирает и то, и другое. «Подробности» "
+			u"читают только то, что это устройство уже синхронизировало, "
+			u"— ничего не запрашивается и ничего не сохраняется."_q },
+		{ u"LuminaForwardNoAuthor"_q, u"Пересылать без автора"_q },
+		{ u"LuminaForwardNoAuthorTitle"_q, u"Пересылать без автора"_q },
+		{ u"LuminaForwardNoCaption"_q,
+			u"Пересылать без автора и подписей"_q },
+		{ u"LuminaForwardNoCaptionTitle"_q,
+			u"Пересылать без автора и подписей"_q },
+		{ u"LuminaSendOriginalCaption"_q, u"Отправить исходную подпись"_q },
+		{ u"LuminaSaveToCloud"_q, u"Сохранить в «Избранное»"_q },
+		{ u"LuminaSaveToCloudTitle"_q, u"Сохранить в «Избранное»"_q },
+		{ u"LuminaShowMessageDetails"_q, u"Подробности сообщения"_q },
+		{ u"LuminaMessageDetails"_q, u"Подробности"_q },
+		{ u"LuminaDetailsFrom"_q, u"От"_q },
+		{ u"LuminaDetailsDate"_q, u"Дата"_q },
+		{ u"LuminaDetailsMessageId"_q, u"ID сообщения"_q },
+		{ u"LuminaDetailsForwardedFrom"_q, u"Переслано от"_q },
+		{ u"LuminaDetailsOriginalDate"_q, u"Исходная дата"_q },
+		{ u"LuminaSelectFromAuthor"_q, u"Выбрать все сообщения автора"_q },
+		{ u"LuminaSelectFromAuthorTitle"_q,
+			u"Выбрать все сообщения автора"_q },
+		{ u"LuminaSelectFromAuthorAbout"_q, u"Добавляет в меню сообщения "
+			u"в группах пункт, который выделяет все сообщения нажатого "
+			u"отправителя. Он охватывает только сообщения, уже "
+			u"загруженные в этом окне, — прокрутите дальше назад и "
+			u"повторите, чтобы захватить более старые. У сообщений, "
+			u"приписанных самому чату — постов канала и постов анонимных "
+			u"администраторов, — этого пункта нет."_q },
+		{ u"LuminaSelectFromAuthorLimit"_q,
+			u"За один раз можно выделить не более {1} сообщений."_q },
+
+		// Numbers and message time.
+		{ u"LuminaExactNumbers"_q,
+			u"Показывать точные числа (без округления 1.2K)"_q },
+		{ u"LuminaExactNumbersInfo"_q, u"Показывать полные значения, "
+			u"например 1 234 567, вместо сокращённых форм вроде 1.2M. "
+			u"Счётчики, уже нарисованные на экране, сохраняют текущий "
+			u"вид до перезапуска приложения."_q },
+		{ u"LuminaTimeWithSeconds"_q,
+			u"Показывать секунды во времени сообщения"_q },
+		{ u"LuminaTimeWithSecondsAbout"_q, u"Время под сообщением, время "
+			u"в скопированном тексте и время, которое произносит "
+			u"программа чтения с экрана, — везде включаются секунды."_q },
+
+		// Link safety inspector.
+		{ u"LuminaLinkSafetyRow"_q, u"Проверка безопасности ссылок"_q },
+		{ u"LuminaLinkSafetyInfo"_q, u"Спрашивать перед открытием "
+			u"ссылки, которая скрывает настоящий адрес за текстом перед "
+			u"знаком «@», записывает домен в punycode или ведёт через "
+			u"известный сокращатель ссылок. В подтверждении показываются "
+			u"настоящий домен назначения и полный адрес. Telegram "
+			u"Desktop и сам предупреждает о похожих доменах, записанных "
+			u"буквами других алфавитов. Ничего не проверяется в "
+			u"интернете — ни один открываемый вами адрес не покидает это "
+			u"устройство."_q },
+		{ u"LuminaLinkSafetyTitle"_q, u"Открыть внешнюю ссылку?"_q },
+		{ u"LuminaLinkSafetyDestination"_q, u"Настоящий адрес"_q },
+		{ u"LuminaLinkSafetyWarnMismatch"_q, u"Эта ссылка скрывает "
+			u"настоящий адрес за текстом перед знаком «@»."_q },
+		{ u"LuminaLinkSafetyWarnPunycode"_q, u"В этом адресе "
+			u"используются закодированные символы (punycode), способные "
+			u"имитировать известный сайт."_q },
+		{ u"LuminaLinkSafetyWarnShortener"_q, u"Это сокращатель ссылок — "
+			u"настоящий адрес скрыт, пока вы не откроете его."_q },
+
+		// Media: background pause and sticker saving.
+		{ u"LuminaMediaTitle"_q, u"Медиа"_q },
+		{ u"LuminaMediaAutoPauseBgVideo"_q,
+			u"Ставить видео на паузу при сворачивании приложения"_q },
+		{ u"LuminaMediaAutoPauseBgVideoInfo"_q, u"Автоматически ставить "
+			u"воспроизводимое видео на паузу, когда вы покидаете "
+			u"LuminaGram. Сворачивание просмотрщика тоже ставит его на "
+			u"паузу. Видео, которое вы намеренно вынесли в отдельное "
+			u"окно или в режим «картинка в картинке», продолжает играть, "
+			u"и музыка с голосовыми сообщениями тоже продолжает играть, "
+			u"пока вас нет."_q },
+		{ u"LuminaMediaSaving"_q, u"Медиа"_q },
+		{ u"LuminaSaveStickers"_q, u"Сохранять стикеры"_q },
+		{ u"LuminaSaveStickersInfo"_q, u"Добавляет пункт «Сохранить "
+			u"стикер» в контекстное меню панели стикеров. Стикеры "
+			u"сохраняются туда же, куда и остальные загрузки, а для "
+			u"собственного набора стикеров группы этот пункт скрывается, "
+			u"если группа ограничивает сохранение."_q },
+		{ u"LuminaSaveSticker"_q, u"Сохранить стикер"_q },
+		{ u"LuminaStickerSavedTo"_q, u"Стикер сохранён в {1}"_q },
+
+		// Recent stickers and saved GIFs. "Unlimited recent stickers" is an
+		// experimental setting of Telegram Desktop and is never translated
+		// there, so it has to stay English here for it to be findable.
+		{ u"LuminaRecentLimitsRow"_q,
+			u"Хранить больше недавних стикеров и GIF"_q },
+		{ u"LuminaRecentLimitsInfo"_q, u"Не даёт этому устройству "
+			u"выбрасывать недавние стикеры и сохранённые GIF раньше, чем "
+			u"необходимо, с теми же пределами, что и у LuminaGram на "
+			u"Android: до 200 недавних стикеров и 500 сохранённых GIF. "
+			u"Сколько их на самом деле хранится в вашем аккаунте и "
+			u"синхронизируется с другими вашими устройствами, "
+			u"по-прежнему решают серверы Telegram, поэтому облачный "
+			u"список от этого больше не станет — при следующей "
+			u"синхронизации всё, чего сервер больше не хранит, исчезнет "
+			u"и здесь, обычно за считаные секунды. Пока параметр "
+			u"включён, Telegram Desktop перестаёт сам удалять "
+			u"сохранённые GIF, поэтому его напоминание Premium о лимите "
+			u"сохранённых GIF не появляется. В панели стикеров "
+			u"по-прежнему видны только первые 20 недавних стикеров, если "
+			u"вы дополнительно не включите «Unlimited recent stickers» в "
+			u"разделе «Настройки › Продвинутые настройки › "
+			u"Экспериментальные настройки»."_q },
+
+		// The first-run card.
+		{ u"LuminaOnboardingHeader"_q, u"О программе"_q },
+		{ u"LuminaOnboardingRow"_q, u"Что добавляет LuminaGram"_q },
+		{ u"LuminaOnboardingRowAbout"_q, u"Показывает приветственную "
+			u"карточку, которая появляется при первом открытии настроек "
+			u"LuminaGram. Она только рассказывает, что здесь есть, и "
+			u"ничего не включает."_q },
+		{ u"LuminaOnboardingTitle"_q, u"Добро пожаловать в LuminaGram"_q },
+		{ u"LuminaOnboardingIntro"_q, u"LuminaGram добавляет собственные "
+			u"инструменты поверх Telegram Desktop. Все параметры ниже "
+			u"хранятся только на этом компьютере и никогда не "
+			u"синхронизируются с Telegram."_q },
+		{ u"LuminaOnboardingTranslateText"_q, u"Переводите входящие "
+			u"сообщения через собственный сервис перевода и переводите "
+			u"то, что печатаете, перед отправкой."_q },
+		{ u"LuminaOnboardingDualName"_q, u"Оба языка сразу"_q },
+		{ u"LuminaOnboardingDualText"_q, u"Оригинальный текст остаётся "
+			u"на экране рядом с переводом — и для полученных сообщений, "
+			u"и для отправленных."_q },
+		{ u"LuminaOnboardingVaultName"_q, u"Сейф маскировки"_q },
+		{ u"LuminaOnboardingVaultText"_q, u"Спрячьте LuminaGram за "
+			u"калькулятором или заметками, которые открывают настоящее "
+			u"приложение только по вашему секретному коду."_q },
+		{ u"LuminaOnboardingSafetyName"_q, u"Проверки безопасности"_q },
+		{ u"LuminaOnboardingSafetyText"_q, u"Предупреждает перед "
+			u"открытием ссылки, адрес которой не тот, чем кажется, "
+			u"замечает подменённый крипто-адрес при вставке и удаляет "
+			u"геоданные из отправляемых фотографий."_q },
+		{ u"LuminaOnboardingFooter"_q, u"Откройте нужный раздел на "
+			u"странице настроек LuminaGram, чтобы всё это настроить. Эту "
+			u"карточку можно открыть снова из раздела «Инструменты»."_q },
+		{ u"LuminaOnboardingGotIt"_q, u"Понятно"_q },
+
+		// The local profile card.
+		{ u"LuminaProfileCardTitle"_q, u"Визитка"_q },
+		{ u"LuminaProfileCardAbout"_q, u"Локальная визитка о вас — на "
+			u"каких языках вы говорите, чем увлекаетесь, — которую можно "
+			u"скопировать и вставить в чат. Она остаётся на этом "
+			u"устройстве."_q },
+		{ u"LuminaProfileCardEdit"_q, u"Моя визитка"_q },
+		{ u"LuminaProfileCardHeader"_q, u"Моя визитка"_q },
+		{ u"LuminaProfileCardInfo"_q, u"Эта визитка хранится только на "
+			u"этом устройстве и никогда не отправляется в Telegram. Она "
+			u"не меняет ваш профиль Telegram."_q },
+		{ u"LuminaProfileCardNotSet"_q, u"Не задано"_q },
+		{ u"LuminaProfileCardTagline"_q, u"Слоган"_q },
+		{ u"LuminaProfileCardTaglineHint"_q, u"Короткая фраза о себе"_q },
+		{ u"LuminaProfileCardBio"_q, u"О себе"_q },
+		{ u"LuminaProfileCardBioHint"_q, u"Несколько слов о себе"_q },
+		{ u"LuminaProfileCardLanguages"_q, u"Языки, на которых я говорю"_q },
+		{ u"LuminaProfileCardLanguagesHint"_q,
+			u"например: Русский, English, Español"_q },
+		{ u"LuminaProfileCardInterests"_q, u"Интересы / теги"_q },
+		{ u"LuminaProfileCardInterestsHint"_q,
+			u"например: музыка, походы, программирование"_q },
+		{ u"LuminaProfileCardCopy"_q, u"Скопировать в буфер обмена"_q },
+		{ u"LuminaProfileCardCopyInfo"_q, u"Создаёт текстовую сводку "
+			u"вашей визитки. Вставьте её в любой чат, когда захотите "
+			u"поделиться."_q },
+		{ u"LuminaProfileCardCopied"_q, u"Визитка скопирована"_q },
+		{ u"LuminaProfileCardEmptyShare"_q, u"Сначала заполните визитку"_q },
+
+		// Extra rows on profile pages.
+		{ u"LuminaProfileInfoHeader"_q, u"Профиль"_q },
+		{ u"LuminaProfileInfoInfo"_q, u"Дополнительные строки на "
+			u"страницах профилей, все вычисляются на этом устройстве — у "
+			u"Telegram ничего не запрашивается. Для некоторых аккаунтов "
+			u"дату регистрации сообщает сам Telegram; для остальных она "
+			u"оценивается по номеру аккаунта и показывается со знаком "
+			u"«~». Дата-центр — это тот, где хранится фотография "
+			u"профиля. Дата создания — это когда была создана группа или "
+			u"канал."_q },
+		{ u"LuminaProfileShowRegistrationDate"_q,
+			u"Показывать дату регистрации"_q },
+		{ u"LuminaProfileRegistrationDate"_q, u"Дата регистрации"_q },
+		{ u"LuminaProfileShowDcId"_q, u"Показывать дата-центр"_q },
+		{ u"LuminaProfileDcId"_q, u"Дата-центр"_q },
+		{ u"LuminaProfileShowChatDate"_q, u"Показывать дату создания"_q },
+		{ u"LuminaProfileChatCreated"_q, u"Создан"_q },
+
+		// Reply templates.
+		{ u"LuminaReplyTemplatesTitle"_q, u"Шаблоны ответов"_q },
+		{ u"LuminaReplyTemplatesAbout"_q, u"Короткие фрагменты текста, "
+			u"которые хранятся на этом устройстве и вставляются в поле "
+			u"сообщения. Нажмите правой кнопкой на кнопку эмодзи в чате, "
+			u"чтобы выбрать шаблон. Шаблоны никогда не отправляются в "
+			u"Telegram."_q },
+		{ u"LuminaReplyTemplatesShow"_q, u"Предлагать шаблоны в чатах"_q },
+		{ u"LuminaReplyTemplatesManage"_q, u"Управление шаблонами…"_q },
+		{ u"LuminaReplyTemplatesList"_q, u"Шаблоны"_q },
+		{ u"LuminaReplyTemplatesInfo"_q, u"Нажмите правой кнопкой на "
+			u"кнопку эмодзи в чате, чтобы вставить шаблон. Нажмите "
+			u"правой кнопкой на шаблон здесь, чтобы переместить его "
+			u"вверх или вниз; откройте шаблон, чтобы изменить или "
+			u"удалить его."_q },
+		{ u"LuminaReplyTemplatesNone"_q, u"Нет"_q },
+		{ u"LuminaReplyTemplatesEmpty"_q, u"Шаблонов пока нет. Добавьте "
+			u"шаблон, затем нажмите правой кнопкой на кнопку эмодзи в "
+			u"чате, чтобы вставить его."_q },
+		{ u"LuminaReplyTemplatesFull"_q,
+			u"Список заполнен — удалите шаблон, чтобы добавить новый."_q },
+		{ u"LuminaReplyTemplatesAdd"_q, u"Добавить шаблон"_q },
+		{ u"LuminaReplyTemplatesEdit"_q, u"Изменить шаблон"_q },
+		{ u"LuminaReplyTemplatesPlaceholder"_q, u"Текст шаблона"_q },
+		{ u"LuminaReplyTemplatesMoveUp"_q, u"Переместить вверх"_q },
+		{ u"LuminaReplyTemplatesMoveDown"_q, u"Переместить вниз"_q },
+
+		// Panic wipe. The "\n" pairs are spelled exactly as the English
+		// table spells them, so both languages lay the text out the same.
+		{ u"LuminaSecurityPanicHeader"_q, u"Экстренная очистка"_q },
+		{ u"LuminaSecurityPanicWipe"_q, u"Экстренная очистка (Kaboom)"_q },
+		{ u"LuminaSecurityPanicWipeAbout"_q, u"Выходит из всех аккаунтов "
+			u"на этом устройстве и стирает локальную базу сообщений, "
+			u"черновики и кэш медиафайлов вместе с собственными "
+			u"настройками LuminaGram, закладками, сохранёнными "
+			u"переводами и ключами API. Ваши аккаунты и ваши сообщения "
+			u"остаются на серверах Telegram. Уже загруженные файлы "
+			u"остаются на месте. Это действие нельзя отменить."_q },
+		{ u"LuminaSecurityPanicConfirmTitle"_q, u"Экстренная очистка?"_q },
+		{ u"LuminaSecurityPanicConfirmText"_q, u"Все аккаунты на этом "
+			u"устройстве будут выведены из системы. Локальная база "
+			u"сообщений, черновики и кэш медиафайлов будут стёрты вместе "
+			u"с собственными настройками LuminaGram, закладками, "
+			u"сохранёнными переводами и ключами API.\n\nВаши аккаунты "
+			u"не удаляются. Они остаются на серверах Telegram, как и "
+			u"ваши сообщения, — вы сможете войти снова откуда "
+			u"угодно.\n\nУже загруженные файлы НЕ удаляются. "
+			u"LuminaGram не трогает вашу папку загрузок, потому что "
+			u"обычно это ваша системная папка «Загрузки», в которой лежат "
+			u"посторонние файлы. Всё важное оттуда перенесите или "
+			u"удалите сами.\n\nЭто действие нельзя отменить."_q },
+		{ u"LuminaSecurityPanicConfirmAck"_q,
+			u"Я понимаю, что это нельзя отменить"_q },
+		{ u"LuminaSecurityPanicConfirmButton"_q, u"Стереть сейчас"_q },
+
+		// Undo send. The one "{1}" is the length of the window in seconds,
+		// so it is followed by the invariant "сек." rather than a form that
+		// would only agree with one number.
+		{ u"LuminaUndoSendTitle"_q, u"Отмена отправки"_q },
+		{ u"LuminaUndoSendWindow"_q, u"Окно отмены отправки"_q },
+		{ u"LuminaUndoSendWindowInfo"_q, u"Задерживает обычное текстовое "
+			u"сообщение на {1} сек. за кнопкой «Отмена», прежде чем оно "
+			u"уйдёт. Ваш текст всё это время остаётся в поле ввода, и "
+			u"поле очищается только когда сообщение действительно "
+			u"отправлено, поэтому «Отмена» просто оставляет текст на "
+			u"месте — ничего не убирается и не возвращается обратно. "
+			u"Повторная отправка, переход в другой чат или выход из "
+			u"приложения отправляют задержанное сообщение сразу. Медиа, "
+			u"голосовые, изменённые, пересланные и отложенные сообщения "
+			u"никогда не задерживаются, как и сообщения из темы форума "
+			u"или ветки комментариев."_q },
+		{ u"LuminaUndoSendBulletin"_q, u"Отправка сообщения…"_q },
+		{ u"LuminaUndoSendUndo"_q, u"Отмена"_q },
 	};
 }
 

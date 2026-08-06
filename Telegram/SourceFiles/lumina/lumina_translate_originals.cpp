@@ -12,13 +12,17 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "base/unixtime.h"
 #include "data/data_peer.h"
 #include "data/data_session.h"
+#include "data/data_user.h"
 #include "history/history.h"
 #include "history/history_item.h"
 #include "lumina/lumina_dual_language_line.h"
 #include "lumina/lumina_settings.h"
+#include "lumina/lumina_text_replace.h"
 #include "lumina/lumina_translate_gating.h"
 #include "lumina/lumina_translate_send.h"
 #include "main/main_session.h"
+#include "ui/item_text_options.h"
+#include "ui/text/text_entity.h"
 
 #include <QtCore/QJsonArray>
 #include <QtCore/QJsonObject>
@@ -37,6 +41,11 @@ namespace {
 constexpr auto kMaxEntries = 500;
 constexpr auto kMaxAge = TimeId(90 * 24 * 60 * 60);
 constexpr auto kArmedLifetime = crl::time(60 * 1000);
+
+// Far more than the number of sends that can be waiting for an id at once -
+// undo-send holds one message at a time - and here only so that an arm nothing
+// ever claims cannot accumulate.
+constexpr auto kMaxArmed = 8;
 
 [[nodiscard]] QString StoreKey() {
 	return u"tbsOriginals"_q;
@@ -57,20 +66,36 @@ struct Entry {
 };
 
 // One original waiting for the message id that ApiWrap::sendMessage() is about
-// to mint for it. There is only ever one, because W2-A's hook fires once per
-// translated send and the composer's `proceed` runs to the mint without
-// returning to the event loop.
+// to mint for it.
+//
+// `sent` is what the text W2-A released will look like once apiwrap has
+// finished with it (AsSent() below), not the provider's raw answer, and
+// `sameTurn` says whether the mint can still be the one this arm was made for
+// without any further proof. See Arm() and FindArmed() below - between them
+// they are the whole reason a translated send that another interceptor holds
+// for a few seconds still keeps its original.
 struct Armed {
 	uint64 session = 0;
 	PeerId peer;
 	QString original;
+	QString sent;
 	crl::time when = 0;
+	uint64 id = 0;
+	bool sameTurn = false;
 };
 
 struct State {
 	base::flat_map<Key, Entry> map;
 	base::flat_set<uint64> hooked;
-	std::optional<Armed> armed;
+
+	// More than one, because more than one translated send can be waiting: the
+	// hook fires when the translate pipeline releases a send, and undo-send
+	// then holds it for five seconds, so a second translated send arriving
+	// inside that window arms a second original while the first is still on its
+	// way to apiwrap. A single slot lost the first one - which is the whole
+	// original, and it exists nowhere else.
+	std::vector<Armed> armed;
+
 	uint64 order = 0;
 	bool loaded = false;
 };
@@ -200,8 +225,12 @@ void EnsureLoaded() {
 void Unhook(uint64 session) {
 	auto &state = Current();
 	state.hooked.remove(session);
-	if (state.armed && state.armed->session == session) {
-		state.armed = std::nullopt;
+	for (auto i = state.armed.begin(); i != state.armed.end();) {
+		if (i->session == session) {
+			i = state.armed.erase(i);
+		} else {
+			++i;
+		}
 	}
 	for (auto i = state.map.begin(); i != state.map.end();) {
 		if (i->first.session == session && !Persistable(i->first)) {
@@ -298,24 +327,131 @@ void Remember(
 	}
 }
 
-// The send that is being armed here reaches ApiWrap::sendMessage() without
-// returning to the event loop - all three composers call it straight out of
-// the `proceed` W2-A invokes immediately after this hook. So the arm only has
-// to survive the current turn, and dropping it at the end of that turn is what
-// keeps a send that never reached apiwrap (a rejected slowmode send, a dice
-// emoji taking the media path, a destroyed section widget) from binding its
-// original to whatever the user sends next. The wall-clock check below is the
-// same guarantee written a second way, for a queue that never drains.
-void Arm(not_null<History*> history, const QString &original) {
-	Current().armed = Armed{
+// What the text W2-A just released will actually look like by the time
+// ApiWrap::sendMessage() mints an id for it, which is the string the exact
+// match in FindArmed() below has to be made of.
+//
+// Between the hook and the mint apiwrap rewrites the text twice, in this order:
+// Lumina::ApplyOutgoingTextReplacements() and then
+// TextUtilities::PrepareForSending() with Ui::ItemTextOptions - which removes
+// '\r', turns each tab into two spaces, replaces the characters the server will
+// not take, parses markdown markers out of the text (ItemTextOptions carries
+// TextParseMarkdown) and trims. Arming the provider's raw answer instead means
+// arming a string no outgoing message can ever equal whenever the translation
+// carries a CRLF, a tab or a markdown character, or whenever the user has an
+// outgoing replacement rule that matches it. Inside its own turn the arm is
+// still accepted without any such proof, so this only ever mattered for a send
+// another interceptor holds past that turn - which is exactly the undo-send
+// case the whole mechanism below exists for, i.e. every case where the exact
+// match is the only thing left.
+//
+// Both steps are pure functions of the text, so running them here cannot change
+// what is sent; they only say what to expect.
+[[nodiscard]] QString AsSent(
+		not_null<History*> history,
+		const QString &text) {
+	auto replaced = TextWithTags{ text };
+	ApplyOutgoingTextReplacements(replaced);
+	auto prepared = TextWithEntities{ std::move(replaced.text) };
+	TextUtilities::PrepareForSending(
+		prepared,
+		Ui::ItemTextOptions(history, history->session().user()).flags);
+	return prepared.text;
+}
+
+// THE ARM IS NOT DROPPED AT THE END OF THE TURN, AND THAT IS THE FIX FOR A
+// FEATURE THAT WAS OTHERWISE DEAD FOR ANYONE WITH UNDO-SEND SWITCHED ON.
+//
+// W2-A invokes this hook immediately before its `proceed`, and `proceed` is not
+// the composer: it is the rest of the interceptor chain
+// (lumina/lumina_send_pipeline.h). Undo-send is registered on that chain after
+// the translate pipeline, deliberately and from Core::Application::run(), and
+// it holds a text send for five seconds. ApiWrap::sendMessage() - the one place
+// an id is minted, and therefore the only place NoteOutgoingText() can run - is
+// then reached several turns later. Dropping the arm at the end of the turn it
+// was made in meant every translated send made with undo-send on recorded no
+// original at all, and the bubble degraded to translation-only with no way
+// back.
+//
+// So the turn boundary is a demotion rather than a deletion. Inside the turn
+// the arm is accepted as it always was, which keeps every send that does reach
+// apiwrap synchronously recorded exactly as before. After the turn it is
+// accepted only for a message whose outgoing text is character-for-character
+// what AsSent() above says this translation becomes on the way to the wire,
+// which is the exact-sent-text match Android needed for the same reason. A send
+// that never reached apiwrap therefore cannot bind its original to whatever the
+// user sends next: the text would have to be identical, and then the original
+// is right. kArmedLifetime remains the outer bound in both cases.
+void Arm(
+		not_null<History*> history,
+		const QString &sent,
+		const QString &original) {
+	static auto counter = uint64(0);
+	const auto id = ++counter;
+	const auto now = crl::now();
+	auto &armed = Current().armed;
+	for (auto i = armed.begin(); i != armed.end();) {
+		if (now - i->when > kArmedLifetime) {
+			i = armed.erase(i);
+		} else {
+			++i;
+		}
+	}
+	while (int(armed.size()) >= kMaxArmed) {
+		armed.erase(armed.begin());
+	}
+	armed.push_back(Armed{
 		history->session().uniqueId(),
 		history->peer->id,
 		original,
-		crl::now(),
-	};
-	crl::on_main([] {
-		Current().armed = std::nullopt;
+		AsSent(history, sent),
+		now,
+		id,
+		true,
 	});
+	crl::on_main([id] {
+		for (auto &entry : Current().armed) {
+			if (entry.id == id) {
+				entry.sameTurn = false;
+				return;
+			}
+		}
+	});
+}
+
+// The armed original this outgoing chunk belongs to, or -1.
+//
+// An exact sent-text match wins wherever it is found, because it is proof. The
+// arm made in this very turn is the fallback, and it is what covers a message
+// whose text apiwrap rewrote in a way AsSent() above cannot reproduce - that is
+// the case the exact match cannot see, and it is only safe to guess at inside
+// the turn.
+//
+// Scanned oldest first, both for the match and for the fallback, because ids
+// are minted in the order the sends were released: with two arms alive in one
+// chat - which is what undo-send holding the first send while a second is
+// translated produces - the newest-first scan handed the first message the
+// second message's original.
+[[nodiscard]] int FindArmed(
+		uint64 session,
+		PeerId peer,
+		const QString &text) {
+	const auto &armed = Current().armed;
+	const auto now = crl::now();
+	auto fallback = -1;
+	for (auto i = 0, count = int(armed.size()); i != count; ++i) {
+		const auto &entry = armed[i];
+		if ((entry.session != session)
+			|| (entry.peer != peer)
+			|| (now - entry.when > kArmedLifetime)) {
+			continue;
+		} else if (!entry.sent.isEmpty() && (entry.sent == text)) {
+			return i;
+		} else if (entry.sameTurn && (fallback < 0)) {
+			fallback = i;
+		}
+	}
+	return fallback;
 }
 
 } // namespace
@@ -328,10 +464,10 @@ void SetupSentOriginals() {
 	registered = true;
 	SetSendOriginalHook([](
 			not_null<History*> history,
-			const QString &, // sentText, re-read from apiwrap instead.
+			const QString &sentText,
 			const QString &originalText) {
 		if (!originalText.trimmed().isEmpty()) {
-			Arm(history, originalText);
+			Arm(history, sentText, originalText);
 		}
 	});
 
@@ -349,16 +485,21 @@ void NoteOutgoingText(
 		FullMsgId id,
 		const QString &text) {
 	auto &state = Current();
-	if (!state.armed || !id.msg) {
-		return;
-	} else if (state.armed->session != session->uniqueId()
-		|| state.armed->peer != id.peer
-		|| (crl::now() - state.armed->when > kArmedLifetime)) {
+	if (state.armed.empty() || !id.msg) {
 		return;
 	}
-	auto original = std::move(state.armed->original);
-	state.armed = std::nullopt;
-	if (original.isEmpty() || original == text) {
+	const auto index = FindArmed(session->uniqueId(), id.peer, text);
+	if (index < 0) {
+		// Nothing armed answers for this message. Whatever is armed is left
+		// alone rather than dropped: the send it belongs to may still be
+		// waiting behind another interceptor, and past its own turn it can only
+		// ever be claimed by a message carrying that exact translation.
+		// kArmedLifetime is what ends it otherwise.
+		return;
+	}
+	auto original = std::move(state.armed[index].original);
+	state.armed.erase(state.armed.begin() + index);
+	if (original.isEmpty() || (original == text)) {
 		return;
 	}
 	Remember(session, id, original);

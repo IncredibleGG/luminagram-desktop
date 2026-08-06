@@ -5710,9 +5710,11 @@ void HistoryWidget::sendTextWithTags(
 		_justMarkingAsRead = false;
 
 		if (sameChat) {
-			clearFieldText();
-			if (_preview) {
-				_preview->apply({ .removed = true });
+			if (_field->getTextWithTags() == fieldAtSend) {
+				clearFieldText();
+				if (_preview) {
+					_preview->apply({ .removed = true });
+				}
 			}
 			saveDraftWithTextNow();
 
@@ -5735,6 +5737,10 @@ void HistoryWidget::sendTextWithTags(
 			done();
 		}
 	});
+	// The interceptor may hold this send and hand the text back to the user
+	// (a cancelled confirm, a failed engine). Remember what the field held
+	// so the cleanup below only runs if it is still the same text.
+	const auto fieldAtSend = _field->getTextWithTags();
 	if (!Lumina::InterceptSend(
 			pending->action.history,
 			pending->textWithTags,

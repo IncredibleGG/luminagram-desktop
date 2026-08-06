@@ -110,7 +110,19 @@ void EnsureLoaded() {
 	}
 
 	const auto array = Settings::Instance().getArray(StoreKey());
+
+	// Two different reasons to stop reading an entry, and they must not be
+	// rewritten the same way. `dropped` means the entry was UNUSABLE - bad
+	// JSON, a duplicate, an id that can never name a message again - and
+	// rewriting the file without it is a cleanup. `truncated` means the entry
+	// was perfectly good and only did not fit under kMaxBookmarks, which
+	// happens to a store imported from a build or a platform with a larger cap
+	// (Android has none at all). Rewriting the file then would DELETE
+	// bookmarks the user explicitly asked to keep, which is exactly what
+	// lumina_bookmarks.h promises this cap does not do - so the file is left
+	// alone and the extra entries survive on disk.
 	auto dropped = false;
+	auto truncated = false;
 	for (auto i = 0, count = int(array.size()); i != count; ++i) {
 		const auto object = array.at(i).toObject();
 		auto sessionOk = false;
@@ -131,7 +143,7 @@ void EnsureLoaded() {
 			dropped = true;
 			continue;
 		} else if (int(state.list.size()) >= kMaxBookmarks) {
-			dropped = true;
+			truncated = true;
 			break;
 		}
 		state.list.push_back(Bookmark{
@@ -141,12 +153,20 @@ void EnsureLoaded() {
 			.date = TimeId(object.value(u"date"_q).toInt()),
 		});
 	}
-	if (dropped) {
+	if (dropped && !truncated) {
 		// Rewriting the file is never urgent - the entries it drops are
 		// already gone from the vector that answers every lookup - and this
 		// runs from inside a context-menu build, where Settings::set() firing
 		// changes() synchronously would invalidate the vector underneath the
 		// caller. So it goes to the next main-thread turn.
+		//
+		// `!truncated` because Save() writes the whole in-memory vector, which
+		// is the one that stops at the cap: cleaning up an unusable entry must
+		// not become an excuse to also delete the good ones behind it. A store
+		// that is over the cap therefore keeps its unusable entries too, and
+		// they are re-skipped on every load, which costs nothing. (A later
+		// toggle still calls Save() and truncates then - that is a write the
+		// user asked for, and the alternative is refusing to bookmark at all.)
 		crl::on_main([] {
 			EnsureLoaded();
 			Save();

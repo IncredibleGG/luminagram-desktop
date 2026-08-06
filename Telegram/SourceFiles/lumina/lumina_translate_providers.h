@@ -174,6 +174,17 @@ struct TranslateResult {
 	QString detectedFrom; // Empty when the provider does not report it.
 	TranslateError error = TranslateError::None;
 
+	// The HTTP status the service answered with, and 0 when there never was
+	// one - a transport failure, a timeout, or an engine that does not speak
+	// HTTP at all. Only meaningful next to a non-None `error`.
+	//
+	// It is carried because the enum above cannot be widened without changing
+	// what every existing caller does with it, while the settings test row has
+	// to tell a rejected key from an exhausted quota from a host that never
+	// answered - three failures that land in only two of these enumerators.
+	// Nothing on the message paths reads it; nothing has to.
+	int httpStatus = 0;
+
 	[[nodiscard]] bool failed() const {
 		return (error != TranslateError::None) || text.isEmpty();
 	}

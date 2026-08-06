@@ -82,7 +82,13 @@ void SetScamKeywordWarningEnabled(bool value);
 //      only replays what was already read on another device is silent - this
 //      is the "genuinely new" gate, and it fails OPEN when the read horizon is
 //      not known yet, so a real new message is never missed;
-//   2. at most one hint per peer per app run;
+//   2. at most one hint per peer per WINDOW per app run. `_warned` lives in
+//      the watcher, and the watcher is installed once per
+//      Window::SessionController (window_session_controller.cpp:1743), so a
+//      second window opened on the same account warns once more for the same
+//      peer. Accepted: the alternative is a session-wide set, and a hint the
+//      user has never actually seen - because it was spent on a window that
+//      was not in front - is the worse failure for a warning;
 //   3. the hint is only shown while that peer's chat is the active chat of
 //      this window. A peer flagged while the user is elsewhere is remembered
 //      and the hint appears the moment that chat is opened - which is also

@@ -45,10 +45,24 @@ bool OnDemandTranslateAllowed(const QString &text) {
 
 auto CreateOnDemandTranslateProvider(not_null<Main::Session*> session)
 -> std::unique_ptr<Ui::TranslateProvider> {
-	auto result = Ui::CreateTranslateProvider(session);
-	return result
-		? std::move(result)
-		: Ui::CreateMTProtoTranslateProvider(session);
+	if (auto result = Ui::CreateTranslateProvider(session)) {
+		return result;
+	}
+	// Ui::CreateTranslateProvider() (lang/translate_provider.cpp:34-48) only
+	// answers null on the branch it takes for the platform translator: it
+	// checks Platform::IsTranslateProviderAvailable() and then calls
+	// Platform::CreateTranslateProvider(), which on macOS can still decline
+	// (platform/mac/translate_provider_mac.mm:96-101). It returns before ever
+	// reaching Lumina::CreateTranslateProvider(), so falling straight to
+	// MTProto here would send the selection to Telegram - past the provider
+	// the user actually named on the LuminaGram translate page, and past the
+	// promise at the top of this file that nothing quietly reroutes a lookup.
+	// Ask the named provider first; it answers null itself for "Telegram" and
+	// for a provider with no key, and only then is MTProto the right answer.
+	if (auto own = Lumina::CreateTranslateProvider(session)) {
+		return own;
+	}
+	return Ui::CreateMTProtoTranslateProvider(session);
 }
 
 LanguageId OnDemandTranslateTo(LanguageId chosen) {

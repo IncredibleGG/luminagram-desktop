@@ -157,14 +157,25 @@ namespace Lumina {
 // through the pipeline, and nothing is recorded for a message that goes out
 // untranslated.
 //
-// The arm is dropped at the end of the event-loop turn it was made in. All
-// three composers reach ApiWrap::sendMessage() synchronously out of `proceed`,
-// so a real send is always captured; a send that dies on the way there - a
-// destroyed section widget, a slowmode or Stars rejection, a dice emoji taking
-// the media path - simply records nothing instead of leaving a pending entry
-// that would later attach a stranger's text to an unrelated message. Android
-// needed a 60-second TTL and an exact-sent-text match for that, because its
-// dispatch is asynchronous; on desktop the turn is the boundary.
+// The arm survives past the turn it was made in, and it has to: W2-A's
+// `proceed` is not the composer, it is the rest of the interceptor chain
+// (lumina/lumina_send_pipeline.h), and undo-send sits on that chain behind the
+// translate pipeline and holds a text send for five seconds. An arm that ended
+// with the turn recorded nothing at all for anybody with undo-send switched on.
+//
+// What the turn boundary does instead is decide how much proof is needed:
+//
+//  * inside it, the arm is taken as-is. Every composer that reaches
+//    ApiWrap::sendMessage() straight out of `proceed` is captured exactly as
+//    before, including the sends whose text apiwrap rewrites on the way there.
+//  * after it, only a message whose outgoing text is character-for-character
+//    the translation W2-A reported is accepted. So a send that died on the way
+//    - a destroyed section widget, a dice emoji taking the media path, an undo
+//    the user pressed - cannot attach its original to whatever is sent next,
+//    because that would have to be the same message.
+//
+// Android needed the same exact-sent-text match plus a 60-second TTL, because
+// its dispatch is asynchronous too. Both are here; kArmedLifetime is the TTL.
 //
 // A translation long enough to be split into several messages binds the whole
 // original to the FIRST part only. The parts of a translation do not line up

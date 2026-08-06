@@ -9,6 +9,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include "base/unique_qptr.h"
 #include "base/unixtime.h"
+#include "data/data_changes.h"
 #include "data/data_peer.h"
 #include "data/data_session.h"
 #include "lang/lang_keys.h"
@@ -111,16 +112,71 @@ void ConfirmRemove(
 	}));
 }
 
+// A bookmark outlives the memory its chat lives in. peerLoaded() is a lookup
+// in the loaded-peer map, not on disk, and that map fills as the dialog list
+// arrives - so a chat that is perfectly fine reads as unavailable whenever
+// this page is opened before its peer has been created, and a row rendered
+// from a one-shot lookup would stay wrong for as long as the page is open.
+// OpenBookmark() resolves the peer again at click time for the same reason.
+//
+// WHICH SIGNAL, AND WHY NOT THE OBVIOUS ONE.
+// PeerUpdate::Flag::Name is a RENAME, not an arrival. PeerData is created with
+// _nameVersion == 1 (data_peer.h:653) and updateNameDelayed() raises the Name
+// flag only from `_nameVersion++ > 1` (data_peer.cpp:345), so the very first
+// name a freshly created peer is given - the one that arrives with the dialog
+// list, which is precisely the case this fallback exists for - is SILENT.
+// Listening to Flag::Name alone leaves the row reading "Chat unavailable"
+// forever, which is the whole bug wearing a subscription.
+//
+// What does happen is ApiWrap's dialogs handler calling processUsers() /
+// processChats() and then Data::Session::chatsListChanged() (apiwrap.cpp:979,
+// :1125) once per page, and chatsListDone() when a list finishes (:1084). So
+// arrivals are read off the chat list and renames off Flag::Name, and the name
+// is re-resolved from scratch on either. A peer that exists but has no name
+// yet - created as a stub by a message before its chat arrived - counts as
+// unavailable rather than rendering an empty row.
+[[nodiscard]] rpl::producer<QString> ChatTitleValue(
+		not_null<Main::Session*> session,
+		PeerId peerId) {
+	const auto owner = &session->data();
+	const auto name = [=] {
+		const auto peer = owner->peerLoaded(peerId);
+		const auto result = peer ? peer->name() : QString();
+		return result.isEmpty()
+			? Lumina::Tr(u"LuminaBookmarkChatUnavailable"_q)
+			: result;
+	};
+	auto renames = session->changes().peerUpdates(
+		Data::PeerUpdate::Flag::Name
+	) | rpl::filter([=](const Data::PeerUpdate &update) {
+		return (update.peer->id == peerId);
+	}) | rpl::to_empty;
+
+	const auto peer = owner->peerLoaded(peerId);
+	if (peer && !peer->name().isEmpty()) {
+		// Already resolvable, so nothing has to watch the chat list: the only
+		// thing left that can change this row's title is a rename.
+		return rpl::single(
+			name()
+		) | rpl::then(std::move(renames) | rpl::map(name));
+	}
+	return rpl::single(
+		name()
+	) | rpl::then(rpl::merge(
+		std::move(renames),
+		rpl::merge(
+			owner->chatsListChanges(),
+			owner->chatsListLoadedEvents()
+		) | rpl::to_empty
+	) | rpl::map(name));
+}
+
 void AppendBookmarkRow(
 		not_null<Ui::VerticalLayout*> container,
 		not_null<Window::SessionController*> controller,
 		const Lumina::Bookmark &bookmark) {
-	const auto owner = &controller->session().data();
-	const auto peer = owner->peerLoaded(bookmark.id.peer);
 	const auto id = bookmark.id;
-	const auto title = peer
-		? peer->name()
-		: Lumina::Tr(u"LuminaBookmarkChatUnavailable"_q);
+	auto title = ChatTitleValue(&controller->session(), id.peer);
 
 	// Android shows the snippet with the date underneath, and falls back to
 	// the date when there is no snippet. Desktop has one line, and the chat a
@@ -133,7 +189,7 @@ void AppendBookmarkRow(
 
 	const auto button = AddButtonWithLabel(
 		container,
-		rpl::single(title),
+		std::move(title),
 		rpl::single(label),
 		st::settingsButtonNoIcon);
 	button->setClickedCallback([=] {

@@ -7,6 +7,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "settings/sections/settings_lumina_tools.h"
 
+#include "lumina/lumina_onboarding.h"
 #include "lumina/lumina_backup_settings.h"
 #include "lumina/lumina_profile_card_settings.h"
 #include "lumina/lumina_contact_notes_settings.h"
@@ -51,6 +52,7 @@ void LuminaTools::setupContent(not_null<Ui::VerticalLayout*> container) {
 	Lumina::AddContactNotesRows(container, controller());
 	Lumina::AddProfileCardRows(container, controller());
 	Lumina::AddBackupRows(container, controller());
+	Lumina::AddOnboardingRows(container, controller());
 }
 
 } // namespace Settings

@@ -101,9 +101,40 @@ const auto kKeyTimeWithSeconds = u"timeWithSeconds"_q;
 	return cachedTo;
 }
 
+// The re-measure follows the PREFERENCE rather than this file's own setter,
+// because SetTimeWithSeconds() is not the only writer of the key: a backup
+// restore goes through Lumina::Settings::importAll(), which writes the key and
+// fires changes() without ever reaching any setter, and a second window would
+// do the same. Hanging the walk off the setter left those writes with new
+// timestamps measured at the old widths - clipped seconds when the preference
+// was restored on, a leftover gap when it was restored off.
+//
+// Registered lazily rather than at static init because the first call reads a
+// preference, and Lumina::Settings is not safe to touch before QApplication
+// exists. TimeWithSeconds() is the one function every path goes through -
+// including SetTimeWithSeconds(), which calls it before it writes - so the
+// subscription always exists before the first change can be fired.
+void EnsureRefreshOnChange() {
+	static auto lifetime = rpl::lifetime();
+	[[maybe_unused]] static const auto init = [] {
+		TimeWithSecondsChanges() | rpl::on_next([] {
+			// A change is normally delivered from inside a settings toggle's
+			// own click handling. Walking every message view from there fires
+			// resize and repaint requests back into a widget tree that is
+			// still finishing that press, so the re-measure goes to the next
+			// main-thread turn instead.
+			crl::on_main([] {
+				RefreshMessageTimeLayouts();
+			});
+		}, lifetime);
+		return true;
+	}();
+}
+
 } // namespace
 
 bool TimeWithSeconds() {
+	EnsureRefreshOnChange();
 	return Settings::Instance().getBool(kKeyTimeWithSeconds, false);
 }
 
@@ -112,14 +143,6 @@ void SetTimeWithSeconds(bool value) {
 		return;
 	}
 	Settings::Instance().set(kKeyTimeWithSeconds, value, Store::Prefs);
-
-	// This is normally reached from inside a settings toggle's own click
-	// handling. Walking every message view from there fires resize and repaint
-	// requests back into a widget tree that is still finishing that press, so
-	// the re-measure goes to the next main-thread turn instead.
-	crl::on_main([] {
-		RefreshMessageTimeLayouts();
-	});
 }
 
 rpl::producer<bool> TimeWithSecondsValue() {

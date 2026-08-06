@@ -464,6 +464,16 @@ BackupError ApplyBackup(
 	// passphrase incapable of half-restoring anything. saveNow() then replaces
 	// each of the three store files atomically instead of leaving the restored
 	// values sitting in the debounce window.
+	//
+	// saveNow() returns void and swallows a store it could not write, so this
+	// function cannot tell a flushed import from one that only reached memory
+	// and reports success either way. When Settings::saveNow() is changed to
+	// report whether every dirty store was written, this becomes:
+	//
+	//   Settings::Instance().importAll(restored);
+	//   const auto saved = Settings::Instance().saveNow();
+	//   Wipe(padded);
+	//   return saved ? BackupError::None : BackupError::WriteFailed;
 	Settings::Instance().importAll(restored);
 	Settings::Instance().saveNow();
 	Wipe(padded);

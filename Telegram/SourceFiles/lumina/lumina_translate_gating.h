@@ -154,15 +154,30 @@ namespace Lumina {
 	not_null<History*> history);
 
 // Fires when anything AutoTranslateOfferSkip() reads may have changed: the
-// master opt-in, the mode, either scope key, the read language, the selected
-// provider. A consumer must re-read rather than assume, because the provider
-// stream covers API key edits as well.
+// master opt-in, the mode, either scope key, the read language, the language
+// the read language falls back to (Core::Settings::translateTo(), which every
+// stock translate-to picker writes) and the selected provider. A consumer must
+// re-read rather than assume, because the provider stream covers API key edits
+// as well.
 //
-// The rest of what that predicate reads already has a stream the read side
-// watches, and duplicating them here would only add wakeups:
-// Core::Settings::translateChatEnabledValue() and
-// ChatTranslationUnlockedValue() through the tracker's own tracking flag, and
-// PeerUpdate::Flag::TranslationDisabled through its per-peer subscription.
+// This stream is NOT the whole of what AutoTranslateOfferSkip() reads, and a
+// caller must not treat it as such. Three inputs are per-account or per-peer
+// and cannot be expressed here: Core::Settings::translateChatEnabled(),
+// ChatTranslationUnlocked() (its Premium half) and
+// PeerData::translationFlag(). Each of them has its own stream on the read
+// side, so no offer is ever computed from a stale answer.
+//
+// The trap is one level up. A consumer that feeds this into
+// rpl::distinct_until_changed() is remembering the last value THIS stream
+// carried, and one of those three moving the answer behind its back leaves
+// that memory holding a value the predicate no longer returns - after which
+// the next change that maps back to the remembered value is dropped as "not a
+// change", and the switch the user just turned off does nothing. So a consumer
+// that de-duplicates must merge those three streams in as well; see
+// TranslateTracker::setup() in history/view/history_view_translate_tracker.cpp,
+// which does exactly that. Duplicating them inside this function instead would
+// not work: two of the three need a Main::Session and the third a PeerData,
+// and this producer is per-application.
 [[nodiscard]] rpl::producer<> AutoTranslatePolicyChanges();
 
 } // namespace Lumina

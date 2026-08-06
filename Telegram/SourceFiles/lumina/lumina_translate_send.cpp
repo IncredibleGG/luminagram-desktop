@@ -10,13 +10,16 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "base/flat_map.h"
 #include "base/timer.h"
 #include "base/weak_ptr.h"
+#include "chat_helpers/compose/compose_show.h"
 #include "data/data_peer.h"
 #include "data/data_premium_limits.h"
+#include "data/data_session.h"
 #include "history/history.h"
 #include "lang/lang_keys.h"
 #include "lumina/lumina_locale.h"
 #include "lumina/lumina_send_pipeline.h"
 #include "lumina/lumina_settings.h"
+#include "lumina/lumina_translate_caption.h"
 #include "lumina/lumina_translate_gating.h"
 #include "lumina/lumina_translate_providers.h"
 #include "lumina/lumina_translate_settings.h"
@@ -67,6 +70,29 @@ constexpr auto kQueueLimit = 4;
 // stalled request plus the one behind it, so this only ever fires on a hold
 // nothing else was going to end.
 constexpr auto kQueueGuardTimeout = kWatchdogTimeout * 3;
+
+// The bound on a confirm box or a language picker the user never answers, and
+// it is armed for a held CAPTION send only.
+//
+// Nothing else ends that wait. kWatchdogTimeout above covers a provider in
+// flight and is cancelled before the confirm box opens; the language boxes open
+// before any watchdog is armed at all; kQueueGuardTimeout only exists once a
+// second send has queued behind this one, so a lone hold waits forever. For a
+// typed message that is the right answer - the composer still shows the text,
+// nothing is lost, and cutting the wait short would send an untranslated
+// message out from under a box the user is still reading. For a caption it is
+// the whole photo: SendFilesBox has closed and the files exist only inside the
+// bundle this send carries.
+//
+// Quitting does not rescue it either. Application::readyToQuit() holds the quit
+// open for pending draft saves and nothing else (ApiWrap::isQuitPrevent()), so
+// a media upload started at that point never finishes. The wait has to be
+// bounded here, in the session, or not at all.
+//
+// Minutes rather than seconds, matching the ordering timeout in
+// lumina_translate_caption.cpp: long enough that it never cuts short a box
+// someone is actually reading, short enough that the photo still leaves.
+constexpr auto kCaptionBoxTimeout = crl::time(3 * 60 * 1000);
 
 [[nodiscard]] QString DialogLanguagesKey() {
 	return u"trSendLangDialog"_q;
@@ -156,9 +182,17 @@ struct Request {
 	uint64 generation = 0;
 };
 
+// Deliberately leaked, exactly as the hold in lumina_undo_send.cpp is and for
+// the same reason: a Request owns a base::Timer, which is a QObject, and not
+// every exit runs Application::readyToQuit() - Sandbox::isSavingSession()
+// quits without it. A plain function-local static would then be destroyed at
+// static-destruction time, killing a running timer after QApplication is
+// already gone. Leaking one pointer removes that whole class of shutdown
+// crash, and a send still held at that point has nothing left to do anyway.
 [[nodiscard]] base::flat_map<QString, std::unique_ptr<Request>> &Requests() {
-	static auto result = base::flat_map<QString, std::unique_ptr<Request>>();
-	return result;
+	using Map = base::flat_map<QString, std::unique_ptr<Request>>;
+	static const auto result = new Map();
+	return *result;
 }
 
 [[nodiscard]] uint64 NextGeneration() {
@@ -205,9 +239,11 @@ struct Queue {
 	uint64 id = 0;
 };
 
+// Leaked for the reason Requests() above is: a Queue owns a base::Timer too.
 [[nodiscard]] base::flat_map<QString, std::unique_ptr<Queue>> &Queues() {
-	static auto result = base::flat_map<QString, std::unique_ptr<Queue>>();
-	return result;
+	using Map = base::flat_map<QString, std::unique_ptr<Queue>>;
+	static const auto result = new Map();
+	return *result;
 }
 
 void DrainQueue(const QString &key);
@@ -271,7 +307,16 @@ void FinishRequest(
 	}
 	if (text && !translated.isEmpty() && (translated != original)) {
 		text->text = translated;
-		if (const auto hook = OriginalHook()) {
+
+		// Not for a caption. The store behind this hook is keyed on the message
+		// id ApiWrap::sendMessage() mints, and a media send never goes near
+		// that function - it leaves through ApiWrap::sendFiles(). So arming for
+		// a caption arms something nothing can ever claim, and it does not just
+		// sit there harmlessly: a text message sent in the same chat inside the
+		// arm's lifetime and carrying that exact translation WOULD claim it,
+		// and would then show the photo's caption as its own original.
+		const auto hook = OriginalHook();
+		if (hook && !HoldsCaptionSend(history, original)) {
 			hook(history, translated, original);
 		}
 	}
@@ -286,6 +331,25 @@ void CancelRequest(const QString &key, uint64 generation) {
 		Requests().remove(key);
 		ScheduleDrain(key);
 	}
+}
+
+// Armed just before a box that has no deadline of its own is opened, and only
+// when the send behind it is a caption send - see kCaptionBoxTimeout above.
+// Everything that answers the box calls FinishRequest() or CancelRequest(),
+// both of which drop the Request and the timer with it, and StartTranslation()
+// re-arms the same timer with its own watchdog, so this never outlives the wait
+// it was armed for. A box still open when it fires has nothing left to answer,
+// which is the trade FlushQueue() already makes.
+void ArmCaptionBoxGuard(const QString &key, uint64 generation) {
+	const auto request = FindRequest(key, generation);
+	if (!request
+		|| !HoldsCaptionSend(request->history.get(), request->original)) {
+		return;
+	}
+	request->watchdog.setCallback([=] {
+		crl::on_main([=] { FinishRequest(key, generation, QString()); });
+	});
+	request->watchdog.callOnce(kCaptionBoxTimeout);
 }
 
 [[nodiscard]] uint64 CreateRequest(
@@ -382,6 +446,7 @@ void ShowTranslationConfirm(
 	}
 	const auto original = request->original;
 	const auto name = TranslateLanguageName(request->target);
+	ArmCaptionBoxGuard(key, generation);
 	const auto routed = std::make_shared<bool>(false);
 	controller->show(Box([=](not_null<Ui::GenericBox*> box) {
 		box->setTitle(TrValue(u"LuminaTranslateBeforeSend"_q));
@@ -414,7 +479,16 @@ void ShowTranslationConfirm(
 			});
 			box->closeBox();
 		});
-		box->addLeftButton(tr::lng_cancel(), [=] {
+		// NOT tr::lng_cancel(). Cancelling a text send abandons it and the
+		// composer still holds what the user typed, so "Cancel" is exact. The
+		// same button on a send that carries a caption abandons nothing: the
+		// files exist only inside the bundle this send is carrying and
+		// lumina_translate_caption.h finishes them with the caption as typed
+		// rather than lose a photo to a dismissed box. SendCancelLabel() is the
+		// one place that knows which of the two this box belongs to, and it is
+		// matched on the held text as well as on the chat because a chat can
+		// have a text send held and a caption send queued behind it.
+		box->addLeftButton(SendCancelLabel(history, original), [=] {
 			box->closeBox();
 		});
 		box->lifetime().add([=] {
@@ -666,6 +740,7 @@ void FlushQueue(const QString &key, uint64 id) {
 		text,
 		original,
 		std::move(proceed));
+	ArmCaptionBoxGuard(key, generation);
 	AskSendLanguage(controller, history, key, generation);
 	return true;
 }
@@ -848,6 +923,58 @@ bool Intercept(
 
 } // namespace
 
+bool InterceptCaptionSend(
+		not_null<History*> history,
+		TextWithTags &caption,
+		Api::SendOptions options,
+		Fn<void()> proceed) {
+	Expects(proceed != nullptr);
+
+	// `options` is deliberately not consulted: nothing in this pipeline depends
+	// on it, and the parameter is here so the caption seam hands its send over
+	// in exactly the shape lumina_send_pipeline.h describes.
+	return Intercept(history, caption, std::move(proceed));
+}
+
+void FlushTranslateSends() {
+	// Every pass either finishes one request or empties one chat's queue, and
+	// nothing reachable from here can add either: Intercept() only runs from a
+	// composer, and no composer sends while the application is quitting. The
+	// bound is a safety net rather than a real limit - one request and one
+	// queue per open chat is the whole of what can be waiting.
+	constexpr auto kFlushLimit = 1024;
+	for (auto pass = 0; pass != kFlushLimit; ++pass) {
+		if (!Requests().empty()) {
+			const auto i = Requests().begin();
+			const auto key = i->first;
+			const auto generation = i->second->generation;
+			FinishRequest(key, generation, QString());
+			continue;
+		}
+		const auto i = Queues().begin();
+		if (i == Queues().end()) {
+			return;
+		}
+
+		// ScheduleDrain() posts, and a post made during the quit never runs, so
+		// the backlog is emptied here rather than left to it.
+		auto queue = std::move(i->second);
+		Queues().erase(i);
+		for (auto &entry : queue->entries) {
+			SendAsTyped(entry);
+		}
+	}
+}
+
+void FlushTranslateSendsAndCaptions() {
+	// The requests above own the caption sends that reached the chain, so they
+	// go first; what is left in the caption seam's own ordering queue never
+	// reached it and is released afterwards, which keeps the order the user
+	// sent in.
+	FlushTranslateSends();
+	FlushTranslateCaptionSends();
+}
+
 void SetupTranslateSendPipeline() {
 	static auto registered = false;
 	if (registered) {
@@ -968,6 +1095,41 @@ void AddSendMenuTranslateRow(
 		[=] { SetQuickToggle(peerId, !checked); },
 		&st::menuIconTranslate,
 		checked);
+}
+
+void AddSendMenuTranslateRow(
+		not_null<Ui::PopupMenu*> menu,
+		const std::shared_ptr<ChatHelpers::Show> &show,
+		const SendMenu::Details &details) {
+	AddSendMenuTranslateRow(menu, details);
+	if (!show
+		|| !TranslationFeatureEnabled()
+		|| !details.barePeerId
+		|| (details.spoiler != SendMenu::SpoilerState::None)
+		|| (details.caption != SendMenu::CaptionState::None)
+		|| (details.photoQuality != SendMenu::PhotoQualityState::None)
+		|| details.price.has_value()) {
+		return;
+	}
+
+	// Only while the language is actually per chat. With a non-auto send
+	// language set globally, DialogSendLanguage() is never consulted and a row
+	// that edits it would be a row that changes nothing.
+	if (!TranslateSendLanguageIsAuto()) {
+		return;
+	}
+
+	// The session comes from the show rather than from the peer id, which is
+	// the whole reason this overload exists - see the header.
+	const auto history = show->session().data().history(
+		PeerId(details.barePeerId));
+	if (!TranslateBeforeSendActive(history)) {
+		return;
+	}
+	menu->addAction(
+		Tr(u"LuminaTrSendPickerTitle"_q),
+		[=] { ShowDialogSendLanguagePicker(history); },
+		&st::menuIconTranslate);
 }
 
 namespace {

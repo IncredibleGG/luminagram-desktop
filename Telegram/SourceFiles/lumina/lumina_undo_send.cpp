@@ -17,6 +17,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "lumina/lumina_settings.h"
 #include "main/main_session.h"
 #include "mainwidget.h"
+#include "mainwindow.h"
 #include "storage/storage_account.h"
 #include "ui/qt_object_factory.h"
 #include "ui/toast/toast.h"
@@ -47,6 +48,7 @@ constexpr auto kWindow = crl::time(5000);
 // live object is never touched, because undo-send does not rewrite messages.
 struct Hold {
 	base::weak_ptr<History> history;
+	base::weak_ptr<Window::SessionController> controller;
 	QString text;
 	Fn<void()> proceed;
 	base::weak_ptr<Ui::Toast::Instance> toast;
@@ -93,6 +95,50 @@ void ReleaseHold(const std::unique_ptr<Hold> &hold) {
 	}
 }
 
+// Removes the local draft this send left behind in the chat it came from, and
+// ONLY when that draft is character-for-character the text that just went out.
+//
+// THE ORDERING THIS EXISTS FOR, BECAUSE IT IS NOT THE OBVIOUS ONE.
+// HistoryWidget writes the composer's text into the chat's local draft on its
+// way out of that chat - showHistory() calls saveCurrentDraftToCloud(), which
+// runs Core::App().materializeLocalDrafts() -> saveFieldToHistoryLocalDraft()
+// (history_widget.cpp:3022), and MainWidget::showNewSection() gets there
+// through _history->showHistory(PeerId(), MsgId()) (mainwidget.cpp:1939).
+// Both of those happen before anything announces the move, so by the time a
+// held send is dispatched the residue is already on disk. Meanwhile `proceed`
+// itself skips clearFieldText() / saveDraftWithTextNow() once the composer has
+// moved, because by then those belong to another chat.
+//
+// The cloud draft is not a problem: ApiWrap::sendMessage() clears it and sets
+// f_clear_draft on the wire. The local one is - without this the text would be
+// sitting in the message box again the next time the user opened this chat,
+// directly under the message it had already sent, which invites sending it
+// twice.
+//
+// The exact-text guard is what makes this safe to do at all: a draft the user
+// typed instead of, or on top of, the held message does not match and is left
+// completely alone. It also means the residue survives when an interceptor
+// registered ahead of this one rewrote the text - translate-before-send does -
+// because then the draft holds what the user typed and this holds what went
+// out. Leaving a draft behind is the right way to be wrong here.
+void ClearSentLocalDraft(History *history, const QString &text) {
+	if (!history) {
+		return;
+	}
+
+	// The same key HistoryWidget::saveFieldToHistoryLocalDraft() writes: this
+	// send provably came from HistoryWidget, which has no topic and no
+	// monoforum sublist of its own.
+	const auto topicRootId = MsgId();
+	const auto monoforumPeerId = PeerId();
+	const auto draft = history->localDraft(topicRootId, monoforumPeerId);
+	if (!draft || draft->textWithTags.text != text) {
+		return;
+	}
+	history->clearLocalDraft(topicRootId, monoforumPeerId);
+	history->session().local().writeDrafts(history);
+}
+
 // Sends the held message now. Everything is torn down before `proceed` runs,
 // so a terminal reached from inside `proceed` - the quit flush re-entering,
 // another interceptor further down the chain - finds nothing left to act on.
@@ -116,7 +162,26 @@ void DispatchHold(std::unique_ptr<Hold> hold) {
 	if (!hold->history) {
 		return;
 	}
+	const auto history = hold->history.get();
+
+	// Whether the composer has moved off this chat decides who owns the text
+	// left in the chat's local draft, and it has to be read before `proceed`
+	// runs, because `proceed` is what moves the composer's own state. The
+	// nullable sessionContent() rather than SessionController::content(): the
+	// latter wraps it in not_null and would assert while a window is being
+	// torn down. A window or a MainWidget that is already gone resolves to
+	// "not moved", which is the conservative answer - `proceed` is guarded on
+	// the composer, so a dead one means the message never went out, and a
+	// draft removed then would take the user's text with it.
+	const auto controller = hold->controller.get();
+	const auto content = controller
+		? controller->widget()->sessionContent()
+		: nullptr;
+	const auto moved = content && (content->peer() != history->peer.get());
 	proceed();
+	if (moved) {
+		ClearSentLocalDraft(history, hold->text);
+	}
 }
 
 // Cancels the held message. The composer never cleared its field, so the text
@@ -186,72 +251,30 @@ void DropHold(std::unique_ptr<Hold> hold) {
 	return weak;
 }
 
-// Removes the local draft this send left behind in the chat it came from, and
-// ONLY when that draft is character-for-character the text that just went out.
-//
-// THE ORDERING THIS EXISTS FOR, BECAUSE IT IS NOT THE OBVIOUS ONE.
-// controller->activeChatChanges() does NOT fire while HistoryWidget is still
-// on the old chat. HistoryWidget::showHistory() switches _history first and
-// calls controller()->setActiveChatEntry() as its very last statement, and
-// MainWidget::showNewSection() likewise announces the new active chat after
-// the composer has moved. So `proceed` always runs with sameChat == false on
-// this path, and HistoryWidget deliberately skips clearFieldText() and
-// saveDraftWithTextNow() then, because by that point those belong to another
-// chat. Meanwhile showHistory() has already pushed the composer's text into
-// this chat's local draft on its way out (saveCurrentDraftToCloud() ->
-// Core::App().materializeLocalDrafts() -> saveFieldToHistoryLocalDraft()).
-//
-// The cloud draft is not a problem: ApiWrap::sendMessage() clears it and sets
-// f_clear_draft on the wire. The local one is - without this the text would be
-// sitting in the message box again the next time the user opened this chat,
-// directly under the message it had already sent, which invites sending it
-// twice.
-//
-// The exact-text guard is what makes this safe to do at all: a draft the user
-// typed instead of, or on top of, the held message does not match and is left
-// completely alone. It also means the residue survives when an interceptor
-// registered ahead of this one rewrote the text - translate-before-send does -
-// because then the draft holds what the user typed and this holds what went
-// out. Leaving a draft behind is the right way to be wrong here.
-void ClearSentLocalDraft(History *history, const QString &text) {
-	if (!history) {
-		return;
-	}
-
-	// The same key HistoryWidget::saveFieldToHistoryLocalDraft() writes: this
-	// send provably came from HistoryWidget, which has no topic and no
-	// monoforum sublist of its own.
-	const auto topicRootId = MsgId();
-	const auto monoforumPeerId = PeerId();
-	const auto draft = history->localDraft(topicRootId, monoforumPeerId);
-	if (!draft || draft->textWithTags.text != text) {
-		return;
-	}
-	history->clearLocalDraft(topicRootId, monoforumPeerId);
-	history->session().local().writeDrafts(history);
-}
-
 // Leaving the chat sends the held message rather than keeping it waiting in a
 // chat the user is no longer looking at.
 //
 // It is not a correctness fix for the message itself - Intercept() has already
 // made sure the composer survives, so the five second timer would send it
-// anyway - but a hold must not outlive the chat it belongs to on screen, and
-// the draft residue described above has to be cleaned up either way. Dispatch
-// stays synchronous so that the send and that cleanup happen before anything
-// else can write a new draft for the chat being left.
+// anyway - but a hold must not outlive the chat it belongs to on screen.
+// Dispatch stays synchronous so that the send and the draft cleanup that
+// DispatchHold() performs happen before anything else can write a new draft
+// for the chat being left.
 //
 // Dialogs::Key::history() is null for a forum topic or a saved sublist, so any
 // move at all - to another chat, into a topic, to the chat list - ends the
 // hold.
 //
-// Clearing a draft here is only sound because `proceed` provably reached the
-// composer: every emitter of activeChatChanges() runs with HistoryWidget alive
-// (they are all navigation calls, none of them a destructor reachable while a
-// hold exists), and tearing the window down destroys MainWidget without
-// emitting anything at all - an rpl::variable does not fire changes() when it
-// is destroyed. So there is no path where this removes a draft for a message
-// that was never handed over.
+// This is a shortcut, not the guarantee. activeChatChanges() does NOT fire on
+// every move away from the chat: MainWidget::showNewSection() only announces
+// the new entry when the incoming section has one (mainwidget.cpp:1941), so
+// opening Settings or a profile page leaves the hold running with the composer
+// already off this chat. That case is handled by the timer instead, and the
+// draft residue by DispatchHold() rather than here.
+//
+// DispatchHold() consumes the Hold and destroys the lifetime that owns this
+// very subscription. rpl copies a handler before invoking it
+// (rpl/consumer.h put_next), so the call is safe - but nothing may follow it.
 void WatchActiveChat(
 		not_null<Hold*> hold,
 		not_null<Window::SessionController*> controller,
@@ -260,23 +283,57 @@ void WatchActiveChat(
 	const auto watched = history.get();
 	controller->activeChatChanges(
 	) | rpl::on_next([=](Dialogs::Key key) {
-		if (key.history() == watched) {
-			return;
+		if (key.history() != watched) {
+			DispatchHold(TakeHold(generation));
 		}
-		auto taken = TakeHold(generation);
-		if (!taken) {
-			return;
-		}
-
-		// Read before dispatching: DispatchHold() consumes the Hold, and it
-		// also destroys the lifetime that owns this very subscription. rpl
-		// copies a handler before invoking it, so the rest of this lambda is
-		// safe to run - but nothing may touch `taken` after the call.
-		const auto sent = taken->history.get();
-		const auto text = taken->text;
-		DispatchHold(std::move(taken));
-		ClearSentLocalDraft(sent, text);
 	}, hold->lifetime);
+}
+
+// The window whose composer this send came from, or null if none can be shown
+// to have produced it.
+//
+// THE OBVIOUS CALL IS THE WRONG ONE. Session::tryResolveWindow(peer) prefers a
+// window DEDICATED to that peer over the window that is asking
+// (main_session.cpp:590-601, the `windowId().thread->peer() == forPeer` early
+// return). With chat X open both in the main window and in a window of its
+// own, a send typed in the main window resolves to the other window, and then
+// three things are wrong at once: the Undo toast is shown on a window the user
+// may not even be looking at - which is exactly the "invisible five second
+// delay" ShowUndoToast()'s contract forbids - the activeChatChanges() shortcut
+// watches a window that will never move, and DispatchHold() asks the wrong
+// composer whether it has left the chat and so skips the draft cleanup.
+//
+// The window the user pressed Enter in is the active one, so that is what is
+// looked for first. Requiring its HistoryWidget to be showing this chat is the
+// same test the fallback makes, and it is what keeps section composers out:
+// MainWidget::peer() is HistoryWidget's peer and is null whenever a forum
+// topic, a discussion thread, a saved sublist or the scheduled view owns the
+// composer instead. See "WHERE IT IS AVAILABLE" in lumina_undo_send.h for why
+// that restriction exists at all.
+//
+// When no window is active - which should not happen for a keystroke-driven
+// send, but is not worth crashing the feature over - this falls back to
+// exactly the pair of checks this file made before, so it can never accept a
+// send the previous version rejected.
+[[nodiscard]] Window::SessionController *ResolveComposerWindow(
+		not_null<History*> history) {
+	const auto peer = history->peer.get();
+	const auto shows = [&](Window::SessionController *window) {
+		if (!window) {
+			return false;
+		}
+		// The nullable sessionContent() rather than the not_null content():
+		// the latter asserts while a window is being torn down.
+		const auto content = window->widget()->sessionContent();
+		return content && (content->peer() == peer);
+	};
+	for (const auto &window : history->session().windows()) {
+		if (window->widget()->isActiveWindow() && shows(window)) {
+			return window.get();
+		}
+	}
+	const auto resolved = history->session().tryResolveWindow(peer);
+	return shows(resolved) ? resolved : nullptr;
 }
 
 void ArmHold(
@@ -288,6 +345,7 @@ void ArmHold(
 		base::weak_ptr<Ui::Toast::Instance> toast) {
 	auto hold = std::make_unique<Hold>();
 	hold->history = base::make_weak(history);
+	hold->controller = base::make_weak(controller);
 	hold->text = text;
 	hold->proceed = std::move(proceed);
 	hold->toast = toast;
@@ -327,13 +385,6 @@ bool Intercept(
 		return true;
 	}
 
-	// No window means no toast, and a hold the user cannot see or undo is just
-	// an invisible five second delay. Fail open and send now.
-	const auto controller = history->session().tryResolveWindow(history->peer);
-	if (!controller) {
-		return true;
-	}
-
 	// THE CONSTRAINT THAT DECIDES WHERE THIS FEATURE IS AVAILABLE AT ALL.
 	//
 	// `proceed` is crl::guard()ed on the composer that produced it, so a hold
@@ -349,11 +400,16 @@ bool Intercept(
 	// HistoryWidget is currently showing" - it is null whenever a section
 	// widget (forum topic, discussion thread, saved sublist, scheduled) owns
 	// the composer instead. So a hold is armed only when this send provably
-	// came from HistoryWidget, and every other composer sends unchanged.
+	// came from a HistoryWidget showing this chat, and every other composer
+	// sends unchanged. That is a deliberate reduction against Android, which
+	// holds everywhere: losing a message is far worse than not offering to
+	// undo one.
 	//
-	// That is a deliberate reduction against Android, which holds everywhere.
-	// Losing a message is far worse than not offering to undo one.
-	if (controller->content()->peer() != history->peer.get()) {
+	// A null answer also covers "no window at all", and then there is nowhere
+	// to put a toast - a hold the user can neither see nor undo is only an
+	// invisible five second delay. Either way: fail open and send now.
+	const auto controller = ResolveComposerWindow(history);
+	if (!controller) {
 		return true;
 	}
 

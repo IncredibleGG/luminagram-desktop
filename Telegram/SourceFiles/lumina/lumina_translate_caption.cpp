@@ -15,8 +15,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "history/history.h"
 #include "lang/lang_keys.h"
 #include "lumina/lumina_locale.h"
-#include "lumina/lumina_send_pipeline.h"
 #include "lumina/lumina_translate_gating.h"
+#include "lumina/lumina_translate_send.h"
 #include "main/main_session.h"
 #include "ui/chat/attach/attach_prepare.h"
 
@@ -85,9 +85,16 @@ struct ChatQueue {
 	uint64 token = 0;
 };
 
+// Deliberately leaked, as the equivalents in lumina_translate_send.cpp and
+// lumina_undo_send.cpp are: a ChatQueue owns a base::Timer, which is a
+// QObject, and not every exit runs Application::readyToQuit() -
+// Sandbox::isSavingSession() quits without it. A plain function-local static
+// would then be destroyed at static-destruction time, killing a running timer
+// after QApplication is already gone.
 [[nodiscard]] base::flat_map<QString, std::unique_ptr<ChatQueue>> &Queues() {
-	static auto result = base::flat_map<QString, std::unique_ptr<ChatQueue>>();
-	return result;
+	using Map = base::flat_map<QString, std::unique_ptr<ChatQueue>>;
+	static const auto result = new Map();
+	return *result;
 }
 
 // The caption currently held in each chat, which is what decides the wording
@@ -112,6 +119,26 @@ struct ChatQueue {
 	return result;
 }
 
+// The one moment a media send is in no chat's ordering queue and in no request.
+// ReleaseChatSlot() below takes the next send out of its chat's queue and posts
+// the main-thread turn that starts it, and for that one turn the send lives
+// nowhere but inside the posted lambda: a quit landing in the gap would find it
+// in no queue and in no request, the post would never run, and the photo would
+// be gone. It is registered here for exactly that turn and taken back out by
+// StartHeldCaptionSend(), so FlushTranslateCaptionSends() can always see it.
+[[nodiscard]] std::vector<std::shared_ptr<Waiting>> &InTransit() {
+	static auto result = std::vector<std::shared_ptr<Waiting>>();
+	return result;
+}
+
+void DropInTransit(const std::shared_ptr<Waiting> &entry) {
+	auto &list = InTransit();
+	const auto i = ranges::find(list, entry);
+	if (i != list.end()) {
+		list.erase(i);
+	}
+}
+
 [[nodiscard]] uint64 NextToken() {
 	static auto result = uint64(0);
 	return ++result;
@@ -127,7 +154,10 @@ struct ChatQueue {
 }
 
 void ReleaseChatSlot(QString key, uint64 token);
-void StartHeldCaptionSend(const QString &key, uint64 token, Waiting waiting);
+void StartHeldCaptionSend(
+	const QString &key,
+	uint64 token,
+	std::shared_ptr<Waiting> waiting);
 
 void UpdateOrderingWatchdog(not_null<ChatQueue*> queue, const QString &key) {
 	if (queue->waiting.empty()) {
@@ -167,11 +197,12 @@ void ReleaseChatSlot(QString key, uint64 token) {
 	const auto next = std::make_shared<Waiting>(
 		std::move(queue->waiting.front()));
 	queue->waiting.erase(queue->waiting.begin());
+	InTransit().push_back(next);
 	const auto nextToken = NextToken();
 	queue->token = nextToken;
 	UpdateOrderingWatchdog(queue, key);
 	crl::on_main([=] {
-		StartHeldCaptionSend(key, nextToken, std::move(*next));
+		StartHeldCaptionSend(key, nextToken, next);
 	});
 }
 
@@ -197,6 +228,23 @@ void ReleaseChatSlot(QString key, uint64 token) {
 		}
 	}
 	return result;
+}
+
+// Whether handing this caption over can accomplish anything, which is the only
+// reason to take a chat's ordering slot and hold a photo at all.
+//
+// Both terms are the pipeline's own answers, not second spellings of them:
+// TranslateBeforeSendActive() is the predicate the live preview bar is shown on
+// and the one Intercept() reads, and Intercept() refuses a caption carrying
+// tags for its own reason - a tag is an absolute offset into these exact
+// characters, and replacing them moves every one of them out from under it. So
+// this cannot answer differently from the send that follows; asking here only
+// means a send that was always going to come straight back does not take a slot
+// and does not delay the next photo behind it.
+[[nodiscard]] bool PipelineWouldTake(
+		not_null<History*> history,
+		not_null<const TextWithTags*> caption) {
+	return caption->tags.isEmpty() && TranslateBeforeSendActive(history);
 }
 
 // A translation that outgrew the caption limit is put back. The caption the
@@ -285,9 +333,9 @@ CaptionSend::~CaptionSend() {
 	// the composer still holds what they typed. Here the box is closed and the
 	// files exist nowhere else, so the send is finished with the caption as
 	// typed instead. It goes to the next main-thread turn because this can run
-	// from inside the InterceptSend() call itself, and it carries a copy of the
-	// bundle so that a caller which did not capture one cannot turn a cancelled
-	// translation into a send from a destroyed bundle. The slot goes back on
+	// from inside the InterceptCaptionSend() call itself, and it carries a copy
+	// of the bundle so that a caller which did not capture one cannot turn a
+	// cancelled translation into a send from a destroyed bundle. The slot goes on
 	// that same turn, after the send, so the next media send in this chat
 	// leaves after this one rather than ahead of it.
 	crl::on_main([callback = std::move(callback), release, kept = bundle] {
@@ -302,22 +350,36 @@ CaptionSend::~CaptionSend() {
 // when it was queued, so unlike InterceptSendFiles() there is no "send it
 // yourself" answer left to give: every outcome below ends with `proceed`
 // invoked and the slot handed on.
-void StartHeldCaptionSend(const QString &key, uint64 token, Waiting waiting) {
-	const auto history = waiting.history.get();
-	const auto bundle = waiting.bundle;
+void StartHeldCaptionSend(
+		const QString &key,
+		uint64 token,
+		std::shared_ptr<Waiting> waiting) {
+	DropInTransit(waiting);
+	if (!waiting) {
+		ReleaseChatSlot(key, token);
+		return;
+	}
+	const auto history = waiting->history.get();
+	const auto bundle = waiting->bundle;
 	const auto caption = bundle ? SingleCaption(bundle.get()) : nullptr;
-	auto proceed = base::take(waiting.proceed);
+	auto proceed = base::take(waiting->proceed);
 	if (!proceed) {
 		ReleaseChatSlot(key, token);
 		return;
-	} else if (!history || !caption) {
+	} else if (!history
+		|| !caption
+		|| !PipelineWouldTake(history, caption)) {
+		// The preference can have been turned off, or the slot handed on to a
+		// caption the pipeline was never going to take, while this one waited.
+		// It still waited its turn, so it still leaves after the send in front
+		// of it - it just leaves without entering the chain.
 		proceed();
 		ReleaseChatSlot(key, token);
 		return;
 	}
 	const auto state = std::make_shared<CaptionSend>();
 	state->bundle = bundle;
-	state->history = waiting.history;
+	state->history = waiting->history;
 	state->caption = caption;
 	state->original = *caption;
 	state->proceed = std::move(proceed);
@@ -325,10 +387,10 @@ void StartHeldCaptionSend(const QString &key, uint64 token, Waiting waiting) {
 	state->token = token;
 	state->owns = true;
 	SetCaptionHeld(state.get(), true);
-	const auto carryOn = InterceptSend(
+	const auto carryOn = InterceptCaptionSend(
 		history,
 		*caption,
-		waiting.options,
+		waiting->options,
 		[state] { FinishCaptionSend(state.get()); });
 	if (carryOn && !state->finished) {
 		FinishCaptionSend(state.get());
@@ -350,6 +412,18 @@ bool InterceptSendFiles(
 		return true;
 	}
 	const auto key = ChatKey(history);
+
+	// The seam is shared, and entering it costs far more than a wasted lookup
+	// when the pipeline was never going to take this caption - see
+	// PipelineWouldTake() above, which is where the reasoning lives.
+	//
+	// The ordering queue is still honoured whenever this chat already has media
+	// held, because a preference changed mid-hold must not let a later photo
+	// overtake it; a queued send that turns out not to be ours by the time its
+	// turn comes is released without entering the chain either.
+	if (!Queues().contains(key) && !PipelineWouldTake(history, caption)) {
+		return true;
+	}
 
 	// Photo B, sent while photo A's caption is still being translated. Before
 	// this queue existed B went out at once and A whenever its translation came
@@ -397,9 +471,11 @@ bool InterceptSendFiles(
 	// Marked held before the call rather than after it, because the language
 	// confirm and the language picker are opened from inside it, synchronously.
 	SetCaptionHeld(state.get(), true);
-	const auto carryOn = InterceptSend(history, *caption, options, [state] {
-		FinishCaptionSend(state.get());
-	});
+	const auto carryOn = InterceptCaptionSend(
+		history,
+		*caption,
+		options,
+		[state] { FinishCaptionSend(state.get()); });
 
 	// `finished` here would mean an interceptor both answered and returned
 	// true, which lumina_send_pipeline.h forbids - but if one ever does, this
@@ -419,23 +495,53 @@ bool InterceptSendFiles(
 	return true;
 }
 
+void FlushTranslateCaptionSends() {
+	// Only the sends that are still waiting their turn. The one that owns each
+	// chat's slot is held by the text pipeline, and Lumina::FlushTranslateSends()
+	// has already finished it by the time this runs; a waiting send never
+	// entered the chain at all, and ReleaseChatSlot() would have started it from
+	// a posted main-thread turn that the quit is not going to reach.
+	//
+	// The in-transit list first, because an entry is in it precisely because it
+	// was the next one out of its chat's queue.
+	const auto release = [](Waiting &entry) {
+		auto proceed = base::take(entry.proceed);
+		if (proceed && entry.history) {
+			proceed();
+		}
+	};
+	auto transit = base::take(InTransit());
+	for (const auto &entry : transit) {
+		if (entry) {
+			release(*entry);
+		}
+	}
+	auto queues = base::take(Queues());
+	for (auto &pair : queues) {
+		for (auto &entry : pair.second->waiting) {
+			release(entry);
+		}
+	}
+}
+
+bool HoldsCaptionSend(History *history, const QString &original) {
+	if (!history) {
+		return false;
+	}
+	const auto i = HeldCaptions().find(ChatKey(history));
+	if (i == HeldCaptions().end()) {
+		return false;
+	}
+
+	// An empty `original` is the caller saying it cannot tell us which send the
+	// box is for, and then the chat is all we have to go on.
+	return original.isEmpty() || (i->second == original);
+}
+
 rpl::producer<QString> SendCancelLabel(
 		History *history,
 		const QString &original) {
-	const auto sendsCaption = [&] {
-		if (!history) {
-			return false;
-		}
-		const auto i = HeldCaptions().find(ChatKey(history));
-		if (i == HeldCaptions().end()) {
-			return false;
-		}
-
-		// An empty `original` is the caller saying it cannot tell us which send
-		// the box is for, and then the chat is all we have to go on.
-		return original.isEmpty() || (i->second == original);
-	}();
-	return sendsCaption
+	return HoldsCaptionSend(history, original)
 		? TrValue(u"LuminaSendOriginalCaption"_q)
 		: tr::lng_cancel();
 }

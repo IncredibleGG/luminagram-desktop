@@ -16,6 +16,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <atomic>
 #include <cstring>
 #include <optional>
+#include <vector>
 
 namespace Lumina {
 namespace {
@@ -121,6 +122,54 @@ void Zero(const TiffBlock &tiff, int at, int64 size) {
 	memset(tiff.data + at, 0, size_t(count));
 }
 
+// A half-open byte range inside the TIFF block.
+struct Region {
+	int from = 0;
+	int till = 0;
+};
+
+// The bytes an IFD occupies: its entry count, its entries, and the four-byte
+// link to the next IFD. std::nullopt when that whole structure does not fit
+// inside the block, which is also what makes it unsafe to write anywhere near.
+[[nodiscard]] std::optional<Region> IfdRegionAt(
+		const TiffBlock &tiff,
+		int at) {
+	if (at <= 0) {
+		return std::nullopt;
+	}
+	const auto count = ReadU16(tiff, at);
+	if (!count) {
+		return std::nullopt;
+	}
+	const auto till = int64(at) + 2 + (int64(*count) * kIfdEntrySize) + 4;
+	if (till > int64(tiff.size)) {
+		return std::nullopt;
+	}
+	return Region{ at, int(till) };
+}
+
+// The IFDs we are only ever allowed to READ. Orientation, the camera tags and
+// every other offset a reader depends on live in IFD0 (and, for the embedded
+// thumbnail, in IFD1); an offset stored in the file is a 32-bit field that a
+// corrupt or hostile photo can point anywhere, including straight back at
+// those. `visited` already refuses a GPS pointer that lands exactly on the
+// start of an IFD we walked, but not one that lands two bytes into it, and
+// EmptySubIfd() writes zeroes - so a GPS sub-IFD, or one of its out-of-line
+// values, that overlaps a guarded IFD is refused outright rather than
+// followed. Refusing means malformed, which means StripResult::Failed, which
+// means the caller throws this buffer away: the safe direction.
+[[nodiscard]] bool OverlapsGuarded(
+		const std::vector<Region> &guarded,
+		int64 from,
+		int64 till) {
+	for (const auto &region : guarded) {
+		if (from < int64(region.till) && int64(region.from) < till) {
+			return true;
+		}
+	}
+	return false;
+}
+
 // Empties the sub-IFD at `at`. For every entry: a value too big to sit inside
 // the entry lives elsewhere in the TIFF block and is zeroed there first - that
 // is where the actual coordinates are, three RATIONALs per axis - then the
@@ -138,7 +187,11 @@ void Zero(const TiffBlock &tiff, int at, int64 size) {
 // Orientation and the camera tags with it while still reporting success. So
 // nothing is zeroed unless the whole structure it belongs to fits inside the
 // block, and a claim that does not fit marks the strip malformed instead.
-void EmptySubIfd(const TiffBlock &tiff, int at, StripState &state) {
+void EmptySubIfd(
+		const TiffBlock &tiff,
+		int at,
+		const std::vector<Region> &guarded,
+		StripState &state) {
 	const auto count = ReadU16(tiff, at);
 	if (!count) {
 		state.malformed = true;
@@ -161,6 +214,11 @@ void EmptySubIfd(const TiffBlock &tiff, int at, StripState &state) {
 			const auto where = ReadU32(tiff, entry + 8);
 			if (!where || !*where || (*where + bytes) > int64(tiff.size)) {
 				state.malformed = true;
+			} else if (OverlapsGuarded(guarded, *where, *where + bytes)) {
+				// A GPS value whose bytes sit inside IFD0 or IFD1. Zeroing it
+				// would take Orientation, or whatever else shares those bytes,
+				// with it.
+				state.malformed = true;
 			} else {
 				Zero(tiff, int(*where), bytes);
 			}
@@ -177,11 +235,20 @@ void StripGpsInIfd(
 		int at,
 		int depth,
 		base::flat_set<int> &visited,
+		std::vector<Region> &guarded,
 		StripState &state) {
 	if (depth > kMaxIfdDepth || at <= 0 || visited.contains(at)) {
 		return;
 	}
 	visited.emplace(at);
+
+	// This IFD is being read, so from here on nothing may be written into it.
+	// Recorded before its own entries are walked, which is what makes IFD0
+	// off limits by the time its GPS pointer is followed.
+	if (const auto region = IfdRegionAt(tiff, at)) {
+		guarded.push_back(*region);
+	}
+
 	const auto count = ReadU16(tiff, at);
 	if (!count) {
 		return;
@@ -199,14 +266,23 @@ void StripGpsInIfd(
 		const auto inside = where && *where && (*where < int64(tiff.size));
 		const auto sub = inside ? int(*where) : 0;
 		if (*tag != kGpsIfdPointer) {
-			StripGpsInIfd(tiff, sub, depth + 1, visited, state);
-		} else if (!sub || visited.contains(sub)) {
-			// A GPS pointer we cannot follow, or one aliasing an IFD we
-			// have already walked - emptying that would erase all of IFD0.
+			StripGpsInIfd(tiff, sub, depth + 1, visited, guarded, state);
+			continue;
+		}
+		const auto region = sub ? IfdRegionAt(tiff, sub) : std::nullopt;
+		if (!sub || visited.contains(sub) || !region) {
+			// A GPS pointer we cannot follow, one aliasing an IFD we have
+			// already walked, or one whose IFD does not fit in the block.
+			state.malformed = true;
+		} else if (OverlapsGuarded(guarded, region->from, region->till)) {
+			// A GPS pointer that lands *inside* an IFD we are reading rather
+			// than on its start - the case `visited` cannot see. Emptying it
+			// there would zero IFD0's own entries, Orientation among them,
+			// and still report success.
 			state.malformed = true;
 		} else {
 			visited.emplace(sub);
-			EmptySubIfd(tiff, sub, state);
+			EmptySubIfd(tiff, sub, guarded, state);
 		}
 	}
 }
@@ -228,6 +304,48 @@ void StripGpsInTiff(char *data, int size, StripState &state) {
 	if (!magic || *magic != kTiffMagic) {
 		return;
 	}
+	auto guarded = std::vector<Region>();
+
+	// The TIFF header itself: the byte-order mark, the magic, and the offset
+	// of IFD0. Guarding the IFDs is not enough, because these eight bytes are
+	// not part of any IFD and a GPS value pointer can be aimed straight at
+	// them: `where` is only refused when it is zero, so an out-of-line value
+	// claiming five bytes at offset 1 lands entirely inside the header, misses
+	// every IFD region, and is zeroed. The entries the header describes are
+	// then untouched but unreachable - every reader drops the whole APP1
+	// segment, Orientation with it - and the strip still reports Stripped, so
+	// storage/localimageloader.cpp:998 uploads that buffer. Same failure as a
+	// GPS pointer aimed into IFD0, one level lower down.
+	guarded.push_back(Region{ 0, 8 });
+
+	// The top-level chain is collected BEFORE anything is written, because
+	// IFD1 - where the embedded thumbnail keeps its own Orientation - is
+	// walked after IFD0, i.e. after IFD0's GPS pointer has already been
+	// followed. Read-only pass: it follows next-links and records regions,
+	// nothing else.
+	{
+		auto seen = base::flat_set<int>();
+		auto scan = ReadU32(tiff, 4);
+		for (auto i = 0; i != kMaxIfdChain; ++i) {
+			if (!scan || !*scan || *scan >= int64(tiff.size)) {
+				break;
+			}
+			const auto at = int(*scan);
+			if (seen.contains(at)) {
+				break;
+			}
+			seen.emplace(at);
+			if (const auto region = IfdRegionAt(tiff, at)) {
+				guarded.push_back(*region);
+			}
+			const auto count = ReadU16(tiff, at);
+			if (!count) {
+				break;
+			}
+			scan = ReadU32(tiff, at + 2 + (*count * kIfdEntrySize));
+		}
+	}
+
 	auto visited = base::flat_set<int>();
 	auto next = ReadU32(tiff, 4);
 	for (auto i = 0; i != kMaxIfdChain; ++i) {
@@ -238,7 +356,7 @@ void StripGpsInTiff(char *data, int size, StripState &state) {
 		if (visited.contains(at)) {
 			break;
 		}
-		StripGpsInIfd(tiff, at, 0, visited, state);
+		StripGpsInIfd(tiff, at, 0, visited, guarded, state);
 		const auto count = ReadU16(tiff, at);
 		if (!count) {
 			break;

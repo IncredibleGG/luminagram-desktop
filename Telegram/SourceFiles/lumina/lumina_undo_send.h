@@ -44,9 +44,19 @@ namespace Lumina {
 //    lumina_undo_send.cpp - it removes a draft only when it is exactly the
 //    text that was just sent, so a draft the user typed instead is untouched.
 //  * A graceful quit flushes: FlushUndoSend() below dispatches the held send
-//    from Application::readyToQuit(), before that same function asks whether
-//    ApiWrap wants to prevent the quit - so the message is queued first and
-//    the quit then waits for it. The message is sent, not lost.
+//    from the top of Application::readyToQuit(), so the request is queued
+//    before anything decides whether the quit may proceed. Two limits are
+//    worth writing down rather than assuming away. Nothing in
+//    Application::readyToQuit() waits for an outgoing MESSAGE - ApiWrap's
+//    isQuitPrevent() only waits on draft-save requests (apiwrap.cpp:2576) -
+//    so what a flushed send gets is the same best effort any normal send
+//    would get from a user who pressed Enter and quit in the same second, no
+//    more and no less. And Core::QuitAttempt() short-circuits readyToQuit()
+//    entirely when Sandbox::isSavingSession() (application.cpp:1846), so an
+//    OS-driven logout inside the window drops the held send without flushing
+//    it. Both degrade to the same place as a hard kill: the text is still in
+//    the composer, HistoryWidget's destructor saves it to the chat's local
+//    draft (history_widget.cpp:11274), and nothing typed is lost.
 //  * A hard kill inside the window loses nothing that upstream would have
 //    kept: the text never left the composer, so it lands in the local draft
 //    exactly as text typed and not sent always does. There is no LuminaGram

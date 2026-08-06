@@ -23,8 +23,26 @@ constexpr auto kWindowWidth = 340;
 constexpr auto kWindowHeight = 160;
 constexpr auto kPadding = 24;
 constexpr auto kSpacing = 12;
-constexpr auto kCodeMaxLength = 128;
 
+// DO NOT give this field a setMaxLength(). It had one - 128, chosen to mirror
+// the 128 the settings editor caps the code at - and the two numbers do not
+// mean the same thing.
+//
+// The editor is a Ui::InputField, whose _maxLength is enforced in document
+// positions (chopByMaxLength() measures with QTextCursor::position()), and an
+// emoji is folded into ONE position: the correction pass turns every sequence
+// Emoji::Find() recognises into a single object-replacement character
+// (input_field.cpp:3520-3534), and getTextWithTags() expands it back to the
+// full emoji text on the way out, adjusting the reported length as it goes.
+// QLineEdit::setMaxLength() counts UTF-16 units. So a code of 65 ordinary
+// emoji is 65 positions in the editor - accepted and stored whole - and 130+
+// units here, where it would be truncated to 128 and could then never match.
+// The door would drop into the decoy on every attempt, silently and forever,
+// with the settings page still reporting the code as "Set".
+//
+// Qt's own default cap of 32767 units applies instead, which is far above
+// anything 128 editor positions can expand to and is not a number this file
+// has to keep in sync with anything.
 class DoorWindow final : public QWidget {
 public:
 	explicit DoorWindow(Fn<void(VaultOutcome)> done);
@@ -52,7 +70,6 @@ DoorWindow::DoorWindow(Fn<void(VaultOutcome)> done)
 	_field = new QLineEdit(this);
 	_field->setEchoMode(QLineEdit::Password);
 	_field->setPlaceholderText(u"Password"_q);
-	_field->setMaxLength(kCodeMaxLength);
 	layout->addWidget(_field);
 
 	const auto confirmButton = new QPushButton(u"OK"_q, this);

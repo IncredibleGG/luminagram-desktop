@@ -551,7 +551,14 @@ object_ptr<BoxContent> ChooseTranslateToBox(
 			selected.push_back(id);
 		}
 	}
-	if (bringUp && ranges::contains(selected, bringUp)) {
+	// `selected` reaches ChooseLanguageBox() only as the set it partitions the
+	// list by, so pushing a language it already holds cannot change anything.
+	// The one case worth a push is the opposite one: a target that is neither
+	// the saved one nor in the skip list - the language a chat is currently
+	// being translated into, most often - would otherwise sit wherever the
+	// alphabet puts it instead of at the top, which is the whole point of
+	// handing it in.
+	if (bringUp && !ranges::contains(selected, bringUp)) {
 		selected.push_back(bringUp);
 	}
 	return Box(ChooseLanguageBox, tr::lng_languages(), [=](

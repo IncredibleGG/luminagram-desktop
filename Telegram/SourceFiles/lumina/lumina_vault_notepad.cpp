@@ -83,6 +83,7 @@ private:
 	void finish(VaultOutcome outcome);
 
 	void closeEvent(QCloseEvent *e) override;
+	void mouseDoubleClickEvent(QMouseEvent *e) override;
 
 	Fn<void(VaultOutcome)> _done;
 	QPlainTextEdit *_body = nullptr;
@@ -161,6 +162,28 @@ void NotepadWindow::finish(VaultOutcome outcome) {
 void NotepadWindow::closeEvent(QCloseEvent *e) {
 	finish(VaultOutcome::Closed);
 	QWidget::closeEvent(e);
+}
+
+// The same unlock attempt, one widget further out, and it is not redundant
+// padding.
+//
+// In VaultMode::DecoyApp with the notepad skin - which is the default skin,
+// and the skin the gate substitutes whenever the calculator cannot type the
+// code - the double click on the title is the ONLY way the owner ever gets
+// back into their account. A single unlock surface that depends on one Qt
+// widget receiving one event kind is too narrow a thing to hang an account on.
+//
+// QLabel does not accept plain mouse events unless it has text interaction
+// flags, so a double click on the title is delivered to TitleLabel first and
+// then propagates here; a double click anywhere else on the window chrome
+// arrives here directly. The body swallows its own, which is correct - a
+// double click in a text area selects a word and must keep doing so.
+//
+// tryUnlock() with a body that is not the code does nothing observable, so
+// widening where it can be attempted from gives nothing away.
+void NotepadWindow::mouseDoubleClickEvent(QMouseEvent *e) {
+	tryUnlock();
+	QWidget::mouseDoubleClickEvent(e);
 }
 
 } // namespace

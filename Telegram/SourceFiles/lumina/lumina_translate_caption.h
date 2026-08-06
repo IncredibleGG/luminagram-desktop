@@ -43,9 +43,15 @@ namespace Lumina {
 //
 // Nothing is decided here. Whether this caption is translated at all, into
 // what language, with or without a confirm, and what happens while a provider
-// is slow are all the text pipeline's answers, reached through the same
-// interceptor chain a typed message goes through, so the two cannot drift
-// apart or answer differently.
+// is slow are all the text pipeline's answers, reached through the very code a
+// typed message reaches, so the two cannot drift apart or answer differently.
+//
+// Reached, though, through Lumina::InterceptCaptionSend() rather than
+// Lumina::InterceptSend(): that is the translate pipeline alone and not the
+// whole interceptor chain. See the note on it in lumina/lumina_translate_send.h
+// - a caption travelling the chain reaches undo-send, which is written on the
+// assumption that media never does, and one of the consequences is a typed
+// message being dropped instead of sent.
 //
 // Two things this file does decide, because they only exist on this path:
 // what a cancel says (SendCancelLabel() below), and the order media leaves a
@@ -85,6 +91,17 @@ namespace Lumina {
 	Api::SendOptions options,
 	Fn<void()> proceed);
 
+// Releases every media send still waiting its turn in this chat's ordering
+// queue, right now and synchronously, exactly as the composer handed it over.
+//
+// Call Lumina::FlushTranslateSendsAndCaptions() rather than this: the send
+// that owns each chat's slot lives in the text pipeline, so that one has to be
+// finished first or the waiting sends leave ahead of it. See the note on
+// Lumina::FlushTranslateSends() in lumina/lumina_translate_send.h for why the
+// quit path needs this at all - a held caption send is the one thing on this
+// seam that cannot be typed again.
+void FlushTranslateCaptionSends();
+
 // The label for the cancel button on the translate-before-send confirm, which
 // is the one place in that pipeline where cancelling means two different
 // things.
@@ -110,6 +127,22 @@ namespace Lumina {
 // Called from lumina_translate_send.cpp when it builds the confirm box, which
 // is the only file that knows a cancel button is being shown at all.
 [[nodiscard]] rpl::producer<QString> SendCancelLabel(
+	History *history,
+	const QString &original = QString());
+
+// Whether the send the text pipeline is holding for this chat is a media send
+// carrying a caption, matched the same way SendCancelLabel() above matches it.
+//
+// It is the difference between a hold that costs the user nothing and one that
+// can cost them a photo, and lumina_translate_send.cpp needs it for more than
+// the wording of a button: a confirm box or a language picker left unanswered
+// holds a send with no deadline over it, which is correct for typed text -
+// still sitting in the composer - and not survivable for a caption, whose files
+// exist nowhere but inside the bundle the hold is carrying.
+//
+// `history` may be null and `original` may be empty, with the same meanings as
+// above.
+[[nodiscard]] bool HoldsCaptionSend(
 	History *history,
 	const QString &original = QString());
 

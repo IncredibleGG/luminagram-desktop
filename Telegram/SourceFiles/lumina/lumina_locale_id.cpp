@@ -159,6 +159,10 @@ namespace {
 		{ u"LuminaTranslatePreviewTranslating"_q, u"Menerjemahkan…"_q },
 		{ u"LuminaTranslatePreviewFailed"_q, u"Terjemahan tidak tersedia"_q },
 
+		// The per-chat translate button in the chat top bar.
+		{ u"LuminaTranslateChatToggle"_q, u"Terjemahkan obrolan ini"_q },
+		{ u"LuminaTranslateChatShowOriginal"_q, u"Tampilkan asli"_q },
+
 		// Names of the languages LuminaGram can translate into, in the order
 		// the pickers show them.
 		{ u"LuminaLangEn"_q, u"Inggris"_q },
@@ -243,6 +247,389 @@ namespace {
 		{ u"LuminaLangCy"_q, u"Wales"_q },
 		{ u"LuminaLangYi"_q, u"Yiddish"_q },
 		{ u"LuminaLangZu"_q, u"Zulu"_q },
+		{ u"LuminaAppearanceStickerSizeHeader"_q, u"Ukuran stiker"_q },
+		{ u"LuminaBackupCryptoFailed"_q,
+			u"Enkripsi tidak tersedia di sistem ini."_q },
+		{ u"LuminaBackupDamaged"_q,
+			u"Berkas cadangan rusak dan tidak dapat dipulihkan."_q },
+		{ u"LuminaBackupExport"_q, u"Ekspor cadangan terenkripsi"_q },
+		{ u"LuminaBackupExportDone"_q, u"Cadangan disimpan."_q },
+		{ u"LuminaBackupExportFailed"_q,
+			u"Tidak dapat membuat berkas cadangan."_q },
+		{ u"LuminaBackupExportInfo"_q, u"Simpan semua yang disimpan "
+			u"LuminaGram di perangkat ini — penanda, catatan, templat "
+			u"balasan, penggantian teks, dan seluruh pengaturan — ke dalam "
+			u"satu berkas, terenkripsi dengan frasa sandi pilihan Anda. "
+			u"Berkas ini juga memuat nilai-nilai pribadi: kunci API "
+			u"terjemahan, kode brankas dan crash palsu, serta catatan umpan. "
+			u"Tidak ada yang dikirim ke Telegram. Pilih frasa sandi yang "
+			u"panjang dan simpan di tempat aman — tanpa frasa itu berkas "
+			u"tidak dapat dibuka, dan tidak ada cara untuk memulihkannya."_q },
+		{ u"LuminaBackupExportPassphraseTitle"_q, u"Tetapkan frasa sandi"_q },
+		{ u"LuminaBackupFileFilter"_q, u"Cadangan LuminaGram (*.lgbak)"_q },
+		{ u"LuminaBackupImport"_q, u"Impor cadangan"_q },
+		{ u"LuminaBackupImportFailed"_q,
+			u"Tidak dapat membaca berkas cadangan."_q },
+		{ u"LuminaBackupImportInfo"_q, u"Pilih berkas cadangan dan masukkan "
+			u"frasa sandinya untuk memulihkan data LuminaGram Anda. "
+			u"Pengaturan yang dibawa cadangan menggantikan pengaturan di "
+			u"perangkat ini; apa pun yang tidak dibawanya dibiarkan apa "
+			u"adanya. Berkas yang tidak dapat diverifikasi ditolak sebelum "
+			u"apa pun ditulis, sehingga frasa sandi yang salah tidak pernah "
+			u"membuat pemulihan Anda berhenti di tengah jalan."_q },
+		{ u"LuminaBackupImportSuccess"_q, u"Cadangan dipulihkan. Mulai ulang "
+			u"LuminaGram untuk menerapkan semuanya."_q },
+		{ u"LuminaBackupInvalidFile"_q,
+			u"Ini bukan berkas cadangan LuminaGram yang valid."_q },
+		{ u"LuminaBackupNewerFormat"_q,
+			u"Cadangan ini dibuat oleh versi LuminaGram yang lebih baru."_q },
+		{ u"LuminaBackupOpenCaption"_q, u"Buka cadangan LuminaGram"_q },
+		{ u"LuminaBackupPassphraseHint"_q, u"Frasa sandi"_q },
+		{ u"LuminaBackupPassphraseMismatch"_q,
+			u"Kedua frasa sandi tidak sama."_q },
+		{ u"LuminaBackupPassphraseRepeatHint"_q, u"Ulangi frasa sandi"_q },
+		{ u"LuminaBackupPassphraseTitle"_q, u"Masukkan frasa sandi"_q },
+		{ u"LuminaBackupPassphraseTooShort"_q,
+			u"Pilih frasa sandi minimal 4 karakter."_q },
+		{ u"LuminaBackupSaveCaption"_q, u"Simpan cadangan LuminaGram"_q },
+		{ u"LuminaBackupTitle"_q, u"Cadangan terenkripsi"_q },
+		{ u"LuminaBackupUnauthenticated"_q, u"Cadangan ini memakai format "
+			u"lama tanpa perlindungan, yang tidak dapat diperiksa terhadap "
+			u"frasa sandi yang salah maupun terhadap perubahan isi. Buat "
+			u"cadangan baru dari LuminaGram versi terbaru."_q },
+		{ u"LuminaBackupWrongPassphrase"_q,
+			u"Frasa sandi salah, atau berkasnya telah diubah."_q },
+		{ u"LuminaBookmark"_q, u"Tambahkan penanda"_q },
+		{ u"LuminaBookmarkAdded"_q, u"Ditambahkan ke penanda"_q },
+		{ u"LuminaBookmarkChatUnavailable"_q, u"Obrolan tidak tersedia"_q },
+		{ u"LuminaBookmarkDeleteTitle"_q, u"Hapus penanda?"_q },
+		{ u"LuminaBookmarkGone"_q,
+			u"Obrolan ini tidak lagi tersedia di perangkat ini."_q },
+		{ u"LuminaBookmarkRemove"_q, u"Hapus penanda"_q },
+		{ u"LuminaBookmarkRemoved"_q, u"Dihapus dari penanda"_q },
+		{ u"LuminaBookmarksAbout"_q, u"Penanda hanyalah penunjuk ke pesan, "
+			u"disimpan hanya di perangkat ini dan tidak pernah dikirim ke "
+			u"Telegram. Menghapus penanda tidak mengubah pesannya sama "
+			u"sekali."_q },
+		{ u"LuminaBookmarksEmpty"_q,
+			u"Anda belum menyimpan pesan apa pun ke penanda."_q },
+		{ u"LuminaBookmarksFull"_q, u"Daftar penanda sudah penuh. Hapus satu "
+			u"penanda untuk menambahkan yang lain."_q },
+		{ u"LuminaBookmarksList"_q, u"Pesan yang ditandai"_q },
+		{ u"LuminaBookmarksListAbout"_q, u"Klik sebuah penanda untuk membuka "
+			u"pesannya, atau klik kanan untuk menghapusnya. Penanda tetap ada "
+			u"di daftar ini bahkan setelah pesannya dihapus."_q },
+		{ u"LuminaBookmarksNone"_q, u"Tidak ada"_q },
+		{ u"LuminaBookmarksTitle"_q, u"Penanda"_q },
+		{ u"LuminaChatListDensityTitle"_q, u"Kepadatan daftar obrolan"_q },
+		{ u"LuminaCompactListRows"_q, u"Baris ringkas"_q },
+		{ u"LuminaCompactListRowsInfo"_q, u"Menampilkan lebih banyak obrolan "
+			u"di layar dengan memendekkan setiap baris daftar obrolan. Foto "
+			u"profil dan pratinjau pesan tetap terlihat."_q },
+		{ u"LuminaChatListDotsTitle"_q, u"Titik avatar"_q },
+		{ u"LuminaChatListOnlineDot"_q, u"Titik daring"_q },
+		{ u"LuminaChatListOnlineDotInfo"_q, u"Menampilkan titik hijau kecil "
+			u"pada avatar obrolan pribadi yang kontaknya sedang daring."_q },
+		{ u"LuminaChatListRecencyDot"_q, u"Titik terakhir dilihat"_q },
+		{ u"LuminaChatListRecencyDotInfo"_q, u"Mewarnai titik avatar pada "
+			u"obrolan pribadi berdasarkan seberapa baru kontak terakhir "
+			u"terlihat: hijau saat sedang daring, kuning dalam satu jam, "
+			u"oranye dalam satu hari. Tidak ada titik untuk terakhir terlihat "
+			u"yang lebih lama atau yang disembunyikan. Sakelar titik daring "
+			u"tetap mengendalikan kondisi hijau (daring)."_q },
+		{ u"LuminaChatListVisibilityAbout"_q, u"Menghilangkan bilah folder "
+			u"dari daftar obrolan — baik bilah vertikal di sampingnya maupun "
+			u"bilah horizontal di atasnya. Selama tab folder disembunyikan, "
+			u"Anda selalu melihat semua obrolan: folder yang sedang Anda buka "
+			u"akan ditinggalkan, sedangkan pintasan folder dan gesekan "
+			u"antarfolder tidak melakukan apa pun. Menyembunyikan cerita "
+			u"hanya menghapus baris di atas daftar obrolan; cerita itu "
+			u"sendiri, dan semua cara lain untuk membukanya, tidak "
+			u"berubah."_q },
+		{ u"LuminaChatListVisibilityTitle"_q, u"Folder dan cerita"_q },
+		{ u"LuminaContactNote"_q, u"Catatan pribadi"_q },
+		{ u"LuminaContactNoteAbout"_q, u"Hanya Anda yang bisa melihat ini. "
+			u"Catatan tetap di perangkat ini, tidak pernah dikirim ke "
+			u"Telegram, dan tidak disinkronkan ke perangkat Anda yang "
+			u"lain."_q },
+		{ u"LuminaContactNoteEmpty"_q,
+			u"Klik untuk menambah catatan pribadi"_q },
+		{ u"LuminaContactNoteHint"_q,
+			u"Catatan (hanya Anda yang bisa melihat)"_q },
+		{ u"LuminaContactNotesAbout"_q, u"Menambahkan catatan pribadi dan "
+			u"daftar tag ke profil seseorang. Keduanya tetap di perangkat "
+			u"ini, tidak pernah dikirim ke Telegram, dan tidak disinkronkan "
+			u"ke perangkat Anda yang lain. Catatan kontak milik Telegram "
+			u"sendiri dibiarkan apa adanya: catatan pribadi ditawarkan di "
+			u"tempat catatan Telegram tidak tersedia — pada bot, dan pada "
+			u"orang yang tidak ada di kontak Anda — sedangkan tag ditawarkan "
+			u"di mana saja."_q },
+		{ u"LuminaContactNotesClear"_q, u"Hapus semua catatan pribadi"_q },
+		{ u"LuminaContactNotesClearText"_q, u"Hapus setiap catatan pribadi "
+			u"dan tag yang tersimpan di perangkat ini? Tindakan ini tidak "
+			u"dapat dibatalkan."_q },
+		{ u"LuminaContactNotesClearTitle"_q, u"Hapus catatan pribadi"_q },
+		{ u"LuminaContactNotesNone"_q, u"Tidak ada"_q },
+		{ u"LuminaContactNotesTitle"_q, u"Catatan kontak pribadi"_q },
+		{ u"LuminaContactNotesToggle"_q,
+			u"Catatan pribadi dan tag di profil"_q },
+		{ u"LuminaContactTags"_q, u"Tag"_q },
+		{ u"LuminaContactTagsEmpty"_q, u"Klik untuk menambah tag"_q },
+		{ u"LuminaContactTagsHint"_q, u"Tag, dipisahkan koma"_q },
+		{ u"LuminaDetailsDate"_q, u"Tanggal"_q },
+		{ u"LuminaDetailsForwardedFrom"_q, u"Diteruskan dari"_q },
+		{ u"LuminaDetailsFrom"_q, u"Dari"_q },
+		{ u"LuminaDetailsMessageId"_q, u"ID pesan"_q },
+		{ u"LuminaDetailsOriginalDate"_q, u"Tanggal asli"_q },
+		{ u"LuminaExactNumbers"_q,
+			u"Tampilkan angka persis (tanpa pembulatan 1.2K)"_q },
+		{ u"LuminaExactNumbersInfo"_q, u"Tampilkan jumlah penuh seperti "
+			u"1.234.567 alih-alih bentuk singkat seperti 1.2M. Penghitung "
+			u"yang sudah tergambar di layar tetap memakai bentuk lamanya "
+			u"sampai aplikasi dimulai ulang."_q },
+		{ u"LuminaForwardNoAuthor"_q, u"Teruskan tanpa penulis"_q },
+		{ u"LuminaForwardNoAuthorTitle"_q, u"Teruskan tanpa penulis"_q },
+		{ u"LuminaForwardNoCaption"_q,
+			u"Teruskan tanpa penulis dan keterangan"_q },
+		{ u"LuminaForwardNoCaptionTitle"_q,
+			u"Teruskan tanpa penulis dan keterangan"_q },
+		{ u"LuminaHideStories"_q, u"Sembunyikan cerita"_q },
+		{ u"LuminaHideTabs"_q, u"Sembunyikan tab folder"_q },
+		{ u"LuminaLinkSafetyDestination"_q, u"Tujuan asli"_q },
+		{ u"LuminaLinkSafetyInfo"_q, u"Menanyakan sebelum membuka tautan yang "
+			u"menyembunyikan tujuan aslinya di balik teks sebelum tanda @, "
+			u"yang menulis domainnya dalam punycode, atau yang lewat pemendek "
+			u"tautan yang dikenal. Konfirmasinya menampilkan host tujuan asli "
+			u"dan alamat lengkapnya. Telegram Desktop sendiri sudah "
+			u"menanyakan tentang domain mirip yang ditulis dengan abjad lain. "
+			u"Tidak ada pemeriksaan daring — tidak ada alamat yang Anda buka "
+			u"meninggalkan perangkat ini."_q },
+		{ u"LuminaLinkSafetyRow"_q, u"Pemeriksa keamanan tautan"_q },
+		{ u"LuminaLinkSafetyTitle"_q, u"Buka tautan eksternal?"_q },
+		{ u"LuminaLinkSafetyWarnMismatch"_q, u"Tautan ini menyembunyikan "
+			u"tujuan aslinya di balik teks sebelum tanda «@»."_q },
+		{ u"LuminaLinkSafetyWarnPunycode"_q, u"Alamat ini memakai karakter "
+			u"tersandi (punycode) yang bisa meniru situs terkenal."_q },
+		{ u"LuminaLinkSafetyWarnShortener"_q, u"Ini pemendek tautan — tujuan "
+			u"aslinya tetap tersembunyi sampai Anda membukanya."_q },
+		{ u"LuminaMediaAutoPauseBgVideo"_q,
+			u"Jeda video saat aplikasi berpindah ke latar belakang"_q },
+		{ u"LuminaMediaAutoPauseBgVideoInfo"_q, u"Otomatis menjeda video yang "
+			u"sedang diputar saat Anda meninggalkan LuminaGram. Mengecilkan "
+			u"penampil juga menjedanya. Video yang sengaja Anda pindahkan ke "
+			u"jendela tersendiri, atau ke gambar-dalam-gambar, tetap diputar, "
+			u"dan musik serta pesan suara juga tetap diputar selama Anda "
+			u"pergi."_q },
+		{ u"LuminaMediaSaving"_q, u"Media"_q },
+		{ u"LuminaMediaTitle"_q, u"Media"_q },
+		{ u"LuminaMessageActionsInfo"_q, u"Entri ini hanya muncul di menu "
+			u"konteks sebuah pesan. Masing-masing memakai penerusan milik "
+			u"Telegram sendiri, jadi obrolan yang membatasi penerusan tetap "
+			u"dibatasi. «Teruskan tanpa penulis dan keterangan» dinamai "
+			u"sesuai apa yang benar-benar dikirim: Telegram tidak dapat "
+			u"membuang keterangan sambil mempertahankan pengirim, sehingga "
+			u"memilihnya membuang keduanya. «Detail» hanya membaca apa yang "
+			u"sudah disinkronkan perangkat ini — tidak ada yang diminta dan "
+			u"tidak ada yang disimpan."_q },
+		{ u"LuminaMessageDetails"_q, u"Detail"_q },
+		{ u"LuminaOnboardingDualName"_q, u"Dua bahasa sekaligus"_q },
+		{ u"LuminaOnboardingDualText"_q, u"Menyimpan teks asli di layar "
+			u"berdampingan dengan terjemahannya, baik untuk pesan yang Anda "
+			u"terima maupun yang Anda kirim."_q },
+		{ u"LuminaOnboardingFooter"_q, u"Buka salah satu bagian di halaman "
+			u"pengaturan LuminaGram untuk menyiapkannya. Anda bisa membaca "
+			u"kartu ini lagi dari Alat."_q },
+		{ u"LuminaOnboardingGotIt"_q, u"Mengerti"_q },
+		{ u"LuminaOnboardingHeader"_q, u"Tentang"_q },
+		{ u"LuminaOnboardingIntro"_q, u"LuminaGram menambahkan alatnya "
+			u"sendiri di atas Telegram Desktop. Setiap opsi di bawah hanya "
+			u"disimpan di komputer ini dan tidak pernah disinkronkan dengan "
+			u"Telegram."_q },
+		{ u"LuminaOnboardingRow"_q, u"Apa yang ditambahkan LuminaGram"_q },
+		{ u"LuminaOnboardingRowAbout"_q, u"Menampilkan kartu selamat datang "
+			u"yang muncul saat pertama kali Anda membuka pengaturan "
+			u"LuminaGram. Kartu itu hanya menjelaskan apa yang ada di sini "
+			u"dan tidak mengaktifkan apa pun."_q },
+		{ u"LuminaOnboardingSafetyName"_q, u"Pemeriksaan keamanan"_q },
+		{ u"LuminaOnboardingSafetyText"_q, u"Memperingatkan sebelum membuka "
+			u"tautan yang alamatnya tidak seperti terlihat, menangkap alamat "
+			u"kripto yang tertukar saat Anda menempelkannya, dan menghapus "
+			u"lokasi dari foto yang Anda kirim."_q },
+		{ u"LuminaOnboardingTitle"_q, u"Selamat datang di LuminaGram"_q },
+		{ u"LuminaOnboardingTranslateText"_q, u"Menerjemahkan pesan masuk "
+			u"dengan layanan terjemahan Anda sendiri, dan menerjemahkan apa "
+			u"yang Anda ketik sebelum dikirim."_q },
+		{ u"LuminaOnboardingVaultName"_q, u"Brankas penyamaran"_q },
+		{ u"LuminaOnboardingVaultText"_q, u"Menyembunyikan LuminaGram di "
+			u"balik kalkulator atau catatan yang hanya membuka aplikasi "
+			u"aslinya dengan kode rahasia Anda."_q },
+		{ u"LuminaProfileCardAbout"_q, u"Kartu lokal tentang diri Anda — "
+			u"bahasa yang Anda kuasai, hal yang Anda minati — yang bisa Anda "
+			u"salin dan tempel ke sebuah obrolan. Kartu ini tetap di "
+			u"perangkat ini."_q },
+		{ u"LuminaProfileCardBio"_q, u"Bio singkat"_q },
+		{ u"LuminaProfileCardBioHint"_q,
+			u"Beberapa kata tentang diri Anda"_q },
+		{ u"LuminaProfileCardCopied"_q, u"Kartu disalin"_q },
+		{ u"LuminaProfileCardCopy"_q, u"Salin ke papan klip"_q },
+		{ u"LuminaProfileCardCopyInfo"_q, u"Membuat ringkasan teks biasa dari "
+			u"kartu Anda. Tempelkan ke obrolan mana pun saat Anda ingin "
+			u"membagikannya."_q },
+		{ u"LuminaProfileCardEdit"_q, u"Kartu saya"_q },
+		{ u"LuminaProfileCardEmptyShare"_q,
+			u"Isi kartu Anda terlebih dahulu"_q },
+		{ u"LuminaProfileCardHeader"_q, u"Kartu saya"_q },
+		{ u"LuminaProfileCardInfo"_q, u"Kartu ini hanya disimpan di perangkat "
+			u"ini dan tidak pernah dikirim ke Telegram. Kartu ini tidak "
+			u"mengubah profil Telegram Anda."_q },
+		{ u"LuminaProfileCardInterests"_q, u"Minat / tag"_q },
+		{ u"LuminaProfileCardInterestsHint"_q,
+			u"mis. musik, mendaki, coding"_q },
+		{ u"LuminaProfileCardLanguages"_q, u"Bahasa yang saya kuasai"_q },
+		{ u"LuminaProfileCardLanguagesHint"_q,
+			u"mis. Indonesia, English, 中文"_q },
+		{ u"LuminaProfileCardNotSet"_q, u"Belum diatur"_q },
+		{ u"LuminaProfileCardTagline"_q, u"Slogan"_q },
+		{ u"LuminaProfileCardTaglineHint"_q,
+			u"Kalimat singkat tentang diri Anda"_q },
+		{ u"LuminaProfileCardTitle"_q, u"Kartu profil"_q },
+		{ u"LuminaProfileChatCreated"_q, u"Dibuat"_q },
+		{ u"LuminaProfileDcId"_q, u"Pusat data"_q },
+		{ u"LuminaProfileDcIdValue"_q, u"DC{1}"_q },
+		{ u"LuminaProfileInfoHeader"_q, u"Profil"_q },
+		{ u"LuminaProfileInfoInfo"_q, u"Baris tambahan di halaman profil, "
+			u"semuanya dihitung di perangkat ini — tidak ada yang diminta "
+			u"dari Telegram. Telegram sendiri menyediakan tanggal registrasi "
+			u"untuk sebagian akun; untuk sisanya tanggal itu diperkirakan "
+			u"dari nomor akun dan ditampilkan dengan tanda «~». Pusat data "
+			u"adalah tempat foto profil disimpan. Tanggal pembuatan adalah "
+			u"saat sebuah grup atau kanal dibuat."_q },
+		{ u"LuminaProfileRegistrationApprox"_q, u"~ {1}"_q },
+		{ u"LuminaProfileRegistrationDate"_q, u"Tanggal registrasi"_q },
+		{ u"LuminaProfileShowChatDate"_q, u"Tampilkan tanggal dibuat"_q },
+		{ u"LuminaProfileShowDcId"_q, u"Tampilkan pusat data"_q },
+		{ u"LuminaProfileShowRegistrationDate"_q,
+			u"Tampilkan tanggal registrasi"_q },
+		{ u"LuminaRecentLimitsInfo"_q, u"Mencegah perangkat ini membuang "
+			u"stiker terbaru dan GIF tersimpan lebih cepat daripada yang "
+			u"seharusnya, memakai batas yang sama seperti LuminaGram di "
+			u"Android: hingga 200 stiker terbaru dan 500 GIF tersimpan. "
+			u"Server Telegram tetap yang menentukan berapa banyak yang "
+			u"benar-benar disimpan di akun Anda dan disinkronkan ke perangkat "
+			u"Anda yang lain, jadi ini tidak bisa memperbesar daftar di awan "
+			u"— pada sinkronisasi berikutnya, apa pun yang tidak lagi "
+			u"disimpan server juga hilang di sini, biasanya dalam hitungan "
+			u"detik. Selama ini aktif, Telegram Desktop berhenti menghapus "
+			u"GIF tersimpan atas inisiatifnya sendiri, sehingga pengingat "
+			u"Premium tentang batas GIF tersimpan tidak muncul. Panel stiker "
+			u"tetap hanya menampilkan 20 stiker terbaru pertama kecuali Anda "
+			u"juga mengaktifkan «Stiker terbaru tanpa batas» di Pengaturan › "
+			u"Lanjutan › Pengaturan eksperimental."_q },
+		{ u"LuminaRecentLimitsRow"_q,
+			u"Simpan lebih banyak stiker terbaru dan GIF"_q },
+		{ u"LuminaReplyTemplatesAbout"_q, u"Potongan teks pendek yang Anda "
+			u"simpan di perangkat ini dan sisipkan ke kolom pesan. Klik kanan "
+			u"tombol emoji di sebuah obrolan untuk memilih salah satunya. "
+			u"Templat tidak pernah dikirim ke Telegram."_q },
+		{ u"LuminaReplyTemplatesAdd"_q, u"Tambah templat"_q },
+		{ u"LuminaReplyTemplatesEdit"_q, u"Edit templat"_q },
+		{ u"LuminaReplyTemplatesEmpty"_q, u"Belum ada templat. Tambahkan "
+			u"satu, lalu klik kanan tombol emoji di sebuah obrolan untuk "
+			u"menyisipkannya."_q },
+		{ u"LuminaReplyTemplatesFull"_q, u"Daftar sudah penuh — hapus satu "
+			u"templat untuk menambahkan yang lain."_q },
+		{ u"LuminaReplyTemplatesInfo"_q, u"Klik kanan tombol emoji di sebuah "
+			u"obrolan untuk menyisipkan templat. Klik kanan sebuah templat di "
+			u"sini untuk memindahkannya ke atas atau ke bawah; buka salah "
+			u"satunya untuk mengedit atau menghapusnya."_q },
+		{ u"LuminaReplyTemplatesList"_q, u"Templat"_q },
+		{ u"LuminaReplyTemplatesManage"_q, u"Kelola templat…"_q },
+		{ u"LuminaReplyTemplatesMoveDown"_q, u"Pindahkan ke bawah"_q },
+		{ u"LuminaReplyTemplatesMoveUp"_q, u"Pindahkan ke atas"_q },
+		{ u"LuminaReplyTemplatesNone"_q, u"Tidak ada"_q },
+		{ u"LuminaReplyTemplatesPlaceholder"_q, u"Teks templat"_q },
+		{ u"LuminaReplyTemplatesShow"_q, u"Tawarkan templat di obrolan"_q },
+		{ u"LuminaReplyTemplatesTitle"_q, u"Templat balasan"_q },
+		{ u"LuminaSaveSticker"_q, u"Simpan stiker"_q },
+		{ u"LuminaSaveStickers"_q, u"Simpan stiker"_q },
+		{ u"LuminaSaveStickersInfo"_q, u"Menambahkan baris «Simpan stiker» ke "
+			u"menu konteks panel stiker. Stiker disimpan ke tempat unduhan "
+			u"Anda yang lain, dan baris itu disembunyikan untuk paket stiker "
+			u"milik sebuah grup ketika grup tersebut membatasi "
+			u"penyimpanan."_q },
+		{ u"LuminaSaveToCloud"_q, u"Simpan ke Pesan Tersimpan"_q },
+		{ u"LuminaSaveToCloudTitle"_q, u"Simpan ke Pesan Tersimpan"_q },
+		{ u"LuminaSecurityPanicConfirmAck"_q,
+			u"Saya paham tindakan ini tidak dapat dibatalkan"_q },
+		{ u"LuminaSecurityPanicConfirmButton"_q, u"Hapus sekarang"_q },
+		{ u"LuminaSecurityPanicConfirmText"_q, u"Setiap akun di perangkat ini "
+			u"akan dikeluarkan. Basis data pesan lokal, draf, dan media dalam "
+			u"cache akan dihapus, bersama pengaturan LuminaGram sendiri, "
+			u"penanda, terjemahan tersimpan, dan kunci API.\n\nAkun Anda "
+			u"tidak dihapus. Akun tetap ada di server Telegram, begitu pula "
+			u"pesan Anda — Anda bisa masuk lagi dari mana saja.\n\nBerkas "
+			u"yang sudah diunduh TIDAK dihapus. LuminaGram tidak menyentuh "
+			u"folder unduhan Anda, karena folder itu biasanya folder Unduhan "
+			u"biasa dan berisi berkas yang tidak berkaitan. Pindahkan atau "
+			u"hapus sendiri apa pun yang sensitif di sana.\n\nTindakan ini "
+			u"tidak dapat dibatalkan."_q },
+		{ u"LuminaSecurityPanicConfirmTitle"_q, u"Hapus darurat?"_q },
+		{ u"LuminaSecurityPanicHeader"_q, u"Hapus darurat"_q },
+		{ u"LuminaSecurityPanicWipe"_q, u"Hapus darurat (Kaboom)"_q },
+		{ u"LuminaSecurityPanicWipeAbout"_q, u"Mengeluarkan setiap akun di "
+			u"perangkat ini dan menghapus basis data pesan lokal, draf, serta "
+			u"media dalam cache, bersama pengaturan LuminaGram sendiri, "
+			u"penanda, terjemahan tersimpan, dan kunci API. Akun dan pesan "
+			u"Anda tetap ada di server Telegram. Berkas yang sudah Anda unduh "
+			u"dibiarkan di tempatnya. Tindakan ini tidak dapat "
+			u"dibatalkan."_q },
+		{ u"LuminaSelectFromAuthor"_q, u"Pilih semua dari penulis"_q },
+		{ u"LuminaSelectFromAuthorAbout"_q, u"Menambahkan entri menu pesan di "
+			u"grup yang memilih setiap pesan dari pengirim yang Anda klik. "
+			u"Entri ini hanya menjangkau pesan yang sudah dimuat jendela ini "
+			u"— gulir lebih jauh ke atas lalu ulangi untuk menyertakan pesan "
+			u"yang lebih lama. Pesan yang diatribusikan ke obrolan itu "
+			u"sendiri, seperti kiriman kanal dan kiriman admin anonim, tidak "
+			u"mendapat entri ini."_q },
+		{ u"LuminaSelectFromAuthorLimit"_q,
+			u"Hanya {1} pesan yang bisa dipilih sekaligus."_q },
+		{ u"LuminaSelectFromAuthorTitle"_q, u"Pilih semua dari penulis"_q },
+		{ u"LuminaSendOriginalCaption"_q, u"Kirim keterangan asli"_q },
+		{ u"LuminaShowBookmarks"_q, u"Tampilkan item menu penanda"_q },
+		{ u"LuminaShowMessageDetails"_q, u"Detail pesan"_q },
+		{ u"LuminaShowMutedCount"_q,
+			u"Selalu tampilkan jumlah belum dibaca"_q },
+		{ u"LuminaShowMutedCountInfo"_q, u"Menggambar lencana belum dibaca "
+			u"untuk obrolan yang dibisukan dengan warna aksen normal, bukan "
+			u"abu-abu bisu."_q },
+		{ u"LuminaStickerSavedTo"_q, u"Stiker disimpan ke {1}"_q },
+		{ u"LuminaStickerSizeChoice"_q, u"{1}%"_q },
+		{ u"LuminaStickerSizeChoiceDefault"_q, u"{1}% (bawaan)"_q },
+		{ u"LuminaStickerSizeInfo"_q, u"Seberapa besar stiker digambar di "
+			u"obrolan — baik yang Anda kirim maupun yang Anda terima. Emoji "
+			u"animasi, dadu, dan stiker hadiah mempertahankan ukurannya "
+			u"sendiri. Telegram Desktop mengukur sebuah stiker sekali lalu "
+			u"mengingatnya, jadi ukuran baru berlaku saat aplikasi berikutnya "
+			u"dijalankan."_q },
+		{ u"LuminaTimeWithSeconds"_q, u"Tampilkan detik pada waktu pesan"_q },
+		{ u"LuminaTimeWithSecondsAbout"_q, u"Waktu di bawah pesan, waktu pada "
+			u"teks yang disalin, dan waktu yang dibacakan pembaca layar "
+			u"semuanya menyertakan detik."_q },
+		{ u"LuminaUndoSendBulletin"_q, u"Mengirim pesan…"_q },
+		{ u"LuminaUndoSendTitle"_q, u"Urungkan kirim"_q },
+		{ u"LuminaUndoSendUndo"_q, u"Urungkan"_q },
+		{ u"LuminaUndoSendWindow"_q, u"Jendela urungkan kirim"_q },
+		{ u"LuminaUndoSendWindowInfo"_q, u"Menahan pesan teks biasa selama "
+			u"{1} detik di balik tombol Urungkan sebelum benar-benar dikirim. "
+			u"Teks Anda tetap berada di kotak pesan selama itu, dan kotaknya "
+			u"baru dikosongkan setelah pesan benar-benar terkirim, jadi "
+			u"Urungkan cukup membiarkannya di tempatnya — tidak ada yang "
+			u"diambil lalu dikembalikan. Mengirim lagi, membuka obrolan lain, "
+			u"atau menutup aplikasi akan langsung mengirim pesan yang "
+			u"ditahan. Pesan media, pesan suara, pesan hasil edit, pesan yang "
+			u"diteruskan, dan pesan terjadwal tidak pernah ditahan, begitu "
+			u"pula pesan yang dikirim dari topik forum atau utas "
+			u"komentar."_q },
 	};
 }
 

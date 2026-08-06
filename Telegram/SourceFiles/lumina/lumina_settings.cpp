@@ -101,7 +101,14 @@ void Settings::loadStore(Store store) {
 	const auto index = StoreIndex(store);
 	const auto path = FilePath(store);
 	auto file = QFile(path);
-	if (!file.exists() || !file.open(QIODevice::ReadOnly)) {
+	if (!file.exists()) {
+		return;
+	} else if (!file.open(QIODevice::ReadOnly)) {
+		// It is there and we could not read it. Remember that: writing this
+		// store now would replace the user's settings with an empty object.
+		LOG(("Lumina Error: Could not read '%1', refusing to overwrite it."
+			).arg(path));
+		_loadFailed[index] = true;
 		return;
 	}
 	const auto bytes = file.readAll();
@@ -329,6 +336,12 @@ void Settings::saveNow() {
 }
 
 bool Settings::writeStore(Store store) {
+	if (_loadFailed[StoreIndex(store)]) {
+		// See _loadFailed: this store never loaded, so what is in memory is not
+		// the user's data. Staying dirty loses nothing from this session's point
+		// of view, and destroys nothing on disk.
+		return false;
+	}
 	const auto path = FilePath(store);
 	QDir().mkpath(cWorkingDir() + u"tdata"_q);
 

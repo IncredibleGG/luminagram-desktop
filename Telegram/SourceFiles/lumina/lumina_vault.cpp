@@ -59,6 +59,57 @@ constexpr auto kIconGlyphSize = 36;
 	return QIcon(pixmap);
 }
 
+// Nothing in this tree ever calls setQuitOnLastWindowClosed(), so it is Qt's
+// default, which is true - and every gate window is the only window that
+// exists while it is up. Qt reacts to the last one going away by calling
+// QCoreApplication::exit(), and exit() does two things that are fatal here: it
+// exits every event loop currently on this thread's loop stack, and it leaves
+// QThreadData::quitNow set, which makes every LATER QEventLoop::exec() on this
+// thread return immediately without processing anything.
+//
+// Both of the gate's window-to-window handovers hide the outgoing window, and
+// both then destroy it once the run function returns:
+//
+//   * password door -> decoy, after a wrong code. If the hide or the destroy
+//     trips that path, the decoy's own loop.exec() returns at once, the decoy
+//     is never operable, and RunGate() reports Closed - a wrong code quits the
+//     app instead of showing the decoy it exists to show;
+//   * any unlock. The gate returns true, Application::run() carries on, and
+//     the main event loop it eventually returns to has already been told to
+//     exit - the app disappears moments after the correct code was accepted.
+//
+// Whether a plain hide() is enough to trip it depends on the Qt version, and
+// that is exactly the kind of dependency this must not have: the failure is
+// silent, it is version-dependent, and one of its two forms costs the owner
+// their unlock. So the gate does not rely on the answer. It suppresses the
+// behaviour for its whole duration - including the destruction of the last
+// gate window, which happens inside the Run... functions - and restores the
+// previous value on the way out.
+//
+// Nothing is lost by suppressing it: the caller quits explicitly. RunGate()
+// returning false makes Core::Application::run() call Core::Quit(), which
+// reaches Sandbox::QuitWhenStarted() and the same QCoreApplication::exit(0)
+// (core/application.cpp:279-282, core/sandbox.cpp:230-243). Sandbox::_started
+// is already true by then; it is set at core/sandbox.cpp:180, immediately
+// before the exec() whose event loop is running us.
+class QuitOnLastWindowSuppression final {
+public:
+	QuitOnLastWindowSuppression()
+	: _was(QGuiApplication::quitOnLastWindowClosed()) {
+		QGuiApplication::setQuitOnLastWindowClosed(false);
+	}
+	QuitOnLastWindowSuppression(const QuitOnLastWindowSuppression &) = delete;
+	QuitOnLastWindowSuppression &operator=(
+		const QuitOnLastWindowSuppression &) = delete;
+	~QuitOnLastWindowSuppression() {
+		QGuiApplication::setQuitOnLastWindowClosed(_was);
+	}
+
+private:
+	const bool _was = false;
+
+};
+
 [[nodiscard]] VaultOutcome RunSkin(VaultSkin skin) {
 	try {
 		return (skin == VaultSkin::Calculator)
@@ -84,6 +135,7 @@ constexpr auto kIconGlyphSize = 36;
 		LOG(("Lumina Warning: No screen for the vault, opening the app."));
 		return true;
 	}
+	const auto suppression = QuitOnLastWindowSuppression();
 	const auto skin = EffectiveVaultSkin();
 	if (skin != CurrentVaultSkin()) {
 		LOG(("Lumina Warning: Vault code cannot be entered on the chosen "
@@ -128,8 +180,23 @@ bool VaultEnabled() {
 	return Settings::Instance().getBool(kKeyEnabled, false);
 }
 
+// Flushed rather than left to the ~500ms coalescing timer, here and in the
+// other three setters below. All four are read by the gate once, at the very
+// start of the NEXT launch, and the two ways this application ends without
+// draining that timer are both reachable from the screen the vault is
+// configured on: Lumina::TriggerFakeCrash() calls std::_Exit(), which runs no
+// destructor, and a real crash does the same.
+//
+// Losing any of them fails open in the sense that nothing is destroyed, but
+// "fails open" is not the same as "harmless", and it is worst for the mode:
+// a user who picked VaultMode::DecoyApp picked it precisely so that no
+// password box ever appears, and a lost write hands them the password door
+// instead - the disguise inverted, silently, with every switch still showing
+// what they chose. Three small JSON files per toggle is not a price worth
+// haggling over for that.
 void SetVaultEnabled(bool value) {
 	Settings::Instance().set(kKeyEnabled, value);
+	Settings::Instance().saveNow();
 }
 
 VaultMode CurrentVaultMode() {
@@ -145,6 +212,7 @@ void SetVaultMode(VaultMode mode) {
 	Settings::Instance().set(
 		kKeyMode,
 		(mode == VaultMode::DecoyApp) ? kModeDecoyApp : kModePasswordDoor);
+	Settings::Instance().saveNow();
 }
 
 VaultSkin CurrentVaultSkin() {
@@ -160,6 +228,7 @@ void SetVaultSkin(VaultSkin skin) {
 	Settings::Instance().set(
 		kKeySkin,
 		(skin == VaultSkin::Calculator) ? kSkinCalculator : kSkinNotepad);
+	Settings::Instance().saveNow();
 }
 
 // The password door accepts any code, but the calculator keypad can only
@@ -190,6 +259,7 @@ void SetVaultCode(const QString &code) {
 	} else {
 		Settings::Instance().set(kKeyCode, trimmed, Store::Private);
 	}
+	Settings::Instance().saveNow();
 }
 
 bool VaultCodeIsSet() {

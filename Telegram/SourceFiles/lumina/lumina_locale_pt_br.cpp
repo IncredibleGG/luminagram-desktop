@@ -159,6 +159,10 @@ namespace {
 		{ u"LuminaTranslatePreviewTranslating"_q, u"Traduzindo…"_q },
 		{ u"LuminaTranslatePreviewFailed"_q, u"Tradução indisponível"_q },
 
+		// The per-chat translate button in the chat top bar.
+		{ u"LuminaTranslateChatToggle"_q, u"Traduzir esta conversa"_q },
+		{ u"LuminaTranslateChatShowOriginal"_q, u"Mostrar original"_q },
+
 		// Names of the languages LuminaGram can translate into.
 		{ u"LuminaLangEn"_q, u"Inglês"_q },
 		{ u"LuminaLangZhTw"_q, u"Chinês (tradicional)"_q },
@@ -242,6 +246,391 @@ namespace {
 		{ u"LuminaLangCy"_q, u"Galês"_q },
 		{ u"LuminaLangYi"_q, u"Iídiche"_q },
 		{ u"LuminaLangZu"_q, u"Zulu"_q },
+		{ u"LuminaAppearanceStickerSizeHeader"_q,
+			u"Tamanho das figurinhas"_q },
+		{ u"LuminaBackupCryptoFailed"_q,
+			u"A criptografia não está disponível neste sistema."_q },
+		{ u"LuminaBackupDamaged"_q, u"O arquivo de backup está danificado e "
+			u"não pôde ser restaurado."_q },
+		{ u"LuminaBackupExport"_q, u"Exportar backup criptografado"_q },
+		{ u"LuminaBackupExportDone"_q, u"Backup salvo."_q },
+		{ u"LuminaBackupExportFailed"_q,
+			u"Não foi possível criar o arquivo de backup."_q },
+		{ u"LuminaBackupExportInfo"_q, u"Salve tudo o que o LuminaGram guarda "
+			u"neste dispositivo — marcadores, notas, modelos de resposta, "
+			u"substituições de texto e todas as configurações — em um único "
+			u"arquivo, criptografado com uma frase secreta que você escolher. "
+			u"O arquivo também leva os valores privados: as chaves de API de "
+			u"tradução, os códigos do cofre e da falha falsa, a nota do bloco "
+			u"de notas falso. Nada é enviado ao Telegram. Escolha uma frase "
+			u"secreta longa e guarde-a em um lugar seguro — sem ela o arquivo "
+			u"não pode ser aberto, e não há como recuperá-la."_q },
+		{ u"LuminaBackupExportPassphraseTitle"_q,
+			u"Defina uma frase secreta"_q },
+		{ u"LuminaBackupFileFilter"_q, u"Backup do LuminaGram (*.lgbak)"_q },
+		{ u"LuminaBackupImport"_q, u"Importar backup"_q },
+		{ u"LuminaBackupImportFailed"_q,
+			u"Não foi possível ler o arquivo de backup."_q },
+		{ u"LuminaBackupImportInfo"_q, u"Escolha um arquivo de backup e "
+			u"digite a frase secreta dele para restaurar seus dados do "
+			u"LuminaGram. As configurações que o backup contém substituem as "
+			u"deste dispositivo; o que ele não contém fica intacto. Um "
+			u"arquivo que não pode ser verificado é recusado antes de "
+			u"qualquer gravação, então uma frase secreta errada nunca deixa a "
+			u"restauração pela metade."_q },
+		{ u"LuminaBackupImportSuccess"_q,
+			u"Backup restaurado. Reinicie o LuminaGram para aplicar tudo."_q },
+		{ u"LuminaBackupInvalidFile"_q,
+			u"Este não é um arquivo de backup válido do LuminaGram."_q },
+		{ u"LuminaBackupNewerFormat"_q, u"Este backup foi feito por uma "
+			u"versão mais recente do LuminaGram."_q },
+		{ u"LuminaBackupOpenCaption"_q, u"Abrir backup do LuminaGram"_q },
+		{ u"LuminaBackupPassphraseHint"_q, u"Frase secreta"_q },
+		{ u"LuminaBackupPassphraseMismatch"_q,
+			u"As duas frases secretas são diferentes."_q },
+		{ u"LuminaBackupPassphraseRepeatHint"_q, u"Repita a frase secreta"_q },
+		{ u"LuminaBackupPassphraseTitle"_q, u"Digite a frase secreta"_q },
+		{ u"LuminaBackupPassphraseTooShort"_q,
+			u"Escolha uma frase secreta com pelo menos 4 caracteres."_q },
+		{ u"LuminaBackupSaveCaption"_q, u"Salvar backup do LuminaGram"_q },
+		{ u"LuminaBackupTitle"_q, u"Backup criptografado"_q },
+		{ u"LuminaBackupUnauthenticated"_q, u"Este backup usa o formato "
+			u"antigo sem proteção, que não permite verificar uma frase "
+			u"secreta errada nem adulteração. Faça um backup novo em um "
+			u"LuminaGram atualizado."_q },
+		{ u"LuminaBackupWrongPassphrase"_q,
+			u"Frase secreta incorreta, ou o arquivo foi alterado."_q },
+		{ u"LuminaBookmark"_q, u"Adicionar marcador"_q },
+		{ u"LuminaBookmarkAdded"_q, u"Adicionado aos marcadores"_q },
+		{ u"LuminaBookmarkChatUnavailable"_q, u"Conversa indisponível"_q },
+		{ u"LuminaBookmarkDeleteTitle"_q, u"Excluir marcador?"_q },
+		{ u"LuminaBookmarkGone"_q,
+			u"Esta conversa não está mais disponível neste dispositivo."_q },
+		{ u"LuminaBookmarkRemove"_q, u"Remover marcador"_q },
+		{ u"LuminaBookmarkRemoved"_q, u"Removido dos marcadores"_q },
+		{ u"LuminaBookmarksAbout"_q, u"Os marcadores são ponteiros para "
+			u"mensagens, guardados somente neste dispositivo e nunca enviados "
+			u"ao Telegram. Remover um marcador não altera a mensagem em "
+			u"si."_q },
+		{ u"LuminaBookmarksEmpty"_q,
+			u"Você ainda não salvou nenhuma mensagem nos marcadores."_q },
+		{ u"LuminaBookmarksFull"_q, u"A lista de marcadores está cheia. "
+			u"Remova um marcador para adicionar outro."_q },
+		{ u"LuminaBookmarksList"_q, u"Mensagens marcadas"_q },
+		{ u"LuminaBookmarksListAbout"_q, u"Clique em um marcador para abrir a "
+			u"mensagem, ou clique nele com o botão direito para removê-lo. Um "
+			u"marcador continua nesta lista mesmo depois que a mensagem é "
+			u"excluída."_q },
+		{ u"LuminaBookmarksNone"_q, u"Nenhum"_q },
+		{ u"LuminaBookmarksTitle"_q, u"Marcadores"_q },
+		{ u"LuminaChatListDensityTitle"_q, u"Densidade da lista de conversas"_q },
+		{ u"LuminaCompactListRows"_q, u"Linhas compactas"_q },
+		{ u"LuminaCompactListRowsInfo"_q, u"Mostra mais conversas na tela "
+			u"encurtando cada linha da lista de conversas. Os avatares e as "
+			u"prévias das mensagens continuam visíveis."_q },
+		{ u"LuminaChatListDotsTitle"_q, u"Pontos no avatar"_q },
+		{ u"LuminaChatListOnlineDot"_q, u"Ponto on-line"_q },
+		{ u"LuminaChatListOnlineDotInfo"_q, u"Mostra um pequeno ponto verde "
+			u"no avatar das conversas privadas cujo contato está on-line no "
+			u"momento."_q },
+		{ u"LuminaChatListRecencyDot"_q, u"Ponto de visto por último"_q },
+		{ u"LuminaChatListRecencyDotInfo"_q, u"Colore o ponto do avatar nas "
+			u"conversas privadas de acordo com há quanto tempo o contato foi "
+			u"visto por último: verde quando está on-line agora, amarelo em "
+			u"até uma hora e laranja em até um dia. Nenhum ponto para visto "
+			u"por último mais antigo ou oculto. O botão do ponto on-line "
+			u"ainda controla o caso verde (on-line)."_q },
+		{ u"LuminaChatListVisibilityAbout"_q, u"Tira a barra de pastas da "
+			u"lista de conversas — tanto a barra vertical ao lado dela quanto "
+			u"a horizontal acima dela. Enquanto as abas de pastas estiverem "
+			u"ocultas, você sempre vê todas as suas conversas: a pasta em que "
+			u"você estava é deixada, e os atalhos de pastas e o gesto de "
+			u"deslizar entre elas não fazem nada. Ocultar stories remove "
+			u"apenas a linha acima da lista de conversas; os stories em si, e "
+			u"todas as outras formas de abri-los, continuam iguais."_q },
+		{ u"LuminaChatListVisibilityTitle"_q, u"Pastas e stories"_q },
+		{ u"LuminaContactNote"_q, u"Nota privada"_q },
+		{ u"LuminaContactNoteAbout"_q, u"Só você pode ver isto. Fica neste "
+			u"dispositivo, nunca é enviado ao Telegram e não é sincronizado "
+			u"com seus outros dispositivos."_q },
+		{ u"LuminaContactNoteEmpty"_q,
+			u"Clique para adicionar uma nota privada"_q },
+		{ u"LuminaContactNoteHint"_q, u"Nota (só você pode ver)"_q },
+		{ u"LuminaContactNotesAbout"_q, u"Adiciona uma nota privada e uma "
+			u"lista de tags ao perfil de uma pessoa. As duas ficam neste "
+			u"dispositivo, nunca são enviadas ao Telegram e não são "
+			u"sincronizadas com seus outros dispositivos. As notas de contato "
+			u"do próprio Telegram ficam intactas: a nota privada é oferecida "
+			u"onde elas não estão disponíveis — em bots e em pessoas que não "
+			u"estão nos seus contatos — enquanto as tags são oferecidas em "
+			u"todos os perfis."_q },
+		{ u"LuminaContactNotesClear"_q, u"Excluir todas as notas privadas"_q },
+		{ u"LuminaContactNotesClearText"_q, u"Excluir todas as notas privadas "
+			u"e tags guardadas neste dispositivo? Isso não pode ser "
+			u"desfeito."_q },
+		{ u"LuminaContactNotesClearTitle"_q, u"Excluir notas privadas"_q },
+		{ u"LuminaContactNotesNone"_q, u"Nenhuma"_q },
+		{ u"LuminaContactNotesTitle"_q, u"Notas privadas de contatos"_q },
+		{ u"LuminaContactNotesToggle"_q,
+			u"Notas privadas e tags nos perfis"_q },
+		{ u"LuminaContactTags"_q, u"Tags"_q },
+		{ u"LuminaContactTagsEmpty"_q, u"Clique para adicionar tags"_q },
+		{ u"LuminaContactTagsHint"_q, u"Tags separadas por vírgula"_q },
+		{ u"LuminaDetailsDate"_q, u"Data"_q },
+		{ u"LuminaDetailsForwardedFrom"_q, u"Encaminhado de"_q },
+		{ u"LuminaDetailsFrom"_q, u"De"_q },
+		{ u"LuminaDetailsMessageId"_q, u"ID da mensagem"_q },
+		{ u"LuminaDetailsOriginalDate"_q, u"Data original"_q },
+		{ u"LuminaExactNumbers"_q,
+			u"Mostrar números exatos (sem arredondamento 1.2K)"_q },
+		{ u"LuminaExactNumbersInfo"_q, u"Mostrar contagens completas como "
+			u"1.234.567 em vez de formas abreviadas como 1.2M. Os contadores "
+			u"já desenhados na tela mantêm a forma atual até o app ser "
+			u"reiniciado."_q },
+		{ u"LuminaForwardNoAuthor"_q, u"Encaminhar sem autor"_q },
+		{ u"LuminaForwardNoAuthorTitle"_q, u"Encaminhar sem autor"_q },
+		{ u"LuminaForwardNoCaption"_q,
+			u"Encaminhar sem autor e sem legendas"_q },
+		{ u"LuminaForwardNoCaptionTitle"_q,
+			u"Encaminhar sem autor e sem legendas"_q },
+		{ u"LuminaHideStories"_q, u"Ocultar stories"_q },
+		{ u"LuminaHideTabs"_q, u"Ocultar abas de pastas"_q },
+		{ u"LuminaLinkSafetyDestination"_q, u"Destino real"_q },
+		{ u"LuminaLinkSafetyInfo"_q, u"Pergunta antes de abrir um link que "
+			u"esconde o destino real atrás do texto antes de um sinal @, que "
+			u"escreve o domínio em punycode, ou que passa por um encurtador "
+			u"de links conhecido. A confirmação mostra o host de destino real "
+			u"e o endereço completo. O Telegram Desktop já avisa por conta "
+			u"própria sobre domínios parecidos escritos em outros alfabetos. "
+			u"Nada é verificado on-line — nenhum endereço que você abre sai "
+			u"deste dispositivo."_q },
+		{ u"LuminaLinkSafetyRow"_q, u"Inspetor de segurança de links"_q },
+		{ u"LuminaLinkSafetyTitle"_q, u"Abrir link externo?"_q },
+		{ u"LuminaLinkSafetyWarnMismatch"_q, u"Este link esconde o destino "
+			u"real atrás do texto antes do sinal «@»."_q },
+		{ u"LuminaLinkSafetyWarnPunycode"_q, u"Este endereço usa caracteres "
+			u"codificados (punycode) que podem imitar um site conhecido."_q },
+		{ u"LuminaLinkSafetyWarnShortener"_q, u"É um encurtador de links — o "
+			u"destino real fica oculto até você abri-lo."_q },
+		{ u"LuminaMediaAutoPauseBgVideo"_q,
+			u"Pausar o vídeo quando o app vai para segundo plano"_q },
+		{ u"LuminaMediaAutoPauseBgVideoInfo"_q, u"Pausa automaticamente o "
+			u"vídeo em reprodução quando você sai do LuminaGram. Minimizar o "
+			u"visualizador também o pausa. Um vídeo que você colocou de "
+			u"propósito em uma janela própria, ou em picture-in-picture, "
+			u"continua tocando, e as músicas e as mensagens de voz continuam "
+			u"tocando enquanto você está fora."_q },
+		{ u"LuminaMediaSaving"_q, u"Mídia"_q },
+		{ u"LuminaMediaTitle"_q, u"Mídia"_q },
+		{ u"LuminaMessageActionsInfo"_q, u"Estas entradas aparecem somente no "
+			u"menu de contexto de uma mensagem. Cada uma usa o encaminhamento "
+			u"do próprio Telegram, então uma conversa que restringe o "
+			u"encaminhamento continua restrita. «Encaminhar sem autor e sem "
+			u"legendas» tem esse nome pelo que realmente sai: o Telegram não "
+			u"consegue remover as legendas mantendo o remetente, então "
+			u"escolher essa opção remove os dois. «Detalhes» lê apenas o que "
+			u"este dispositivo já sincronizou — nada é solicitado e nada é "
+			u"guardado."_q },
+		{ u"LuminaMessageDetails"_q, u"Detalhes"_q },
+		{ u"LuminaOnboardingDualName"_q, u"Os dois idiomas ao mesmo tempo"_q },
+		{ u"LuminaOnboardingDualText"_q, u"Mantenha o texto original na tela "
+			u"ao lado da tradução, nas mensagens que você recebe e nas que "
+			u"você envia."_q },
+		{ u"LuminaOnboardingFooter"_q, u"Abra uma seção na página de "
+			u"configurações do LuminaGram para configurar qualquer um desses "
+			u"recursos. Você pode ler este cartão de novo em Ferramentas."_q },
+		{ u"LuminaOnboardingGotIt"_q, u"Entendi"_q },
+		{ u"LuminaOnboardingHeader"_q, u"Sobre"_q },
+		{ u"LuminaOnboardingIntro"_q, u"O LuminaGram adiciona as próprias "
+			u"ferramentas sobre o Telegram Desktop. Todas as opções abaixo "
+			u"ficam salvas somente neste computador e nunca são sincronizadas "
+			u"com o Telegram."_q },
+		{ u"LuminaOnboardingRow"_q, u"O que o LuminaGram adiciona"_q },
+		{ u"LuminaOnboardingRowAbout"_q, u"Mostra o cartão de boas-vindas que "
+			u"aparece na primeira vez que você abre as configurações do "
+			u"LuminaGram. Ele apenas explica o que existe aqui e não ativa "
+			u"nada."_q },
+		{ u"LuminaOnboardingSafetyName"_q, u"Verificações de segurança"_q },
+		{ u"LuminaOnboardingSafetyText"_q, u"Avisa antes de abrir um link "
+			u"cujo endereço não é o que parece, detecta um endereço de cripto "
+			u"trocado quando você cola um, e remove a localização das fotos "
+			u"que você envia."_q },
+		{ u"LuminaOnboardingTitle"_q, u"Boas-vindas ao LuminaGram"_q },
+		{ u"LuminaOnboardingTranslateText"_q, u"Traduza as mensagens "
+			u"recebidas com o seu próprio serviço de tradução, e traduza o "
+			u"que você digita antes de ser enviado."_q },
+		{ u"LuminaOnboardingVaultName"_q, u"Cofre de disfarce"_q },
+		{ u"LuminaOnboardingVaultText"_q, u"Esconda o LuminaGram atrás de uma "
+			u"calculadora ou de um bloco de notas que abre o app real somente "
+			u"com o seu código secreto."_q },
+		{ u"LuminaProfileCardAbout"_q, u"Um cartão local sobre você — os "
+			u"idiomas que você fala, os seus interesses — que você pode "
+			u"copiar e colar em uma conversa. Ele fica neste dispositivo."_q },
+		{ u"LuminaProfileCardBio"_q, u"Biografia curta"_q },
+		{ u"LuminaProfileCardBioHint"_q, u"Algumas palavras sobre você"_q },
+		{ u"LuminaProfileCardCopied"_q, u"Cartão copiado"_q },
+		{ u"LuminaProfileCardCopy"_q,
+			u"Copiar para a área de transferência"_q },
+		{ u"LuminaProfileCardCopyInfo"_q, u"Gera um resumo em texto do seu "
+			u"cartão. Cole-o em qualquer conversa quando quiser "
+			u"compartilhá-lo."_q },
+		{ u"LuminaProfileCardEdit"_q, u"Meu cartão"_q },
+		{ u"LuminaProfileCardEmptyShare"_q,
+			u"Preencha seu cartão primeiro"_q },
+		{ u"LuminaProfileCardHeader"_q, u"Meu cartão"_q },
+		{ u"LuminaProfileCardInfo"_q, u"Este cartão fica salvo apenas neste "
+			u"dispositivo e nunca é enviado ao Telegram. Ele não altera o seu "
+			u"perfil do Telegram."_q },
+		{ u"LuminaProfileCardInterests"_q, u"Interesses / tags"_q },
+		{ u"LuminaProfileCardInterestsHint"_q,
+			u"ex.: música, trilhas, programação"_q },
+		{ u"LuminaProfileCardLanguages"_q, u"Idiomas que falo"_q },
+		{ u"LuminaProfileCardLanguagesHint"_q,
+			u"ex.: Português, English, Español"_q },
+		{ u"LuminaProfileCardNotSet"_q, u"Não definido"_q },
+		{ u"LuminaProfileCardTagline"_q, u"Lema"_q },
+		{ u"LuminaProfileCardTaglineHint"_q, u"Uma frase curta sobre você"_q },
+		{ u"LuminaProfileCardTitle"_q, u"Cartão de perfil"_q },
+		{ u"LuminaProfileChatCreated"_q, u"Criado"_q },
+		{ u"LuminaProfileDcId"_q, u"Datacenter"_q },
+		{ u"LuminaProfileDcIdValue"_q, u"DC{1}"_q },
+		{ u"LuminaProfileInfoHeader"_q, u"Perfil"_q },
+		{ u"LuminaProfileInfoInfo"_q, u"Linhas extras nas páginas de perfil, "
+			u"todas calculadas neste dispositivo — nada é pedido ao Telegram. "
+			u"O próprio Telegram fornece a data de registro de algumas "
+			u"contas; para as demais, ela é estimada a partir do número da "
+			u"conta e exibida com um «~». O datacenter é o que armazena a "
+			u"foto do perfil. A data de criação é quando um grupo ou canal "
+			u"foi criado."_q },
+		{ u"LuminaProfileRegistrationApprox"_q, u"~ {1}"_q },
+		{ u"LuminaProfileRegistrationDate"_q, u"Data de registro"_q },
+		{ u"LuminaProfileShowChatDate"_q, u"Mostrar data de criação"_q },
+		{ u"LuminaProfileShowDcId"_q, u"Mostrar datacenter"_q },
+		{ u"LuminaProfileShowRegistrationDate"_q,
+			u"Mostrar data de registro"_q },
+		{ u"LuminaRecentLimitsInfo"_q, u"Impede que este dispositivo descarte "
+			u"figurinhas recentes e GIFs salvos antes do necessário, usando "
+			u"os mesmos limites do LuminaGram para Android: até 200 "
+			u"figurinhas recentes e 500 GIFs salvos. Os servidores do "
+			u"Telegram continuam decidindo quantos ficam realmente guardados "
+			u"na sua conta e sincronizados com seus outros dispositivos, "
+			u"então isto não deixa a lista da nuvem maior — na próxima vez "
+			u"que este dispositivo sincronizar, tudo o que o servidor não "
+			u"guarda mais some daqui também, normalmente em segundos. "
+			u"Enquanto isto estiver ativado, o Telegram Desktop deixa de "
+			u"remover um GIF salvo por conta própria, então o aviso Premium "
+			u"sobre o limite de GIFs salvos fica quieto. O painel de "
+			u"figurinhas ainda mostra apenas as 20 primeiras figurinhas "
+			u"recentes, a menos que você também ative «Figurinhas recentes "
+			u"ilimitadas» em Configurações › Avançado › Configurações "
+			u"experimentais."_q },
+		{ u"LuminaRecentLimitsRow"_q,
+			u"Guardar mais figurinhas recentes e GIFs"_q },
+		{ u"LuminaReplyTemplatesAbout"_q, u"Trechos curtos de texto que você "
+			u"guarda neste dispositivo e insere no campo de mensagem. Clique "
+			u"com o botão direito no botão de emoji em uma conversa para "
+			u"escolher um. Os modelos nunca são enviados ao Telegram."_q },
+		{ u"LuminaReplyTemplatesAdd"_q, u"Adicionar modelo"_q },
+		{ u"LuminaReplyTemplatesEdit"_q, u"Editar modelo"_q },
+		{ u"LuminaReplyTemplatesEmpty"_q, u"Nenhum modelo ainda. Adicione um "
+			u"e depois clique com o botão direito no botão de emoji em uma "
+			u"conversa para inseri-lo."_q },
+		{ u"LuminaReplyTemplatesFull"_q,
+			u"A lista está cheia — exclua um modelo para adicionar outro."_q },
+		{ u"LuminaReplyTemplatesInfo"_q, u"Clique com o botão direito no "
+			u"botão de emoji em uma conversa para inserir um modelo. Clique "
+			u"com o botão direito em um modelo aqui para movê-lo para cima ou "
+			u"para baixo; abra um para editá-lo ou excluí-lo."_q },
+		{ u"LuminaReplyTemplatesList"_q, u"Modelos"_q },
+		{ u"LuminaReplyTemplatesManage"_q, u"Gerenciar modelos…"_q },
+		{ u"LuminaReplyTemplatesMoveDown"_q, u"Mover para baixo"_q },
+		{ u"LuminaReplyTemplatesMoveUp"_q, u"Mover para cima"_q },
+		{ u"LuminaReplyTemplatesNone"_q, u"Nenhum"_q },
+		{ u"LuminaReplyTemplatesPlaceholder"_q, u"Texto do modelo"_q },
+		{ u"LuminaReplyTemplatesShow"_q, u"Oferecer modelos nas conversas"_q },
+		{ u"LuminaReplyTemplatesTitle"_q, u"Modelos de resposta"_q },
+		{ u"LuminaSaveSticker"_q, u"Salvar figurinha"_q },
+		{ u"LuminaSaveStickers"_q, u"Salvar figurinhas"_q },
+		{ u"LuminaSaveStickersInfo"_q, u"Adiciona uma linha «Salvar "
+			u"figurinha» ao menu de contexto do painel de figurinhas. As "
+			u"figurinhas vão para onde vão os seus outros downloads, e a "
+			u"linha fica oculta no pacote de figurinhas próprio de um grupo "
+			u"quando esse grupo restringe o salvamento."_q },
+		{ u"LuminaSaveToCloud"_q, u"Salvar em Mensagens Salvas"_q },
+		{ u"LuminaSaveToCloudTitle"_q, u"Salvar em Mensagens Salvas"_q },
+		{ u"LuminaSecurityPanicConfirmAck"_q,
+			u"Eu entendo que isso não pode ser desfeito"_q },
+		{ u"LuminaSecurityPanicConfirmButton"_q, u"Apagar agora"_q },
+		{ u"LuminaSecurityPanicConfirmText"_q, u"Todas as contas deste "
+			u"dispositivo serão desconectadas. O banco de dados local de "
+			u"mensagens, os rascunhos e a mídia em cache serão apagados, "
+			u"junto com as configurações do próprio LuminaGram, os "
+			u"marcadores, as traduções salvas e as chaves de API.\n\nSuas "
+			u"contas não são excluídas. Elas continuam nos servidores do "
+			u"Telegram, e as suas mensagens também — você pode entrar de novo "
+			u"de qualquer lugar.\n\nOs arquivos que já foram baixados NÃO "
+			u"são excluídos. O LuminaGram não mexe na sua pasta de downloads, "
+			u"porque normalmente ela é a sua pasta Downloads comum e guarda "
+			u"arquivos sem relação com o app. Mova ou exclua você mesmo o que "
+			u"for sensível ali.\n\nIsso não pode ser desfeito."_q },
+		{ u"LuminaSecurityPanicConfirmTitle"_q, u"Limpeza de emergência?"_q },
+		{ u"LuminaSecurityPanicHeader"_q, u"Limpeza de emergência"_q },
+		{ u"LuminaSecurityPanicWipe"_q, u"Limpeza de emergência (Kaboom)"_q },
+		{ u"LuminaSecurityPanicWipeAbout"_q, u"Encerra a sessão de todas as "
+			u"contas deste dispositivo e apaga o banco de dados local de "
+			u"mensagens, os rascunhos e a mídia em cache, junto com as "
+			u"configurações do próprio LuminaGram, os marcadores, as "
+			u"traduções salvas e as chaves de API. Suas contas e suas "
+			u"mensagens continuam nos servidores do Telegram. Os arquivos que "
+			u"você já baixou ficam onde estão. Isso não pode ser "
+			u"desfeito."_q },
+		{ u"LuminaSelectFromAuthor"_q, u"Selecionar tudo do autor"_q },
+		{ u"LuminaSelectFromAuthorAbout"_q, u"Adiciona no menu de mensagens "
+			u"dos grupos uma entrada que seleciona todas as mensagens do "
+			u"remetente em que você clicou. Ela alcança apenas as mensagens "
+			u"que esta janela já carregou — role mais para trás e repita para "
+			u"incluir as mais antigas. Mensagens atribuídas à própria "
+			u"conversa, como publicações de canal e publicações de "
+			u"administradores anônimos, não recebem a entrada."_q },
+		{ u"LuminaSelectFromAuthorLimit"_q,
+			u"Só é possível selecionar {1} mensagens de uma vez."_q },
+		{ u"LuminaSelectFromAuthorTitle"_q, u"Selecionar tudo do autor"_q },
+		{ u"LuminaSendOriginalCaption"_q, u"Enviar legenda original"_q },
+		{ u"LuminaShowBookmarks"_q, u"Mostrar item de marcador no menu"_q },
+		{ u"LuminaShowMessageDetails"_q, u"Menu de detalhes da mensagem"_q },
+		{ u"LuminaShowMutedCount"_q,
+			u"Sempre mostrar contador de não lidas"_q },
+		{ u"LuminaShowMutedCountInfo"_q, u"Desenha o selo de não lidas das "
+			u"conversas silenciadas na cor de destaque normal em vez do cinza "
+			u"silenciado."_q },
+		{ u"LuminaStickerSavedTo"_q, u"Figurinha salva em {1}"_q },
+		{ u"LuminaStickerSizeChoice"_q, u"{1}%"_q },
+		{ u"LuminaStickerSizeChoiceDefault"_q, u"{1}% (padrão)"_q },
+		{ u"LuminaStickerSizeInfo"_q, u"O tamanho com que as figurinhas são "
+			u"desenhadas nas conversas — as que você envia e as que você "
+			u"recebe. Emojis animados, dados e figurinhas de presente mantêm "
+			u"os próprios tamanhos. O Telegram Desktop mede uma figurinha uma "
+			u"vez e guarda essa medida, então um tamanho novo passa a valer "
+			u"na próxima vez que o app iniciar."_q },
+		{ u"LuminaTimeWithSeconds"_q,
+			u"Mostrar segundos na hora da mensagem"_q },
+		{ u"LuminaTimeWithSecondsAbout"_q, u"A hora abaixo de uma mensagem, a "
+			u"hora no texto copiado e a hora que um leitor de tela anuncia "
+			u"passam a incluir os segundos."_q },
+		{ u"LuminaUndoSendBulletin"_q, u"Enviando mensagem…"_q },
+		{ u"LuminaUndoSendTitle"_q, u"Desfazer envio"_q },
+		{ u"LuminaUndoSendUndo"_q, u"Desfazer"_q },
+		{ u"LuminaUndoSendWindow"_q, u"Janela para desfazer o envio"_q },
+		{ u"LuminaUndoSendWindowInfo"_q, u"Retém uma mensagem de texto "
+			u"simples por {1} segundos atrás de um botão Desfazer antes de "
+			u"enviá-la. Seu texto continua na caixa de mensagem esse tempo "
+			u"todo, e a caixa só é limpa quando a mensagem realmente sai, "
+			u"então Desfazer simplesmente deixa o texto onde está — nada é "
+			u"retirado e devolvido. Enviar de novo, abrir outra conversa ou "
+			u"fechar o app envia na hora a mensagem retida. Mensagens de "
+			u"mídia, de voz, editadas, encaminhadas e agendadas nunca são "
+			u"retidas, e o mesmo vale para mensagens enviadas de um tópico de "
+			u"fórum ou de uma thread de comentários."_q },
 	};
 }
 

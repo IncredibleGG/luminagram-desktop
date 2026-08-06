@@ -331,9 +331,28 @@ void ApplyOutgoingTextReplacements(TextWithTags &textWithTags) {
 		return;
 	}
 	auto replaced = ApplyTextReplaceRules(textWithTags.text);
-	if (replaced != textWithTags.text) {
-		textWithTags.text = std::move(replaced);
+	if (replaced == textWithTags.text) {
+		return;
+	} else if (replaced.trimmed().isEmpty()) {
+		// A rule with an empty `to` is legitimate ("delete this word"), and
+		// there is nothing to stop one from matching the whole message: type
+		// exactly the word the rule removes and the rewritten text is empty.
+		//
+		// That is not "send an empty message", it is "send nothing at all".
+		// ApiWrap::sendMessage() splits with TextUtilities::CutPart(), which
+		// returns false for an empty text, so the loop that mints the message
+		// never runs a single iteration and no message - local or remote - is
+		// ever created. The caller does not know that: HistoryWidget's
+		// sendPending calls clearFieldText() straight after sendMessage()
+		// returns (history/history_widget.cpp:5712), so the text the user
+		// typed is wiped out of the composer and nothing takes its place. No
+		// error, no toast, no draft, nothing in the chat.
+		//
+		// The message is therefore sent exactly as typed instead, which is the
+		// same direction every other bail-out in this file errs in.
+		return;
 	}
+	textWithTags.text = std::move(replaced);
 }
 
 } // namespace Lumina

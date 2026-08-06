@@ -33,6 +33,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "history/view/history_view_send_action.h"
 #include "lang/lang_keys.h"
 #include "lottie/lottie_icon.h"
+#include "lumina/lumina_dialogs_style.h"
 #include "lumina/lumina_muted_badge.h"
 #include "main/main_session.h"
 #include "storage/localstorage.h"
@@ -118,7 +119,9 @@ int PaintRightButtonImpl(QPainter &p, const PaintContext &context) {
 		const auto left = context.width
 			- size.width()
 			- rightButton->st->margin.right();
-		const auto top = rightButton->st->margin.top();
+		const auto top = Lumina::DialogRowRightButtonTop(
+			rightButton->st->margin.top(),
+			size.height());
 		p.drawImage(
 			left,
 			top,
@@ -306,15 +309,20 @@ int PaintBadges(
 void PaintExpandedTopicsBar(QPainter &p, float64 progress) {
 	auto hq = PainterHighQualityEnabler(p);
 	const auto radius = st::roundRadiusLarge;
-	const auto width = st::forumDialogRow.padding.left() / 2;
+	// The bar is drawn beside the avatar of the row it belongs to, so it has
+	// to follow the same style the row is painted with. taggedForumDialogRow
+	// shares its padding and photoSize with forumDialogRow, in the compact
+	// copies as well, so the forum row alone answers for both.
+	const auto &st = Lumina::DialogRowStyle(st::forumDialogRow);
+	const auto width = st.padding.left() / 2;
 	p.setPen(Qt::NoPen);
 	p.setBrush(st::dialogsBgActive);
 	p.drawRoundedRect(
 		QRectF(
 			-3. * radius - width * (1. - progress),
-			st::forumDialogRow.padding.top(),
+			st.padding.top(),
 			3. * radius + width,
-			st::forumDialogRow.photoSize),
+			st.photoSize),
 		radius,
 		radius);
 }
@@ -1092,7 +1100,7 @@ void PaintRow(
 
 const style::icon *ChatTypeIcon(not_null<PeerData*> peer) {
 	return ChatTypeIcon(peer, {
-		.st = &st::defaultDialogRow,
+		.st = &Lumina::DialogRowStyle(st::defaultDialogRow),
 		.currentBg = st::windowBg,
 	});
 }
@@ -1139,7 +1147,18 @@ void RowPainter::Paint(
 		Painter &p,
 		not_null<const Row*> row,
 		VideoUserpic *videoUserpic,
-		const PaintContext &context) {
+		const PaintContext &original) {
+	// Every Dialogs::Row in the app is painted through this one overload, so
+	// this is where the compact chat-list style is substituted. Row::height()
+	// is derived from the same mapping applied to the same stock style in
+	// Row::recountHeight(), which is what keeps a row's painted layout and the
+	// slot it was laid out into the same size even for callers that pick their
+	// style by pointer identity and know nothing about the preference - see
+	// Dialogs::CommunityChatsList.
+	auto patched = original;
+	patched.st = &Lumina::DialogRowStyle(*original.st);
+	const auto &context = patched;
+
 	const auto entry = row->entry();
 	const auto history = row->history();
 	const auto thread = row->thread();
@@ -1392,7 +1411,8 @@ QRect RowPainter::SendActionAnimationRect(
 		QRect rect,
 		int fullWidth,
 		bool textUpdated) {
-	const auto &st = Row::ComputeSt(thread, filterId);
+	const auto &st = Lumina::DialogRowStyle(
+		Row::ComputeSt(thread, filterId));
 	const auto nameleft = st.nameLeft;
 	const auto namewidth = fullWidth - nameleft - st.padding.right();
 	const auto texttop = st.textTop;

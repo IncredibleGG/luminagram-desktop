@@ -19,6 +19,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_layers.h"
 #include "styles/style_widgets.h"
 
+#include <algorithm>
+
 namespace Lumina {
 
 void ContactNoteBox(
@@ -41,7 +43,20 @@ void ContactNoteBox(
 			stored.note))
 		: nullptr;
 	if (note) {
-		note->setMaxLength(kContactNoteMaxLength);
+		// NOT the bare cap. InputField::setMaxLength() CHOPS whatever is
+		// already in the field (input_field.cpp:2500-2517), and nothing on the
+		// write path clamps a note - SetContactNote() only trims, and
+		// ContactNoteFor() reads the stored string verbatim. So a note longer
+		// than the cap (a hand-edited store, a cross-platform import once the
+		// v1 container is accepted) would be cut down the instant this box
+		// opened, and the next Save - or the Save the user presses without
+		// having touched the note at all - would make that permanent, with no
+		// way back. The cap exists to bound what one paste can ADD, so it is
+		// raised to whatever is already there: an over-long note can still be
+		// read and shortened, it just cannot be grown.
+		note->setMaxLength(std::max(
+			kContactNoteMaxLength,
+			int(stored.note.size())));
 
 		// Mode::MultiLine alone is not enough: InputField defaults to
 		// SubmitSettings::Enter, and in that mode keyPressEventInner() turns
@@ -58,7 +73,10 @@ void ContactNoteBox(
 		Ui::InputField::Mode::SingleLine,
 		TrValue(u"LuminaContactTagsHint"_q),
 		stored.tags));
-	tags->setMaxLength(kContactTagsMaxLength);
+	// Same reasoning as the note field above.
+	tags->setMaxLength(std::max(
+		kContactTagsMaxLength,
+		int(stored.tags.size())));
 
 	Ui::AddSkip(box->verticalLayout());
 	Ui::AddDividerText(

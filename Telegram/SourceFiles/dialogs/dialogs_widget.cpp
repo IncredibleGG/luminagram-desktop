@@ -57,6 +57,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "main/main_domain.h"
 #include "main/main_session.h"
 #include "main/main_session_settings.h"
+#include "lumina/lumina_dialogs_style.h"
 #include "lumina/lumina_dialogs_visibility.h"
 #include "api/api_authorizations.h"
 #include "api/api_chat_filters.h"
@@ -1449,9 +1450,10 @@ void Widget::updateCommunityAddChatButton() {
 		const auto buttonHeight = st::communityAddChatButton.height;
 		const auto buttonWidth = buttonHeight
 			+ st::communityAddChatNarrowAddedWidth;
+		const auto &rowSt = Lumina::DialogRowStyle(st::defaultDialogRow);
 		const auto stripHeight = buttonHeight
-			+ st::defaultDialogRow.padding.top()
-			+ st::defaultDialogRow.padding.bottom();
+			+ rowSt.padding.top()
+			+ rowSt.padding.bottom();
 		if (!shown) {
 			raw->toggle(false, anim::type::instant);
 			narrowButton->hide();
@@ -1462,7 +1464,7 @@ void Widget::updateCommunityAddChatButton() {
 			raw->toggle(false, anim::type::instant);
 			narrowButton->moveToLeft(
 				(_scroll->width() - buttonWidth) / 2,
-				bottom + st::defaultDialogRow.padding.top());
+				bottom + rowSt.padding.top());
 			narrowButton->show();
 		} else {
 			narrowButton->hide();

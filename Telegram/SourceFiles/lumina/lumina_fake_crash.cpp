@@ -25,8 +25,16 @@ bool FakeCrashEnabled() {
 	return Settings::Instance().getBool(kKeyEnabled, false);
 }
 
+// Flushed rather than left to the ~500ms coalescing timer, here and in
+// SetFakeCrashCode(). These two are what FakeCrashArmed() reads, and the one
+// way this application is most likely to end is the feature they arm:
+// TriggerFakeCrash() calls std::_Exit(), which runs no destructor and drains
+// no timer. Losing the write is silent and fails open - the duress code simply
+// is not armed the next time - which is the safe direction but also the one
+// the user cannot see. A saveNow() per toggle is cheaper than that.
 void SetFakeCrashEnabled(bool value) {
 	Settings::Instance().set(kKeyEnabled, value, Store::Private);
+	Settings::Instance().saveNow();
 }
 
 QString FakeCrashCode() {
@@ -43,6 +51,7 @@ void SetFakeCrashCode(const QString &code) {
 	} else {
 		Settings::Instance().set(kKeyCode, trimmed, Store::Private);
 	}
+	Settings::Instance().saveNow();
 }
 
 bool FakeCrashArmed() {

@@ -63,6 +63,16 @@ enum class StripResult {
 // only remove part of it", and by then the buffer has already been written
 // into. A caller that gets Failed must throw the buffer away - re-encode from
 // pixels, or fall back to the untouched original - and must never upload it.
+//
+// It also covers "we saw GPS and refused to touch it". A stored offset is a
+// 32-bit field of the file, so a corrupt or hostile photo can aim the GPS
+// pointer, or one of the GPS values, back into IFD0 or IFD1 - the IFDs that
+// hold Orientation - or at the eight-byte TIFF header that says where IFD0
+// even is. Emptying it there would zero Orientation, or make the block that
+// holds it unreadable, while still looking like a clean strip, so the parser
+// refuses and reports Failed instead. Refusing means the location is NOT removed from that file: the
+// caller either re-encodes from pixels (which loses all metadata anyway) or
+// sends the original. Only a malformed photo can reach this.
 
 // Preference `stripPhotoLocation`, Store::Prefs, default false.
 //

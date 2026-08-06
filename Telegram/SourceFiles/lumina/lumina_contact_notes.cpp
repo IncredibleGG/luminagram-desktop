@@ -18,6 +18,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/widgets/labels.h"
 #include "window/window_session_controller.h"
 
+#include <QtCore/QJsonDocument>
 #include <QtCore/QJsonObject>
 #include <QtCore/QJsonValue>
 #include <QtCore/QStringList>
@@ -38,7 +39,25 @@ const auto kTagsField = u"tags"_q;
 // cheap anyway: getObject() hands back the already-parsed, implicitly shared
 // QJsonObject, and looking one id up in it is a binary search.
 [[nodiscard]] QJsonObject All() {
-	return Settings::Instance().getObject(kDataKey);
+	auto &settings = Settings::Instance();
+	const auto object = settings.getObject(kDataKey);
+	if (!object.isEmpty()) {
+		return object;
+	}
+
+	// getObject() answers an empty object for a value of any other type, and
+	// the next SetContactNote() would then write a fresh object over it - so a
+	// value stored as a *string* holding JSON would be destroyed by the first
+	// note the user writes, silently and with no way back. Android's config
+	// layer stores objects that way (the same shape lumina_profile_card.cpp and
+	// lumina_quick_replies.cpp already read), so it is read here too and the
+	// next write normalises it to a real object.
+	const auto raw = settings.getString(kDataKey);
+	if (raw.isEmpty()) {
+		return QJsonObject();
+	}
+	const auto document = QJsonDocument::fromJson(raw.toUtf8());
+	return document.isObject() ? document.object() : QJsonObject();
 }
 
 [[nodiscard]] QString KeyOf(not_null<UserData*> user) {

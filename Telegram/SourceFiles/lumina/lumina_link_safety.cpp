@@ -245,7 +245,11 @@ bool LinkSafetyEnabled() {
 }
 
 void SetLinkSafetyEnabled(bool value) {
-	Settings::Instance().set(kKeyEnabled, value);
+	// The store is named rather than defaulted. Settings::set() defaults to
+	// Store::Prefs and silently RELOCATES a key written through that default
+	// (lumina_settings.h:62-67), so a bare set() here is a trap waiting for
+	// the day this key moves - every other setter in this batch names it.
+	Settings::Instance().set(kKeyEnabled, value, Store::Prefs);
 }
 
 rpl::producer<> LinkSafetyChanges() {

@@ -63,7 +63,14 @@ private:
 	void switchTranslation(not_null<HistoryItem*> item, LanguageId id);
 
 	const not_null<History*> _history;
-	const std::unique_ptr<Ui::TranslateProvider> _provider;
+
+	// Not const: LuminaGram rebuilds this when the selected translation
+	// provider or its API key changes, so that a chat left open behind the
+	// settings page stops sending its messages to the service the user has
+	// just moved away from. See the TranslateProviderChanges() subscription
+	// in setup(); it must be declared before _lifetime, which owns that
+	// subscription and therefore has to be destroyed first.
+	std::unique_ptr<Ui::TranslateProvider> _provider;
 	MTP::Sender _api;
 	rpl::variable<bool> _trackingLanguage = false;
 	base::flat_map<FullMsgId, ItemForRecognize> _itemsForRecognize;

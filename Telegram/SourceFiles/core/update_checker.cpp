@@ -67,6 +67,16 @@ namespace {
 constexpr auto kUpdaterTimeout = 10 * crl::time(1000);
 constexpr auto kMaxResponseSize = 1024 * 1024;
 
+// UnpackUpdate() writes this into tupdates/temp/ready where stock writes "1",
+// and checkReadyUpdate() installs nothing without it. An update that official
+// Telegram Desktop downloaded, verified with its own key and unpacked into a
+// profile this fork is then pointed at would otherwise be installed over
+// LuminaGram on the next launch: nothing in that folder says who produced it,
+// and the version check stops helping the moment Telegram's version number
+// passes ours. All three Updater executables only test that the file exists,
+// never what is in it, so the content is ours to use.
+constexpr auto kReadyMarker = "LuminaGram"_cs;
+
 #if !defined Q_OS_WIN && !defined Q_OS_MAC
 constexpr auto kFlatpakPortalService = "org.freedesktop.portal.Flatpak";
 constexpr auto kFlatpakPortalObjectPath = "/org/freedesktop/portal/Flatpak";
@@ -337,9 +347,9 @@ bool UnpackUpdate(const QString &filepath) {
 	}
 
 #if defined Q_OS_WIN && !defined TDESKTOP_USE_PACKAGED // use Lzma SDK for win
-	const int32 hSigLen = 128, hShaLen = 20, hPropsLen = LZMA_PROPS_SIZE, hOriginalSizeLen = sizeof(int32), hSize = hSigLen + hShaLen + hPropsLen + hOriginalSizeLen; // header
+	const int32 hSigLen = UpdatesSignatureSize, hShaLen = 20, hPropsLen = LZMA_PROPS_SIZE, hOriginalSizeLen = sizeof(int32), hSize = hSigLen + hShaLen + hPropsLen + hOriginalSizeLen; // header
 #else // Q_OS_WIN && !TDESKTOP_USE_PACKAGED
-	const int32 hSigLen = 128, hShaLen = 20, hPropsLen = 0, hOriginalSizeLen = sizeof(int32), hSize = hSigLen + hShaLen + hOriginalSizeLen; // header
+	const int32 hSigLen = UpdatesSignatureSize, hShaLen = 20, hPropsLen = 0, hOriginalSizeLen = sizeof(int32), hSize = hSigLen + hShaLen + hOriginalSizeLen; // header
 #endif // Q_OS_WIN && !TDESKTOP_USE_PACKAGED
 
 	QByteArray compressed = input.readAll();
@@ -366,13 +376,12 @@ bool UnpackUpdate(const QString &filepath) {
 		return false;
 	}
 
+	// Stock Telegram Desktop tries a second public key here, so that a build
+	// can cross over between its stable and its beta channel. LuminaGram has
+	// one channel and one signer: a package that does not verify against
+	// UpdatesPublicKey is rejected, whoever signed it.
 	RSA *pbKey = [] {
-		const auto bio = MakeBIO(
-			const_cast<char*>(
-				AppBetaVersion
-					? UpdatesPublicBetaKey
-					: UpdatesPublicKey),
-			-1);
+		const auto bio = MakeBIO(const_cast<char*>(UpdatesPublicKey), -1);
 		return PEM_read_bio_RSAPublicKey(bio.get(), 0, 0, 0);
 	}();
 	if (!pbKey) {
@@ -381,26 +390,8 @@ bool UnpackUpdate(const QString &filepath) {
 	}
 	if (RSA_verify(NID_sha1, (const uchar*)(compressed.constData() + hSigLen), hShaLen, (const uchar*)(compressed.constData()), hSigLen, pbKey) != 1) { // verify signature
 		RSA_free(pbKey);
-
-		// try other public key, if we update from beta to stable or vice versa
-		pbKey = [] {
-			const auto bio = MakeBIO(
-				const_cast<char*>(
-					AppBetaVersion
-						? UpdatesPublicKey
-						: UpdatesPublicBetaKey),
-				-1);
-			return PEM_read_bio_RSAPublicKey(bio.get(), 0, 0, 0);
-		}();
-		if (!pbKey) {
-			LOG(("Update Error: cant read public rsa key!"));
-			return false;
-		}
-		if (RSA_verify(NID_sha1, (const uchar*)(compressed.constData() + hSigLen), hShaLen, (const uchar*)(compressed.constData()), hSigLen, pbKey) != 1) { // verify signature
-			RSA_free(pbKey);
-			LOG(("Update Error: bad RSA signature of update file!"));
-			return false;
-		}
+		LOG(("Update Error: bad RSA signature of update file!"));
+		return false;
 	}
 	RSA_free(pbKey);
 
@@ -568,9 +559,10 @@ bool UnpackUpdate(const QString &filepath) {
 		fVersion.close();
 	}
 
+	const auto marker = kReadyMarker.utf8();
 	QFile readyFile(readyFilePath);
 	if (readyFile.open(QIODevice::WriteOnly)) {
-		if (readyFile.write("1", 1)) {
+		if (readyFile.write(marker) == marker.size()) {
 			readyFile.close();
 		} else {
 			LOG(("Update Error: cant write ready file '%1'").arg(readyFilePath));
@@ -1506,9 +1498,14 @@ void Updater::start(bool forceWait) {
 		startImplementation(
 			&_httpImplementation,
 			std::make_unique<HttpChecker>(_testing));
-		startImplementation(
-			&_mtpImplementation,
-			std::make_unique<MtpChecker>(_session, _testing));
+
+		// MtpChecker reads Telegram's own "tdhbcfeed" channel over MTProto and
+		// would hand tryLoaders() an official Telegram package, which this
+		// fork can only ever reject at signature check - after downloading it,
+		// and after it has taken its turn instead of ours. LuminaGram has one
+		// feed, the HTTP one, so this slot is started empty: it fails at once
+		// and tryLoaders() falls through to the HTTP implementation.
+		startImplementation(&_mtpImplementation, nullptr);
 
 		_checking.fire({});
 	} else {
@@ -1759,6 +1756,19 @@ bool checkReadyUpdate() {
 			ClearAll();
 		}
 		return false;
+	}
+
+	{
+		QFile fReady(readyFilePath);
+		const auto written = fReady.open(QIODevice::ReadOnly)
+			? fReady.readAll()
+			: QByteArray();
+		if (written != kReadyMarker.utf8()) {
+			LOG(("Update Error: "
+				"prepared update was not unpacked by LuminaGram."));
+			ClearAll();
+			return false;
+		}
 	}
 
 	// check ready version

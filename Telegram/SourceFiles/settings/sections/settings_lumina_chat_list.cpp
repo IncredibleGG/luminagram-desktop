@@ -7,6 +7,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "settings/sections/settings_lumina_chat_list.h"
 
+#include "lumina/lumina_locale.h"
 #include "ui/wrap/vertical_layout.h"
 #include "ui/rp_widget.h"
 #include "ui/vertical_list.h"
@@ -29,7 +30,7 @@ LuminaChatList::LuminaChatList(
 LuminaChatList::~LuminaChatList() = default;
 
 rpl::producer<QString> LuminaChatList::title() {
-	return rpl::single(u"Chat list"_q);
+	return Lumina::TrValue(u"LuminaGramChatList"_q);
 }
 
 // The old "Hide chat folders bar" row lived on the flat LuminaGram page and
@@ -47,8 +48,7 @@ void LuminaChatList::setupContent(not_null<Ui::VerticalLayout*> container) {
 	Ui::AddSkip(container);
 	Ui::AddDividerText(
 		container,
-		rpl::single(u"Chat list layout and badge options will appear "
-			"here."_q));
+		Lumina::TrValue(u"LuminaChatListPlaceholder"_q));
 }
 
 } // namespace Settings

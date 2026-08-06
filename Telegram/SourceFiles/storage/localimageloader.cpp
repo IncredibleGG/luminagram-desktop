@@ -24,6 +24,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "media/clip/media_clip_reader.h"
 #include "mtproto/facade.h"
 #include "lottie/lottie_animation.h"
+#include "lumina/lumina_exif_strip.h"
 #include "history/history.h"
 #include "history/history_item.h"
 #include "boxes/abstract_box.h"
@@ -475,6 +476,11 @@ FileLoadTask::FileLoadTask(Args &&args)
 		|| _to.options.shortcutId
 		|| !_to.replaceMediaOf
 		|| IsServerMsgId(_to.replaceMediaOf));
+
+	// process() runs on the TaskQueue worker thread and Lumina::Settings is
+	// main-thread only, so the preference is mirrored here, where we are still
+	// on the main thread and the task has not been queued yet.
+	Lumina::RefreshStripPhotoLocationCache();
 }
 
 FileLoadTask::FileLoadTask(VoiceArgs &&args)
@@ -937,6 +943,17 @@ void FileLoadTask::process(ProcessArgs &&args) {
 				auto full = downscaled ? fullimage.scaled(limit, limit, Qt::KeepAspectRatio, Qt::SmoothTransformation) : fullimage;
 				if (downscaled) {
 					fullimagebytes = fullimageformat = QByteArray();
+				} else if (fullimageformat == u"jpeg"_q
+					&& (Lumina::StripLocationForUpload(fullimagebytes)
+						== Lumina::StripResult::Failed)) {
+					// Only reachable with the preference on. Bytes we could
+					// not parse, or only partly rewrote, must not be passed
+					// through, and dropping them here is exactly what the
+					// downscaled branch above does: ComputePhotoJpegBytes then
+					// re-encodes from the decoded image, which carries no
+					// metadata at all. The format is checked first because a
+					// sticker keeps its bytes here while not being a JPEG.
+					fullimagebytes = fullimageformat = QByteArray();
 				}
 				filedata = ComputePhotoJpegBytes(full, fullimagebytes, fullimageformat);
 
@@ -974,6 +991,21 @@ void FileLoadTask::process(ProcessArgs &&args) {
 
 	if (_type == SendMediaType::Photo && photoThumbs.empty()) {
 		_type = SendMediaType::File;
+	}
+
+	if (_type == SendMediaType::File
+		&& fullimageformat == u"jpeg"_q
+		&& (Lumina::StripLocationForUpload(fullimagebytes)
+			== Lumina::StripResult::Stripped)) {
+		// A photo sent as a file is uploaded byte for byte, read straight off
+		// the disk while _content is empty. Handing the rewritten bytes over
+		// as _content makes the uploader send those instead; the user's own
+		// file is never modified. The rewrite only overwrites bytes and never
+		// inserts or removes any, so the size cannot have changed - filesize
+		// is refreshed anyway, because it is what the uploader splits into
+		// parts and what the document constructor below reports.
+		_content = fullimagebytes;
+		filesize = _result->filesize = _content.size();
 	}
 
 	if (isVoice) {

@@ -7,6 +7,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "settings/sections/settings_lumina_translate.h"
 
+#include "lumina/lumina_locale.h"
 #include "lumina/lumina_translate_settings.h"
 #include "ui/wrap/vertical_layout.h"
 #include "ui/rp_widget.h"
@@ -29,7 +30,7 @@ LuminaTranslate::LuminaTranslate(
 LuminaTranslate::~LuminaTranslate() = default;
 
 rpl::producer<QString> LuminaTranslate::title() {
-	return rpl::single(u"Translation"_q);
+	return Lumina::TrValue(u"LuminaTranslateTitle"_q);
 }
 
 // F-02 sub-page contract: this body stays an ordered list of one call per

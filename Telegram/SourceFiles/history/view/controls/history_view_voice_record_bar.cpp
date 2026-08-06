@@ -21,6 +21,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "history/history_item_components.h"
 #include "history/view/controls/history_view_voice_record_button.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_voice_confirm.h"
 #include "main/main_session.h"
 #include "mainwidget.h" // MainWidget::stopAndClosePlayer
 #include "mainwindow.h"
@@ -2138,6 +2139,7 @@ VoiceRecordBar::VoiceRecordBar(
 }
 
 VoiceRecordBar::~VoiceRecordBar() {
+	Lumina::CancelVoiceSendConfirm(this);
 	if (isActive()) {
 		stopRecording(StopType::Cancel);
 	}
@@ -2764,6 +2766,11 @@ void VoiceRecordBar::startRecording() {
 					&& Ui::ShouldSubmit(
 						static_cast<QKeyEvent*>(e.get()),
 						Core::App().settings().sendSubmitWay())) {
+					// A send is already waiting for an answer, so let the key
+					// through to the box instead of swallowing it here.
+					if (Lumina::VoiceSendConfirmPending(this)) {
+						return Result::Continue;
+					}
 					stop(true);
 					return Result::Cancel;
 				}
@@ -2815,6 +2822,24 @@ void VoiceRecordBar::stop(bool send) {
 		stopRecording(StopType::Listen);
 		_lockShowing = false;
 		return;
+	} else if (send && Lumina::RequestVoiceSendConfirm({
+		.owner = this,
+		.show = _show,
+		.round = _recordingVideo,
+		.discardOnCancel = true,
+		.send = crl::guard(this, [=] { stop(true); }),
+		.cancel = crl::guard(this, [=] { stop(false); }),
+	})) {
+		// Deliberately above stopRecording() rather than around the
+		// _sendVoiceRequests producer: from here "Cancel" still routes to
+		// StopType::Cancel, where the recorder is torn down properly, instead
+		// of leaving a stopped recorder holding a clip nobody sends.
+		//
+		// The pause-instead-of-send branch above is the one flow that reaches
+		// this function without sending anything, so it stays in front: what
+		// it produces is the listen state, and that is asked about in
+		// requestToSendWithOptions() instead, once.
+		return;
 	}
 	const auto ttlBeforeHide = peekTTLState();
 	auto disappearanceCallback = [=] {
@@ -2827,6 +2852,11 @@ void VoiceRecordBar::stop(bool send) {
 }
 
 void VoiceRecordBar::finish() {
+	// The recording this bar was holding is over, whichever route ended it,
+	// so a confirmation still waiting for an answer has nothing left to
+	// answer for.
+	Lumina::CancelVoiceSendConfirm(this);
+
 	_recordingLifetime.destroy();
 	_lockShowing = false;
 	_inField = false;
@@ -3100,6 +3130,22 @@ void VoiceRecordBar::drawMessage(QPainter &p, float64 recordActive) {
 
 void VoiceRecordBar::requestToSendWithOptions(Api::SendOptions options) {
 	if (isListenState()) {
+		// The third _sendVoiceRequests.fire site, and the only one that does
+		// not go through stop(). Backing out here must not discard anything:
+		// the clip is already captured and the user is looking at it.
+		//
+		// A scheduled send is left alone, as on Android (isInScheduleMode()):
+		// the date picker it came through is the confirmation.
+		if (!options.scheduled && Lumina::RequestVoiceSendConfirm({
+			.owner = this,
+			.show = _show,
+			.round = !_data.minithumbs.isNull(),
+			.send = crl::guard(this, [=] {
+				requestToSendWithOptions(options);
+			}),
+		})) {
+			return;
+		}
 		if (takeTTLState()) {
 			options.ttlSeconds = std::numeric_limits<int>::max();
 		}
@@ -3291,6 +3337,9 @@ void VoiceRecordBar::installListenStateFilter() {
 				return Result::Cancel;
 			}
 			if (isEnter && !_warningShown) {
+				if (Lumina::VoiceSendConfirmPending(this)) {
+					return Result::Continue;
+				}
 				requestToSendWithOptions({});
 				return Result::Cancel;
 			}

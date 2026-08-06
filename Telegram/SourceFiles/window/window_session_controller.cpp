@@ -103,6 +103,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "main/main_domain.h"
 #include "main/main_session.h"
 #include "main/main_session_settings.h"
+#include "lumina/lumina_scam_watch.h"
 #include "lang/lang_keys.h"
 #include "apiwrap.h"
 #include "api/api_chat_invite.h"
@@ -1729,6 +1730,8 @@ SessionController::SessionController(
 	) | rpl::on_next([=](FullMsgId id) {
 		checkNonPremiumLimitToastUpload(id);
 	}, _lifetime);
+
+	Lumina::SetupScamWatch(this);
 
 	session->addWindow(this);
 

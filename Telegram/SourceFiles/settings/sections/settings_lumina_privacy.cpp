@@ -7,6 +7,11 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "settings/sections/settings_lumina_privacy.h"
 
+#include "lumina/lumina_exif_strip_settings.h"
+#include "lumina/lumina_scam_watch_settings.h"
+#include "lumina/lumina_clipboard_guard_settings.h"
+#include "lumina/lumina_link_safety_settings.h"
+#include "lumina/lumina_locale.h"
 #include "ui/wrap/vertical_layout.h"
 #include "ui/rp_widget.h"
 #include "ui/vertical_list.h"
@@ -29,7 +34,7 @@ LuminaPrivacy::LuminaPrivacy(
 LuminaPrivacy::~LuminaPrivacy() = default;
 
 rpl::producer<QString> LuminaPrivacy::title() {
-	return rpl::single(u"Privacy"_q);
+	return Lumina::TrValue(u"LuminaPrivacyTitle"_q);
 }
 
 // The stealth cluster - "Appear offline" (`stealthOnline`), "Don't send
@@ -52,11 +57,10 @@ rpl::producer<QString> LuminaPrivacy::title() {
 //   W4-G disable link preview by default;
 //   W6-B account registration date row.
 void LuminaPrivacy::setupContent(not_null<Ui::VerticalLayout*> container) {
-	Ui::AddSkip(container);
-	Ui::AddDividerText(
-		container,
-		rpl::single(u"Link, clipboard and outgoing-media privacy options "
-			"will appear here."_q));
+	Lumina::AddLinkSafetyRows(container, controller());
+	Lumina::AddCryptoGuardRows(container, controller());
+	Lumina::AddScamWarningRows(container, controller());
+	Lumina::AddExifStripRows(container, controller());
 }
 
 } // namespace Settings

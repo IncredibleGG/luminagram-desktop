@@ -10,6 +10,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "base/timer.h"
 #include "data/data_premium_limits.h"
 #include "history/history.h"
+#include "lumina/lumina_locale.h"
 #include "lumina/lumina_settings.h"
 #include "lumina/lumina_translate_providers.h"
 #include "lumina/lumina_translate_send.h"
@@ -32,15 +33,15 @@ namespace {
 // hand reaches the send key.
 constexpr auto kDebounceDelay = crl::time(500);
 
-// LuminaGram-only user-facing text, spelled as a literal for the same reason
-// every other lumina/ file does it: lang.strings belongs to upstream and this
-// item may not add keys to it.
+// LuminaGram-only user-facing text, so it comes from our own in-code tables
+// (lumina/lumina_locale.h) rather than from lang.strings, which belongs to
+// upstream and is served by Telegram's cloud language pack.
 [[nodiscard]] QString TranslatingText() {
-	return u"Translating..."_q;
+	return Tr(u"LuminaTranslatePreviewTranslating"_q);
 }
 
 [[nodiscard]] QString FailedText() {
-	return u"Translation unavailable"_q;
+	return Tr(u"LuminaTranslatePreviewFailed"_q);
 }
 
 // Owned and written by lumina_translate_send.cpp; named here only so that a
@@ -451,6 +452,7 @@ void MoveTranslatePreviewBar(
 rpl::producer<> TranslatePreviewRefreshRequests() {
 	return rpl::merge(
 		TranslateSettingsChanges(),
+		LangChanges(),
 		Settings::Instance().changesFor(DialogLanguageKey()));
 }
 

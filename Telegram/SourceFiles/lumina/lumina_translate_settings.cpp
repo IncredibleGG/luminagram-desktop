@@ -8,6 +8,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "lumina/lumina_translate_settings.h"
 
 #include "lang/lang_keys.h"
+#include "lumina/lumina_locale.h"
 #include "lumina/lumina_settings.h"
 #include "lumina/lumina_translate_gating.h"
 #include "lumina/lumina_translate_providers.h"
@@ -69,6 +70,106 @@ constexpr auto kApiKeyDotsShown = 6;
 		|| (key == kKeyMode);
 }
 
+struct LanguageEntry {
+	QString code;
+	QString key;
+};
+
+// The languages LuminaGram can translate into, in the order the pickers show
+// them. Codes are ISO tags, and the provider layer maps them to whatever
+// spelling each service wants. The dialect entries are the reason this table
+// exists instead of tdesktop's own LanguageId list, which is a bare
+// QLocale::Language and cannot tell zh-TW from zh-CN - which is also why the
+// names are our own strings rather than QLocale::languageToString().
+[[nodiscard]] const std::vector<LanguageEntry> &LanguageEntries() {
+	static const auto result = std::vector<LanguageEntry>{
+		{ u"en"_q, u"LuminaLangEn"_q },
+		{ u"zh-TW"_q, u"LuminaLangZhTw"_q },
+		{ u"zh-CN"_q, u"LuminaLangZhCn"_q },
+		{ u"ja"_q, u"LuminaLangJa"_q },
+		{ u"ko"_q, u"LuminaLangKo"_q },
+		{ u"es"_q, u"LuminaLangEs"_q },
+		{ u"fr"_q, u"LuminaLangFr"_q },
+		{ u"de"_q, u"LuminaLangDe"_q },
+		{ u"ru"_q, u"LuminaLangRu"_q },
+		{ u"pt-BR"_q, u"LuminaLangPtBr"_q },
+		{ u"pt-PT"_q, u"LuminaLangPtPt"_q },
+		{ u"it"_q, u"LuminaLangIt"_q },
+		{ u"ar"_q, u"LuminaLangAr"_q },
+		{ u"hi"_q, u"LuminaLangHi"_q },
+		{ u"id"_q, u"LuminaLangId"_q },
+		{ u"th"_q, u"LuminaLangTh"_q },
+		{ u"vi"_q, u"LuminaLangVi"_q },
+		{ u"tr"_q, u"LuminaLangTr"_q },
+		{ u"pl"_q, u"LuminaLangPl"_q },
+		{ u"uk"_q, u"LuminaLangUk"_q },
+		{ u"nl"_q, u"LuminaLangNl"_q },
+
+		{ u"af"_q, u"LuminaLangAf"_q },
+		{ u"sq"_q, u"LuminaLangSq"_q },
+		{ u"am"_q, u"LuminaLangAm"_q },
+		{ u"hy"_q, u"LuminaLangHy"_q },
+		{ u"az"_q, u"LuminaLangAz"_q },
+		{ u"eu"_q, u"LuminaLangEu"_q },
+		{ u"be"_q, u"LuminaLangBe"_q },
+		{ u"bn"_q, u"LuminaLangBn"_q },
+		{ u"bs"_q, u"LuminaLangBs"_q },
+		{ u"bg"_q, u"LuminaLangBg"_q },
+		{ u"my"_q, u"LuminaLangMy"_q },
+		{ u"ca"_q, u"LuminaLangCa"_q },
+		{ u"hr"_q, u"LuminaLangHr"_q },
+		{ u"cs"_q, u"LuminaLangCs"_q },
+		{ u"da"_q, u"LuminaLangDa"_q },
+		{ u"et"_q, u"LuminaLangEt"_q },
+		{ u"tl"_q, u"LuminaLangTl"_q },
+		{ u"fi"_q, u"LuminaLangFi"_q },
+		{ u"gl"_q, u"LuminaLangGl"_q },
+		{ u"ka"_q, u"LuminaLangKa"_q },
+		{ u"el"_q, u"LuminaLangEl"_q },
+		{ u"gu"_q, u"LuminaLangGu"_q },
+		{ u"he"_q, u"LuminaLangHe"_q },
+		{ u"hu"_q, u"LuminaLangHu"_q },
+		{ u"is"_q, u"LuminaLangIs"_q },
+		{ u"ga"_q, u"LuminaLangGa"_q },
+		{ u"jv"_q, u"LuminaLangJv"_q },
+		{ u"kn"_q, u"LuminaLangKn"_q },
+		{ u"kk"_q, u"LuminaLangKk"_q },
+		{ u"km"_q, u"LuminaLangKm"_q },
+		{ u"ku"_q, u"LuminaLangKu"_q },
+		{ u"ky"_q, u"LuminaLangKy"_q },
+		{ u"lo"_q, u"LuminaLangLo"_q },
+		{ u"lv"_q, u"LuminaLangLv"_q },
+		{ u"lt"_q, u"LuminaLangLt"_q },
+		{ u"mk"_q, u"LuminaLangMk"_q },
+		{ u"ms"_q, u"LuminaLangMs"_q },
+		{ u"ml"_q, u"LuminaLangMl"_q },
+		{ u"mr"_q, u"LuminaLangMr"_q },
+		{ u"mn"_q, u"LuminaLangMn"_q },
+		{ u"ne"_q, u"LuminaLangNe"_q },
+		{ u"no"_q, u"LuminaLangNo"_q },
+		{ u"ps"_q, u"LuminaLangPs"_q },
+		{ u"fa"_q, u"LuminaLangFa"_q },
+		{ u"pa"_q, u"LuminaLangPa"_q },
+		{ u"ro"_q, u"LuminaLangRo"_q },
+		{ u"sr"_q, u"LuminaLangSr"_q },
+		{ u"si"_q, u"LuminaLangSi"_q },
+		{ u"sk"_q, u"LuminaLangSk"_q },
+		{ u"sl"_q, u"LuminaLangSl"_q },
+		{ u"so"_q, u"LuminaLangSo"_q },
+		{ u"sw"_q, u"LuminaLangSw"_q },
+		{ u"sv"_q, u"LuminaLangSv"_q },
+		{ u"tg"_q, u"LuminaLangTg"_q },
+		{ u"ta"_q, u"LuminaLangTa"_q },
+		{ u"te"_q, u"LuminaLangTe"_q },
+		{ u"ur"_q, u"LuminaLangUr"_q },
+		{ u"uz"_q, u"LuminaLangUz"_q },
+		{ u"cy"_q, u"LuminaLangCy"_q },
+		{ u"yi"_q, u"LuminaLangYi"_q },
+		{ u"zu"_q, u"LuminaLangZu"_q },
+	};
+	return result;
+}
+
 [[nodiscard]] const TranslateProviderInfo &CurrentProvider() {
 	const auto found = FindTranslateProvider(CurrentProviderId());
 	return found ? *found : TranslateProviders().front();
@@ -84,12 +185,16 @@ constexpr auto kApiKeyDotsShown = 6;
 // Every label and every toggle on the page is recomputed from the store on any
 // change, so a value edited in a box, restored from a backup or written by
 // another part of the app is reflected without the page having to know which
-// row owns which key.
+// row owns which key. A computed label also names a language or a state in the
+// user's own language, which is why this listens for the in-app language as
+// well - a row that is spelled out by Lumina::Tr() directly gets that from
+// Lumina::TrValue() instead.
 [[nodiscard]] rpl::producer<QString> LabelValue(Fn<QString()> compute) {
 	return rpl::single(
 		rpl::empty
-	) | rpl::then(
-		TranslateSettingsChanges()
+	) | rpl::then(rpl::merge(
+		TranslateSettingsChanges(),
+		LangChanges())
 	) | rpl::map([compute = std::move(compute)] {
 		return compute();
 	});
@@ -107,7 +212,7 @@ constexpr auto kApiKeyDotsShown = 6;
 
 [[nodiscard]] QString MaskedApiKey(const QString &key) {
 	if (key.isEmpty()) {
-		return u"Not set"_q;
+		return Tr(u"LuminaTranslateApiKeyNotSet"_q);
 	}
 	const auto length = int(key.size());
 	const auto tail = std::min(kApiKeyTailShown, length);
@@ -117,12 +222,12 @@ constexpr auto kApiKeyDotsShown = 6;
 
 void AddToggleRow(
 		not_null<Ui::VerticalLayout*> container,
-		const QString &label,
+		rpl::producer<QString> label,
 		Fn<bool()> checked,
 		Fn<void(bool)> save) {
 	const auto button = container->add(object_ptr<Ui::SettingsButton>(
 		container,
-		rpl::single(label),
+		std::move(label),
 		st::settingsButtonNoIcon
 	))->toggleOn(FlagValue(std::move(checked)));
 	button->toggledChanges(
@@ -135,12 +240,12 @@ void AddToggleRow(
 // section helpers have to be reached through the global namespace.
 void AddValueRow(
 		not_null<Ui::VerticalLayout*> container,
-		const QString &label,
+		rpl::producer<QString> label,
 		Fn<QString()> value,
 		Fn<void()> activate) {
 	::Settings::AddButtonWithLabel(
 		container,
-		rpl::single(label),
+		std::move(label),
 		LabelValue(std::move(value)),
 		st::settingsButtonNoIcon
 	)->setClickedCallback(std::move(activate));
@@ -229,7 +334,7 @@ void ShowProviderPicker(not_null<Window::SessionController*> controller) {
 	}
 	controller->show(Box([=](not_null<Ui::GenericBox*> box) {
 		SingleChoiceBox(box, {
-			.title = rpl::single(u"Translation service"_q),
+			.title = TrValue(u"LuminaTranslateProvider"_q),
 			.options = options,
 			.initialSelection = selected,
 			.callback = [=](int index) {
@@ -244,13 +349,13 @@ void ShowProviderPicker(not_null<Window::SessionController*> controller) {
 
 void ShowModePicker(not_null<Window::SessionController*> controller) {
 	const auto options = std::vector<QString>{
-		u"In every chat"_q,
-		u"Only chats I turn on"_q,
+		Tr(u"LuminaTranslateModeAll"_q),
+		Tr(u"LuminaTranslateModeManual"_q),
 	};
 	const auto selected = AutoTranslateEverything() ? 0 : 1;
 	controller->show(Box([=](not_null<Ui::GenericBox*> box) {
 		SingleChoiceBox(box, {
-			.title = rpl::single(u"Translate incoming messages"_q),
+			.title = TrValue(u"LuminaTranslateModeHeader"_q),
 			.options = options,
 			.initialSelection = selected,
 			.callback = [=](int index) {
@@ -319,25 +424,27 @@ void AddSendRows(
 		not_null<Ui::VerticalLayout*> container,
 		not_null<Window::SessionController*> controller) {
 	Ui::AddSkip(container);
-	Ui::AddSubsectionTitle(container, rpl::single(u"Sending"_q));
+	Ui::AddSubsectionTitle(
+		container,
+		TrValue(u"LuminaTranslateSendHeader"_q));
 	AddToggleRow(
 		container,
-		u"Translate before sending"_q,
+		TrValue(u"LuminaTranslateBeforeSend"_q),
 		[] { return TranslateBeforeSend(); },
 		[](bool value) { SetTranslateBeforeSend(value); });
 	AddValueRow(
 		container,
-		u"Send in"_q,
+		TrValue(u"LuminaTranslateSendLang"_q),
 		[] {
 			return TranslateSendLanguageIsAuto()
-				? u"Recipient's language"_q
+				? Tr(u"LuminaTranslateSendLangAuto"_q)
 				: TranslateLanguageName(TranslateSendLanguage());
 		},
 		[=] {
 			ShowLanguagePicker(
 				controller,
-				u"Send in"_q,
-				u"Recipient's language"_q,
+				Tr(u"LuminaTranslateSendLang"_q),
+				Tr(u"LuminaTranslateSendLangAuto"_q),
 				kSendLangAuto,
 				TranslateSendLanguage(),
 				[](QString code) { SetTranslateSendLanguage(code); });
@@ -347,97 +454,85 @@ void AddSendRows(
 	// pipeline whatever this is set to, and has no preference of its own.
 	AddToggleRow(
 		container,
-		u"Confirm before sending"_q,
+		TrValue(u"LuminaTranslateBeforeSendConfirm"_q),
 		[] { return TranslateBeforeSendConfirm(); },
 		[](bool value) { SetTranslateBeforeSendConfirm(value); });
 	Ui::AddSkip(container);
-	Ui::AddDividerText(
-		container,
-		rpl::single(u"Outgoing messages are translated into the language "
-			"above, and the original is kept alongside the translation. "
-			"With \"Recipient's language\" LuminaGram asks once per chat "
-			"which language to use there, then remembers it. "
-			"\"Confirm before sending\" shows the translation next to the "
-			"original first, so you can send either one; with it off the "
-			"translation goes out straight away."_q));
+	Ui::AddDividerText(container, TrValue(u"LuminaTranslateSendInfo"_q));
 }
 
 void AddReceiveRows(
 		not_null<Ui::VerticalLayout*> container,
 		not_null<Window::SessionController*> controller) {
 	Ui::AddSkip(container);
-	Ui::AddSubsectionTitle(container, rpl::single(u"Receiving"_q));
+	Ui::AddSubsectionTitle(
+		container,
+		TrValue(u"LuminaTranslateReceiveHeader"_q));
 	AddToggleRow(
 		container,
-		u"Show original and translation together"_q,
+		TrValue(u"LuminaDualLanguageDisplay"_q),
 		[] { return DualLanguageDisplay(); },
 		[](bool value) { SetDualLanguageDisplay(value); });
 	AddValueRow(
 		container,
-		u"Read in"_q,
+		TrValue(u"LuminaTranslateReadLang"_q),
 		[] {
 			const auto code = TranslateReadLanguage();
 			return code.isEmpty()
-				? u"Interface language"_q
+				? Tr(u"LuminaTranslateReadLangFollow"_q)
 				: TranslateLanguageName(code);
 		},
 		[=] {
 			ShowLanguagePicker(
 				controller,
-				u"Read in"_q,
-				u"Interface language"_q,
+				Tr(u"LuminaTranslateReadLang"_q),
+				Tr(u"LuminaTranslateReadLangFollow"_q),
 				QString(),
 				TranslateReadLanguage(),
 				[](QString code) { SetTranslateReadLanguage(code); });
 		});
 	AddValueRow(
 		container,
-		u"Translate incoming messages"_q,
+		TrValue(u"LuminaTranslateModeHeader"_q),
 		[] {
 			return AutoTranslateEverything()
-				? u"In every chat"_q
-				: u"Only chats I turn on"_q;
+				? Tr(u"LuminaTranslateModeAll"_q)
+				: Tr(u"LuminaTranslateModeManual"_q);
 		},
 		[=] { ShowModePicker(controller); });
 	Ui::AddSkip(container);
-	Ui::AddDividerText(
-		container,
-		rpl::single(u"Incoming messages keep their original text in full "
-			"size, with the translation shown underneath. \"In every chat\" "
-			"sends one request per message to your translation service - on "
-			"a metered key, leave it on \"Only chats I turn on\"."_q));
+	Ui::AddDividerText(container, TrValue(u"LuminaTranslateReceiveInfo"_q));
 }
 
 void AddScopeRows(not_null<Ui::VerticalLayout*> container) {
 	Ui::AddSkip(container);
-	Ui::AddSubsectionTitle(container, rpl::single(u"Where it applies"_q));
+	Ui::AddSubsectionTitle(
+		container,
+		TrValue(u"LuminaTranslateScopeHeader"_q));
 	AddToggleRow(
 		container,
-		u"Private chats"_q,
+		TrValue(u"LuminaTranslateScopePrivate"_q),
 		[] { return TranslateScopePrivate(); },
 		[](bool value) { SetTranslateScopePrivate(value); });
 	AddToggleRow(
 		container,
-		u"Groups and channels"_q,
+		TrValue(u"LuminaTranslateScopeGroup"_q),
 		[] { return TranslateScopeGroup(); },
 		[](bool value) { SetTranslateScopeGroup(value); });
 	Ui::AddSkip(container);
-	Ui::AddDividerText(
-		container,
-		rpl::single(u"Chats outside the scope are left alone in both "
-			"directions: they are not translated as you read them, and "
-			"messages you send there go out untranslated. You can still "
-			"translate any single message by hand."_q));
+	Ui::AddDividerText(container, TrValue(u"LuminaTranslateScopeInfo"_q));
 }
 
 void AddProviderRows(
 		not_null<Ui::VerticalLayout*> container,
 		not_null<Window::SessionController*> controller) {
 	Ui::AddSkip(container);
-	Ui::AddSubsectionTitle(container, rpl::single(u"Service"_q));
+	Ui::AddSubsectionTitle(
+		container,
+		TrValue(u"LuminaTranslateProviderHeader"_q));
 	AddValueRow(
 		container,
-		u"Translation service"_q,
+		TrValue(u"LuminaTranslateProvider"_q),
 		[] { return CurrentProvider().name; },
 		[=] { ShowProviderPicker(controller); });
 
@@ -446,14 +541,14 @@ void AddProviderRows(
 	});
 	AddValueRow(
 		keyBlock,
-		u"API key"_q,
+		TrValue(u"LuminaTranslateApiKey"_q),
 		[] { return MaskedApiKey(ProviderApiKey(CurrentProviderId())); },
 		[=] {
 			const auto id = CurrentProviderId();
 			ShowTextEditor(
 				controller,
-				u"API key"_q,
-				u"API key"_q,
+				Tr(u"LuminaTranslateApiKey"_q),
+				Tr(u"LuminaTranslateApiKey"_q),
 				ProviderApiKey(id),
 				kApiKeyMaxLength,
 				false,
@@ -465,12 +560,12 @@ void AddProviderRows(
 	});
 	AddValueRow(
 		baseUrlBlock,
-		u"Base URL"_q,
+		TrValue(u"LuminaTranslateBaseUrl"_q),
 		[] { return LlmBaseUrl(); },
 		[=] {
 			ShowTextEditor(
 				controller,
-				u"Base URL"_q,
+				Tr(u"LuminaTranslateBaseUrl"_q),
 				DefaultLlmBaseUrl(),
 				LlmBaseUrl(),
 				kBaseUrlMaxLength,
@@ -483,12 +578,12 @@ void AddProviderRows(
 	});
 	AddValueRow(
 		modelBlock,
-		u"Model"_q,
+		TrValue(u"LuminaTranslateModel"_q),
 		[] { return LlmModel(); },
 		[=] {
 			ShowTextEditor(
 				controller,
-				u"Model"_q,
+				Tr(u"LuminaTranslateModel"_q),
 				DefaultLlmModel(),
 				LlmModel(),
 				kModelMaxLength,
@@ -501,17 +596,17 @@ void AddProviderRows(
 	});
 	AddValueRow(
 		promptBlock,
-		u"System prompt"_q,
+		TrValue(u"LuminaTranslateSystemPrompt"_q),
 		[] {
 			return (LlmPrompt() == DefaultLlmPrompt())
-				? u"Default"_q
-				: u"Custom"_q;
+				? Tr(u"LuminaTranslatePromptDefault"_q)
+				: Tr(u"LuminaTranslatePromptCustom"_q);
 		},
 		[=] {
 			ShowTextEditor(
 				controller,
-				u"System prompt"_q,
-				u"System prompt"_q,
+				Tr(u"LuminaTranslateSystemPrompt"_q),
+				Tr(u"LuminaTranslateSystemPrompt"_q),
 				LlmPrompt(),
 				kPromptMaxLength,
 				true,
@@ -523,17 +618,14 @@ void AddProviderRows(
 	});
 	AddToggleRow(
 		fallbackBlock,
-		u"Fall back to Telegram when this service fails"_q,
+		TrValue(u"LuminaTranslateFallbackTelegram"_q),
 		[] { return TranslateFallbackToTelegram(); },
 		[](bool value) { SetTranslateFallbackToTelegram(value); });
 
 	Ui::AddSkip(container);
 	Ui::AddDividerText(
 		container,
-		rpl::single(u"Keys are kept on this device only, in a separate file "
-			"from the rest of the settings, and are never sent to Telegram. "
-			"Everything you translate is sent to the service selected here, "
-			"so pick one you trust."_q));
+		TrValue(u"LuminaTranslateProviderSecurityInfo"_q));
 }
 
 } // namespace
@@ -614,95 +706,26 @@ void SetAutoTranslateEverything(bool value) {
 }
 
 const std::vector<TranslateLanguage> &TranslateLanguages() {
-	// Codes are ISO tags, and the provider layer maps them to whatever
-	// spelling each service wants. The dialect entries are the reason this
-	// table exists instead of tdesktop's own LanguageId list, which is a bare
-	// QLocale::Language and cannot tell zh-TW from zh-CN.
-	static const auto result = std::vector<TranslateLanguage>{
-		{ u"en"_q, u"English"_q },
-		{ u"zh-TW"_q, u"Chinese (Traditional)"_q },
-		{ u"zh-CN"_q, u"Chinese (Simplified)"_q },
-		{ u"ja"_q, u"Japanese"_q },
-		{ u"ko"_q, u"Korean"_q },
-		{ u"es"_q, u"Spanish"_q },
-		{ u"fr"_q, u"French"_q },
-		{ u"de"_q, u"German"_q },
-		{ u"ru"_q, u"Russian"_q },
-		{ u"pt-BR"_q, u"Portuguese (Brazil)"_q },
-		{ u"pt-PT"_q, u"Portuguese (Portugal)"_q },
-		{ u"it"_q, u"Italian"_q },
-		{ u"ar"_q, u"Arabic"_q },
-		{ u"hi"_q, u"Hindi"_q },
-		{ u"id"_q, u"Indonesian"_q },
-		{ u"th"_q, u"Thai"_q },
-		{ u"vi"_q, u"Vietnamese"_q },
-		{ u"tr"_q, u"Turkish"_q },
-		{ u"pl"_q, u"Polish"_q },
-		{ u"uk"_q, u"Ukrainian"_q },
-		{ u"nl"_q, u"Dutch"_q },
-
-		{ u"af"_q, u"Afrikaans"_q },
-		{ u"sq"_q, u"Albanian"_q },
-		{ u"am"_q, u"Amharic"_q },
-		{ u"hy"_q, u"Armenian"_q },
-		{ u"az"_q, u"Azerbaijani"_q },
-		{ u"eu"_q, u"Basque"_q },
-		{ u"be"_q, u"Belarusian"_q },
-		{ u"bn"_q, u"Bengali"_q },
-		{ u"bs"_q, u"Bosnian"_q },
-		{ u"bg"_q, u"Bulgarian"_q },
-		{ u"my"_q, u"Burmese"_q },
-		{ u"ca"_q, u"Catalan"_q },
-		{ u"hr"_q, u"Croatian"_q },
-		{ u"cs"_q, u"Czech"_q },
-		{ u"da"_q, u"Danish"_q },
-		{ u"et"_q, u"Estonian"_q },
-		{ u"tl"_q, u"Filipino"_q },
-		{ u"fi"_q, u"Finnish"_q },
-		{ u"gl"_q, u"Galician"_q },
-		{ u"ka"_q, u"Georgian"_q },
-		{ u"el"_q, u"Greek"_q },
-		{ u"gu"_q, u"Gujarati"_q },
-		{ u"he"_q, u"Hebrew"_q },
-		{ u"hu"_q, u"Hungarian"_q },
-		{ u"is"_q, u"Icelandic"_q },
-		{ u"ga"_q, u"Irish"_q },
-		{ u"jv"_q, u"Javanese"_q },
-		{ u"kn"_q, u"Kannada"_q },
-		{ u"kk"_q, u"Kazakh"_q },
-		{ u"km"_q, u"Khmer"_q },
-		{ u"ku"_q, u"Kurdish"_q },
-		{ u"ky"_q, u"Kyrgyz"_q },
-		{ u"lo"_q, u"Lao"_q },
-		{ u"lv"_q, u"Latvian"_q },
-		{ u"lt"_q, u"Lithuanian"_q },
-		{ u"mk"_q, u"Macedonian"_q },
-		{ u"ms"_q, u"Malay"_q },
-		{ u"ml"_q, u"Malayalam"_q },
-		{ u"mr"_q, u"Marathi"_q },
-		{ u"mn"_q, u"Mongolian"_q },
-		{ u"ne"_q, u"Nepali"_q },
-		{ u"no"_q, u"Norwegian"_q },
-		{ u"ps"_q, u"Pashto"_q },
-		{ u"fa"_q, u"Persian"_q },
-		{ u"pa"_q, u"Punjabi"_q },
-		{ u"ro"_q, u"Romanian"_q },
-		{ u"sr"_q, u"Serbian"_q },
-		{ u"si"_q, u"Sinhala"_q },
-		{ u"sk"_q, u"Slovak"_q },
-		{ u"sl"_q, u"Slovenian"_q },
-		{ u"so"_q, u"Somali"_q },
-		{ u"sw"_q, u"Swahili"_q },
-		{ u"sv"_q, u"Swedish"_q },
-		{ u"tg"_q, u"Tajik"_q },
-		{ u"ta"_q, u"Tamil"_q },
-		{ u"te"_q, u"Telugu"_q },
-		{ u"ur"_q, u"Urdu"_q },
-		{ u"uz"_q, u"Uzbek"_q },
-		{ u"cy"_q, u"Welsh"_q },
-		{ u"yi"_q, u"Yiddish"_q },
-		{ u"zu"_q, u"Zulu"_q },
-	};
+	// The names are re-read whenever the in-app language changes, in place: a
+	// caller holds a reference to this vector while it copies the names out of
+	// it, so the entries themselves must never move.
+	static auto result = std::vector<TranslateLanguage>();
+	static auto builtFor = QString();
+	if (result.empty()) {
+		const auto &entries = LanguageEntries();
+		result.reserve(entries.size());
+		for (const auto &entry : entries) {
+			result.push_back({ entry.code, QString() });
+		}
+	}
+	const auto locale = LocaleCode();
+	if (builtFor != locale) {
+		builtFor = locale;
+		const auto &entries = LanguageEntries();
+		for (auto i = 0, count = int(result.size()); i != count; ++i) {
+			result[i].name = Tr(entries[i].key);
+		}
+	}
 	return result;
 }
 
@@ -737,18 +760,13 @@ void AddTranslateRows(
 	Ui::AddSkip(container);
 	AddToggleRow(
 		container,
-		u"Enable LuminaGram translation"_q,
+		TrValue(u"LuminaTranslateEnable"_q),
 		[] { return TranslationFeatureEnabled(); },
 		[](bool value) {
 			Settings::Instance().set(kKeyFeatureEnabled, value);
 		});
 	Ui::AddSkip(container);
-	Ui::AddDividerText(
-		container,
-		rpl::single(u"Translate with your own engine instead of Telegram's "
-			"Premium service. The default engine needs no account and no "
-			"API key. While this is off, LuminaGram leaves translation "
-			"exactly as Telegram Desktop ships it."_q));
+	Ui::AddDividerText(container, TrValue(u"LuminaTranslateEnableInfo"_q));
 	AddSendRows(container, controller);
 	AddReceiveRows(container, controller);
 	AddScopeRows(container);

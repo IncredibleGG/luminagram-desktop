@@ -7,6 +7,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "settings/sections/settings_luminagram.h"
 
+#include "lumina/lumina_update_settings.h"
+#include "lumina/lumina_locale.h"
 #include "settings/sections/settings_lumina_appearance.h"
 #include "settings/sections/settings_lumina_chat.h"
 #include "settings/sections/settings_lumina_chat_list.h"
@@ -28,12 +30,12 @@ namespace {
 
 void AddSectionRow(
 		not_null<Ui::VerticalLayout*> container,
-		const QString &label,
+		rpl::producer<QString> label,
 		const style::icon &icon,
 		Fn<void()> callback) {
 	AddButtonWithIcon(
 		container,
-		rpl::single(label),
+		std::move(label),
 		st::settingsButton,
 		{ &icon }
 	)->setClickedCallback(std::move(callback));
@@ -55,7 +57,7 @@ LuminaGram::LuminaGram(
 LuminaGram::~LuminaGram() = default;
 
 rpl::producer<QString> LuminaGram::title() {
-	return rpl::single(u"LuminaGram"_q);
+	return Lumina::TrValue(u"LuminaGramTitle"_q);
 }
 
 void LuminaGram::setupContent() {
@@ -65,44 +67,45 @@ void LuminaGram::setupContent() {
 	Ui::AddSkip(content);
 	AddSectionRow(
 		content,
-		u"Translation"_q,
+		Lumina::TrValue(u"LuminaTranslateTitle"_q),
 		st::menuIconTranslate,
 		[=] { showOther(LuminaTranslateId()); });
 	AddSectionRow(
 		content,
-		u"Privacy"_q,
+		Lumina::TrValue(u"LuminaPrivacyTitle"_q),
 		st::menuIconStealth,
 		[=] { showOther(LuminaPrivacyId()); });
 	AddSectionRow(
 		content,
-		u"Security"_q,
+		Lumina::TrValue(u"LuminaSecurityTitle"_q),
 		st::menuIconLock,
 		[=] { showOther(LuminaSecurityId()); });
 	AddSectionRow(
 		content,
-		u"Chats"_q,
+		Lumina::TrValue(u"LuminaChatSettings"_q),
 		st::menuIconChatBubble,
 		[=] { showOther(LuminaChatId()); });
 	AddSectionRow(
 		content,
-		u"Chat list"_q,
+		Lumina::TrValue(u"LuminaGramChatList"_q),
 		st::menuIconChats,
 		[=] { showOther(LuminaChatListId()); });
 	AddSectionRow(
 		content,
-		u"Appearance"_q,
+		Lumina::TrValue(u"LuminaAppearanceTitle"_q),
 		st::menuIconPalette,
 		[=] { showOther(LuminaAppearanceId()); });
 	AddSectionRow(
 		content,
-		u"Tools"_q,
+		Lumina::TrValue(u"LuminaToolsTitle"_q),
 		st::menuIconManage,
 		[=] { showOther(LuminaToolsId()); });
 	Ui::AddSkip(content);
 	Ui::AddDividerText(
 		content,
-		rpl::single(u"LuminaGram options are stored on this device only and "
-			"are never synced to Telegram."_q));
+		Lumina::TrValue(u"LuminaGramStoredLocallyInfo"_q));
+
+	Lumina::AddUpdateRows(content);
 
 	Ui::ResizeFitChild(this, content);
 }

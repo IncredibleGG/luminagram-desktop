@@ -17,6 +17,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "data/stickers/data_custom_emoji.h"
 #include "data/data_session.h"
 #include "iv/iv_instance.h"
+#include "lumina/lumina_link_safety.h"
 #include "ui/text/text_custom_emoji.h"
 #include "ui/text/text_utilities.h"
 #include "ui/basic_click_handlers.h"
@@ -422,6 +423,8 @@ bool UiIntegration::handleUrlClick(
 		return true;
 	} else if (local.startsWith(u"internal:"_q, Qt::CaseInsensitive)) {
 		Core::App().openInternalUrl(local, context);
+		return true;
+	} else if (Lumina::InterceptExternalUrl(url, context)) {
 		return true;
 	} else if (Iv::PreferForUri(url)
 		&& !context.value<ClickHandlerContext>().ignoreIv) {

@@ -7,6 +7,10 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "settings/sections/settings_lumina_chat.h"
 
+#include "lumina/lumina_link_preview_settings.h"
+#include "lumina/lumina_voice_confirm_settings.h"
+#include "lumina/lumina_text_replace_settings.h"
+#include "lumina/lumina_locale.h"
 #include "lumina/lumina_settings.h"
 #include "ui/widgets/buttons.h"
 #include "ui/wrap/vertical_layout.h"
@@ -22,11 +26,11 @@ namespace {
 
 void AddToggle(
 		not_null<Ui::VerticalLayout*> container,
-		const QString &label,
+		rpl::producer<QString> label,
 		const QString &key) {
 	const auto button = container->add(object_ptr<Ui::SettingsButton>(
 		container,
-		rpl::single(label),
+		std::move(label),
 		st::settingsButtonNoIcon
 	))->toggleOn(rpl::single(Lumina::Settings::Instance().getBool(key)));
 	button->toggledChanges(
@@ -53,7 +57,7 @@ LuminaChat::LuminaChat(
 LuminaChat::~LuminaChat() = default;
 
 rpl::producer<QString> LuminaChat::title() {
-	return rpl::single(u"Chats"_q);
+	return Lumina::TrValue(u"LuminaChatSettings"_q);
 }
 
 // F-02 sub-page contract: apart from the one row below, which already ships
@@ -67,18 +71,9 @@ rpl::producer<QString> LuminaChat::title() {
 //   W4-E undo-send window;
 //   W4-F confirm before sending voice / video messages.
 void LuminaChat::setupContent(not_null<Ui::VerticalLayout*> container) {
-	Ui::AddSkip(container);
-	Ui::AddSubsectionTitle(container, rpl::single(u"Message actions"_q));
-	AddToggle(
-		container,
-		u"Allow save / copy from restricted chats"_q,
-		u"allowSaveRestricted"_q);
-	Ui::AddSkip(container);
-	Ui::AddDividerText(
-		container,
-		rpl::single(u"\"Allow save / copy from restricted chats\" only "
-			"affects local actions on this device. Some chats restrict "
-			"saving for a reason - use responsibly."_q));
+	Lumina::AddTextReplaceRows(container, controller());
+	Lumina::AddVoiceConfirmRows(container, controller());
+	Lumina::AddLinkPreviewRows(container, controller());
 }
 
 } // namespace Settings

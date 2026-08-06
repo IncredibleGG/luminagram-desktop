@@ -92,6 +92,28 @@ public:
 	// unless preview was removed in the draft or manual.
 	void apply(Data::WebPageDraft draft, bool reparse = true);
 	[[nodiscard]] Data::WebPageDraft draft() const;
+
+	// LuminaGram (W4-G): draft() as it should be *stored*, which is
+	// draft() minus any `removed` flag this processor seeded itself from
+	// the "disable link preview by default" preference.
+	//
+	// Data::WebPageDraft::removed is serialised: the local draft carries
+	// it to disk (storage/storage_account.cpp) and from there into the
+	// cloud draft as messages.saveDraft's no_webpage flag (apiwrap.cpp).
+	// A purely local presentation default has no business travelling to
+	// the user's other clients, and it is re-derived from scratch every
+	// time a link set appears, so nothing is lost by keeping it out of
+	// storage.
+	//
+	// Call sites that STORE a draft should use this. Call sites that SEND
+	// or EDIT a message must keep using draft(), which is the only place
+	// the flag has to survive for no_webpage to be set. The storing sites
+	// are saveFieldToHistoryLocalDraft(), registerDraftSource() and
+	// editMessage() in history/history_widget.cpp, and
+	// saveFieldToHistoryLocalDraft() and registerDraftSource() in
+	// history/view/controls/history_view_compose_controls.cpp.
+	[[nodiscard]] Data::WebPageDraft draftForSaving() const;
+
 	[[nodiscard]] std::shared_ptr<WebpageResolver> resolver() const;
 	[[nodiscard]] const std::vector<MessageLinkRange> &links() const;
 	[[nodiscard]] QString link() const;
@@ -116,6 +138,17 @@ private:
 	QString _link;
 	WebPageData *_data = nullptr;
 	Data::WebPageDraft _draft;
+
+	// LuminaGram (W4-G). `_luminaDefaultChecked` latches the preference
+	// read for one episode of "the field contains at least one link", so
+	// that a preview restored by hand is not removed again by the next
+	// parse. It is cleared exactly where _draft.removed is cleared, which
+	// is what re-seeds the default when a link appears again after the
+	// field went link-free, including after a send.
+	// `_luminaDefaultRemoved` records that the removal now in _draft is
+	// ours rather than the user's, and is what draftForSaving() strips.
+	bool _luminaDefaultChecked = false;
+	bool _luminaDefaultRemoved = false;
 
 	rpl::event_stream<> _repaintRequests;
 	rpl::variable<WebpageParsed> _parsed;

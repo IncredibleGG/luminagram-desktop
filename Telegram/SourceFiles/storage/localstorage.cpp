@@ -524,6 +524,24 @@ void rewriteSettingsIfNeeded() {
 	}
 }
 
+// LuminaGram's update feed. The stock default was https://td.telegram.org,
+// which served Telegram Desktop packages to this fork.
+constexpr auto kLuminaUpdatesPrefix = "https://pub-d6a54d2e5f5947e2b0b23fb8e27ce0a5.r2.dev"_cs;
+
+// The prefix is persisted in tdata/prefix and is also pushed by the MTProto
+// config (autoupdate_url_prefix, applied in mtproto/mtp_instance.cpp), so a
+// profile created before this fork existed still holds Telegram's address and
+// the server would happily set it again. Both paths go through this check, so
+// anything that is not our own feed is refused rather than stored or used.
+[[nodiscard]] bool IsLuminaUpdatesPrefix(const QString &value) {
+	static const auto RegExp = QRegularExpression("/+$");
+	auto normalized = value.trimmed();
+	normalized.replace(RegExp, QString());
+	return !normalized.compare(
+		kLuminaUpdatesPrefix.utf16(),
+		Qt::CaseInsensitive);
+}
+
 const QString &AutoupdatePrefix(const QString &replaceWith = {}) {
 	Expects(!Core::UpdaterDisabled());
 
@@ -550,31 +568,35 @@ const QString &readAutoupdatePrefixRaw() {
 	QFile f(autoupdatePrefixFile());
 	if (f.open(QIODevice::ReadOnly)) {
 		const auto value = QString::fromUtf8(f.readAll());
-		if (!value.isEmpty()) {
-			return AutoupdatePrefix(value);
+		f.close();
+		if (!IsLuminaUpdatesPrefix(value)) {
+			// Left by an install that followed some other feed - most likely
+			// official Telegram Desktop's, which is the whole reason this is
+			// pinned. Drop it so it cannot come back if the check above is
+			// ever loosened.
+			f.remove();
 		}
 	}
-	return AutoupdatePrefix("https://td.telegram.org");
+	// The stored value is never used even when it passes: it can only be our
+	// own address, but it can be a variant of it - with whitespace around it,
+	// or with trailing slashes - and readAutoupdatePrefix() strips slashes
+	// only. Resolving to the compiled-in constant means the URL that is
+	// actually requested has exactly one possible spelling.
+	return AutoupdatePrefix(kLuminaUpdatesPrefix.utf16());
 }
 
-void writeAutoupdatePrefix(const QString &prefix) {
-	if (Core::UpdaterDisabled()) {
-		return;
-	}
-
-	const auto current = readAutoupdatePrefixRaw();
-	if (current != prefix) {
-		AutoupdatePrefix(prefix);
-		QFile f(autoupdatePrefixFile());
-		if (f.open(QIODevice::WriteOnly)) {
-			f.write(prefix.toUtf8());
-			f.close();
-		}
-		if (cAutoUpdate()) {
-			Core::UpdateChecker checker;
-			checker.start();
-		}
-	}
+void writeAutoupdatePrefix(const QString &) {
+	// LuminaGram's feed address is compiled in, not configured, so there is
+	// nothing to store: readAutoupdatePrefixRaw() always resolves to
+	// kLuminaUpdatesPrefix and a stale tdata/prefix is deleted the first time
+	// it is read.
+	//
+	// The only caller is the MTProto config handler
+	// (mtproto/mtp_instance.cpp, autoupdate_url_prefix), i.e. Telegram's own
+	// servers telling this fork where to fetch its updates from. Nothing they
+	// send can be worth persisting - not even our own string echoed back,
+	// which would reintroduce the spelling variants above and be written to
+	// disk, where it would outlive the connection that suggested it.
 }
 
 QString readAutoupdatePrefix() {

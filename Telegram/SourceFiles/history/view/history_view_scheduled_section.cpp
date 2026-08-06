@@ -61,6 +61,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "inline_bots/inline_bot_result.h"
 #include "lang/lang_keys.h"
 #include "lumina/lumina_send_pipeline.h"
+#include "lumina/lumina_translate_caption.h"
 #include "styles/style_chat.h"
 #include "styles/style_chat_helpers.h"
 #include "styles/style_boxes.h"
@@ -621,13 +622,36 @@ void ScheduledWidget::sendingFilesConfirmed(
 	const auto type = compress ? SendMediaType::Photo : SendMediaType::File;
 	auto action = prepareSendAction(options);
 	action.clearDraft = false;
-	auto &api = session().api();
-	for (auto &group : bundle->groups) {
-		const auto album = (group.type != Ui::AlbumType::None)
-			? std::make_shared<SendingAlbum>()
-			: nullptr;
-		api.sendFiles(std::move(group.list), type, album, action);
+
+	// LuminaGram: the caption send seam (F-06). Same placement as the text seam
+	// in send() below - after the composer's own checks, before the first
+	// irreversible step. `sendPending` owns the bundle, which keeps the caption
+	// reference handed to the pipeline alive as long as it holds the send, and
+	// it depends on nothing of this section, which is destroyed when the user
+	// navigates away: a held send must not take the files with it, since unlike
+	// a held text message they exist nowhere else by now.
+	const auto weak = base::make_weak(action.history);
+	const auto sendPending = [=] {
+		const auto history = weak.get();
+		if (!history) {
+			return;
+		}
+		auto &api = history->session().api();
+		for (auto &group : bundle->groups) {
+			const auto album = (group.type != Ui::AlbumType::None)
+				? std::make_shared<SendingAlbum>()
+				: nullptr;
+			api.sendFiles(std::move(group.list), type, album, action);
+		}
+	};
+	if (!Lumina::InterceptSendFiles(
+			action.history,
+			bundle,
+			action.options,
+			sendPending)) {
+		return;
 	}
+	sendPending();
 }
 
 bool ScheduledWidget::confirmSendingFiles(

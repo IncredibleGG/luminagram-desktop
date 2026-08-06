@@ -58,6 +58,12 @@ struct ClickHandlerContext {
 	bool ignoreIv = false;
 	bool forceExternalUrlConfirmation = false;
 	bool dark = false;
+	// LuminaGram: set when the link safety inspector's confirmation has been
+	// accepted, so the re-dispatched open does not ask a second time. It is a
+	// per-click flag rather than a remembered "last approved URL" string,
+	// because a single remembered URL re-prompts on every click as soon as
+	// the user alternates between two links - see lumina/lumina_link_safety.h.
+	bool luminaLinkSafetyApproved = false;
 	// Is filled from peer info.
 	PeerData *peer = nullptr;
 };

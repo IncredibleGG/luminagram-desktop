@@ -7,6 +7,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "settings/sections/settings_lumina_appearance.h"
 
+#include "lumina/lumina_locale.h"
 #include "ui/wrap/vertical_layout.h"
 #include "ui/rp_widget.h"
 #include "ui/vertical_list.h"
@@ -29,7 +30,7 @@ LuminaAppearance::LuminaAppearance(
 LuminaAppearance::~LuminaAppearance() = default;
 
 rpl::producer<QString> LuminaAppearance::title() {
-	return rpl::single(u"Appearance"_q);
+	return Lumina::TrValue(u"LuminaAppearanceTitle"_q);
 }
 
 // F-02 sub-page contract: this body stays an ordered list of one call per
@@ -46,8 +47,7 @@ void LuminaAppearance::setupContent(not_null<Ui::VerticalLayout*> container) {
 	Ui::AddSkip(container);
 	Ui::AddDividerText(
 		container,
-		rpl::single(u"Message, sticker and number formatting options will "
-			"appear here."_q));
+		Lumina::TrValue(u"LuminaAppearancePlaceholder"_q));
 }
 
 } // namespace Settings

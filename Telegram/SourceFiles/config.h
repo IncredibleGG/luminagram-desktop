@@ -42,21 +42,29 @@ inline const char *cGUIDStr() {
 	return gGuidStr;
 }
 
+// The only key that may sign a LuminaGram update package. It replaces both of
+// Telegram's own update keys, and the beta one is gone rather than reused:
+// while a second accepted signer existed, a package signed by Telegram could
+// still install itself over this fork, which is exactly what must not happen.
+// The matching private key lives outside this repository and is 2048-bit, so
+// the signature field in an update package is 256 bytes - see hSigLen in
+// core/update_checker.cpp and in _other/packer.cpp, which must agree.
 static const char *UpdatesPublicKey = "\
 -----BEGIN RSA PUBLIC KEY-----\n\
-MIGJAoGBAMA4ViQrjkPZ9xj0lrer3r23JvxOnrtE8nI69XLGSr+sRERz9YnUptnU\n\
-BZpkIfKaRcl6XzNJiN28cVwO1Ui5JSa814UAiDHzWUqCaXUiUEQ6NmNTneiGx2sQ\n\
-+9PKKlb8mmr3BB9A45ZNwLT6G9AK3+qkZLHojeSA+m84/a6GP4svAgMBAAE=\n\
+MIIBCgKCAQEAxQnFlsQK5Eu1bkWhajp1ZTcdO4i1AfevPz9w30HXU6dJxkevrWxz\n\
+V9/A1qR4Non3Mo7hkeaJk1z/0+5a8+RgEb0OTeWODwMzRokY90ucjATKuZOy8uf8\n\
+w2lrlFket9pyEEmmuLj+qcCCpE/d24ITkmoreFXrznYA+aFr+RVpU3LM6zG6EQf2\n\
+YGtpH0ba6hmYmA2QYb+a2FKiZ9S2Ewqc+uyQqUh9GpE259WjT9i7vHpOkt1/ufIP\n\
+Sf/mqspKvWP0BZMzwxjOdzKVcc4BuCOK0xwJhKHrYPmmqHSmcecjqF6t2GMSmFIY\n\
+oGk5JfNJhYQLVl8da0JjYDqmgtvB5Iz+JwIDAQAB\n\
 -----END RSA PUBLIC KEY-----\
 ";
 
-static const char *UpdatesPublicBetaKey = "\
------BEGIN RSA PUBLIC KEY-----\n\
-MIGJAoGBALWu9GGs0HED7KG7BM73CFZ6o0xufKBRQsdnq3lwA8nFQEvmdu+g/I1j\n\
-0LQ+0IQO7GW4jAgzF/4+soPDb6uHQeNFrlVx1JS9DZGhhjZ5rf65yg11nTCIHZCG\n\
-w/CVnbwQOw0g5GBwwFV3r0uTTvy44xx8XXxk+Qknu4eBCsmrAFNnAgMBAAE=\n\
------END RSA PUBLIC KEY-----\
-";
+// The number of bytes an update package reserves for its RSA signature, which
+// is the size of the key above. Both the client (core/update_checker.cpp) and
+// the packer (_other/packer.cpp) hardcode this as hSigLen; it is stated here
+// so the two have a single place to be checked against.
+constexpr auto UpdatesSignatureSize = 256;
 
 #if defined TDESKTOP_API_ID && defined TDESKTOP_API_HASH
 

@@ -11,6 +11,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "base/call_delayed.h"
 #include "base/system_unlock.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_fake_crash.h"
 #include "storage/storage_domain.h"
 #include "mainwindow.h"
 #include "core/application.h"
@@ -109,7 +110,24 @@ PasscodeLockWidget::PasscodeLockWidget(
 	});
 
 	using namespace rpl::mappers;
-	if (Core::App().settings().systemUnlockEnabled()) {
+	// LuminaGram: the fake-crash duress code is typed into the field above.
+	// A system unlock - Touch ID, Windows Hello, an Apple Watch, the system
+	// password - never touches that field, so leaving it available would let
+	// anyone who can hold the user's finger to the sensor open the real app
+	// and walk straight past the duress code. While a duress code is armed,
+	// the passcode field is the only way in.
+	//
+	// This reads the state, it does not write it: tdesktop's own
+	// systemUnlockEnabled() preference is left exactly as the user set it, so
+	// clearing the duress code brings system unlock back with no further
+	// action. Nothing is built when the branch is skipped, which is also what
+	// keeps the icon out of the field and the "use Touch ID" hint off the
+	// screen - both live inside it.
+	//
+	// The settings page that arms the code says all of this out loud; see
+	// Lumina::AddFakeCrashRows.
+	if (Core::App().settings().systemUnlockEnabled()
+		&& !Lumina::FakeCrashArmed()) {
 		_systemUnlockAvailable = base::SystemUnlockStatus(
 			true
 		) | rpl::map([](base::SystemUnlockAvailability status) {
@@ -275,6 +293,37 @@ void PasscodeLockWidget::submit() {
 		? domain.local().checkPasscode(passcode)
 		: (domain.start(passcode) == Storage::StartResult::Success);
 	if (!correct) {
+		// LuminaGram fake-crash duress unlock: a SECOND, purely local code
+		// that ends the process instead of unlocking, leaving the screen as if
+		// the app had crashed. Strictly gated - it fires only when the feature
+		// is on AND a non-empty code is stored AND what was typed is exactly
+		// that code. Anything else, including an ordinary wrong passcode,
+		// falls through to the bad-try handling below and behaves normally.
+		//
+		// Placed on the already-failed path, which is where this port differs
+		// from Android (PasscodeView.processDone() tests the duress code
+		// BEFORE SharedConfig.checkPasscode). Two reasons, both about what
+		// happens when the duress code and the passcode end up equal - which
+		// no settings page can prevent, because the passcode can be changed
+		// afterwards, on a different page, by someone who has forgotten the
+		// duress code exists:
+		//
+		//  * here, the passcode always wins, so a collision merely stops the
+		//    duress code from firing. In Android's order a collision fires the
+		//    fake crash on every correct unlock, locking the user out of their
+		//    own account permanently, with nothing but "log out" left on the
+		//    screen. Its settings screen has to refuse the collision to stay
+		//    safe; ours refuses it too, but is not relying on that;
+		//  * nothing LuminaGram does can delay, block or break a legitimate
+		//    unlock, because by the time any of it runs the passcode has
+		//    already been checked and rejected.
+		//
+		// The flood gate above still applies first, exactly as on Android, so
+		// the duress code does not work while the user is locked out for
+		// retrying too fast. Deliberately nothing is logged here.
+		if (Lumina::FakeCrashCodeMatches(_passcode->text())) {
+			Lumina::TriggerFakeCrash(); // Does not return.
+		}
 		cSetPasscodeBadTries(cPasscodeBadTries() + 1);
 		cSetPasscodeLastTry(crl::now());
 		error();

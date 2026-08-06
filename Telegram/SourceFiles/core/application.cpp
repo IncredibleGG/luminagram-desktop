@@ -52,6 +52,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "lang/lang_cloud_manager.h"
 #include "lang/lang_hardcoded.h"
 #include "lang/lang_instance.h"
+#include "lumina/lumina_vault.h"
 #include "inline_bots/bot_attach_web_view.h"
 #include "mainwidget.h"
 #include "tray.h"
@@ -267,6 +268,17 @@ void Application::run() {
 	// Depends on OpenSSL on macOS, so on ThirdParty::start().
 	// Depends on notifications settings.
 	_notifications = std::make_unique<Window::Notifications::System>();
+
+	// LuminaGram disguise vault. As early as the gate can go: before the
+	// style manager, the fonts, the text options and the language pack, so
+	// everything it draws is raw Qt with hard-coded English. It is not the
+	// very first statement only because ~Application() dereferences
+	// _notifications unconditionally, so quitting above this line would crash
+	// on the way out. Fails open: false means the user closed the decoy.
+	if (!Lumina::VaultGatePassed()) {
+		Quit();
+		return;
+	}
 
 	startLocalStorage();
 

@@ -212,11 +212,20 @@ void Unhook(uint64 session) {
 	}
 }
 
-// Deleting a message must delete the plaintext we kept for it. Without this
-// the text the user typed outlives the message it belongs to by the whole
-// retention window, in a file that also holds their API keys - the one place
-// where "it expires eventually" is not a good enough answer.
-void Forget(uint64 session, FullMsgId id) {
+// Drops the stored original for one message.
+//
+// NOT wired to Data::Session::itemRemoved, and this is load-bearing: that
+// signal comes from Session::unregisterMessage(), which runs from
+// ~HistoryItem() - i.e. every time a message object is freed, including the
+// ordinary memory churn of leaving a chat or reloading history. Hooking it
+// deleted the user's typed original while the message was still on screen,
+// which is exactly the "the original disappeared again" bug they reported.
+// MessageUpdate::Flag::Destroyed is fired from the same place and is no better.
+//
+// Real deletion would have to be caught in the delete flow itself. Until then
+// the plaintext is bounded by the retention policy above, which is what keeps
+// it from growing without limit.
+[[maybe_unused]] void Forget(uint64 session, FullMsgId id) {
 	auto &state = Current();
 	const auto key = Key{ session, id };
 	if (!state.map.remove(key)) {
@@ -266,10 +275,6 @@ void EnsureHooked(not_null<Main::Session*> session) {
 		if (const auto item = session->data().message(change.newId)) {
 			RefreshDualLanguage(item);
 		}
-	}, session->lifetime());
-	session->data().itemRemoved(
-	) | rpl::on_next([=](not_null<const HistoryItem*> item) {
-		Forget(unique, item->fullId());
 	}, session->lifetime());
 	session->lifetime().add([=] {
 		Unhook(unique);

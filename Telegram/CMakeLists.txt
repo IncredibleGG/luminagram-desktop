@@ -1800,16 +1800,61 @@ PRIVATE
     settings/sections/settings_lumina_tools.h
     settings/sections/settings_lumina_translate.cpp
     settings/sections/settings_lumina_translate.h
-    lumina/lumina_message_menu.cpp
-    lumina/lumina_message_menu.h
-    lumina/lumina_profile_rows.cpp
-    lumina/lumina_profile_rows.h
-    lumina/lumina_send_pipeline.cpp
-    lumina/lumina_send_pipeline.h
+    lumina/lumina_clipboard_guard.cpp
+    lumina/lumina_clipboard_guard.h
+    lumina/lumina_clipboard_guard_settings.cpp
+    lumina/lumina_clipboard_guard_settings.h
     lumina/lumina_dual_language_line.cpp
     lumina/lumina_dual_language_line.h
+    lumina/lumina_exif_strip.cpp
+    lumina/lumina_exif_strip.h
+    lumina/lumina_exif_strip_settings.cpp
+    lumina/lumina_exif_strip_settings.h
+    lumina/lumina_fake_crash.cpp
+    lumina/lumina_fake_crash.h
+    lumina/lumina_fake_crash_settings.cpp
+    lumina/lumina_fake_crash_settings.h
+    lumina/lumina_link_preview.cpp
+    lumina/lumina_link_preview.h
+    lumina/lumina_link_preview_settings.cpp
+    lumina/lumina_link_preview_settings.h
+    lumina/lumina_link_safety.cpp
+    lumina/lumina_link_safety.h
+    lumina/lumina_link_safety_settings.cpp
+    lumina/lumina_link_safety_settings.h
+    lumina/lumina_locale.cpp
+    lumina/lumina_locale.h
+    lumina/lumina_locale_ar.cpp
+    lumina/lumina_locale_es.cpp
+    lumina/lumina_locale_fa.cpp
+    lumina/lumina_locale_id.cpp
+    lumina/lumina_locale_pt_br.cpp
+    lumina/lumina_locale_ru.cpp
+    lumina/lumina_locale_tr.cpp
+    lumina/lumina_locale_zh_hans.cpp
+    lumina/lumina_locale_zh_hant.cpp
+    lumina/lumina_message_menu.cpp
+    lumina/lumina_message_menu.h
+    lumina/lumina_panic_wipe.cpp
+    lumina/lumina_panic_wipe.h
+    lumina/lumina_panic_wipe_settings.cpp
+    lumina/lumina_panic_wipe_settings.h
+    lumina/lumina_profile_rows.cpp
+    lumina/lumina_profile_rows.h
+    lumina/lumina_scam_watch.cpp
+    lumina/lumina_scam_watch.h
+    lumina/lumina_scam_watch_settings.cpp
+    lumina/lumina_scam_watch_settings.h
+    lumina/lumina_send_pipeline.cpp
+    lumina/lumina_send_pipeline.h
     lumina/lumina_settings.cpp
     lumina/lumina_settings.h
+    lumina/lumina_text_replace.cpp
+    lumina/lumina_text_replace.h
+    lumina/lumina_text_replace_settings.cpp
+    lumina/lumina_text_replace_settings.h
+    lumina/lumina_translate_caption.cpp
+    lumina/lumina_translate_caption.h
     lumina/lumina_translate_gating.cpp
     lumina/lumina_translate_gating.h
     lumina/lumina_translate_originals.cpp
@@ -1824,6 +1869,22 @@ PRIVATE
     lumina/lumina_translate_send.h
     lumina/lumina_translate_settings.cpp
     lumina/lumina_translate_settings.h
+    lumina/lumina_update_settings.cpp
+    lumina/lumina_update_settings.h
+    lumina/lumina_vault.cpp
+    lumina/lumina_vault.h
+    lumina/lumina_vault_calculator.cpp
+    lumina/lumina_vault_calculator.h
+    lumina/lumina_vault_door.cpp
+    lumina/lumina_vault_door.h
+    lumina/lumina_vault_notepad.cpp
+    lumina/lumina_vault_notepad.h
+    lumina/lumina_vault_settings.cpp
+    lumina/lumina_vault_settings.h
+    lumina/lumina_voice_confirm.cpp
+    lumina/lumina_voice_confirm.h
+    lumina/lumina_voice_confirm_settings.cpp
+    lumina/lumina_voice_confirm_settings.h
     settings/sections/settings_folders.cpp
     settings/sections/settings_folders.h
     settings/sections/settings_global_ttl.cpp

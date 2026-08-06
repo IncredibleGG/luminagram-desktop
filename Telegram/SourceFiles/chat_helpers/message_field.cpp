@@ -44,6 +44,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "history/view/controls/compose_controls_common.h"
 #include "window/window_session_controller.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_clipboard_guard.h"
 #include "mainwindow.h"
 #include "main/main_session.h"
 #include "settings/settings_common.h"
@@ -1620,6 +1621,9 @@ Ui::InputField::MimeDataHook WrappedMessageFieldMimeHook(
 			const auto text = QString::fromUtf8(
 				data->data(u"application/x-telegram-input-field"_q));
 			field->textCursor().insertText(text);
+			return true;
+		}
+		if (Lumina::InterceptCryptoAddressPaste(field, data, action)) {
 			return true;
 		}
 		return originalHook ? originalHook(data, action) : false;

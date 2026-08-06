@@ -11,24 +11,22 @@ bool BetaChannel = false;
 quint64 AlphaVersion = 0;
 bool OnlyAlphaKey = false;
 
+// Must be the same key as UpdatesPublicKey in Telegram/SourceFiles/config.h:
+// this tool signs what that client verifies, and it checks its own output
+// against this copy before writing the package out. LuminaGram has a single
+// signer, so unlike stock there is no separate beta key to cross over to.
 const char *PublicKey = "\
 -----BEGIN RSA PUBLIC KEY-----\n\
-MIGJAoGBAMA4ViQrjkPZ9xj0lrer3r23JvxOnrtE8nI69XLGSr+sRERz9YnUptnU\n\
-BZpkIfKaRcl6XzNJiN28cVwO1Ui5JSa814UAiDHzWUqCaXUiUEQ6NmNTneiGx2sQ\n\
-+9PKKlb8mmr3BB9A45ZNwLT6G9AK3+qkZLHojeSA+m84/a6GP4svAgMBAAE=\n\
------END RSA PUBLIC KEY-----\
-";
-
-const char *PublicBetaKey = "\
------BEGIN RSA PUBLIC KEY-----\n\
-MIGJAoGBALWu9GGs0HED7KG7BM73CFZ6o0xufKBRQsdnq3lwA8nFQEvmdu+g/I1j\n\
-0LQ+0IQO7GW4jAgzF/4+soPDb6uHQeNFrlVx1JS9DZGhhjZ5rf65yg11nTCIHZCG\n\
-w/CVnbwQOw0g5GBwwFV3r0uTTvy44xx8XXxk+Qknu4eBCsmrAFNnAgMBAAE=\n\
+MIIBCgKCAQEAxQnFlsQK5Eu1bkWhajp1ZTcdO4i1AfevPz9w30HXU6dJxkevrWxz\n\
+V9/A1qR4Non3Mo7hkeaJk1z/0+5a8+RgEb0OTeWODwMzRokY90ucjATKuZOy8uf8\n\
+w2lrlFket9pyEEmmuLj+qcCCpE/d24ITkmoreFXrznYA+aFr+RVpU3LM6zG6EQf2\n\
+YGtpH0ba6hmYmA2QYb+a2FKiZ9S2Ewqc+uyQqUh9GpE259WjT9i7vHpOkt1/ufIP\n\
+Sf/mqspKvWP0BZMzwxjOdzKVcc4BuCOK0xwJhKHrYPmmqHSmcecjqF6t2GMSmFIY\n\
+oGk5JfNJhYQLVl8da0JjYDqmgtvB5Iz+JwIDAQAB\n\
 -----END RSA PUBLIC KEY-----\
 ";
 
 extern const char *PrivateKey;
-extern const char *PrivateBetaKey;
 #include "../../../../DesktopPrivate/packer_private.h" // RSA PRIVATE KEYS for update signing
 #include "../../../../DesktopPrivate/alpha_private.h" // private key for alpha version file generation
 
@@ -284,7 +282,7 @@ int main(int argc, char *argv[])
 
 	QByteArray compressed, resultCheck;
 #if defined Q_OS_WIN && !defined PACKER_USE_PACKAGED // use Lzma SDK for win
-	const int32 hSigLen = 128, hShaLen = 20, hPropsLen = LZMA_PROPS_SIZE, hOriginalSizeLen = sizeof(int32), hSize = hSigLen + hShaLen + hPropsLen + hOriginalSizeLen; // header
+	const int32 hSigLen = 256, hShaLen = 20, hPropsLen = LZMA_PROPS_SIZE, hOriginalSizeLen = sizeof(int32), hSize = hSigLen + hShaLen + hPropsLen + hOriginalSizeLen; // header, hSigLen == UpdatesSignatureSize in config.h
 
 	compressed.resize(hSize + resultSize + 1024 * 1024); // rsa signature + sha1 + lzma props + max compressed size
 
@@ -327,7 +325,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 #else // use liblzma for others
-	const int32 hSigLen = 128, hShaLen = 20, hPropsLen = 0, hOriginalSizeLen = sizeof(int32), hSize = hSigLen + hShaLen + hOriginalSizeLen; // header
+	const int32 hSigLen = 256, hShaLen = 20, hPropsLen = 0, hOriginalSizeLen = sizeof(int32), hSize = hSigLen + hShaLen + hOriginalSizeLen; // header, hSigLen == UpdatesSignatureSize in config.h
 
 	compressed.resize(hSize + resultSize + 1024 * 1024); // rsa signature + sha1 + lzma props + max compressed size
 
@@ -444,12 +442,9 @@ int main(int argc, char *argv[])
 
 	cout << "Signing..\n";
 	RSA *prKey = [] {
-		const auto bio = makeBIO(
-			const_cast<char*>(
-				(BetaChannel || AlphaVersion)
-					? PrivateBetaKey
-					: PrivateKey),
-			-1);
+		// One signer, always: LuminaGram has no separate beta key, so a
+		// -beta or -alpha run must not silently sign with a different one.
+		const auto bio = makeBIO(const_cast<char*>(PrivateKey), -1);
 		return PEM_read_bio_RSAPrivateKey(bio.get(), 0, 0, 0);
 	}();
 	if (!prKey) {
@@ -475,12 +470,7 @@ int main(int argc, char *argv[])
 
 	cout << "Checking signature..\n";
 	RSA *pbKey = [] {
-		const auto bio = makeBIO(
-			const_cast<char*>(
-				(BetaChannel || AlphaVersion)
-					? PublicBetaKey
-					: PublicKey),
-			-1);
+		const auto bio = makeBIO(const_cast<char*>(PublicKey), -1);
 		return PEM_read_bio_RSAPublicKey(bio.get(), 0, 0, 0);
 	}();
 	if (!pbKey) {

@@ -12,6 +12,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "lang/lang_text_entity.h"
 #include "lang/translate_mtproto_provider.h"
 #include "lang/translate_provider.h"
+#include "lumina/lumina_locale.h"
 #include "lumina/lumina_settings.h"
 
 #include <QtCore/QJsonArray>
@@ -716,7 +717,12 @@ QString DefaultProviderId() {
 }
 
 const std::vector<TranslateProviderInfo> &TranslateProviders() {
-	static const auto result = std::vector<TranslateProviderInfo>{
+	// The first three names are the services' own, and a brand is not ours to
+	// translate. The LLM entry names a kind of endpoint rather than a product,
+	// so it comes from our table - and it is refreshed in place, because
+	// FindTranslateProvider() hands out pointers into this vector and no entry
+	// may ever move.
+	static auto result = std::vector<TranslateProviderInfo>{
 		{
 			.id = TelegramProviderId(),
 			.name = u"Telegram"_q,
@@ -732,13 +738,24 @@ const std::vector<TranslateProviderInfo> &TranslateProviders() {
 		},
 		{
 			.id = LlmProviderId(),
-			.name = u"LLM (OpenAI-compatible)"_q,
 			.needsKey = true,
 			.needsBaseUrl = true,
 			.needsModel = true,
 			.needsPrompt = true,
 		},
 	};
+	static auto builtFor = QString();
+	const auto locale = LocaleCode();
+	if (builtFor != locale) {
+		builtFor = locale;
+		const auto i = ranges::find(
+			result,
+			LlmProviderId(),
+			&TranslateProviderInfo::id);
+		if (i != end(result)) {
+			i->name = Tr(u"LuminaTranslateProviderLlm"_q);
+		}
+	}
 	return result;
 }
 

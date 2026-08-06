@@ -94,6 +94,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "iv/editor/iv_editor_session.h"
 #include "lang/lang_keys.h"
 #include "lumina/lumina_send_pipeline.h"
+#include "lumina/lumina_translate_caption.h"
 #include "styles/style_chat.h"
 #include "styles/style_chat_helpers.h"
 #include "styles/style_info.h"
@@ -1317,19 +1318,45 @@ void ChatWidget::sendingFilesConfirmed(
 	const auto type = compress ? SendMediaType::Photo : SendMediaType::File;
 	auto action = prepareSendAction(options);
 	action.clearDraft = false;
-	auto &api = session().api();
-	for (auto &group : bundle->groups) {
-		const auto album = (group.type != Ui::AlbumType::None)
-			? std::make_shared<SendingAlbum>()
-			: nullptr;
-		api.sendFiles(std::move(group.list), type, album, action);
+
+	// LuminaGram: the caption send seam (F-06). Same placement as the text seam
+	// in sendTextWithTags() below - after the sending-files, ephemeral and Stars
+	// checks and after the payment-approved re-entry, before the first
+	// irreversible step. `sendPending` owns the bundle, which keeps the caption
+	// reference handed to the pipeline alive as long as it holds the send. Only
+	// the composer side effects are guarded on this section: it is destroyed
+	// when the user navigates away, and a held send must not take the files with
+	// it - unlike a held text message, they exist nowhere else by now.
+	const auto weak = base::make_weak(action.history);
+	const auto finishPending = crl::guard(this, [=] {
+		if (_composeControls->replyingToMessage() == action.replyTo) {
+			_composeControls->cancelReplyMessage();
+			refreshTopBarActiveChat();
+		}
+		finishSending();
+	});
+	const auto sendPending = [=] {
+		const auto history = weak.get();
+		if (!history) {
+			return;
+		}
+		auto &api = history->session().api();
+		for (auto &group : bundle->groups) {
+			const auto album = (group.type != Ui::AlbumType::None)
+				? std::make_shared<SendingAlbum>()
+				: nullptr;
+			api.sendFiles(std::move(group.list), type, album, action);
+		}
+		finishPending();
+	};
+	if (!Lumina::InterceptSendFiles(
+			action.history,
+			bundle,
+			action.options,
+			sendPending)) {
+		return;
 	}
-	if (_composeControls->replyingToMessage().messageId
-			== action.replyTo.messageId) {
-		_composeControls->cancelReplyMessage();
-		refreshTopBarActiveChat();
-	}
-	finishSending();
+	sendPending();
 }
 
 bool ChatWidget::confirmSendingFiles(

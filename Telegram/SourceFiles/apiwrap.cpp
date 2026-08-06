@@ -71,6 +71,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "base/random.h"
 #include "base/call_delayed.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_text_replace.h"
 #include "lumina/lumina_translate_originals.h"
 #include "mainwidget.h"
 #include "boxes/add_contact_box.h"
@@ -4613,6 +4614,16 @@ void ApiWrap::sendMessage(
 	if (Api::SendDice(message)) {
 		return;
 	}
+
+	// LuminaGram: the user's outgoing text-replacement rules (W4-D). Placed
+	// here so that everything downstream - the recent-hashtag record, the
+	// local echo and the message actually sent - sees one and the same text,
+	// and after Api::SendDice() so that a substitution can never turn an
+	// ordinary message into a dice roll. A no-op unless the user turned the
+	// feature on, and it refuses outright to touch a message that carries
+	// formatting tags: tag offsets are absolute indices into this text.
+	Lumina::ApplyOutgoingTextReplacements(textWithTags);
+
 	local().saveRecentSentHashtags(textWithTags.text);
 
 	auto sending = TextWithEntities();

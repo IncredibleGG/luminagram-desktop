@@ -14,6 +14,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "data/data_web_page.h"
 #include "history/history.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_link_preview.h"
 #include "main/main_session.h"
 
 namespace HistoryView::Controls {
@@ -246,6 +247,14 @@ Data::WebPageDraft WebpageProcessor::draft() const {
 	return _draft;
 }
 
+Data::WebPageDraft WebpageProcessor::draftForSaving() const {
+	auto result = _draft;
+	if (_luminaDefaultRemoved) {
+		result.removed = false;
+	}
+	return result;
+}
+
 std::shared_ptr<WebpageResolver> WebpageProcessor::resolver() const {
 	return _resolver;
 }
@@ -260,11 +269,13 @@ QString WebpageProcessor::link() const {
 
 void WebpageProcessor::apply(Data::WebPageDraft draft, bool reparse) {
 	const auto was = _link;
+	_luminaDefaultRemoved = false;
 	if (draft.removed) {
 		_draft = draft;
 		_parsedLinks = _parser.list().current();
 		if (_parsedLinks.empty()) {
 			_draft.removed = false;
+			_luminaDefaultChecked = false;
 		}
 		_data = nullptr;
 		_links = QStringList();
@@ -355,6 +366,28 @@ void WebpageProcessor::checkPreview() {
 		&& _history->peer->amRestricted(ChatRestriction::EmbedLinks);
 	if (_parsedLinks.empty()) {
 		_draft.removed = false;
+		_luminaDefaultChecked = false;
+		_luminaDefaultRemoved = false;
+	} else if (!_luminaDefaultChecked) {
+		// LuminaGram (W4-G). The preference is read once per episode of
+		// "the field contains a link", right here, because the branch
+		// above throws the flag away the moment the field goes
+		// link-free - which is exactly what re-seeds the default for the
+		// next message, including after a send. A draft that already
+		// names a page, a manual choice and an existing removal are left
+		// alone, and so is a chat where previews are restricted: there
+		// the branch below has its own cleanup to run and deliberately
+		// keeps `removed` out of the draft.
+		_luminaDefaultChecked = true;
+		if (!previewRestricted
+			&& !_draft.removed
+			&& !_draft.manual
+			&& !_draft.id
+			&& _draft.url.isEmpty()
+			&& Lumina::LinkPreviewOffByDefault()) {
+			_draft.removed = true;
+			_luminaDefaultRemoved = true;
+		}
 	}
 	if (_draft.removed) {
 		return;

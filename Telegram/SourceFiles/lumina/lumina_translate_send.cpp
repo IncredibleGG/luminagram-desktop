@@ -14,6 +14,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "data/data_premium_limits.h"
 #include "history/history.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_locale.h"
 #include "lumina/lumina_send_pipeline.h"
 #include "lumina/lumina_settings.h"
 #include "lumina/lumina_translate_gating.h"
@@ -313,10 +314,11 @@ void ShowTranslationConfirm(
 	const auto name = TranslateLanguageName(request->target);
 	const auto routed = std::make_shared<bool>(false);
 	controller->show(Box([=](not_null<Ui::GenericBox*> box) {
-		box->setTitle(rpl::single(u"Translate before sending"_q));
+		box->setTitle(TrValue(u"LuminaTranslateBeforeSend"_q));
 		box->addRow(object_ptr<Ui::FlatLabel>(
 			box.get(),
-			u"Original\n"_q
+			Tr(u"LuminaTranslateOriginalLabel"_q)
+				+ QChar('\n')
 				+ original
 				+ u"\n\n"_q
 				+ name
@@ -328,14 +330,14 @@ void ShowTranslationConfirm(
 		// outcome is posted to the next main-thread turn and the close is the
 		// last statement, which also keeps the send itself out of a layer that
 		// is in the middle of going away.
-		box->addButton(rpl::single(u"Send translation"_q), [=] {
+		box->addButton(TrValue(u"LuminaSendTranslation"_q), [=] {
 			*routed = true;
 			crl::on_main([=] {
 				FinishRequest(key, generation, translated);
 			});
 			box->closeBox();
 		});
-		box->addButton(rpl::single(u"Send original"_q), [=] {
+		box->addButton(TrValue(u"LuminaSendOriginal"_q), [=] {
 			*routed = true;
 			crl::on_main([=] {
 				FinishRequest(key, generation, QString());
@@ -400,7 +402,7 @@ void ShowLanguagePicker(
 	const auto routed = std::make_shared<bool>(false);
 	controller->show(Box([=](not_null<Ui::GenericBox*> box) {
 		SingleChoiceBox(box, {
-			.title = rpl::single(u"Translate messages into"_q),
+			.title = TrValue(u"LuminaTrSendPickerTitle"_q),
 			.options = options,
 			.initialSelection = selected,
 			.callback = [=](int index) {
@@ -442,16 +444,12 @@ void ShowSendLanguageConfirm(
 	const auto routed = std::make_shared<bool>(false);
 	const auto weakController = base::make_weak(controller);
 	controller->show(Box([=](not_null<Ui::GenericBox*> box) {
-		box->setTitle(rpl::single(u"Translate before sending"_q));
+		box->setTitle(TrValue(u"LuminaTranslateBeforeSend"_q));
 		box->addRow(object_ptr<Ui::FlatLabel>(
 			box.get(),
-			u"This chat looks like it is written in "_q
-				+ name
-				+ u". Translate the messages you send here into "_q
-				+ name
-				+ u"? LuminaGram will remember this for this chat."_q,
+			Tr(u"LuminaTrSendConfirmMessage"_q, name),
 			st::boxLabel));
-		box->addButton(rpl::single(u"Translate"_q), [=] {
+		box->addButton(TrValue(u"LuminaTrSendConfirmTranslate"_q), [=] {
 			*routed = true;
 			if (const auto history = weak.get()) {
 				SetDialogSendLanguage(history, code);
@@ -461,14 +459,14 @@ void ShowSendLanguageConfirm(
 			});
 			box->closeBox();
 		});
-		box->addButton(rpl::single(u"Send as typed"_q), [=] {
+		box->addButton(TrValue(u"LuminaTrSendAsTyped"_q), [=] {
 			*routed = true;
 			crl::on_main([=] {
 				FinishRequest(key, generation, QString());
 			});
 			box->closeBox();
 		});
-		box->addLeftButton(rpl::single(u"Choose language"_q), [=] {
+		box->addLeftButton(TrValue(u"LuminaTrSendChooseOther"_q), [=] {
 			*routed = true;
 			crl::on_main([=] {
 				if (const auto strong = weakController.get()) {
@@ -706,7 +704,7 @@ void AddSendMenuTranslateRow(
 		TranslateBeforeSend());
 	Menu::AddCheckedAction(
 		menu,
-		u"Translate before sending"_q,
+		Tr(u"LuminaTranslateBeforeSend"_q),
 		[=] { SetQuickToggle(peerId, !checked); },
 		&st::menuIconTranslate,
 		checked);

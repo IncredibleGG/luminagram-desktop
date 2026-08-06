@@ -186,7 +186,10 @@ QString BookmarkSnippet(not_null<const HistoryItem*> item) {
 	auto result = item->notificationText().text.simplified();
 	if (result.size() > kBookmarkSnippetMaxLength) {
 		result = result.left(kBookmarkSnippetMaxLength);
-		if (!result.isEmpty() && result.back().isHighSurrogate()) {
+		// Qt 5's non-const QString::back() yields a QCharRef, which has
+		// no isHighSurrogate(); at() yields a QChar and does.
+		if (!result.isEmpty()
+			&& result.at(result.size() - 1).isHighSurrogate()) {
 			result.chop(1);
 		}
 		result = result.trimmed();

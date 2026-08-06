@@ -75,7 +75,10 @@ void WriteTemplates(const QJsonArray &array) {
 	auto result = text.trimmed();
 	if (result.size() > kReplyTemplateMaxLength) {
 		result = result.left(kReplyTemplateMaxLength);
-		if (!result.isEmpty() && result.back().isHighSurrogate()) {
+		// Qt 5's non-const QString::back() yields a QCharRef, which has
+		// no isHighSurrogate(); at() yields a QChar and does.
+		if (!result.isEmpty()
+			&& result.at(result.size() - 1).isHighSurrogate()) {
 			result.chop(1);
 		}
 		result = result.trimmed();
@@ -280,7 +283,10 @@ QString ReplyTemplatePreview(const QString &text) {
 	auto result = text.simplified();
 	if (result.size() > kReplyTemplatePreviewLength) {
 		result = result.left(kReplyTemplatePreviewLength);
-		if (!result.isEmpty() && result.back().isHighSurrogate()) {
+		// Qt 5's non-const QString::back() yields a QCharRef, which has
+		// no isHighSurrogate(); at() yields a QChar and does.
+		if (!result.isEmpty()
+			&& result.at(result.size() - 1).isHighSurrogate()) {
 			result.chop(1);
 		}
 		result = result.trimmed() + QChar(0x2026);

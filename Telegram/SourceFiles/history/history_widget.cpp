@@ -5674,6 +5674,10 @@ void HistoryWidget::sendTextWithTags(
 	// id is minted, so an interceptor can still hold or drop the send with
 	// nothing to undo. `sendPending` owns the message, which keeps the text
 	// reference given to the interceptors alive as long as they hold it.
+	// An interceptor may hold this send and hand the text back to the user
+	// (a cancelled confirm, an engine that failed). Snapshot the field now,
+	// so the cleanup below only clears it if it is still the same text.
+	const auto fieldAtSend = _field->getTextWithTags();
 	const auto pending = std::make_shared<Api::MessageToSend>(
 		std::move(message));
 	const auto sendPending = crl::guard(this, [=] {
@@ -5737,10 +5741,6 @@ void HistoryWidget::sendTextWithTags(
 			done();
 		}
 	});
-	// The interceptor may hold this send and hand the text back to the user
-	// (a cancelled confirm, a failed engine). Remember what the field held
-	// so the cleanup below only runs if it is still the same text.
-	const auto fieldAtSend = _field->getTextWithTags();
 	if (!Lumina::InterceptSend(
 			pending->action.history,
 			pending->textWithTags,

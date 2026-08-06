@@ -1,3 +1,20 @@
+7.0.9 (06.08.26)
+
+- Translate received messages again: the offer was suppressed for any language
+  the app assumed you already knew, so a read language could never take effect.
+- Add a translate button to every chat's title bar.
+- Translate a selected word or sentence without Premium, and without turning the
+  translation service on.
+- Translate media captions like any other message.
+- Add a button that tests the chosen translation engine and says what is wrong.
+- LuminaGram now updates itself, signed with its own key.
+- Add disguise vault, panic wipe, duress unlock, clipboard address guard, link
+  safety check, scam keyword warning, outgoing text replacement, voice message
+  confirmation, link previews off by default, and stripping photo location
+  before upload.
+- LuminaGram's own text follows the language you picked, in ten languages.
+- Fix the typed original disappearing from translated messages.
+
 7.0.8 (03.08.26)
 
 - Fix launch on some Windows 7 machines.

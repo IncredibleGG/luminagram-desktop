@@ -57,36 +57,16 @@ namespace Lumina {
 // this file has to state rather than let a caller discover. Requiring it hid
 // the control exactly when it was most wanted - on a chat tdesktop has not
 // decided is foreign - which is the judgement a per-chat control exists to
-// overrule. But nothing downstream can act until the judgement arrives:
-// History::translateTo() returns on its first line while the History has no
-// HistoryTranslation, and only the tracker's recognition creates one. So
-// between "available" and "recognised" this returns true for a chat whose
-// incoming side cannot yet be pointed anywhere, and a caller that offers a
-// language there is offering a write that is dropped. Test
-// ChatTranslateIncomingReady() below before offering one, and before offering
-// to turn translation on at all; the outgoing side has no such dependency and
-// works throughout.
+// overrule - including the chat it has decided needs no translating, which is
+// the one this button exists for.
+//
+// True here means the controls can be offered outright: SetChatTranslatingTo()
+// opens the translation itself when the tracker never did, so there is no
+// second, later moment at which the incoming half becomes usable.
 [[nodiscard]] bool ChatTranslateAvailable(not_null<History*> history);
 
 // Whether this chat is being translated right now.
 [[nodiscard]] bool ChatTranslating(not_null<History*> history);
-
-// Whether the INCOMING half can be pointed anywhere yet - the second half of
-// the note above, as a question a caller can ask instead of reaching into
-// History for it.
-//
-// False means the tracker has not recognised the language this chat is written
-// in, so History has no HistoryTranslation, so History::translateTo() returns
-// on its first line and BOTH SetChatTranslating(history, true) and
-// SetChatTranslatingTo() are silent no-ops. Every control that offers to start
-// translating, or to choose a language to read this chat in, has to test this
-// first - a control that does not is a control that looks live, writes a
-// value, and changes nothing. The outgoing half is unaffected: the send lock
-// is this fork's own preference and never touches HistoryTranslation.
-//
-// Turning translation OFF is always safe: it only runs while it is on, and it
-// is on only when a HistoryTranslation exists.
-[[nodiscard]] bool ChatTranslateIncomingReady(not_null<History*> history);
 
 // The language THIS chat's incoming messages are being translated into, and the
 // one it would use if it has never been told otherwise.

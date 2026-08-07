@@ -168,9 +168,6 @@ namespace {
 			u"Los mensajes que recibes se traducen a {1}"_q },
 		{ u"LuminaChatLangIncomingOff"_q, u"Los mensajes que recibes no se "
 			u"traducen: elige en qué idioma quieres leer este chat"_q },
-		{ u"LuminaChatLangIncomingPending"_q, u"Los mensajes que recibes se "
-			u"traducirían a {1}, en cuanto LuminaGram reconozca el idioma en "
-			u"que está escrito este chat"_q },
 		{ u"LuminaChatLangIncomingDefault"_q,
 			u"Los mensajes que recibes: usar el predeterminado, {1}"_q },
 		{ u"LuminaChatLangIncomingPicker"_q, u"Idioma de lectura de este "

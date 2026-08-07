@@ -1,3 +1,12 @@
+7.0.11 (07.08.26)
+
+- Translate a chat the app saw no reason to translate. Asking by hand now
+  opens the translation itself, so the button and its menu work in a chat
+  written in the language you read in.
+- Choose the language your own messages go out in from the chat that needs
+  it, and have that choice win over the one set for every chat.
+- Every row of the chat language menu now does something when pressed.
+
 7.0.10 (07.08.26)
 
 - Translate a selected phrase or a single message whatever the LuminaGram

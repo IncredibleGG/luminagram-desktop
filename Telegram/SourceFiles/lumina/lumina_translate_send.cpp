@@ -107,6 +107,27 @@ constexpr auto kCaptionBoxTimeout = crl::time(3 * 60 * 1000);
 		+ QString::number(history->peer->id.value);
 }
 
+// Which language this chat's outgoing messages are translated into, once it is
+// settled that they are translated at all.
+//
+// The chat's own language wins over the one set for every chat. It is chosen
+// from inside the conversation, against a specific person, and the global one
+// is a default for the chats that were never given an answer of their own -
+// reading them the other way round would write the per-chat choice to a key
+// nothing goes on to read, which is indistinguishable from the menu being
+// broken.
+//
+// Empty means no language is settled yet, and the send pipeline asks.
+[[nodiscard]] QString ResolveSendTarget(not_null<History*> history) {
+	const auto chat = DialogSendLanguage(history);
+	if (!chat.isEmpty()) {
+		return chat;
+	}
+	return TranslateSendLanguageIsAuto()
+		? QString()
+		: TranslateSendLanguage();
+}
+
 struct QuickToggle {
 	uint64 peerId = 0;
 	crl::time when = 0;
@@ -506,7 +527,11 @@ void ShowLanguagePicker(
 		base::weak_ptr<History> weak,
 		const QString &current,
 		const QString &pending,
-		uint64 generation) {
+		uint64 generation,
+		// Whether choosing a language should also switch translate-before-send
+		// on. False for the pickers the send pipeline opens: those are already
+		// running inside a send that is being translated, and the switch is on.
+		bool enableOnChoice = false) {
 	const auto &languages = TranslateLanguages();
 	auto options = std::vector<QString>();
 	auto codes = std::vector<QString>();
@@ -557,6 +582,9 @@ void ShowLanguagePicker(
 				const auto code = codes[index];
 				if (const auto history = weak.get()) {
 					SetDialogSendLanguage(history, code);
+					if (enableOnChoice && !TranslateBeforeSend()) {
+						SetTranslateBeforeSend(true);
+					}
 				}
 				if (!pending.isEmpty()) {
 					crl::on_main([=] {
@@ -698,9 +726,7 @@ void FlushQueue(const QString &key, uint64 id) {
 		TextWithTags &text,
 		const QString &original,
 		Fn<void()> &proceed) {
-	const auto target = TranslateSendLanguageIsAuto()
-		? DialogSendLanguage(history)
-		: TranslateSendLanguage();
+	const auto target = ResolveSendTarget(history);
 	if (!target.isEmpty()) {
 		const auto &preview = Preview();
 		const auto reuse = (preview.dialog == key)
@@ -1025,12 +1051,9 @@ void SetDialogSendLanguage(not_null<History*> history, const QString &code) {
 }
 
 QString ResolveSendLanguage(not_null<History*> history) {
-	if (!TranslateBeforeSendActive(history)) {
-		return QString();
-	} else if (!TranslateSendLanguageIsAuto()) {
-		return TranslateSendLanguage();
-	}
-	return DialogSendLanguage(history);
+	return TranslateBeforeSendActive(history)
+		? ResolveSendTarget(history)
+		: QString();
 }
 
 void ShowDialogSendLanguagePicker(not_null<History*> history) {
@@ -1040,7 +1063,16 @@ void ShowDialogSendLanguagePicker(not_null<History*> history) {
 			base::make_weak(history),
 			DialogSendLanguage(history),
 			QString(),
-			0);
+			0,
+			// Naming the language a chat's own messages go out in is the act
+			// of asking for them to be translated; this is the only picker
+			// reached from the chat, and leaving the switch alone here would
+			// store an answer that changes nothing until the user finds an
+			// unrelated settings page. Turning it on rather than holding a
+			// per-chat exception keeps one switch in charge of whether
+			// anything is translated on the way out, so turning that switch
+			// off still turns every chat off.
+			true);
 	}
 }
 

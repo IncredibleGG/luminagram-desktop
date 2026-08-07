@@ -156,9 +156,6 @@ namespace {
 		{ u"LuminaChatLangIncomingOff"_q,
 			u"الرسائل التي تستقبلها لا تُترجَم — اختر اللغة التي تقرأ "
 			u"بها هذه الدردشة"_q },
-		{ u"LuminaChatLangIncomingPending"_q,
-			u"الرسائل التي تستقبلها ستُترجَم إلى {1} بمجرد أن يتعرّف "
-			u"LuminaGram على اللغة التي كُتبت بها هذه الدردشة"_q },
 		{ u"LuminaChatLangIncomingPicker"_q, u"لغة قراءة هذه الدردشة"_q },
 		{ u"LuminaChatLangOutgoingAuto"_q,
 			u"الرسائل التي ترسلها تُترجَم إلى اللغة التي كُتبت بها "

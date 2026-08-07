@@ -361,24 +361,11 @@ void TopBarWidget::toggleTranslate() {
 	if (!history || !Lumina::ChatTranslateAvailable(history)) {
 		return;
 	}
-	const auto translating = Lumina::ChatTranslating(history);
-
-	// LuminaGram: Lumina::ChatTranslateAvailable() deliberately does not wait
-	// for the language this chat is written in to be recognised, so the button
-	// is on the bar before there is anything to translate INTO - and in that
-	// state turning translation ON is a no-op that says nothing (see
-	// Lumina::ChatTranslateIncomingReady). A button that answers a click by
-	// doing nothing is worse than no button, so the click opens the menu
-	// instead: its incoming row states the wait in words, and its outgoing
-	// half - which never depended on that recognition - still works.
-	//
-	// Turning translation OFF is never routed here: it only runs while it is
-	// on, and it is on only once the recognition has happened.
-	if (!translating && !Lumina::ChatTranslateIncomingReady(history)) {
-		showTranslateMenu();
-		return;
-	}
-	Lumina::SetChatTranslating(history, !translating);
+	// LuminaGram: turning it on works whether or not the app ever offered to
+	// translate this chat - Lumina::SetChatTranslatingTo() opens the offer
+	// itself - so the click is the plain toggle it looks like. Choosing the
+	// languages is the menu, on the right button.
+	Lumina::SetChatTranslating(history, !Lumina::ChatTranslating(history));
 }
 
 void TopBarWidget::showTranslateMenu() {

@@ -192,9 +192,6 @@ struct Registration {
 			u"Messages you receive are translated into {1}"_q },
 		{ u"LuminaChatLangIncomingOff"_q, u"Messages you receive are not "
 			"translated - choose the language to read this chat in"_q },
-		{ u"LuminaChatLangIncomingPending"_q, u"Messages you receive would be "
-			"translated into {1}, once LuminaGram recognises the language this "
-			"chat is written in"_q },
 		{ u"LuminaChatLangIncomingDefault"_q,
 			u"Messages you receive: use the default, {1}"_q },
 		{ u"LuminaChatLangIncomingPicker"_q, u"Read this chat in"_q },

@@ -151,9 +151,6 @@ namespace {
 		{ u"LuminaChatLangIncomingOff"_q, u"As mensagens que você recebe "
 			u"não são traduzidas — escolha o idioma para ler esta "
 			u"conversa"_q },
-		{ u"LuminaChatLangIncomingPending"_q, u"As mensagens que você "
-			u"recebe serão traduzidas para {1} assim que o LuminaGram "
-			u"reconhecer o idioma em que esta conversa é escrita"_q },
 		{ u"LuminaChatLangIncomingPicker"_q, u"Ler esta conversa em"_q },
 		{ u"LuminaChatLangOutgoingAuto"_q, u"As mensagens que você envia "
 			u"são traduzidas para o idioma em que esta conversa é "

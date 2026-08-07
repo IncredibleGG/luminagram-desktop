@@ -160,9 +160,6 @@ namespace {
 		{ u"LuminaChatLangIncomingOff"_q, u"Сообщения, которые вы "
 			u"получаете, не переводятся — выберите язык, на котором "
 			u"читать этот чат"_q },
-		{ u"LuminaChatLangIncomingPending"_q, u"Сообщения, которые вы "
-			u"получаете, будут переводиться на язык {1}, как только "
-			u"LuminaGram определит, на каком языке пишут в этом чате"_q },
 		{ u"LuminaChatLangIncomingDefault"_q, u"Сообщения, которые вы "
 			u"получаете: используется язык по умолчанию — {1}"_q },
 		{ u"LuminaChatLangIncomingPicker"_q, u"Язык чтения этого чата"_q },

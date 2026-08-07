@@ -39,10 +39,6 @@ bool ChatTranslating(not_null<History*> history) {
 	return history->translatedTo().known();
 }
 
-bool ChatTranslateIncomingReady(not_null<History*> history) {
-	return (history->translation() != nullptr);
-}
-
 LanguageId ChatTranslateDefaultTo(not_null<History*> history) {
 	return Ui::ChooseTranslateTo(history);
 }
@@ -63,6 +59,21 @@ void SetChatTranslatingTo(not_null<History*> history, LanguageId id) {
 	using Flag = PeerData::TranslationFlag;
 	if (id && (peer->translationFlag() == Flag::Disabled)) {
 		peer->saveTranslationDisabled(false);
+	}
+	// History::translateTo() drops the language on the floor unless the app has
+	// already offered to translate this chat, and it never offers one written
+	// in the language being read into - which is precisely the chat this
+	// feature exists for: the one the app sees no reason to translate, that
+	// the user wants translated anyway. Asking by hand is reason enough, so
+	// the offer is opened here rather than waited for.
+	//
+	// The source named is the chat's own if detection settled on one, and the
+	// read language otherwise. It is what the translate bar says the text is
+	// being translated from; the engine detects the real source itself, so a
+	// wrong guess here costs a word in a bar, not a wrong translation.
+	if (id && !history->translation()) {
+		const auto detected = history->translateOfferedFrom();
+		history->translateOfferFrom(detected ? detected : id);
 	}
 	history->translateTo(id);
 	if (const auto migrated = history->migrateFrom()) {

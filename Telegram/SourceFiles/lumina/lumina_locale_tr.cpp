@@ -153,9 +153,6 @@ namespace {
 			u"Aldığınız mesajlar {1} diline çevrilir"_q },
 		{ u"LuminaChatLangIncomingOff"_q, u"Aldığınız mesajlar çevrilmiyor — "
 			u"bu sohbeti hangi dilde okuyacağınızı seçin"_q },
-		{ u"LuminaChatLangIncomingPending"_q, u"Aldığınız mesajlar, "
-			u"LuminaGram bu sohbetin hangi dilde yazıldığını tanıdığında {1} "
-			u"diline çevrilecek"_q },
 		{ u"LuminaChatLangIncomingDefault"_q,
 			u"Aldığınız mesajlar: varsayılanı, yani {1} dilini kullan"_q },
 		{ u"LuminaChatLangIncomingPicker"_q, u"Bu sohbeti şu dilde oku"_q },

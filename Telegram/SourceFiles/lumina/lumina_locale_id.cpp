@@ -147,9 +147,6 @@ namespace {
 			u"Pesan yang Anda terima diterjemahkan ke {1}"_q },
 		{ u"LuminaChatLangIncomingOff"_q, u"Pesan yang Anda terima tidak "
 			u"diterjemahkan — pilih bahasa untuk membaca obrolan ini"_q },
-		{ u"LuminaChatLangIncomingPending"_q, u"Pesan yang Anda terima "
-			u"akan diterjemahkan ke {1}, begitu LuminaGram mengenali "
-			u"bahasa yang dipakai di obrolan ini"_q },
 		{ u"LuminaChatLangIncomingDefault"_q,
 			u"Pesan yang Anda terima: pakai bawaan, {1}"_q },
 		{ u"LuminaChatLangIncomingPicker"_q, u"Baca obrolan ini dalam"_q },

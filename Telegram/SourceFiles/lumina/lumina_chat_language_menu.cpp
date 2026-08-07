@@ -46,16 +46,17 @@ struct OutgoingState {
 [[nodiscard]] OutgoingState ResolveOutgoing(not_null<History*> history) {
 	if (!TranslateBeforeSendActive(history)) {
 		return { Outgoing::Off, QString() };
+	}
+	const auto code = DialogSendLanguage(history);
+	if (!code.isEmpty()) {
+		return { Outgoing::Chat, TranslateLanguageName(code) };
 	} else if (!TranslateSendLanguageIsAuto()) {
 		return {
 			Outgoing::Global,
 			TranslateLanguageName(TranslateSendLanguage()),
 		};
 	}
-	const auto code = DialogSendLanguage(history);
-	return code.isEmpty()
-		? OutgoingState{ Outgoing::Ask, QString() }
-		: OutgoingState{ Outgoing::Chat, TranslateLanguageName(code) };
+	return { Outgoing::Ask, QString() };
 }
 
 // A row wide enough to say a whole sentence. Ui::Menu::Action elides at the
@@ -123,17 +124,6 @@ void FillIncoming(
 		not_null<Window::SessionController*> controller,
 		not_null<History*> history) {
 	const auto effective = Ui::LanguageName(ChatTranslatingTo(history));
-	// A read target chosen while Lumina::ChatTranslateIncomingReady() is false
-	// is dropped by History::translateTo(), so that row states the wait
-	// instead of offering a picker that writes nothing.
-	if (!ChatTranslateIncomingReady(history)) {
-		AddRow(
-			menu,
-			Tr(u"LuminaChatLangIncomingPending"_q, effective),
-			&st::menuIconDownload,
-			nullptr);
-		return;
-	}
 	const auto choose = [=] { ShowIncomingPicker(controller, history); };
 	if (!ChatTranslating(history)) {
 		AddRow(
@@ -166,14 +156,14 @@ void FillOutgoing(
 			menu,
 			Tr(u"LuminaChatLangOutgoingOff"_q),
 			&st::menuIconSend,
-			nullptr);
+			choose);
 		return;
 	case Outgoing::Global:
 		AddRow(
 			menu,
 			Tr(u"LuminaChatLangOutgoingGlobal"_q, state.name),
 			&st::menuIconSend,
-			nullptr);
+			choose);
 		return;
 	case Outgoing::Chat:
 		AddRow(

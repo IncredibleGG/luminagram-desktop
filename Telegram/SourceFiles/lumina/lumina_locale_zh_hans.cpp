@@ -142,8 +142,6 @@ namespace {
 		{ u"LuminaChatLangIncoming"_q, u"你收到的消息会翻译成{1}"_q },
 		{ u"LuminaChatLangIncomingOff"_q, u"你收到的消息不会翻译——选择用哪种"
 			u"语言阅读这个聊天"_q },
-		{ u"LuminaChatLangIncomingPending"_q, u"你收到的消息将翻译成{1}，但要"
-			u"等 LuminaGram 认出这个聊天用的是哪种语言"_q },
 		{ u"LuminaChatLangIncomingDefault"_q, u"你收到的消息：使用默认设置，"
 			u"{1}"_q },
 		{ u"LuminaChatLangIncomingPicker"_q, u"用哪种语言阅读这个聊天"_q },

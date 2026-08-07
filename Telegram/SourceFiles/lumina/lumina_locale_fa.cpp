@@ -142,9 +142,6 @@ namespace {
 		{ u"LuminaChatLangIncomingOff"_q, u"پیام‌هایی که دریافت می‌کنید "
 			u"ترجمه نمی‌شوند — زبانی را برای خواندن این گفتگو انتخاب "
 			u"کنید"_q },
-		{ u"LuminaChatLangIncomingPending"_q, u"پیام‌هایی که دریافت "
-			u"می‌کنید به {1} ترجمه خواهند شد، به‌محض اینکه LuminaGram "
-			u"زبانی را که این گفتگو با آن نوشته می‌شود تشخیص دهد"_q },
 		{ u"LuminaChatLangIncomingPicker"_q, u"زبان خواندن این گفتگو"_q },
 		{ u"LuminaChatLangOutgoingAuto"_q, u"پیام‌هایی که می‌فرستید به "
 			u"زبانی که این گفتگو با آن نوشته می‌شود ترجمه می‌شوند؛ "

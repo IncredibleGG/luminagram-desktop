@@ -136,8 +136,6 @@ namespace {
 			u"也就是{1}"_q },
 		{ u"LuminaChatLangIncomingOff"_q, u"你收到的訊息不會翻譯——選擇要"
 			u"用哪個語言閱讀這個聊天"_q },
-		{ u"LuminaChatLangIncomingPending"_q, u"等 LuminaGram 認出這個聊天"
-			u"使用的語言後，你收到的訊息就會翻譯成{1}"_q },
 		{ u"LuminaChatLangIncomingPicker"_q, u"閱讀這個聊天的語言"_q },
 		{ u"LuminaChatLangOutgoingAuto"_q, u"你傳送的訊息會翻譯成這個聊天"
 			u"使用的語言；LuminaGram 會在第一則送出前先問一次是哪個語言"_q },

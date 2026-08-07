@@ -512,7 +512,7 @@ QString SentOriginalText(not_null<const HistoryItem*> item) {
 }
 
 QString SentOriginalText(not_null<Main::Session*> session, FullMsgId id) {
-	if (!id.msg || !TranslationFeatureEnabled()) {
+	if (!id.msg || !ContinuousTranslationAvailable()) {
 		return QString();
 	}
 	EnsureLoaded();

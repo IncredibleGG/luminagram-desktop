@@ -791,6 +791,16 @@ QString CurrentProviderId() {
 	return FindTranslateProvider(stored) ? stored : TelegramProviderId();
 }
 
+bool ProviderExplicitlyChosen() {
+	// True only once the user has picked something on the Service row. The
+	// stored key is absent on a fresh profile, where CurrentProviderId()
+	// answers with a default instead - and a default is not a choice.
+	const auto stored = Settings::Instance().getString(
+		ProviderKey(),
+		QString()).trimmed();
+	return !stored.isEmpty() && (FindTranslateProvider(stored) != nullptr);
+}
+
 void SetCurrentProviderId(const QString &id) {
 	if (!FindTranslateProvider(id)) {
 		return;
@@ -1090,7 +1100,7 @@ std::unique_ptr<Ui::TranslateProvider> CreateTranslateProvider(
 	// The master opt-in has to gate this too: without it a Premium account
 	// with the feature OFF still had its chat translations sent to Google
 	// instead of to Telegram, which is exactly what OFF must not do.
-	if (!TranslationFeatureEnabled() || !UsingOwnProvider()) {
+	if (!ContinuousTranslationAvailable() || !UsingOwnProvider()) {
 		return nullptr;
 	}
 	auto engine = MakeCurrentTranslateEngine(session);

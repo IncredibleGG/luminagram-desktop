@@ -89,6 +89,12 @@ void SetCurrentProviderId(const QString &id);
 // entering no key would otherwise unlock the Premium-gated whole-chat
 // translation and then serve every message from Telegram's paid service,
 // which is exactly the thing this predicate exists to prevent.
+// Whether the user has actually picked an engine on the Service row, as
+// opposed to running on the default. A one-off lookup honours an explicit
+// choice even with the continuous tier switched off; it must NOT quietly move
+// a default profile's text to a third party nobody asked for.
+[[nodiscard]] bool ProviderExplicitlyChosen();
+
 [[nodiscard]] bool UsingOwnProvider();
 
 // False when the provider needs an API key that is not set yet.

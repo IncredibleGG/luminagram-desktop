@@ -1522,6 +1522,16 @@ void FillContextMenuItems(
 			}
 		}, &st::menuIconCopy);
 	}
+	// FREE TIER. This row and the single-message one below it are the two
+	// entry points that are NOT gated on
+	// Lumina::ContinuousTranslationAvailable()
+	// (lumina/lumina_translate_gating.h) and must never become gated on it,
+	// nor on anything else that can be off:
+	// one action, one request, exactly what stock Telegram gives everyone. The
+	// tier predicate governs the things that keep running afterwards - a whole
+	// conversation, translate-before-send, dual-language display - and a
+	// licence check belongs inside it, not here.
+	//
 	// The row the user asks for by hand, over text they picked themselves, so
 	// it states the on-demand policy directly instead of going through
 	// Ui::SkipTranslate() - which reads as "should this be hidden" and carries
@@ -1587,6 +1597,12 @@ void FillContextMenuItems(
 				}, &st::menuIconCopy);
 			}
 
+			// The other half of the free tier: one message, translated because
+			// the user asked for this one. Ui::SkipTranslate() is upstream's
+			// name but no longer upstream's answer - it now forwards to
+			// Lumina::OnDemandTranslateAllowed(), which asks only about the
+			// text itself and never about the account, the switch or the
+			// languages the local detector assumes are already readable.
 			const auto translate = mediaHasTextForCopy
 				? (HistoryView::TransribedText(item)
 					.append('\n')

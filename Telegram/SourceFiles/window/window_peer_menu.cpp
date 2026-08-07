@@ -1056,14 +1056,20 @@ void Filler::addExportChat() {
 // it only while a non-Telegram provider is selected.
 void Filler::addTranslate() {
 	if (!_peer
+		|| !Lumina::ContinuousTranslationAvailable()
 		|| !Core::App().settings().translateChatEnabled()
 		|| !Lumina::ChatTranslationUnlocked(&_peer->session())) {
 		return;
 	}
 	const auto history = _peer->owner().historyLoaded(_peer);
-	if (!history || !history->translateOfferedFrom()) {
+	if (!history) {
 		return;
 	}
+	// Deliberately not gated on history->translateOfferedFrom(). That flag is
+	// the local language detector's opinion, and requiring it hid this row for
+	// exactly the chats a user would want to overrule it on - the fourth place
+	// in this fork where the same gate hid the same feature. Whether a chat is
+	// translated is the user's call; the source language is the engine's.
 	const auto translating = history->translatedTo().known();
 	const auto setTranslating = [=](bool enabled) {
 		const auto peer = history->peer;

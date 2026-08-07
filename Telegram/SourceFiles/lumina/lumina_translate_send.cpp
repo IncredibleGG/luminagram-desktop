@@ -858,7 +858,7 @@ bool Intercept(
 		not_null<History*> history,
 		TextWithTags &text,
 		Fn<void()> proceed) {
-	if (!TranslationFeatureEnabled()) {
+	if (!ContinuousTranslationAvailable()) {
 		return true;
 	}
 	const auto peer = history->peer;
@@ -882,9 +882,6 @@ bool Intercept(
 	// as queueing it would be.
 	if (AlreadyHeld(key, original)) {
 		return false;
-	}
-	if (!TranslateScopeAllows(peer)) {
-		return true;
 	}
 	const auto quick = PeekQuickToggle(peer->id.value);
 	if (!quick.value_or(TranslateBeforeSend())) {
@@ -991,12 +988,11 @@ void SetupTranslateSendPipeline() {
 }
 
 bool TranslateBeforeSendActive(not_null<History*> history) {
-	if (!TranslationFeatureEnabled()) {
+	if (!ContinuousTranslationAvailable()) {
 		return false;
 	}
 	const auto peer = history->peer;
-	return PeekQuickToggle(peer->id.value).value_or(TranslateBeforeSend())
-		&& TranslateScopeAllows(peer);
+	return PeekQuickToggle(peer->id.value).value_or(TranslateBeforeSend());
 }
 
 QString DialogSendLanguage(not_null<History*> history) {
@@ -1078,7 +1074,7 @@ void AddSendMenuTranslateRow(
 	// the override is per chat and is consumed by that chat's next text send -
 	// but it is offered in more places than it reads well in. Narrowing it
 	// needs a flag on SendMenu::Details, which is not this item's file.
-	if (!TranslationFeatureEnabled()
+	if (!ContinuousTranslationAvailable()
 		|| !details.barePeerId
 		|| (details.spoiler != SendMenu::SpoilerState::None)
 		|| (details.caption != SendMenu::CaptionState::None)
@@ -1103,7 +1099,7 @@ void AddSendMenuTranslateRow(
 		const SendMenu::Details &details) {
 	AddSendMenuTranslateRow(menu, details);
 	if (!show
-		|| !TranslationFeatureEnabled()
+		|| !ContinuousTranslationAvailable()
 		|| !details.barePeerId
 		|| (details.spoiler != SendMenu::SpoilerState::None)
 		|| (details.caption != SendMenu::CaptionState::None)

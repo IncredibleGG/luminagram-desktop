@@ -44,20 +44,33 @@ namespace Lumina {
 //
 //   provider, API keys, LLM base URL / model / prompt, Telegram fallback
 //                                       lumina/lumina_translate_providers.h
-//   trMode / scope read semantics       lumina/lumina_translate_gating.h
-//
-// trMode is the one split case: Lumina::AutoTranslateEverything() in
-// lumina_translate_gating.h is the reader every runtime path uses, and
-// SetAutoTranslateEverything() below is the only writer.
+//   the master switch, and the tier it governs
+//                                       lumina/lumina_translate_gating.h
 //
 // trReadLang goes the other way: the key is declared and written here, and
 // lumina/lumina_translate_readlang.h only projects it onto the LanguageId
 // shape stock tdesktop's read path expects.
 //
+// THE PAGE IS A SWITCH, AN ENGINE AND TWO DEFAULT LANGUAGES. It used to carry a
+// mode (every chat / only chats I turn on) and a scope (private chats, groups
+// and channels) as well. Both existed only to decide WHICH chats translate
+// automatically, and the user now makes that decision per chat, by hand, in the
+// chat itself - so both were two more things that could go wrong for no
+// benefit. Their keys - trMode, trScopePrivate, trScopeGroup - are no longer
+// written and no longer read; a profile that still has them keeps three unread
+// entries in its pref file and nothing else. Do not re-add a preference here
+// that answers a question a chat can answer about itself.
+//
+// The scope keys were the only ones whose removal a user can feel. They also
+// narrowed translate-before-send, so a profile that had turned "Groups and
+// channels" off and translate-before-send on now translates outgoing messages
+// in groups too. Both scope keys defaulted to on and translate-before-send
+// defaults to off, so that is the intersection of two deliberate choices; the
+// send-menu row and the per-chat send language are where it is controlled now.
+//
 // Every key this file owns defaults to stock Telegram Desktop behaviour: both
-// send-side toggles off, dual-language display off, send language "auto", read
-// language unset, mode "manual", both scopes on (and scope only ever narrows
-// the mode, which is off).
+// send-side toggles off, dual-language display off, send language "auto" and
+// read language unset.
 //
 // The page is NOT behaviour-neutral overall, and the reason is not here: the
 // provider row reads Lumina::CurrentProviderId(), whose unset value resolves
@@ -103,25 +116,6 @@ void SetDualLanguageDisplay(bool value);
 [[nodiscard]] QString TranslateReadLanguage();
 void SetTranslateReadLanguage(const QString &code);
 
-// The scope, mirroring Android's user / chat dialog split.
-// Lumina::TranslateScopeAllows() in lumina_translate_gating.h is what both
-// paths consult; these two exist for the rows that write them.
-//
-// BOTH directions on desktop: a chat outside the scope is left alone by the
-// read side and by translate-before-send alike. Android's code does the same
-// (ChatActivityEnterView.luminaTbsInScope()), but its help string claims the
-// scope only limits automatic reading, so a user with "Groups" off there
-// silently loses send translation with nothing saying so. The behaviour is
-// worth keeping - it is what "where it applies" means - so the string is what
-// changed: the divider below states plainly that the scope covers both.
-[[nodiscard]] bool TranslateScopePrivate();
-void SetTranslateScopePrivate(bool value);
-[[nodiscard]] bool TranslateScopeGroup();
-void SetTranslateScopeGroup(bool value);
-
-// Writes trMode. Read it back through Lumina::AutoTranslateEverything().
-void SetAutoTranslateEverything(bool value);
-
 // The language picker list, shared by the send-side and read-side rows. Codes
 // are the ISO tags a provider is handed unchanged, so the list carries the
 // dialects a bare two-letter code cannot express - the zh-TW / zh-CN split in
@@ -148,8 +142,9 @@ struct TranslateLanguage {
 // The whole sub-page, in the F-02 sub-page shape: the section .cpp holds this
 // one call and nothing else.
 //
-// Sections, in Android's order (LuminaTranslateActivity.fillItems), under the
-// desktop-only master opt-in: sending, mode, receiving, scope, service.
+// Three sections under the master switch: sending, receiving, service. Android
+// puts a mode section after sending and a scope section after receiving; both
+// are deliberately absent here, for the reason given at the top of this file.
 //
 // The service section ends in a test action that really does translate a
 // sample through the selected engine - deliberately without the Telegram

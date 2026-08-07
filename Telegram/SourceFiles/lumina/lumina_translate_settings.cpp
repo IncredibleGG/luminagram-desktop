@@ -20,7 +20,6 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/toast/toast.h"
 #include "ui/vertical_list.h"
 #include "ui/widgets/buttons.h"
-#include "ui/widgets/checkbox.h"
 #include "ui/widgets/fields/input_field.h"
 #include "ui/wrap/slide_wrap.h"
 #include "ui/wrap/vertical_layout.h"
@@ -41,13 +40,8 @@ const auto kKeyBeforeSendConfirm = u"translateBeforeSendConfirm"_q;
 const auto kKeySendLang = u"trSendLang"_q;
 const auto kKeyReadLang = u"trReadLang"_q;
 const auto kKeyDualLanguage = u"dualLanguageDisplay"_q;
-const auto kKeyScopePrivate = u"trScopePrivate"_q;
-const auto kKeyScopeGroup = u"trScopeGroup"_q;
-const auto kKeyMode = u"trMode"_q;
 
 const auto kSendLangAuto = u"auto"_q;
-const auto kModeAll = u"all"_q;
-const auto kModeManual = u"manual"_q;
 
 constexpr auto kApiKeyMaxLength = 512;
 constexpr auto kBaseUrlMaxLength = 512;
@@ -76,11 +70,6 @@ constexpr auto kTestResultMaxLength = 200;
 // only ever catches the case where nothing came back at all.
 constexpr auto kTestTimeoutMs = crl::time(25000);
 
-enum class TranslateMode : uchar {
-	All,
-	Manual,
-};
-
 // The keys this file owns. The provider keys are deliberately absent: their
 // change stream comes from TranslateProviderChanges(), so the key names behind
 // it stay lumina_translate_providers' business.
@@ -90,10 +79,7 @@ enum class TranslateMode : uchar {
 		|| (key == kKeyBeforeSendConfirm)
 		|| (key == kKeySendLang)
 		|| (key == kKeyReadLang)
-		|| (key == kKeyDualLanguage)
-		|| (key == kKeyScopePrivate)
-		|| (key == kKeyScopeGroup)
-		|| (key == kKeyMode);
+		|| (key == kKeyDualLanguage);
 }
 
 struct LanguageEntry {
@@ -586,56 +572,6 @@ void AddSendRows(
 	Ui::AddDividerText(container, TrValue(u"LuminaTranslateSendInfo"_q));
 }
 
-// Android presents the mode as two radio options in a section of their own,
-// directly after the sending section (LuminaTranslateActivity.fillItems), and
-// so does this: a value row hid the fact that "only chats I turn on" is a
-// state the user is already in rather than an action they have not taken.
-void AddModeRows(not_null<Ui::VerticalLayout*> container) {
-	Ui::AddSkip(container);
-	Ui::AddSubsectionTitle(
-		container,
-		TrValue(u"LuminaTranslateModeHeader"_q));
-
-	const auto group = std::make_shared<Ui::RadioenumGroup<TranslateMode>>(
-		AutoTranslateEverything()
-			? TranslateMode::All
-			: TranslateMode::Manual);
-	const auto addOption = [&](TranslateMode value, const QString &key) {
-		const auto radio = container->add(
-			object_ptr<Ui::Radioenum<TranslateMode>>(
-				container,
-				group,
-				value,
-				QString(),
-				st::settingsSendType),
-			st::settingsSendTypePadding);
-		TrValue(key) | rpl::on_next([=](const QString &text) {
-			radio->setText(text);
-		}, radio->lifetime());
-	};
-	addOption(TranslateMode::All, u"LuminaTranslateModeAll"_q);
-	addOption(TranslateMode::Manual, u"LuminaTranslateModeManual"_q);
-
-	// Both directions, like every other row on this page: a value written
-	// anywhere else - the per-chat toggle, a restored backup - moves the
-	// radio, and moving the radio writes the value. They do not chase each
-	// other, because RadiobuttonGroup::setValue() returns early when the value
-	// it is handed is the one it already has.
-	FlagValue([] {
-		return AutoTranslateEverything();
-	}) | rpl::on_next([=](bool everything) {
-		group->setValue(everything
-			? TranslateMode::All
-			: TranslateMode::Manual);
-	}, container->lifetime());
-	group->changes() | rpl::on_next([](TranslateMode value) {
-		SetAutoTranslateEverything(value == TranslateMode::All);
-	}, container->lifetime());
-
-	Ui::AddSkip(container);
-	Ui::AddDividerText(container, TrValue(u"LuminaTranslateModeInfo"_q));
-}
-
 void AddReceiveRows(
 		not_null<Ui::VerticalLayout*> container,
 		not_null<Window::SessionController*> controller) {
@@ -668,25 +604,6 @@ void AddReceiveRows(
 		});
 	Ui::AddSkip(container);
 	Ui::AddDividerText(container, TrValue(u"LuminaTranslateReceiveInfo"_q));
-}
-
-void AddScopeRows(not_null<Ui::VerticalLayout*> container) {
-	Ui::AddSkip(container);
-	Ui::AddSubsectionTitle(
-		container,
-		TrValue(u"LuminaTranslateScopeHeader"_q));
-	AddToggleRow(
-		container,
-		TrValue(u"LuminaTranslateScopePrivate"_q),
-		[] { return TranslateScopePrivate(); },
-		[](bool value) { SetTranslateScopePrivate(value); });
-	AddToggleRow(
-		container,
-		TrValue(u"LuminaTranslateScopeGroup"_q),
-		[] { return TranslateScopeGroup(); },
-		[](bool value) { SetTranslateScopeGroup(value); });
-	Ui::AddSkip(container);
-	Ui::AddDividerText(container, TrValue(u"LuminaTranslateScopeInfo"_q));
 }
 
 // One in-flight test, owned by the page. Destroying it destroys the engine,
@@ -978,26 +895,6 @@ void SetTranslateReadLanguage(const QString &code) {
 	}
 }
 
-bool TranslateScopePrivate() {
-	return Settings::Instance().getBool(kKeyScopePrivate, true);
-}
-
-void SetTranslateScopePrivate(bool value) {
-	Settings::Instance().set(kKeyScopePrivate, value);
-}
-
-bool TranslateScopeGroup() {
-	return Settings::Instance().getBool(kKeyScopeGroup, true);
-}
-
-void SetTranslateScopeGroup(bool value) {
-	Settings::Instance().set(kKeyScopeGroup, value);
-}
-
-void SetAutoTranslateEverything(bool value) {
-	Settings::Instance().set(kKeyMode, value ? kModeAll : kModeManual);
-}
-
 const std::vector<TranslateLanguage> &TranslateLanguages() {
 	// The names are re-read whenever the in-app language changes, in place: a
 	// caller holds a reference to this vector while it copies the names out of
@@ -1061,9 +958,7 @@ void AddTranslateRows(
 	Ui::AddSkip(container);
 	Ui::AddDividerText(container, TrValue(u"LuminaTranslateEnableInfo"_q));
 	AddSendRows(container, controller);
-	AddModeRows(container);
 	AddReceiveRows(container, controller);
-	AddScopeRows(container);
 	AddProviderRows(container, controller);
 }
 

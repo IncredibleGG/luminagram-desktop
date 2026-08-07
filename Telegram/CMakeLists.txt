@@ -1812,6 +1812,8 @@ PRIVATE
     lumina/lumina_bookmarks_section.h
     lumina/lumina_bookmarks_settings.cpp
     lumina/lumina_bookmarks_settings.h
+    lumina/lumina_chat_language_menu.cpp
+    lumina/lumina_chat_language_menu.h
     lumina/lumina_clipboard_guard.cpp
     lumina/lumina_clipboard_guard.h
     lumina/lumina_clipboard_guard_settings.cpp

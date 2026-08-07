@@ -195,6 +195,36 @@ struct Registration {
 		{ u"LuminaTranslateChatToggle"_q, u"Translate this chat"_q },
 		{ u"LuminaTranslateChatShowOriginal"_q, u"Show original"_q },
 
+		// Right-clicking that button: the one place that states this
+		// conversation's language pair. Every line names its direction first
+		// and in full, because the whole complaint these strings answer is that
+		// the app never said which way round anything was. "Incoming" and
+		// "Outgoing" alone would be shorter and would put the reader back to
+		// guessing whose messages are meant.
+		{ u"LuminaChatLangIncoming"_q,
+			u"Messages you receive are translated into {1}"_q },
+		{ u"LuminaChatLangIncomingOff"_q, u"Messages you receive are not "
+			"translated - choose the language to read this chat in"_q },
+		{ u"LuminaChatLangIncomingPending"_q, u"Messages you receive would be "
+			"translated into {1}, once LuminaGram recognises the language this "
+			"chat is written in"_q },
+		{ u"LuminaChatLangIncomingDefault"_q,
+			u"Messages you receive: use the default, {1}"_q },
+		{ u"LuminaChatLangIncomingPicker"_q, u"Read this chat in"_q },
+		{ u"LuminaChatLangTurnOn"_q, u"Translate this chat into {1}"_q },
+		{ u"LuminaChatLangOutgoingChat"_q, u"Messages you send are translated "
+			"into {1}, remembered for this chat"_q },
+		{ u"LuminaChatLangOutgoingAuto"_q, u"Messages you send are translated "
+			"into the language this chat is written in, which LuminaGram asks "
+			"about once before the first one goes out"_q },
+		{ u"LuminaChatLangOutgoingGlobal"_q, u"Messages you send are "
+			"translated into {1}, the language set for every chat in "
+			"Settings"_q },
+		{ u"LuminaChatLangOutgoingOff"_q,
+			u"Messages you send go out as typed, not translated"_q },
+		{ u"LuminaChatLangOutgoingDefault"_q, u"Messages you send: use the "
+			"default, the language this chat is written in"_q },
+
 		// Names of the languages LuminaGram can translate into, in the order
 		// the pickers show them. These are the ones Telegram's own language
 		// list cannot serve, because it names a QLocale::Language and so

@@ -38,21 +38,33 @@ namespace Lumina {
 // (lumina/lumina_send_pipeline.h) and holds exactly one interceptor, so no
 // composer knows anything about translation.
 //
-// The three keys it reads all belong to somebody else, and it reads them
-// through their owner rather than by name:
+// The keys it reads all belong to somebody else, and it reads them through
+// their owner rather than by name:
 //
-//   translateEnabled  master opt-in       lumina/lumina_translate_gating.h
-//   trScopePrivate / trScopeGroup         lumina/lumina_translate_gating.h
-//                                         (Lumina::TranslateScopeAllows)
+//   the continuous tier, `translateEnabled`
+//   today                                 lumina/lumina_translate_gating.h
+//                                 (Lumina::ContinuousTranslationAvailable)
 //   translateBeforeSend, trSendLang,
 //   translateBeforeSendConfirm            lumina/lumina_translate_settings.h
+//
+// trMode, trScopePrivate and trScopeGroup were read here through
+// lumina/lumina_translate_gating.h as well, and are gone: they decided WHICH
+// chats translate, which the user now decides per chat. The scope keys also
+// narrowed translate-before-send, so a profile that had turned "Groups and
+// channels" off and translate-before-send on now translates outgoing messages
+// in groups too - see the note at the top of
+// lumina/lumina_translate_settings.h.
 //
 // The one key it owns is `trSendLangDialog`, the per-dialog send-language
 // lock, described at DialogSendLanguage() below.
 //
-// With translateEnabled false - the default - the interceptor returns on its
-// first line and the composers send exactly the way upstream does, the
-// send-menu row is not added, and nothing here is ever constructed.
+// While Lumina::ContinuousTranslationAvailable() is false - and it is until
+// `translateEnabled` is turned on, which is the default - the interceptor
+// returns on its first line and the composers send exactly the way upstream
+// does, the send-menu row is not added, and nothing here is ever constructed.
+// Translate-before-send keeps running per message against the user's own
+// quota for as long as it is on, so it is continuous tier, not free tier;
+// the free tier is lumina/lumina_translate_selection.h and is not gated.
 //
 // WHERE THIS DELIBERATELY DIVERGES FROM ANDROID
 //

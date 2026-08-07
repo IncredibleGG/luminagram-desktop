@@ -20,26 +20,6 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 namespace Lumina {
 namespace {
 
-[[nodiscard]] QString ModeKey() {
-	return u"trMode"_q;
-}
-
-[[nodiscard]] QString ModeAll() {
-	return u"all"_q;
-}
-
-[[nodiscard]] QString ModeManual() {
-	return u"manual"_q;
-}
-
-[[nodiscard]] QString ScopePrivateKey() {
-	return u"trScopePrivate"_q;
-}
-
-[[nodiscard]] QString ScopeGroupKey() {
-	return u"trScopeGroup"_q;
-}
-
 // TranslateProviderChanges() covers every key on the provider page, not just
 // the provider id, so this recomputes on an API key edit as well; the value
 // only actually changes when the selected provider does, which is what
@@ -81,6 +61,16 @@ rpl::producer<bool> TranslationFeatureEnabledValue() {
 	}) | rpl::distinct_until_changed();
 }
 
+bool ContinuousTranslationAvailable() {
+	// A licence or entitlement check belongs on this line and on no other. See
+	// the note above the declaration in lumina_translate_gating.h.
+	return TranslationFeatureEnabled();
+}
+
+rpl::producer<bool> ContinuousTranslationAvailableValue() {
+	return TranslationFeatureEnabledValue();
+}
+
 bool ChatTranslationUnlocked(not_null<Main::Session*> session) {
 	return session->premium()
 		|| (TranslationFeatureEnabled() && UsingOwnProvider());
@@ -96,31 +86,14 @@ rpl::producer<bool> ChatTranslationUnlockedValue(
 		_1 || (_2 && _3));
 }
 
-bool AutoTranslateEverything() {
-	return (Settings::Instance().getString(ModeKey(), ModeManual())
-		== ModeAll());
-}
-
-bool TranslateScopeAllows(not_null<PeerData*> peer) {
-	return Settings::Instance().getBool(
-		peer->isUser() ? ScopePrivateKey() : ScopeGroupKey(),
-		true);
-}
-
-bool ShouldAutoTranslate(not_null<History*> history) {
+std::optional<std::vector<LanguageId>> TranslateOfferSkip(
+		not_null<History*> history) {
 	const auto peer = history->peer;
 	using Flag = PeerData::TranslationFlag;
-	return TranslationFeatureEnabled()
-		&& AutoTranslateEverything()
-		&& TranslateScopeAllows(peer)
-		&& (peer->translationFlag() == Flag::Enabled)
-		&& Core::App().settings().translateChatEnabled()
-		&& ChatTranslationUnlocked(&history->session());
-}
-
-std::optional<std::vector<LanguageId>> AutoTranslateOfferSkip(
-		not_null<History*> history) {
-	if (!ShouldAutoTranslate(history)) {
+	if (!ContinuousTranslationAvailable()
+		|| (peer->translationFlag() != Flag::Enabled)
+		|| !Core::App().settings().translateChatEnabled()
+		|| !ChatTranslationUnlocked(&history->session())) {
 		return std::nullopt;
 	}
 	const auto to = ReadLanguageOr(Core::App().settings().translateTo());
@@ -131,26 +104,22 @@ std::optional<std::vector<LanguageId>> AutoTranslateOfferSkip(
 	return result;
 }
 
-rpl::producer<> AutoTranslatePolicyChanges() {
-	const auto &settings = Settings::Instance();
+rpl::producer<> TranslateOfferPolicyChanges() {
 	return rpl::merge(
-		settings.changesFor(FeatureEnabledKey()),
-		settings.changesFor(ModeKey()),
-		settings.changesFor(ScopePrivateKey()),
-		settings.changesFor(ScopeGroupKey()),
+		ContinuousTranslationAvailableValue() | rpl::to_empty,
 		TranslateProviderChanges(),
 		ReadLanguageCodeValue() | rpl::skip(1) | rpl::to_empty,
 		// The read language is an OVERRIDE: with none set, and that is the
-		// default, AutoTranslateOfferSkip() resolves the target through
+		// default, TranslateOfferSkip() resolves the target through
 		// Core::Settings::translateTo(). Ui::ChooseTranslateToBox() writes
 		// that one on every pick and NoteReadLanguageChosen() is a no-op
 		// while there is no override, so without this term picking a new
 		// translate-to language moves the target the offer filter is built
 		// from and nothing re-evaluates the filter: a chat already offered
-		// in the new target keeps being offered - and in "all" mode keeps
-		// being translated into itself - while a chat in the old target is
-		// never offered at all. Both only correct themselves when some other
-		// key here changes or the chat is reopened.
+		// in the new target keeps being offered - and translated into itself
+		// while it is switched on - while a chat in the old target is never
+		// offered at all. Both only correct themselves when some other key
+		// here changes or the chat is reopened.
 		Core::App().settings().translateToValue()
 			| rpl::skip(1)
 			| rpl::to_empty);

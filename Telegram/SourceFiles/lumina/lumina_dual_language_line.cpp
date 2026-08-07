@@ -102,8 +102,12 @@ struct Line {
 	return result;
 }
 
+// Dual-language display is continuous-tier: it paints a translation for every
+// message that has one, for as long as it is on, so it goes through the tier
+// predicate rather than through the master switch directly. That predicate is
+// the only place a licence check may ever appear.
 [[nodiscard]] bool FeatureActive() {
-	return TranslationFeatureEnabled() && DualLanguageDisplay();
+	return ContinuousTranslationAvailable() && DualLanguageDisplay();
 }
 
 // Only plain text bubbles, mirroring Android's luminaKeepOriginalAsMain
@@ -333,7 +337,16 @@ void EnsureSubscribed() {
 	// Building the producer first, into a named local, forces that order;
 	// the two sides of `producer | on_next(..., Subscription())` are not
 	// sequenced against each other.
-	auto changes = TranslateSettingsChanges();
+	//
+	// The tier term is merged in rather than left to
+	// TranslateSettingsChanges(), which only carries preference keys: today
+	// the two agree, because the tier predicate reads one of those keys, but
+	// a licence check added inside it would move FeatureActive() with nothing
+	// here waking up. It costs one extra evaluation on subscribe, which the
+	// LastActive() comparison below discards.
+	auto changes = rpl::merge(
+		TranslateSettingsChanges(),
+		ContinuousTranslationAvailableValue() | rpl::to_empty);
 	auto &lifetime = Subscription();
 	std::move(changes) | rpl::on_next([] {
 		const auto now = FeatureActive();

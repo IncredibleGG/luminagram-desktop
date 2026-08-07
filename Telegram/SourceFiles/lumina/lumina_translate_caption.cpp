@@ -404,7 +404,7 @@ bool InterceptSendFiles(
 		std::shared_ptr<Ui::PreparedBundle> bundle,
 		Api::SendOptions options,
 		Fn<void()> proceed) {
-	if (!TranslationFeatureEnabled() || !bundle || !proceed) {
+	if (!ContinuousTranslationAvailable() || !bundle || !proceed) {
 		return true;
 	}
 	const auto caption = SingleCaption(bundle.get());

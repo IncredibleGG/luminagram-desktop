@@ -15,7 +15,6 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <vector>
 
 class History;
-class PeerData;
 
 namespace Main {
 class Session;
@@ -23,21 +22,21 @@ class Session;
 
 namespace Lumina {
 
-// Gating for read-side (incoming) translation: when it may run at all, and
-// when it may start on its own.
+// Where LuminaGram's translation is tiered, and where the read side decides
+// what its language detector is allowed to hide.
 //
-// Keys read here, all in Store::Prefs, all written by the translate settings
-// sub-page (lumina_translate_settings.cpp), which uses exactly these names and
-// defaults:
+// The one key read here is `translateEnabled`, in Store::Prefs, written by the
+// single switch on the translate settings sub-page
+// (lumina_translate_settings.cpp).
 //
-//   trMode             string  default "manual"    "manual" | "all"
-//   trScopePrivate     bool    default true        1:1 user chats
-//   trScopeGroup       bool    default true        groups and channels
+// The keys `trMode`, `trScopePrivate` and `trScopeGroup` were read here and are
+// not any more. They existed to decide WHICH chats translate automatically, and
+// the user now decides that per chat, by hand, in the chat itself. Nothing
+// reads them, nothing writes them, and a profile that still carries them is
+// simply a profile with three unread keys in its pref file - see the migration
+// note on TranslateOfferSkip() below for what such a profile experiences.
 //
-// With those defaults nothing here ever starts translating a chat on its own,
-// which is the point: automatic translation waits for an explicit opt-in.
-//
-// The third input, the selected provider, is not read directly: it belongs to
+// The other input, the selected provider, is not read directly: it belongs to
 // lumina/lumina_translate_providers.h, and Lumina::UsingOwnProvider() there is
 // the single predicate for "this request does not reach Telegram's servers".
 // Declaring a second copy of it here would be one definition too many, and the
@@ -61,10 +60,56 @@ namespace Lumina {
 // UsingOwnProvider(), and a non-Premium account would open the app to a
 // translate bar, an unlocked "Translate chats" switch and a per-chat row that
 // stock does not show. Nothing was asked for, so nothing should change. With
-// the toggle off this fork behaves exactly like upstream; with it on, the free
-// engine works immediately, with no key to obtain.
+// it on, the free engine works immediately, with no key to obtain.
+//
+// WITH THE TOGGLE OFF THIS FORK IS UPSTREAM WITH ONE EXCEPTION, and it is not
+// this file's to hide. Lumina::CreateOnDemandTranslateProvider()
+// (lumina/lumina_translate_selection.cpp) deliberately bypasses the tier when
+// it resolves the engine for a one-off lookup, so a selected-text or
+// single-message translation runs through the Service row even here - which
+// on a profile that never opted in means the keyless google_web default, not
+// upstream's MTProto request. The free tier stays available either way; what
+// moves is WHERE one lookup goes. That file argues the case and names its
+// costs. If the "off means upstream, byte for byte" reading is the one that
+// has to hold, the fix belongs there - drop the bypass - and not here.
 [[nodiscard]] bool TranslationFeatureEnabled();
 [[nodiscard]] rpl::producer<bool> TranslationFeatureEnabledValue();
+
+// ---------------------------------------------------------------------------
+// THE TIER BOUNDARY. One predicate. Do not copy its body anywhere.
+// ---------------------------------------------------------------------------
+//
+// LuminaGram's translation is tiered the way Telegram tiers its own, so that a
+// user does not have to learn a second concept:
+//
+//  * FREE, and NOT gated on anything here - translating a selected piece of
+//    text, and translating one message from its context menu. One user action,
+//    one request, nothing kept. That is what stock Telegram gives everyone, and
+//    the policy for it lives in lumina/lumina_translate_selection.h, which is
+//    deliberately a different file with a different answer.
+//  * CONTINUOUS, gated on THIS - translating a whole conversation (the top bar
+//    button in history/view/history_view_top_bar_widget.cpp, the chat menu row
+//    in window/window_peer_menu.cpp, both through
+//    lumina/lumina_translate_toggle.h), translate-before-send
+//    (lumina/lumina_translate_send.h) and dual-language display
+//    (lumina/lumina_dual_language_line.h). Each of those keeps running after
+//    the one action that started it, one provider request per message,
+//    indefinitely, against the user's own quota. That is the tier Telegram
+//    charges Premium for.
+//
+// Today the answer is the master opt-in and nothing else. A licence or
+// entitlement check goes HERE, inside this function, and NOWHERE ELSE. Every
+// continuous entry point already consults it, so adding the term here is the
+// whole of the work; adding it at a call site instead is how a fork ends up
+// with a switch that turns on and a feature that then does nothing, which is
+// the exact failure this file's ChatTranslationUnlocked() note below describes.
+//
+// It is deliberately session-free. The account-shaped question - may whole-chat
+// translation run for this account at all without taking Telegram's paid
+// feature for free - is ChatTranslationUnlocked() below, and it is a different
+// question with a different answer. Both hold for whole-chat translation.
+[[nodiscard]] bool ContinuousTranslationAvailable();
+[[nodiscard]] rpl::producer<bool> ContinuousTranslationAvailableValue();
 
 // Whether whole-chat translation may run for this account.
 //
@@ -87,38 +132,8 @@ namespace Lumina {
 [[nodiscard]] rpl::producer<bool> ChatTranslationUnlockedValue(
 	not_null<Main::Session*> session);
 
-// trMode == "all". "manual" is the default and has to stay the default: "all"
-// costs one provider request per message against what is usually a metered API
-// key, because lib_translate fans a batch out into N single requests.
-[[nodiscard]] bool AutoTranslateEverything();
-
-// The read-side scope: 1:1 user chats are gated on trScopePrivate, groups and
-// channels on trScopeGroup, mirroring Android's DialogObject.isUserDialog /
-// isChatDialog split. Scope narrows ONLY the automatic mode - a chat outside
-// the scope can still be translated by hand, exactly as Android's own help
-// text promises ("Scope only limits the Auto-translate all chats mode").
-[[nodiscard]] bool TranslateScopeAllows(not_null<PeerData*> peer);
-
-// THE predicate. Every path that would start translating a chat the user did
-// not ask to translate consults this one function and nothing else. On Android
-// the equivalent check was duplicated and one onResume-style entry point
-// silently skipped it, so chats translated themselves while the mode said
-// manual; a second copy of this logic anywhere is that same bug.
-//
-// It deliberately does not cover the paths where the user did ask: the
-// translate bar, the per-chat row in the chat menu, and the channel-side
-// automatic translation Telegram itself performs through
-// ChannelDataFlag::AutoTranslation.
-//
-// TranslationFeatureEnabled() is part of it and not merely implied by
-// ChatTranslationUnlocked(): that one is also satisfied by Premium alone, so
-// without the master opt-in here a Premium account carrying a trMode of "all"
-// from an earlier opt-in would keep translating chats by itself after turning
-// the feature off.
-[[nodiscard]] bool ShouldAutoTranslate(not_null<History*> history);
-
-// The read side's language-detection policy, and the answer to "translate
-// received messages: every chat did nothing".
+// The read side's language-detection policy: what the detector is allowed to
+// hide, and how long it may wait before it says anything.
 //
 // Upstream only ever OFFERS to translate a chat once two independent guesses
 // agree that the user cannot read it: the recognised language must not be in
@@ -126,20 +141,23 @@ namespace Lumina {
 // the user knows, which by default is the interface language plus the system
 // one - and enough of the loaded messages must be in it
 // (kEnoughForTranslation in history/view/history_view_translate_tracker.cpp).
-// Both guesses are right for a translate BAR the user still has to press.
-// Neither survives "translate received messages: every chat": a peer writing
-// the user's own language is filtered out by the skip list, so nothing is ever
-// offered, ShouldAutoTranslate() is never reached, and the read language never
-// gets a say - the setting says every chat and means no chat. Android hit
-// exactly this and answered it by translating immediately once the user has
-// asked for automatic translation.
+// Both guesses are right for a translate BAR that appears on its own.
 //
-// So this returns the skip list the detector should use INSTEAD of the user's
-// own, and its presence is also the signal to translate from the first
-// recognised message rather than waiting for the count threshold. It is
-// nullopt for every chat ShouldAutoTranslate() does not cover, which is every
-// configuration this fork ships by default, and there the detector must use
-// upstream's inputs untouched.
+// Neither survives a per-chat switch. The offer is not decoration: History has
+// no HistoryTranslation until something offers a source language, and
+// History::translateTo() returns on its first line while there is none - so a
+// chat the detector declines to offer is a chat whose top bar button, chat menu
+// row and language panel all write a choice that is dropped on the floor. A
+// peer writing the user's own interface language is exactly such a chat, and it
+// is also exactly the chat someone reaches for the button in. That is the same
+// local detector hiding the same feature for the fifth time, and it does not
+// get to.
+//
+// So while the continuous tier is available for this chat, this returns the
+// skip list the detector must use INSTEAD of the user's own, and its presence
+// is also the signal to offer from the first recognised message rather than
+// waiting for the count threshold. It is nullopt otherwise, and there the
+// detector uses upstream's inputs untouched.
 //
 // The list it returns is not the empty one: bypassing "languages you know" is
 // about the languages the user did not choose, and the read language itself is
@@ -150,17 +168,31 @@ namespace Lumina {
 // Core::Settings::translateTo(), which itself falls back to the interface
 // language - so the detector and the thing that acts on it cannot disagree
 // about what "the read language" is.
-[[nodiscard]] std::optional<std::vector<LanguageId>> AutoTranslateOfferSkip(
+//
+// MIGRATION. This is where a profile carrying the removed trMode = "all" lands.
+// Nothing reads that key any more, so nothing translates itself: such a profile
+// opens on a launch where no chat is translating and every chat waits to be
+// switched on. That is a smaller step than it sounds, because whole-chat
+// translation was never durable in the first place - HistoryTranslation holds
+// _translatedTo in memory only, nothing serialises it, so every launch already
+// started from nothing and "all" was what filled it back in. What the user gets
+// in exchange is that the offer now arrives for chats the skip list used to
+// swallow, so the button is there to press in chats where nothing was ever
+// offered. Nothing is rewritten and no stored value changes meaning.
+[[nodiscard]] std::optional<std::vector<LanguageId>> TranslateOfferSkip(
 	not_null<History*> history);
 
-// Fires when anything AutoTranslateOfferSkip() reads may have changed: the
-// master opt-in, the mode, either scope key, the read language, the language
-// the read language falls back to (Core::Settings::translateTo(), which every
-// stock translate-to picker writes) and the selected provider. A consumer must
-// re-read rather than assume, because the provider stream covers API key edits
-// as well.
+// Fires when anything TranslateOfferSkip() reads may have changed: the tier
+// predicate above, the read language, the language the read language falls back
+// to (Core::Settings::translateTo(), which every stock translate-to picker
+// writes) and the selected provider. A consumer must re-read rather than
+// assume, because the provider stream covers API key edits as well.
 //
-// This stream is NOT the whole of what AutoTranslateOfferSkip() reads, and a
+// The tier term is taken from ContinuousTranslationAvailableValue() rather than
+// from the preference key behind it, so that a licence check added inside that
+// predicate reaches every consumer of this stream without a second edit here.
+//
+// This stream is NOT the whole of what TranslateOfferSkip() reads, and a
 // caller must not treat it as such. Three inputs are per-account or per-peer
 // and cannot be expressed here: Core::Settings::translateChatEnabled(),
 // ChatTranslationUnlocked() (its Premium half) and
@@ -178,6 +210,6 @@ namespace Lumina {
 // which does exactly that. Duplicating them inside this function instead would
 // not work: two of the three need a Main::Session and the third a PeerData,
 // and this producer is per-application.
-[[nodiscard]] rpl::producer<> AutoTranslatePolicyChanges();
+[[nodiscard]] rpl::producer<> TranslateOfferPolicyChanges();
 
 } // namespace Lumina

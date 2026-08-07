@@ -24,6 +24,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "core/shortcuts.h"
 #include "core/application.h"
 #include "core/core_settings.h"
+#include "lumina/lumina_chat_language_menu.h"
 #include "lumina/lumina_locale.h"
 #include "lumina/lumina_translate_toggle.h"
 #include "ui/controls/userpic_button.h"
@@ -161,6 +162,20 @@ TopBarWidget::TopBarWidget(
 	});
 	_groupCall->setClickedCallback([=] { groupCall(); });
 	_translateToggle->setClickedCallback([=] { toggleTranslate(); });
+
+	// LuminaGram: right-click states this conversation's language pair and lets
+	// each half of it be changed. It is added the way the call button's menu is
+	// added, and for the same reason it has to be: setAcceptBoth(true, true)
+	// only routes NON-left buttons through the press path
+	// (Ui::AbstractButton::setDown), so the left click keeps firing on release
+	// through the callback above, with its ripple and its accessible name
+	// untouched, and nothing here changes this bar's geometry.
+	_translateToggle->setAcceptBoth(true, true);
+	_translateToggle->addClickHandler([=](Qt::MouseButton button) {
+		if (button == Qt::RightButton) {
+			showTranslateMenu();
+		}
+	});
 
 	// LuminaGram: the translate toggle is the one child of this bar that has to
 	// start hidden. Every other button is shown or hidden by
@@ -346,7 +361,44 @@ void TopBarWidget::toggleTranslate() {
 	if (!history || !Lumina::ChatTranslateAvailable(history)) {
 		return;
 	}
-	Lumina::SetChatTranslating(history, !Lumina::ChatTranslating(history));
+	const auto translating = Lumina::ChatTranslating(history);
+
+	// LuminaGram: Lumina::ChatTranslateAvailable() deliberately does not wait
+	// for the language this chat is written in to be recognised, so the button
+	// is on the bar before there is anything to translate INTO - and in that
+	// state turning translation ON is a no-op that says nothing (see
+	// Lumina::ChatTranslateIncomingReady). A button that answers a click by
+	// doing nothing is worse than no button, so the click opens the menu
+	// instead: its incoming row states the wait in words, and its outgoing
+	// half - which never depended on that recognition - still works.
+	//
+	// Turning translation OFF is never routed here: it only runs while it is
+	// on, and it is on only once the recognition has happened.
+	if (!translating && !Lumina::ChatTranslateIncomingReady(history)) {
+		showTranslateMenu();
+		return;
+	}
+	Lumina::SetChatTranslating(history, !translating);
+}
+
+void TopBarWidget::showTranslateMenu() {
+	const auto history = _activeChat.key.history();
+	if (!history || !Lumina::ChatLanguageMenuAvailable(history)) {
+		return;
+	} else if (!createMenu(_translateToggle)) {
+		return;
+	}
+	Lumina::FillChatLanguageMenu(_menu.get(), _controller, history);
+	if (_menu->empty()) {
+		_menu = nullptr;
+		return;
+	}
+	_menu->setForcedOrigin(Ui::PanelAnimation::Origin::TopRight);
+	_menu->popup(Ui::PopupMenu::ConstrainToParentScreen(
+		_menu,
+		mapToGlobal(QPoint(
+			_translateToggle->x() + _translateToggle->width(),
+			st::topBarMenuPosition.y()))));
 }
 
 void TopBarWidget::updateTranslateToggleState() {

@@ -24,12 +24,18 @@ namespace Lumina {
 // On-demand translation: the user selected a word or a sentence, opened the
 // context menu and asked what it says. One lookup, one answer, nothing kept.
 //
-// This is deliberately NOT gated on TranslationFeatureEnabled()
-// (lumina_translate_gating.h). That opt-in protects the things that change by
-// themselves - the translate bar appearing, incoming messages being replaced,
-// outgoing messages being rewritten - and none of that is what happens here.
-// A lookup the user asked for, one item at a time, changes nothing about how
-// their chats behave, so it is available the way "Copy" is available.
+// THIS IS THE FREE TIER. It is deliberately NOT gated on
+// Lumina::ContinuousTranslationAvailable() (lumina_translate_gating.h), which
+// is where a licence check will one day live. That predicate governs the things
+// that keep going after one user action - a whole conversation translating
+// itself, outgoing messages being rewritten, every bubble carrying a second
+// line - and none of that is what happens here. One action, one request,
+// nothing kept: available the way "Copy" is available, which is what stock
+// Telegram gives everyone.
+//
+// The gate is absent from BOTH answers below, and the second one is the one
+// that is easy to lose: an entry point that is offered and then translates
+// through somebody else's service is not a free tier, it is a reroute.
 //
 // Everything on-demand goes through these two answers, and nothing decides
 // either of them anywhere else in the tree.
@@ -66,6 +72,16 @@ namespace Lumina {
 // same box, over the same MTProto request, with no Premium check anywhere on
 // the path (Lumina::ChatTranslationUnlocked() gates whole-chat translation,
 // which is the paid feature; a single messages.translateText is not).
+//
+// This does NOT go through Ui::CreateTranslateProvider() alone, and must not.
+// That function reaches a LuminaGram engine only through
+// Lumina::CreateTranslateProvider(), which the continuous tier gates - so with
+// the switch off it would fall through to Telegram's own service, taking the
+// free tier off the keyless engine that makes it free and sending the lookup
+// past the service the user named. The implementation therefore resolves the
+// Service row itself when that would happen. It reads the tier predicate to
+// know when that is, and for nothing else: the tier never decides whether this
+// is offered, only whether upstream's resolution already lands where it should.
 //
 // So the only thing an account-state check could do here is move a Premium
 // service's traffic to Google behind the back of a user who went into Settings

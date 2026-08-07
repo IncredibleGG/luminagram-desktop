@@ -114,6 +114,18 @@ namespace {
 			u"上，存放在与其他设置分开的文件里，绝不会发送给 Telegram。你"
 			u"翻译的所有内容都会发送到这里选择的服务，请挑一个你信任的。"_q },
 
+		// Telegram's own AI editor in the composer, whose Translate tab does
+		// what LuminaGram translation already does. The two product names
+		// stay untranslated.
+		{ u"LuminaAiEditorHeader"_q, u"Telegram AI 编辑器"_q },
+		{ u"LuminaAiEditorKeep"_q, u"保留 Telegram 的 AI 编辑器"_q },
+		{ u"LuminaAiEditorInfo"_q, u"Telegram 在输入框里自带一个 AI 编辑器，"
+			u"其中的“翻译”标签页与 LuminaGram 的翻译重叠。开启 LuminaGram "
+			u"翻译时，它的按钮和键盘快捷键都不会提供，这样你面前始终只有"
+			u"一个翻译工具。开启此项可以让 Telegram 的编辑器照常可用。关闭 "
+			u"LuminaGram 翻译时，Telegram 的编辑器始终都在，这个设置不会有"
+			u"任何影响。"_q },
+
 		// Translate before sending: the boxes and the send menu.
 		{ u"LuminaTranslateOriginalLabel"_q, u"原文"_q },
 		{ u"LuminaSendTranslation"_q, u"发送译文"_q },
@@ -135,27 +147,20 @@ namespace {
 		{ u"LuminaTranslateChatToggle"_q, u"翻译此聊天"_q },
 		{ u"LuminaTranslateChatShowOriginal"_q, u"显示原文"_q },
 
-		// Right-clicking that button: the per-chat language menu, the one
-		// place that states this conversation's language pair. Every row
-		// names its direction in full - the messages you receive, or the ones
-		// you send - because a shorter label would leave the reader guessing.
-		{ u"LuminaChatLangIncoming"_q, u"你收到的消息会翻译成{1}"_q },
-		{ u"LuminaChatLangIncomingOff"_q, u"你收到的消息不会翻译——选择用哪种"
-			u"语言阅读这个聊天"_q },
-		{ u"LuminaChatLangIncomingDefault"_q, u"你收到的消息：使用默认设置，"
-			u"{1}"_q },
-		{ u"LuminaChatLangIncomingPicker"_q, u"用哪种语言阅读这个聊天"_q },
-		{ u"LuminaChatLangTurnOn"_q, u"把这个聊天翻译成{1}"_q },
-		{ u"LuminaChatLangOutgoingChat"_q, u"你发送的消息会翻译成{1}，已为这个"
-			u"聊天记住"_q },
-		{ u"LuminaChatLangOutgoingAuto"_q, u"你发送的消息会翻译成这个聊天所用"
-			u"的语言，LuminaGram 会在第一条发出前询问一次"_q },
-		{ u"LuminaChatLangOutgoingGlobal"_q, u"你发送的消息会翻译成{1}，这是在"
-			u"设置中为所有聊天设定的语言"_q },
-		{ u"LuminaChatLangOutgoingOff"_q,
-			u"你发送的消息按原文发出，不会翻译"_q },
-		{ u"LuminaChatLangOutgoingDefault"_q, u"你发送的消息：使用默认设置，"
-			u"这个聊天所用的语言"_q },
+		// Right-clicking that button: the per-chat language menu. Its two
+		// rows are the two sides of the conversation, named as the other
+		// person and as oneself rather than by direction, because a
+		// direction word alone left the reader guessing whose messages were
+		// meant. The Title strings head the language list each row opens,
+		// the Off strings are how a row reads once that half is off, and
+		// the None entry is the list item inside the list that turns it off.
+		{ u"LuminaChatLangThem"_q, u"对方，翻译成{1}"_q },
+		{ u"LuminaChatLangMe"_q, u"己方，翻译成{1}"_q },
+		{ u"LuminaChatLangThemOff"_q, u"对方，不翻译"_q },
+		{ u"LuminaChatLangMeOff"_q, u"己方，不翻译"_q },
+		{ u"LuminaChatLangThemTitle"_q, u"对方的消息，翻译成"_q },
+		{ u"LuminaChatLangMeTitle"_q, u"己方的消息，翻译成"_q },
+		{ u"LuminaChatLangNone"_q, u"不翻译"_q },
 
 		// Names of the languages LuminaGram can translate into, in the order
 		// the pickers show them.
@@ -521,6 +526,12 @@ namespace {
 		{ u"LuminaTimeWithSeconds"_q, u"在消息时间中显示秒"_q },
 		{ u"LuminaTimeWithSecondsAbout"_q, u"消息下方的时间、复制文本中的"
 			u"时间，以及屏幕阅读器朗读的时间都会包含秒。"_q },
+		// The two items of the system tray menu; the second is also the one
+		// item on the taskbar jump list on Windows. {1} is the application's
+		// own name, never translated and never inflected, so both read as a
+		// verb followed by a bare product name.
+		{ u"LuminaTrayOpen"_q, u"打开 {1}"_q },
+		{ u"LuminaTrayQuit"_q, u"退出 {1}"_q },
 		{ u"LuminaUndoSendBulletin"_q, u"正在发送消息…"_q },
 		{ u"LuminaUndoSendTitle"_q, u"撤销发送"_q },
 		{ u"LuminaUndoSendUndo"_q, u"撤销"_q },

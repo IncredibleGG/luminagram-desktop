@@ -129,25 +129,29 @@ namespace {
 		{ u"LuminaTranslateChatToggle"_q, u"翻譯這個聊天"_q },
 		{ u"LuminaTranslateChatShowOriginal"_q, u"顯示原文"_q },
 
-		// The per-chat language panel that button opens: one subtitle for the
-		// messages you receive, one for the messages you send.
-		{ u"LuminaChatLangIncoming"_q, u"你收到的訊息會翻譯成{1}"_q },
-		{ u"LuminaChatLangIncomingDefault"_q, u"你收到的訊息：使用預設，"
-			u"也就是{1}"_q },
-		{ u"LuminaChatLangIncomingOff"_q, u"你收到的訊息不會翻譯——選擇要"
-			u"用哪個語言閱讀這個聊天"_q },
-		{ u"LuminaChatLangIncomingPicker"_q, u"閱讀這個聊天的語言"_q },
-		{ u"LuminaChatLangOutgoingAuto"_q, u"你傳送的訊息會翻譯成這個聊天"
-			u"使用的語言；LuminaGram 會在第一則送出前先問一次是哪個語言"_q },
-		{ u"LuminaChatLangOutgoingChat"_q, u"你傳送的訊息會翻譯成{1}，"
-			u"這個聊天會記住這個選擇"_q },
-		{ u"LuminaChatLangOutgoingDefault"_q, u"你傳送的訊息：使用預設，"
-			u"也就是這個聊天使用的語言"_q },
-		{ u"LuminaChatLangOutgoingGlobal"_q, u"你傳送的訊息會翻譯成{1}，"
-			u"也就是在設定裡為所有聊天選擇的語言"_q },
-		{ u"LuminaChatLangOutgoingOff"_q, u"你傳送的訊息會照原文送出，"
-			u"不會翻譯"_q },
-		{ u"LuminaChatLangTurnOn"_q, u"把這個聊天翻譯成{1}"_q },
+		// Pressing that button: the two rows that name this conversation's
+		// language pair. Each row names its side first - 「對方」 for the
+		// other person, 「己方」 for you - because a direction word never
+		// said whose messages were meant. Each side has its own off string
+		// instead of feeding 「不翻譯」 into {1}: 「翻譯成」 has to be
+		// followed by a language, so the off state cannot reuse that row.
+		{ u"LuminaChatLangThem"_q, u"對方，翻譯成{1}"_q },
+		{ u"LuminaChatLangThemOff"_q, u"對方，不翻譯"_q },
+		{ u"LuminaChatLangMe"_q, u"己方，翻譯成{1}"_q },
+		{ u"LuminaChatLangMeOff"_q, u"己方，不翻譯"_q },
+		{ u"LuminaChatLangThemTitle"_q, u"對方的訊息，翻譯成"_q },
+		{ u"LuminaChatLangMeTitle"_q, u"己方的訊息，翻譯成"_q },
+		{ u"LuminaChatLangNone"_q, u"不翻譯"_q },
+
+		// Telegram's own AI editor, which carries a Translate tab of its own.
+		{ u"LuminaAiEditorHeader"_q, u"Telegram AI 編輯器"_q },
+		{ u"LuminaAiEditorKeep"_q, u"保留 Telegram 的 AI 編輯器"_q },
+		{ u"LuminaAiEditorInfo"_q, u"Telegram 在訊息輸入框裡有自己的 AI "
+			u"編輯器，其中的「翻譯」分頁與 LuminaGram 的翻譯重疊。開啟 "
+			u"LuminaGram 翻譯時，它的按鈕與鍵盤快捷鍵都不會出現，所以你眼前"
+			u"永遠只有一個翻譯工具。開啟這個選項，就能讓 Telegram 的編輯器"
+			u"仍然保持可用。關閉 LuminaGram 翻譯時，Telegram 的編輯器一直"
+			u"都在，這個選項不會有任何作用。"_q },
 
 		// Names of the languages LuminaGram can translate into, in the order
 		// the pickers show them.
@@ -518,6 +522,12 @@ namespace {
 		{ u"LuminaTimeWithSeconds"_q, u"在訊息時間中顯示秒"_q },
 		{ u"LuminaTimeWithSecondsAbout"_q, u"訊息下方的時間、複製文字中的"
 			u"時間，以及螢幕閱讀器唸出的時間都會包含秒數。"_q },
+		// The two items of the system tray menu; the second is also the only
+		// item on the taskbar button's jump list on Windows. {1} is always
+		// the literal application name, never translated and never inflected,
+		// so each reads as a verb followed by a bare product name.
+		{ u"LuminaTrayOpen"_q, u"開啟 {1}"_q },
+		{ u"LuminaTrayQuit"_q, u"結束 {1}"_q },
 		{ u"LuminaUndoSendBulletin"_q, u"正在傳送訊息…"_q },
 		{ u"LuminaUndoSendTitle"_q, u"復原傳送"_q },
 		{ u"LuminaUndoSendUndo"_q, u"復原"_q },

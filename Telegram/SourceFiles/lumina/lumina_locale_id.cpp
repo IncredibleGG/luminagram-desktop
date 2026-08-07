@@ -143,27 +143,32 @@ namespace {
 		// The per-chat translate button in the chat top bar.
 		{ u"LuminaTranslateChatToggle"_q, u"Terjemahkan obrolan ini"_q },
 		{ u"LuminaTranslateChatShowOriginal"_q, u"Tampilkan asli"_q },
-		{ u"LuminaChatLangIncoming"_q,
-			u"Pesan yang Anda terima diterjemahkan ke {1}"_q },
-		{ u"LuminaChatLangIncomingOff"_q, u"Pesan yang Anda terima tidak "
-			u"diterjemahkan — pilih bahasa untuk membaca obrolan ini"_q },
-		{ u"LuminaChatLangIncomingDefault"_q,
-			u"Pesan yang Anda terima: pakai bawaan, {1}"_q },
-		{ u"LuminaChatLangIncomingPicker"_q, u"Baca obrolan ini dalam"_q },
-		{ u"LuminaChatLangTurnOn"_q, u"Terjemahkan obrolan ini ke {1}"_q },
-		{ u"LuminaChatLangOutgoingChat"_q, u"Pesan yang Anda kirim "
-			u"diterjemahkan ke {1}, yang diingat untuk obrolan ini"_q },
-		{ u"LuminaChatLangOutgoingAuto"_q, u"Pesan yang Anda kirim "
-			u"diterjemahkan ke bahasa yang dipakai di obrolan ini, dan "
-			u"LuminaGram menanyakannya sekali sebelum pesan "
-			u"pertama dikirim"_q },
-		{ u"LuminaChatLangOutgoingGlobal"_q, u"Pesan yang Anda kirim "
-			u"diterjemahkan ke {1}, bahasa yang diatur untuk semua obrolan "
-			u"di Pengaturan"_q },
-		{ u"LuminaChatLangOutgoingOff"_q, u"Pesan yang Anda kirim "
-			u"keluar apa adanya, tanpa diterjemahkan"_q },
-		{ u"LuminaChatLangOutgoingDefault"_q, u"Pesan yang Anda kirim: "
-			u"pakai bawaan, yaitu bahasa yang dipakai di obrolan ini"_q },
+
+		// The menu that button opens: one row per side of the conversation.
+		// Indonesian names the side after the thing it owns, so the rows say
+		// «Pesan mereka» and «Pesan saya» — the two words a reader tells apart
+		// at a glance, where a direction word told them nothing. Off is a row
+		// of its own, so the slot after «ke» only ever holds a language name
+		// or «Bahasa lawan bicara», and both of those follow «ke» properly.
+		{ u"LuminaChatLangThem"_q, u"Pesan mereka, diterjemahkan ke {1}"_q },
+		{ u"LuminaChatLangThemOff"_q, u"Pesan mereka, tidak diterjemahkan"_q },
+		{ u"LuminaChatLangMe"_q, u"Pesan saya, diterjemahkan ke {1}"_q },
+		{ u"LuminaChatLangMeOff"_q, u"Pesan saya, tidak diterjemahkan"_q },
+		{ u"LuminaChatLangThemTitle"_q, u"Pesan mereka, diterjemahkan ke"_q },
+		{ u"LuminaChatLangMeTitle"_q, u"Pesan saya, diterjemahkan ke"_q },
+		{ u"LuminaChatLangNone"_q, u"Tidak diterjemahkan"_q },
+
+		// Telegram's own AI editor, whose Translate tab overlaps ours.
+		{ u"LuminaAiEditorHeader"_q, u"Editor AI Telegram"_q },
+		{ u"LuminaAiEditorKeep"_q, u"Pertahankan editor AI Telegram"_q },
+		{ u"LuminaAiEditorInfo"_q, u"Telegram memiliki editor AI sendiri di "
+			u"kolom pesan, dan tab Terjemahkan di dalamnya tumpang tindih "
+			u"dengan terjemahan LuminaGram. Selama terjemahan LuminaGram "
+			u"aktif, tombol editor itu beserta pintasan papan ketiknya tidak "
+			u"ditawarkan, sehingga hanya ada satu alat terjemahan di hadapan "
+			u"Anda. Aktifkan opsi ini jika Anda tetap ingin editor Telegram "
+			u"tersedia. Bila terjemahan LuminaGram nonaktif, editor Telegram "
+			u"selalu tersedia dan pengaturan ini tidak mengubah apa pun."_q },
 
 		// Names of the languages LuminaGram can translate into, in the order
 		// the pickers show them.
@@ -617,6 +622,12 @@ namespace {
 		{ u"LuminaTimeWithSecondsAbout"_q, u"Waktu di bawah pesan, waktu pada "
 			u"teks yang disalin, dan waktu yang dibacakan pembaca layar "
 			u"semuanya menyertakan detik."_q },
+
+		// The tray menu and the taskbar button's jump list. {1} is the
+		// application name, always the bare word LuminaGram.
+		{ u"LuminaTrayOpen"_q, u"Buka {1}"_q },
+		{ u"LuminaTrayQuit"_q, u"Keluar dari {1}"_q },
+
 		{ u"LuminaUndoSendBulletin"_q, u"Mengirim pesan…"_q },
 		{ u"LuminaUndoSendTitle"_q, u"Urungkan kirim"_q },
 		{ u"LuminaUndoSendUndo"_q, u"Urungkan"_q },

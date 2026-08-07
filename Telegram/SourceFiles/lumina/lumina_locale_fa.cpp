@@ -135,30 +135,34 @@ namespace {
 		// The per-chat translate button in the chat top bar.
 		{ u"LuminaTranslateChatToggle"_q, u"ترجمهٔ این گفتگو"_q },
 		{ u"LuminaTranslateChatShowOriginal"_q, u"نمایش متن اصلی"_q },
-		{ u"LuminaChatLangIncoming"_q, u"پیام‌هایی که دریافت می‌کنید به {1} "
-			u"ترجمه می‌شوند"_q },
-		{ u"LuminaChatLangIncomingDefault"_q, u"پیام‌هایی که دریافت "
-			u"می‌کنید: استفاده از پیش‌فرض، {1}"_q },
-		{ u"LuminaChatLangIncomingOff"_q, u"پیام‌هایی که دریافت می‌کنید "
-			u"ترجمه نمی‌شوند — زبانی را برای خواندن این گفتگو انتخاب "
-			u"کنید"_q },
-		{ u"LuminaChatLangIncomingPicker"_q, u"زبان خواندن این گفتگو"_q },
-		{ u"LuminaChatLangOutgoingAuto"_q, u"پیام‌هایی که می‌فرستید به "
-			u"زبانی که این گفتگو با آن نوشته می‌شود ترجمه می‌شوند؛ "
-			u"LuminaGram پیش از ارسال نخستین پیام یک‌بار دربارهٔ آن "
-			u"می‌پرسد"_q },
-		{ u"LuminaChatLangOutgoingChat"_q, u"پیام‌هایی که می‌فرستید به {1} "
-			u"ترجمه می‌شوند، زبانی که برای این گفتگو به خاطر سپرده شده "
-			u"است"_q },
-		{ u"LuminaChatLangOutgoingDefault"_q, u"پیام‌هایی که می‌فرستید: "
-			u"استفاده از پیش‌فرض، یعنی زبانی که این گفتگو با آن نوشته "
-			u"می‌شود"_q },
-		{ u"LuminaChatLangOutgoingGlobal"_q, u"پیام‌هایی که می‌فرستید به "
-			u"{1} ترجمه می‌شوند، زبانی که در تنظیمات برای همهٔ گفتگوها "
-			u"تعیین شده است"_q },
-		{ u"LuminaChatLangOutgoingOff"_q, u"پیام‌هایی که می‌فرستید "
-			u"همان‌گونه که نوشته‌اید ارسال می‌شوند و ترجمه نمی‌شوند"_q },
-		{ u"LuminaChatLangTurnOn"_q, u"ترجمهٔ این گفتگو به {1}"_q },
+		// The two rows that button opens. Each names its side first - the
+		// person on the other end, then the user - because "incoming" and
+		// "outgoing" never said whose messages were meant. A row that is on
+		// ends in the language it translates into; a row that is off is a
+		// string of its own, so no row ever says "translated into" and then
+		// names something that is not a language.
+		{ u"LuminaChatLangThem"_q,
+			u"پیام‌های طرف مقابل، ترجمه‌شده به {1}"_q },
+		{ u"LuminaChatLangThemOff"_q, u"پیام‌های طرف مقابل، ترجمه‌نشده"_q },
+		{ u"LuminaChatLangMe"_q, u"پیام‌های من، ترجمه‌شده به {1}"_q },
+		{ u"LuminaChatLangMeOff"_q, u"پیام‌های من، ترجمه‌نشده"_q },
+		{ u"LuminaChatLangThemTitle"_q, u"زبان ترجمهٔ پیام‌های طرف مقابل"_q },
+		{ u"LuminaChatLangMeTitle"_q, u"زبان ترجمهٔ پیام‌های من"_q },
+		{ u"LuminaChatLangNone"_q, u"ترجمه نمی‌شود"_q },
+
+		// Telegram's own AI editor, which carries a Translate tab of its
+		// own.
+		{ u"LuminaAiEditorHeader"_q, u"ویرایشگر هوش مصنوعی Telegram"_q },
+		{ u"LuminaAiEditorKeep"_q,
+			u"نگه داشتن ویرایشگر هوش مصنوعی Telegram"_q },
+		{ u"LuminaAiEditorInfo"_q, u"Telegram در کادر پیام ویرایشگر "
+			u"هوش مصنوعی خودش را دارد که زبانهٔ «ترجمه» آن با ترجمهٔ "
+			u"LuminaGram هم‌پوشانی دارد. تا وقتی ترجمهٔ LuminaGram روشن "
+			u"است، دکمه و میان‌بر صفحه‌کلید آن پیشنهاد نمی‌شود، پس همیشه "
+			u"فقط یک ابزار ترجمه پیش روی شماست. این گزینه را روشن کنید تا "
+			u"ویرایشگر Telegram با این حال در دسترس بماند. وقتی ترجمهٔ "
+			u"LuminaGram خاموش است، ویرایشگر Telegram همیشه سر جای خود است "
+			u"و این گزینه هیچ چیزی را تغییر نمی‌دهد."_q },
 
 		// Names of the languages LuminaGram can translate into.
 		{ u"LuminaLangEn"_q, u"انگلیسی"_q },
@@ -417,6 +421,15 @@ namespace {
 		{ u"LuminaStickerSizeInfo"_q, u"استیکرها در گفتگوها با چه اندازه‌ای رسم شوند — هم آن‌هایی که می‌فرستید و هم آن‌هایی که دریافت می‌کنید. ایموجی‌های متحرک، تاس و استیکرهای هدیه اندازهٔ خودشان را نگه می‌دارند. Telegram Desktop اندازهٔ یک استیکر را یک‌بار می‌سنجد و به خاطر می‌سپارد، پس اندازهٔ تازه از راه‌اندازی بعدی برنامه اعمال می‌شود."_q },
 		{ u"LuminaTimeWithSeconds"_q, u"نمایش ثانیه در زمان پیام"_q },
 		{ u"LuminaTimeWithSecondsAbout"_q, u"زمانِ زیر پیام، زمان در متن کپی‌شده و زمانی که صفحه‌خوان اعلام می‌کند، همگی ثانیه را در بر می‌گیرند."_q },
+
+		// The two items in the system tray menu; the second is also the one
+		// item on the taskbar button's jump list on Windows. {1} is the
+		// application's name, always the literal LuminaGram, never
+		// translated and never inflected - so both rows read as a verb
+		// phrase ending in a bare product name.
+		{ u"LuminaTrayOpen"_q, u"باز کردن {1}"_q },
+		{ u"LuminaTrayQuit"_q, u"خروج از {1}"_q },
+
 		{ u"LuminaUndoSendBulletin"_q, u"در حال ارسال پیام…"_q },
 		{ u"LuminaUndoSendTitle"_q, u"لغو ارسال"_q },
 		{ u"LuminaUndoSendUndo"_q, u"لغو"_q },

@@ -120,6 +120,13 @@ bool RegisterLocaleTable(const char *languageCode, LocaleTableFactory factory);
 // wherever the widget takes an rpl::producer<QString> anyway.
 [[nodiscard]] rpl::producer<QString> TrValue(const QString &key);
 
+// Tr(key, arg1) as the same producer. `arg1` is captured once: it is for the
+// values that do not themselves change with the language, such as the app's
+// own name.
+[[nodiscard]] rpl::producer<QString> TrValue(
+	const QString &key,
+	const QString &arg1);
+
 // Fires when the in-app language changes. For rows whose text is computed
 // rather than looked up, merge this into whatever already refreshes them.
 [[nodiscard]] rpl::producer<> LangChanges();

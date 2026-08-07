@@ -23,6 +23,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "core/application.h"
 #include "core/sandbox.h"
 #include "core/shortcuts.h"
+#include "core/version.h" // AppName for the window title fallback.
 #include "lang/lang_keys.h"
 #include "data/data_session.h"
 #include "data/data_forum_topic.h"
@@ -855,7 +856,9 @@ void MainWindow::updateTitle() {
 		: Dialogs::Key();
 	const auto thread = key ? key.thread() : nullptr;
 	if (!thread) {
-		setTitle((user.isEmpty() ? u"Telegram"_q : user) + added);
+		// Windows labels the taskbar button with this title, so the no-chat
+		// fallback has to be the fork name and not the upstream one.
+		setTitle((user.isEmpty() ? AppName.utf16() : user) + added);
 		return;
 	}
 	const auto history = thread->owningHistory();

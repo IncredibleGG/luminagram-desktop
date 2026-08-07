@@ -146,29 +146,45 @@ namespace {
 		{ u"LuminaTranslateChatToggle"_q, u"Bu sohbeti çevir"_q },
 		{ u"LuminaTranslateChatShowOriginal"_q, u"Orijinali göster"_q },
 
-		// Right-clicking that button: the one place that states this
-		// conversation's language pair. Every line names its direction first
-		// and in full.
-		{ u"LuminaChatLangIncoming"_q,
-			u"Aldığınız mesajlar {1} diline çevrilir"_q },
-		{ u"LuminaChatLangIncomingOff"_q, u"Aldığınız mesajlar çevrilmiyor — "
-			u"bu sohbeti hangi dilde okuyacağınızı seçin"_q },
-		{ u"LuminaChatLangIncomingDefault"_q,
-			u"Aldığınız mesajlar: varsayılanı, yani {1} dilini kullan"_q },
-		{ u"LuminaChatLangIncomingPicker"_q, u"Bu sohbeti şu dilde oku"_q },
-		{ u"LuminaChatLangTurnOn"_q, u"Bu sohbeti {1} diline çevir"_q },
-		{ u"LuminaChatLangOutgoingChat"_q, u"Gönderdiğiniz mesajlar {1} "
-			u"diline çevrilir — bu sohbet için hatırlanan dil"_q },
-		{ u"LuminaChatLangOutgoingAuto"_q, u"Gönderdiğiniz mesajlar bu "
-			u"sohbetin yazıldığı dile çevrilir; LuminaGram bu dili ilk mesaj "
-			u"gitmeden önce bir kez sorar"_q },
-		{ u"LuminaChatLangOutgoingGlobal"_q, u"Gönderdiğiniz mesajlar {1} "
-			u"diline çevrilir; bu dil Ayarlar'da tüm sohbetler için "
-			u"belirlenmiştir"_q },
-		{ u"LuminaChatLangOutgoingOff"_q, u"Gönderdiğiniz mesajlar "
-			u"yazdığınız gibi, çevrilmeden gider"_q },
-		{ u"LuminaChatLangOutgoingDefault"_q, u"Gönderdiğiniz mesajlar: "
-			u"varsayılanı, yani bu sohbetin yazıldığı dili kullan"_q },
+		// Pressing that button: the two rows that state this conversation's
+		// language pair. Each row names whose messages it is about - the other
+		// party and myself, never a direction word. Off is its own row now,
+		// so a value row always names a real target: a language name, or the
+		// recipient's-language answer on the Me row. Neither can carry a case
+		// ending here, so the ending sits on the noun "dil" and the value
+		// itself follows the colon.
+		{ u"LuminaChatLangThem"_q,
+			u"Karşı tarafın mesajları şu dile çevrilir: {1}"_q },
+		{ u"LuminaChatLangThemOff"_q,
+			u"Karşı tarafın mesajları çevrilmiyor"_q },
+		{ u"LuminaChatLangMe"_q,
+			u"Benim mesajlarım şu dile çevrilir: {1}"_q },
+		{ u"LuminaChatLangMeOff"_q, u"Benim mesajlarım çevrilmiyor"_q },
+		{ u"LuminaChatLangThemTitle"_q,
+			u"Karşı tarafın mesajlarını şu dile çevir"_q },
+		{ u"LuminaChatLangMeTitle"_q, u"Mesajlarımı şu dile çevir"_q },
+		{ u"LuminaChatLangNone"_q, u"Çevrilmiyor"_q },
+
+		// The tray menu and the taskbar button's jump list, which upstream
+		// builds from lng_open_from_tray / lng_quit_from_tray - "Telegram" in
+		// every language it serves. The name is substituted bare and cannot
+		// take a case ending, so the ending sits on "uygulama" after it.
+		{ u"LuminaTrayOpen"_q, u"{1} uygulamasını aç"_q },
+		{ u"LuminaTrayQuit"_q, u"{1} uygulamasından çık"_q },
+
+		// Telegram's own AI editor, which carries a Translate tab of its own
+		// and so overlaps what LuminaGram translation already does.
+		{ u"LuminaAiEditorHeader"_q, u"Telegram yapay zekâ düzenleyicisi"_q },
+		{ u"LuminaAiEditorKeep"_q,
+			u"Telegram'ın yapay zekâ düzenleyicisini koru"_q },
+		{ u"LuminaAiEditorInfo"_q, u"Telegram'ın mesaj kutusunda kendi yapay "
+			u"zekâ düzenleyicisi vardır ve onun Çeviri sekmesi LuminaGram'ın "
+			u"çevirisiyle çakışır. LuminaGram çevirisi açıkken bu "
+			u"düzenleyicinin düğmesi de klavye kısayolu da sunulmaz; böylece "
+			u"önünüzde her zaman tek bir çeviri aracı olur. Telegram'ın "
+			u"düzenleyicisini yine de kullanılabilir tutmak için bunu açın. "
+			u"LuminaGram çevirisi kapalıyken Telegram'ın düzenleyicisi zaten "
+			u"her zaman oradadır ve bu ayar hiçbir şeyi değiştirmez."_q },
 
 		// Names of the languages LuminaGram can translate into, in the order
 		// the pickers show them.

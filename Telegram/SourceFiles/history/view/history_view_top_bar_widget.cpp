@@ -161,15 +161,17 @@ TopBarWidget::TopBarWidget(
 		}
 	});
 	_groupCall->setClickedCallback([=] { groupCall(); });
-	_translateToggle->setClickedCallback([=] { toggleTranslate(); });
+	_translateToggle->setClickedCallback([=] { showTranslateMenu(); });
 
-	// LuminaGram: right-click states this conversation's language pair and lets
-	// each half of it be changed. It is added the way the call button's menu is
-	// added, and for the same reason it has to be: setAcceptBoth(true, true)
-	// only routes NON-left buttons through the press path
-	// (Ui::AbstractButton::setDown), so the left click keeps firing on release
-	// through the callback above, with its ripple and its accessible name
-	// untouched, and nothing here changes this bar's geometry.
+	// LuminaGram: the button states this chat's language pair and lets each
+	// half of it be changed, so pressing it opens that pair rather than
+	// toggling one end of it blind. The right button is accepted as well and
+	// does the same thing, the way the call button's menu is added, and for
+	// the same reason it has to be: setAcceptBoth(true, true) only routes
+	// NON-left buttons through the press path (Ui::AbstractButton::setDown),
+	// so the left click keeps firing on release through the callback above,
+	// with its ripple and its accessible name untouched, and nothing here
+	// changes this bar's geometry.
 	_translateToggle->setAcceptBoth(true, true);
 	_translateToggle->addClickHandler([=](Qt::MouseButton button) {
 		if (button == Qt::RightButton) {
@@ -354,18 +356,6 @@ void TopBarWidget::groupCall() {
 			_controller->startOrJoinGroupCall(peer, {});
 		}
 	}
-}
-
-void TopBarWidget::toggleTranslate() {
-	const auto history = _activeChat.key.history();
-	if (!history || !Lumina::ChatTranslateAvailable(history)) {
-		return;
-	}
-	// LuminaGram: turning it on works whether or not the app ever offered to
-	// translate this chat - Lumina::SetChatTranslatingTo() opens the offer
-	// itself - so the click is the plain toggle it looks like. Choosing the
-	// languages is the menu, on the right button.
-	Lumina::SetChatTranslating(history, !Lumina::ChatTranslating(history));
 }
 
 void TopBarWidget::showTranslateMenu() {

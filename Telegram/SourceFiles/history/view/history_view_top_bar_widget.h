@@ -154,7 +154,6 @@ private:
 
 	void call(Calls::StartOutgoingCallArgs);
 	void groupCall();
-	void toggleTranslate();
 	void showTranslateMenu();
 	void updateTranslateToggleState();
 	void showGroupCallMenu(not_null<PeerData*> peer);

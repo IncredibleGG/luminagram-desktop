@@ -12,7 +12,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "core/core_settings.h"
 #include "platform/platform_notifications_manager.h"
 #include "platform/platform_specific.h"
+#include "core/version.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_locale.h"
 
 #include <QtWidgets/QApplication>
 
@@ -79,7 +81,7 @@ void Tray::rebuildMenu() {
 			_activeForTrayIconAction = Core::App().isActiveForTrayMenu();
 			return _activeForTrayIconAction
 				? tr::lng_minimize_to_tray(tr::now)
-				: tr::lng_open_from_tray(tr::now);
+				: Lumina::Tr(u"LuminaTrayOpen"_q, AppName.utf16());
 		});
 
 		_tray.addAction(
@@ -100,7 +102,9 @@ void Tray::rebuildMenu() {
 			[=] { toggleSoundNotifications(); });
 	}
 
-	_tray.addAction(tr::lng_quit_from_tray(), [] { Core::Quit(); });
+	_tray.addAction(
+		Lumina::TrValue(u"LuminaTrayQuit"_q, AppName.utf16()),
+		[] { Core::Quit(); });
 
 	TrayAccountsMenu::Fill(_tray);
 

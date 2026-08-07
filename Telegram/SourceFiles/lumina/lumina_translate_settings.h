@@ -156,4 +156,21 @@ void AddTranslateRows(
 	not_null<Ui::VerticalLayout*> container,
 	not_null<Window::SessionController*> controller);
 
+// The language list this page's two language rows open, shared so that the
+// translate button in a chat's title bar edits the very same two values
+// through the very same list. A second list built somewhere else is a second
+// set of languages to keep in step, and a shortcut that offers different
+// choices than the page it is a shortcut to is not a shortcut.
+//
+// `firstOption` is the special entry at the top - "Recipient's language" on
+// the send side, "Interface language" on the read side, "Not translated" from
+// the chat - and `firstValue` the code it stores.
+void ShowLanguagePicker(
+	not_null<Window::SessionController*> controller,
+	const QString &title,
+	const QString &firstOption,
+	const QString &firstValue,
+	const QString &current,
+	Fn<void(QString)> save);
+
 } // namespace Lumina

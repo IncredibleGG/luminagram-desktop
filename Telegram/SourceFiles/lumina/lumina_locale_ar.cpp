@@ -147,32 +147,43 @@ namespace {
 		{ u"LuminaTranslateChatToggle"_q, u"ترجمة هذه المحادثة"_q },
 		{ u"LuminaTranslateChatShowOriginal"_q, u"عرض النص الأصلي"_q },
 
-		// The per-chat language panel that button opens: one subtitle for the
-		// messages you receive, one for the messages you send.
-		{ u"LuminaChatLangIncoming"_q,
-			u"الرسائل التي تستقبلها تُترجَم إلى {1}"_q },
-		{ u"LuminaChatLangIncomingDefault"_q,
-			u"الرسائل التي تستقبلها: استخدام الافتراضي، أي {1}"_q },
-		{ u"LuminaChatLangIncomingOff"_q,
-			u"الرسائل التي تستقبلها لا تُترجَم — اختر اللغة التي تقرأ "
-			u"بها هذه الدردشة"_q },
-		{ u"LuminaChatLangIncomingPicker"_q, u"لغة قراءة هذه الدردشة"_q },
-		{ u"LuminaChatLangOutgoingAuto"_q,
-			u"الرسائل التي ترسلها تُترجَم إلى اللغة التي كُتبت بها "
-			u"هذه الدردشة، وهي لغة يسألك عنها LuminaGram مرة واحدة "
-			u"قبل خروج أول رسالة"_q },
-		{ u"LuminaChatLangOutgoingChat"_q,
-			u"الرسائل التي ترسلها تُترجَم إلى {1}، وهي اللغة "
-			u"المحفوظة لهذه الدردشة"_q },
-		{ u"LuminaChatLangOutgoingDefault"_q,
-			u"الرسائل التي ترسلها: استخدام الافتراضي، أي اللغة "
-			u"التي كُتبت بها هذه الدردشة"_q },
-		{ u"LuminaChatLangOutgoingGlobal"_q,
-			u"الرسائل التي ترسلها تُترجَم إلى {1}، وهي اللغة "
-			u"المحدَّدة لكل الدردشات في الإعدادات"_q },
-		{ u"LuminaChatLangOutgoingOff"_q,
-			u"الرسائل التي ترسلها تخرج كما كُتبت، دون ترجمة"_q },
-		{ u"LuminaChatLangTurnOn"_q, u"ترجمة هذه الدردشة إلى {1}"_q },
+		// Pressing that button: the two rows that name the language each half
+		// of this conversation is translated into. Each row names its side -
+		// the other person, and me - instead of a direction, because the
+		// complaint these strings answer is that the app never said whose
+		// messages were meant.
+		//
+		// A half that is off has a row of its own, so "{1}" is only ever a
+		// language a reader recognises - or, on the "me" row, the recipient's
+		// language, which reads the same way after "translated into".
+		{ u"LuminaChatLangThem"_q, u"رسائل الطرف الآخر تُترجَم إلى {1}"_q },
+		{ u"LuminaChatLangMe"_q, u"رسائلي تُترجَم إلى {1}"_q },
+		{ u"LuminaChatLangThemOff"_q, u"رسائل الطرف الآخر لا تُترجَم"_q },
+		{ u"LuminaChatLangMeOff"_q, u"رسائلي لا تُترجَم"_q },
+		{ u"LuminaChatLangThemTitle"_q, u"ترجمة رسائل الطرف الآخر إلى"_q },
+		{ u"LuminaChatLangMeTitle"_q, u"ترجمة رسائلي إلى"_q },
+		{ u"LuminaChatLangNone"_q, u"بلا ترجمة"_q },
+
+		// The tray menu, and the one item on the taskbar button's jump list.
+		// Upstream builds both from lng_open_from_tray / lng_quit_from_tray,
+		// which name Telegram in every language Telegram serves - so the menu
+		// reached from our own taskbar button named someone else's product.
+		{ u"LuminaTrayOpen"_q, u"فتح {1}"_q },
+		{ u"LuminaTrayQuit"_q, u"إنهاء {1}"_q },
+
+		// Telegram's own AI editor, which carries a Translate tab of its own.
+		{ u"LuminaAiEditorHeader"_q,
+			u"محرّر الذكاء الاصطناعي في Telegram"_q },
+		{ u"LuminaAiEditorKeep"_q,
+			u"الإبقاء على محرّر الذكاء الاصطناعي في Telegram"_q },
+		{ u"LuminaAiEditorInfo"_q,
+			u"لدى Telegram محرّر ذكاء اصطناعي خاص به في مربّع الرسالة، وفيه "
+			u"علامة تبويب «ترجمة» تتداخل مع ترجمة LuminaGram. وما دامت "
+			u"ترجمة LuminaGram مفعّلة، فلا يُعرض زرّه ولا اختصار لوحة "
+			u"المفاتيح الخاص به، فلا تكون أمامك أبدًا أكثر من أداة ترجمة "
+			u"واحدة. فعّل هذا الخيار للإبقاء على محرّر Telegram متاحًا رغم "
+			u"ذلك. أما عند إيقاف ترجمة LuminaGram فمحرّر Telegram موجود "
+			u"دائمًا، ولا يغيّر هذا الخيار شيئًا."_q },
 
 		// Names of the languages LuminaGram can translate into, in the order
 		// the pickers show them.

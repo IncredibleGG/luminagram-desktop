@@ -182,32 +182,50 @@ struct Registration {
 		{ u"LuminaTranslateChatToggle"_q, u"Translate this chat"_q },
 		{ u"LuminaTranslateChatShowOriginal"_q, u"Show original"_q },
 
-		// Right-clicking that button: the one place that states this
-		// conversation's language pair. Every line names its direction first
-		// and in full, because the whole complaint these strings answer is that
-		// the app never said which way round anything was. "Incoming" and
-		// "Outgoing" alone would be shorter and would put the reader back to
-		// guessing whose messages are meant.
-		{ u"LuminaChatLangIncoming"_q,
-			u"Messages you receive are translated into {1}"_q },
-		{ u"LuminaChatLangIncomingOff"_q, u"Messages you receive are not "
-			"translated - choose the language to read this chat in"_q },
-		{ u"LuminaChatLangIncomingDefault"_q,
-			u"Messages you receive: use the default, {1}"_q },
-		{ u"LuminaChatLangIncomingPicker"_q, u"Read this chat in"_q },
-		{ u"LuminaChatLangTurnOn"_q, u"Translate this chat into {1}"_q },
-		{ u"LuminaChatLangOutgoingChat"_q, u"Messages you send are translated "
-			"into {1}, remembered for this chat"_q },
-		{ u"LuminaChatLangOutgoingAuto"_q, u"Messages you send are translated "
-			"into the language this chat is written in, which LuminaGram asks "
-			"about once before the first one goes out"_q },
-		{ u"LuminaChatLangOutgoingGlobal"_q, u"Messages you send are "
-			"translated into {1}, the language set for every chat in "
-			"Settings"_q },
-		{ u"LuminaChatLangOutgoingOff"_q,
-			u"Messages you send go out as typed, not translated"_q },
-		{ u"LuminaChatLangOutgoingDefault"_q, u"Messages you send: use the "
-			"default, the language this chat is written in"_q },
+		// Pressing that button: the one place that states this conversation's
+		// language pair, and the shortcut to the two rows on the translation
+		// settings page that hold it. Both halves name their side first -
+		// "them" and "me" rather than "incoming" and "outgoing" - because the
+		// complaint these strings answer is that the app never said whose
+		// messages were meant, and a direction word does not say it.
+		//
+		// The language at the end is the whole content of each row, so it is
+		// always a language a reader recognises: never a code, and never an
+		// empty value standing in for one.
+		// One string per side per state rather than substituting the "not
+		// translated" entry into {1}: that reads as "translated into not
+		// translated" in English and breaks outright in languages that place
+		// the verb elsewhere.
+		{ u"LuminaChatLangThem"_q, u"Them, translated into {1}"_q },
+		{ u"LuminaChatLangThemOff"_q, u"Them, not translated"_q },
+		{ u"LuminaChatLangMe"_q, u"Me, translated into {1}"_q },
+		{ u"LuminaChatLangMeOff"_q, u"Me, not translated"_q },
+		{ u"LuminaChatLangThemTitle"_q, u"Their messages, translated into"_q },
+		{ u"LuminaChatLangMeTitle"_q, u"My messages, translated into"_q },
+		{ u"LuminaChatLangNone"_q, u"Not translated"_q },
+
+		// The tray menu and the taskbar button's jump list. Upstream builds
+		// both from lng_open_from_tray / lng_quit_from_tray, whose text is
+		// "Open Telegram" and "Quit Telegram" in every language Telegram
+		// serves - so the one menu a user reaches by right-clicking our
+		// taskbar button named someone else's product.
+		{ u"LuminaTrayOpen"_q, u"Open {1}"_q },
+		{ u"LuminaTrayQuit"_q, u"Quit {1}"_q },
+
+		// Telegram's own AI editor, which carries a Translate tab of its own.
+		// These were reached through TrOrValue() with the English written at
+		// the call site, so the settings page they build was the one section
+		// of LuminaGram that stayed English in every other language.
+		{ u"LuminaAiEditorHeader"_q, u"Telegram AI editor"_q },
+		{ u"LuminaAiEditorKeep"_q, u"Keep Telegram's AI editor"_q },
+		{ u"LuminaAiEditorInfo"_q, u"Telegram has an AI editor of its own in "
+			"the composer, with a Translate tab that overlaps LuminaGram's "
+			"translation. While LuminaGram translation is on, its button and "
+			"its keyboard shortcut are not offered, so there is only ever one "
+			"translation tool in front of you. Turn this on to keep "
+			"Telegram's editor available anyway. With LuminaGram translation "
+			"off, Telegram's editor is always there and this setting changes "
+			"nothing."_q },
 
 		// Names of the languages LuminaGram can translate into, in the order
 		// the pickers show them. These are the ones Telegram's own language
@@ -586,6 +604,16 @@ rpl::producer<QString> TrValue(const QString &key) {
 		LangChanges()
 	) | rpl::map([key] {
 		return Tr(key);
+	});
+}
+
+rpl::producer<QString> TrValue(const QString &key, const QString &arg1) {
+	return rpl::single(
+		rpl::empty
+	) | rpl::then(
+		LangChanges()
+	) | rpl::map([key, arg1] {
+		return Tr(key, arg1);
 	});
 }
 

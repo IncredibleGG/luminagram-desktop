@@ -148,37 +148,52 @@ namespace {
 		{ u"LuminaTranslateChatToggle"_q, u"Перевести этот чат"_q },
 		{ u"LuminaTranslateChatShowOriginal"_q, u"Показать оригинал"_q },
 
-		// Right-clicking that button: the one place that states this
-		// conversation's language pair. Every line names its direction in
-		// full, as the English table does, rather than a bare
-		// incoming/outgoing pair that leaves whose messages are meant to
-		// guesswork. The "{1}" arrives as a language name in the
-		// nominative, so every line keeps it after "язык" or a dash and
-		// never in a case the name would have to agree with.
-		{ u"LuminaChatLangIncoming"_q, u"Сообщения, которые вы "
-			u"получаете, переводятся на язык {1}"_q },
-		{ u"LuminaChatLangIncomingOff"_q, u"Сообщения, которые вы "
-			u"получаете, не переводятся — выберите язык, на котором "
-			u"читать этот чат"_q },
-		{ u"LuminaChatLangIncomingDefault"_q, u"Сообщения, которые вы "
-			u"получаете: используется язык по умолчанию — {1}"_q },
-		{ u"LuminaChatLangIncomingPicker"_q, u"Язык чтения этого чата"_q },
-		{ u"LuminaChatLangTurnOn"_q, u"Переводить этот чат на язык {1}"_q },
-		{ u"LuminaChatLangOutgoingChat"_q, u"Сообщения, которые вы "
-			u"отправляете, переводятся на язык {1}, запомненный для "
-			u"этого чата"_q },
-		{ u"LuminaChatLangOutgoingAuto"_q, u"Сообщения, которые вы "
-			u"отправляете, переводятся на язык, на котором пишут в этом "
-			u"чате; о нём LuminaGram один раз спрашивает перед отправкой "
-			u"первого сообщения"_q },
-		{ u"LuminaChatLangOutgoingGlobal"_q, u"Сообщения, которые вы "
-			u"отправляете, переводятся на язык {1}, заданный для всех "
-			u"чатов в настройках"_q },
-		{ u"LuminaChatLangOutgoingOff"_q, u"Сообщения, которые вы "
-			u"отправляете, уходят как есть, без перевода"_q },
-		{ u"LuminaChatLangOutgoingDefault"_q, u"Сообщения, которые вы "
-			u"отправляете: используется язык по умолчанию — тот, на "
-			u"котором пишут в этом чате"_q },
+		// Pressing that button: the one place that states this conversation's
+		// language pair, and the shortcut to the two rows on the translation
+		// settings page that hold it. Each row names its side first -
+		// "сообщений собеседника" and "моих сообщений" rather than an
+		// incoming/outgoing pair - because the complaint these rows answer is
+		// that the app never said whose messages were meant, and a direction
+		// word does not say it. Off is a row of its own on each side, so the
+		// value slot never has to hold a negation.
+		//
+		// The language is the whole value of each row, and it follows a colon
+		// rather than a preposition: the "{1}" arrives in the nominative, and
+		// on the "me" row it can be «Язык собеседника», which carries a "язык"
+		// of its own. After "на язык" both of those break; after a colon
+		// nothing has to agree with anything.
+		{ u"LuminaChatLangThem"_q, u"Перевод сообщений собеседника: {1}"_q },
+		{ u"LuminaChatLangThemOff"_q,
+			u"Перевод сообщений собеседника: Выключен"_q },
+		{ u"LuminaChatLangMe"_q, u"Перевод моих сообщений: {1}"_q },
+		{ u"LuminaChatLangMeOff"_q, u"Перевод моих сообщений: Выключен"_q },
+		{ u"LuminaChatLangThemTitle"_q, u"Перевод сообщений собеседника"_q },
+		{ u"LuminaChatLangMeTitle"_q, u"Перевод моих сообщений"_q },
+		{ u"LuminaChatLangNone"_q, u"Выключен"_q },
+
+		// The tray menu and the taskbar button's jump list, the one menu that
+		// named Telegram rather than this app: upstream builds both from
+		// lng_open_from_tray / lng_quit_from_tray. The "{1}" is the app name,
+		// always the literal "LuminaGram", and it never declines - the
+		// genitive after "из" leaves a Latin name exactly as it is, which is
+		// how Telegram itself words this item in Russian.
+		{ u"LuminaTrayOpen"_q, u"Открыть {1}"_q },
+		{ u"LuminaTrayQuit"_q, u"Выйти из {1}"_q },
+
+		// Telegram's own AI editor, which carries a Translate tab of its own.
+		// "Telegram" and "LuminaGram" are product names and stay as they are;
+		// the tab is named here by the Russian name Telegram gives it.
+		{ u"LuminaAiEditorHeader"_q, u"ИИ-редактор Telegram"_q },
+		{ u"LuminaAiEditorKeep"_q, u"Оставить ИИ-редактор Telegram"_q },
+		{ u"LuminaAiEditorInfo"_q, u"У Telegram в поле ввода есть "
+			u"собственный ИИ-редактор, а в нём — вкладка «Перевод», которая "
+			u"пересекается с переводом LuminaGram. Пока перевод LuminaGram "
+			u"включён, кнопка этого редактора и его сочетание клавиш не "
+			u"предлагаются, поэтому перед вами всегда только один инструмент "
+			u"перевода. Включите этот параметр, чтобы редактор Telegram всё "
+			u"равно оставался доступен. Когда перевод LuminaGram выключен, "
+			u"редактор Telegram доступен всегда и этот параметр ничего не "
+			u"меняет."_q },
 
 		// Names of the languages LuminaGram can translate into.
 		{ u"LuminaLangEn"_q, u"Английский"_q },

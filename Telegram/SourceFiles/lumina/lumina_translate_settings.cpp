@@ -476,60 +476,6 @@ void ShowProviderPicker(not_null<Window::SessionController*> controller) {
 	}));
 }
 
-// `firstOption` is the special entry at the top of the list - "Recipient's
-// language" on the send side, "Interface language" on the read side - and
-// `firstValue` the code it stores ("auto" and "").
-void ShowLanguagePicker(
-		not_null<Window::SessionController*> controller,
-		const QString &title,
-		const QString &firstOption,
-		const QString &firstValue,
-		const QString &current,
-		Fn<void(QString)> save) {
-	const auto &languages = TranslateLanguages();
-	auto options = std::vector<QString>();
-	auto codes = std::vector<QString>();
-	options.reserve(languages.size() + 2);
-	codes.reserve(languages.size() + 2);
-	options.push_back(firstOption);
-	codes.push_back(firstValue);
-	for (const auto &language : languages) {
-		options.push_back(language.name);
-		codes.push_back(language.code);
-	}
-
-	// A stored code this build's table does not carry - written by another
-	// client, or restored from a backup - gets an entry of its own. Without it
-	// the picker falls back to highlighting the first row, so it would show a
-	// selection the settings row above disagrees with, and the next tap would
-	// silently discard the stored dialect.
-	if (!current.isEmpty()
-		&& (current != firstValue)
-		&& (ranges::find(codes, current) == end(codes))) {
-		options.push_back(TranslateLanguageName(current));
-		codes.push_back(current);
-	}
-
-	auto selected = 0;
-	for (auto i = 0, count = int(codes.size()); i != count; ++i) {
-		if (codes[i] == current) {
-			selected = i;
-			break;
-		}
-	}
-	controller->show(Box([=](not_null<Ui::GenericBox*> box) {
-		SingleChoiceBox(box, {
-			.title = rpl::single(title),
-			.options = options,
-			.initialSelection = selected,
-			.callback = [=](int index) {
-				if (index >= 0 && index < int(codes.size())) {
-					save(codes[index]);
-				}
-			},
-		});
-	}));
-}
 
 void AddSendRows(
 		not_null<Ui::VerticalLayout*> container,
@@ -839,6 +785,61 @@ void AddProviderRows(
 }
 
 } // namespace
+
+// `firstOption` is the special entry at the top of the list - "Recipient's
+// language" on the send side, "Interface language" on the read side - and
+// `firstValue` the code it stores ("auto" and "").
+void ShowLanguagePicker(
+		not_null<Window::SessionController*> controller,
+		const QString &title,
+		const QString &firstOption,
+		const QString &firstValue,
+		const QString &current,
+		Fn<void(QString)> save) {
+	const auto &languages = TranslateLanguages();
+	auto options = std::vector<QString>();
+	auto codes = std::vector<QString>();
+	options.reserve(languages.size() + 2);
+	codes.reserve(languages.size() + 2);
+	options.push_back(firstOption);
+	codes.push_back(firstValue);
+	for (const auto &language : languages) {
+		options.push_back(language.name);
+		codes.push_back(language.code);
+	}
+
+	// A stored code this build's table does not carry - written by another
+	// client, or restored from a backup - gets an entry of its own. Without it
+	// the picker falls back to highlighting the first row, so it would show a
+	// selection the settings row above disagrees with, and the next tap would
+	// silently discard the stored dialect.
+	if (!current.isEmpty()
+		&& (current != firstValue)
+		&& (ranges::find(codes, current) == end(codes))) {
+		options.push_back(TranslateLanguageName(current));
+		codes.push_back(current);
+	}
+
+	auto selected = 0;
+	for (auto i = 0, count = int(codes.size()); i != count; ++i) {
+		if (codes[i] == current) {
+			selected = i;
+			break;
+		}
+	}
+	controller->show(Box([=](not_null<Ui::GenericBox*> box) {
+		SingleChoiceBox(box, {
+			.title = rpl::single(title),
+			.options = options,
+			.initialSelection = selected,
+			.callback = [=](int index) {
+				if (index >= 0 && index < int(codes.size())) {
+					save(codes[index]);
+				}
+			},
+		});
+	}));
+}
 
 bool TranslateBeforeSend() {
 	return Settings::Instance().getBool(kKeyBeforeSend, false);

@@ -144,30 +144,33 @@ namespace {
 		// The per-chat translate button in the chat top bar.
 		{ u"LuminaTranslateChatToggle"_q, u"Traduzir esta conversa"_q },
 		{ u"LuminaTranslateChatShowOriginal"_q, u"Mostrar original"_q },
-		{ u"LuminaChatLangIncoming"_q,
-			u"As mensagens que você recebe são traduzidas para {1}"_q },
-		{ u"LuminaChatLangIncomingDefault"_q,
-			u"Mensagens que você recebe: usar o padrão, {1}"_q },
-		{ u"LuminaChatLangIncomingOff"_q, u"As mensagens que você recebe "
-			u"não são traduzidas — escolha o idioma para ler esta "
-			u"conversa"_q },
-		{ u"LuminaChatLangIncomingPicker"_q, u"Ler esta conversa em"_q },
-		{ u"LuminaChatLangOutgoingAuto"_q, u"As mensagens que você envia "
-			u"são traduzidas para o idioma em que esta conversa é "
-			u"escrita, que o LuminaGram pergunta uma vez antes de a "
-			u"primeira mensagem sair"_q },
-		{ u"LuminaChatLangOutgoingChat"_q, u"As mensagens que você envia "
-			u"são traduzidas para {1}, o idioma lembrado nesta "
-			u"conversa"_q },
-		{ u"LuminaChatLangOutgoingDefault"_q, u"Mensagens que você envia: "
-			u"usar o padrão, o idioma em que esta conversa é "
-			u"escrita"_q },
-		{ u"LuminaChatLangOutgoingGlobal"_q, u"As mensagens que você "
-			u"envia são traduzidas para {1}, o idioma definido para "
-			u"todas as conversas nas Configurações"_q },
-		{ u"LuminaChatLangOutgoingOff"_q, u"As mensagens que você envia "
-			u"saem como digitadas, sem tradução"_q },
-		{ u"LuminaChatLangTurnOn"_q, u"Traduzir esta conversa para {1}"_q },
+
+		// The two-row menu that button opens. Each row names its side -
+		// the other person, or me - because a direction word never said
+		// whose messages were meant.
+		{ u"LuminaChatLangThem"_q,
+			u"Mensagens da outra pessoa, traduzidas para {1}"_q },
+		{ u"LuminaChatLangThemOff"_q,
+			u"Mensagens da outra pessoa, não traduzidas"_q },
+		{ u"LuminaChatLangMe"_q, u"Minhas mensagens, traduzidas para {1}"_q },
+		{ u"LuminaChatLangMeOff"_q, u"Minhas mensagens, não traduzidas"_q },
+		{ u"LuminaChatLangThemTitle"_q,
+			u"Traduzir as mensagens da outra pessoa para"_q },
+		{ u"LuminaChatLangMeTitle"_q, u"Traduzir minhas mensagens para"_q },
+		{ u"LuminaChatLangNone"_q, u"Sem tradução"_q },
+
+		// Telegram's own AI editor, whose Translate tab overlaps ours.
+		{ u"LuminaAiEditorHeader"_q, u"Editor de IA do Telegram"_q },
+		{ u"LuminaAiEditorKeep"_q, u"Manter o editor de IA do Telegram"_q },
+		{ u"LuminaAiEditorInfo"_q, u"O Telegram tem um editor de IA próprio "
+			u"no campo de mensagem, com uma aba «Traduzir» que se sobrepõe à "
+			u"tradução do LuminaGram. Enquanto a tradução do LuminaGram "
+			u"estiver ativada, o botão e o atalho de teclado dele não são "
+			u"oferecidos, para que exista sempre uma única ferramenta de "
+			u"tradução à sua frente. Ative isto para manter o editor do "
+			u"Telegram disponível mesmo assim. Com a tradução do LuminaGram "
+			u"desativada, o editor do Telegram está sempre disponível e esta "
+			u"opção não muda nada."_q },
 
 		// Names of the languages LuminaGram can translate into.
 		{ u"LuminaLangEn"_q, u"Inglês"_q },
@@ -623,6 +626,10 @@ namespace {
 		{ u"LuminaTimeWithSecondsAbout"_q, u"A hora abaixo de uma mensagem, a "
 			u"hora no texto copiado e a hora que um leitor de tela anuncia "
 			u"passam a incluir os segundos."_q },
+		// The tray menu and the taskbar button's jump list, where {1} is
+		// always the bare product name.
+		{ u"LuminaTrayOpen"_q, u"Abrir o {1}"_q },
+		{ u"LuminaTrayQuit"_q, u"Sair do {1}"_q },
 		{ u"LuminaUndoSendBulletin"_q, u"Enviando mensagem…"_q },
 		{ u"LuminaUndoSendTitle"_q, u"Desfazer envio"_q },
 		{ u"LuminaUndoSendUndo"_q, u"Desfazer"_q },

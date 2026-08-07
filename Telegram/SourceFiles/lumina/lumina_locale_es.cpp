@@ -156,35 +156,45 @@ namespace {
 		{ u"LuminaTranslateChatToggle"_q, u"Traducir este chat"_q },
 		{ u"LuminaTranslateChatShowOriginal"_q, u"Mostrar original"_q },
 
-		// Right-clicking that button: the one place that states this
-		// conversation's language pair. Every row names its direction first
-		// and in full - «los mensajes que recibes» / «los mensajes que
-		// envías» - because «entrantes» and «salientes» on their own would
-		// leave the reader guessing whose messages are meant. {1} is a
-		// language name, capitalised the way the pickers list it, so these
-		// rows take it bare, without the article Spanish would put before a
-		// lower-case one; LuminaTrSendConfirmMessage already does the same.
-		{ u"LuminaChatLangIncoming"_q,
-			u"Los mensajes que recibes se traducen a {1}"_q },
-		{ u"LuminaChatLangIncomingOff"_q, u"Los mensajes que recibes no se "
-			u"traducen: elige en qué idioma quieres leer este chat"_q },
-		{ u"LuminaChatLangIncomingDefault"_q,
-			u"Los mensajes que recibes: usar el predeterminado, {1}"_q },
-		{ u"LuminaChatLangIncomingPicker"_q, u"Idioma de lectura de este "
-			u"chat"_q },
-		{ u"LuminaChatLangTurnOn"_q, u"Traducir este chat a {1}"_q },
-		{ u"LuminaChatLangOutgoingChat"_q, u"Los mensajes que envías se "
-			u"traducen a {1}, que se recuerda para este chat"_q },
-		{ u"LuminaChatLangOutgoingAuto"_q, u"Los mensajes que envías se "
-			u"traducen al idioma en que está escrito este chat; LuminaGram lo "
-			u"pregunta una vez antes de enviar el primero"_q },
-		{ u"LuminaChatLangOutgoingGlobal"_q, u"Los mensajes que envías se "
-			u"traducen a {1}, el idioma configurado para todos los chats en "
-			u"Ajustes"_q },
-		{ u"LuminaChatLangOutgoingOff"_q, u"Los mensajes que envías salen tal "
-			u"como los escribes, sin traducir"_q },
-		{ u"LuminaChatLangOutgoingDefault"_q, u"Los mensajes que envías: usar "
-			u"el predeterminado, el idioma en que está escrito este chat"_q },
+		// Pressing that button: the one place that states this conversation's
+		// language pair. Each row names its side first - «La otra persona»
+		// and «Yo», never a direction word - because the complaint these rows
+		// answer is that «entrantes» and «salientes» never said whose
+		// messages were meant. Off is a row of its own per side, worded like
+		// LuminaChatLangNone - the entry inside the language list that turns
+		// that half off - so the row and the list say the same thing.
+		//
+		// {1} is the whole value of the row, and holding it after a colon is
+		// what keeps every value grammatical: a participle after «La otra
+		// persona,» would agree with the person rather than the messages,
+		// and «Idioma del destinatario», which the outgoing half puts here
+		// when the send language is asked per chat, would need the article
+		// «al» that a bare {1} cannot carry.
+		{ u"LuminaChatLangThem"_q, u"La otra persona, traducción: {1}"_q },
+		{ u"LuminaChatLangThemOff"_q, u"La otra persona, sin traducir"_q },
+		{ u"LuminaChatLangMe"_q, u"Yo, traducción: {1}"_q },
+		{ u"LuminaChatLangMeOff"_q, u"Yo, sin traducir"_q },
+		{ u"LuminaChatLangThemTitle"_q, u"Traducción de los mensajes de la "
+			u"otra persona"_q },
+		{ u"LuminaChatLangMeTitle"_q, u"Traducción de mis mensajes"_q },
+		{ u"LuminaChatLangNone"_q, u"Sin traducir"_q },
+
+		// Telegram's own AI editor, which carries a Translate tab of its
+		// own. Its rows live on the Chats sub-page, but everything the
+		// divider text says is about the overlap with our translation, so
+		// they sit with the translation rows, as they do in English.
+		{ u"LuminaAiEditorHeader"_q, u"Editor con IA de Telegram"_q },
+		{ u"LuminaAiEditorKeep"_q,
+			u"Mantener el editor con IA de Telegram"_q },
+		{ u"LuminaAiEditorInfo"_q, u"Telegram tiene su propio editor con IA "
+			u"en el campo del mensaje, con una pestaña Traducir que se "
+			u"solapa con la traducción de LuminaGram. Mientras la traducción "
+			u"de LuminaGram está activada, no se ofrecen ni el botón ni el "
+			u"atajo de teclado de ese editor, así que nunca tienes delante "
+			u"más de una herramienta de traducción. Activa esto para "
+			u"mantener disponible el editor de Telegram de todos modos. Con "
+			u"la traducción de LuminaGram desactivada, el editor de Telegram "
+			u"está siempre ahí y esta opción no cambia nada."_q },
 
 		// Names of the languages LuminaGram can translate into, in the order
 		// the pickers show them. Spanish writes language names in lower case
@@ -648,6 +658,15 @@ namespace {
 		{ u"LuminaTimeWithSecondsAbout"_q, u"La hora que aparece bajo un "
 			u"mensaje, la hora del texto copiado y la hora que anuncia un "
 			u"lector de pantalla incluyen los segundos."_q },
+
+		// The two items in the system tray menu; LuminaTrayQuit is also the
+		// whole jump list on the Windows taskbar button. {1} is the
+		// application's name, always the literal LuminaGram: never
+		// translated and never inflected, so both rows take it bare, and
+		// the preposition «Salir de» carries what Spanish needs here.
+		{ u"LuminaTrayOpen"_q, u"Abrir {1}"_q },
+		{ u"LuminaTrayQuit"_q, u"Salir de {1}"_q },
+
 		{ u"LuminaUndoSendBulletin"_q, u"Enviando mensaje…"_q },
 		{ u"LuminaUndoSendTitle"_q, u"Deshacer el envío"_q },
 		{ u"LuminaUndoSendUndo"_q, u"Deshacer"_q },

@@ -1,3 +1,22 @@
+7.0.12 (08.08.26)
+
+- The translate button in a chat's title bar now opens the pair of languages
+  it stands for: one row for the messages you receive, one for the messages
+  you send, each naming the language it is set to. They are the same two
+  values the translation settings page holds, edited from the chat.
+- Say LuminaGram, not Telegram, in the taskbar and the window title, in the
+  tray menu and on the taskbar button's own menu.
+- Paint LuminaGram's own icon in the taskbar and the tray. The icon the
+  application loads at runtime had never been replaced, so every build so far
+  carried Telegram's.
+- Take a taskbar identity of our own. It was byte-for-byte Telegram Desktop's,
+  and the Start menu shortcut we wrote was named after Telegram too.
+- Update the entry this application owns in Add or Remove Programs. The
+  updater was writing to the one belonging to a real Telegram Desktop
+  installed beside it.
+- Translate the settings for Telegram's AI editor, which had been left as
+  English written into the code.
+
 7.0.11 (07.08.26)
 
 - Translate a chat the app saw no reason to translate. Asking by hand now

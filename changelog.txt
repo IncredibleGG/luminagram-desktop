@@ -1,3 +1,17 @@
+7.0.10 (07.08.26)
+
+- Translate a selected phrase or a single message whatever the LuminaGram
+  translation switch says, the way Telegram itself does.
+- The switch now governs the continuous side only: a whole conversation,
+  translating before sending, and showing both languages.
+- Give every chat its own language pair, shown and changed from the translate
+  button in its title bar.
+- A one-off translation follows the engine you named; a profile that never
+  named one keeps going where Telegram Desktop sends it.
+- Translate photo and video captions when sending them.
+- Finish the Traditional Chinese, Simplified Chinese, Russian, Spanish, Arabic,
+  Persian, Turkish, Indonesian and Portuguese wording.
+
 7.0.9 (06.08.26)
 
 - Translate received messages again: the offer was suppressed for any language

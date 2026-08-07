@@ -76,16 +76,6 @@ namespace {
 			u"«Подтверждать перед отправкой» сначала показывает перевод рядом "
 			u"с оригиналом, чтобы вы могли отправить любой из них; если этот "
 			u"параметр выключен, перевод уходит сразу."_q },
-		{ u"LuminaTranslateModeHeader"_q,
-			u"Переводить входящие сообщения"_q },
-		{ u"LuminaTranslateModeAll"_q, u"Во всех чатах"_q },
-		{ u"LuminaTranslateModeManual"_q, u"Только выбранные мной чаты"_q },
-		{ u"LuminaTranslateModeInfo"_q, u"В режиме «Только выбранные мной "
-			u"чаты» откройте чат и нажмите кнопку «Перевод» вверху, чтобы "
-			u"включить перевод в нём; остальные чаты остаются нетронутыми. В "
-			u"режиме «Во всех чатах» на каждое сообщение уходит отдельный "
-			u"запрос к вашему сервису перевода — с платным ключом лучше "
-			u"оставить «Только выбранные мной чаты»."_q },
 		{ u"LuminaTranslateReceiveHeader"_q, u"Получение"_q },
 		{ u"LuminaDualLanguageDisplay"_q,
 			u"Показывать оригинал и перевод вместе"_q },
@@ -94,14 +84,6 @@ namespace {
 		{ u"LuminaTranslateReceiveInfo"_q, u"Входящие сообщения сохраняют "
 			u"исходный текст в полном размере, а перевод показывается под "
 			u"ним."_q },
-		{ u"LuminaTranslateScopeHeader"_q, u"Область применения"_q },
-		{ u"LuminaTranslateScopePrivate"_q, u"Личные чаты"_q },
-		{ u"LuminaTranslateScopeGroup"_q, u"Группы и каналы"_q },
-		{ u"LuminaTranslateScopeInfo"_q, u"Чаты вне области применения не "
-			u"затрагиваются в обе стороны: они не переводятся при чтении, а "
-			u"сообщения, которые вы туда отправляете, уходят без перевода. "
-			u"Любое отдельное сообщение по-прежнему можно перевести "
-			u"вручную."_q },
 		{ u"LuminaTranslateProviderHeader"_q, u"Сервис"_q },
 		{ u"LuminaTranslateProvider"_q, u"Сервис перевода"_q },
 		{ u"LuminaTranslateProviderLlm"_q, u"LLM (совместимый с OpenAI)"_q },
@@ -165,6 +147,41 @@ namespace {
 		// what pressing the button will do, not what the chat is doing now.
 		{ u"LuminaTranslateChatToggle"_q, u"Перевести этот чат"_q },
 		{ u"LuminaTranslateChatShowOriginal"_q, u"Показать оригинал"_q },
+
+		// Right-clicking that button: the one place that states this
+		// conversation's language pair. Every line names its direction in
+		// full, as the English table does, rather than a bare
+		// incoming/outgoing pair that leaves whose messages are meant to
+		// guesswork. The "{1}" arrives as a language name in the
+		// nominative, so every line keeps it after "язык" or a dash and
+		// never in a case the name would have to agree with.
+		{ u"LuminaChatLangIncoming"_q, u"Сообщения, которые вы "
+			u"получаете, переводятся на язык {1}"_q },
+		{ u"LuminaChatLangIncomingOff"_q, u"Сообщения, которые вы "
+			u"получаете, не переводятся — выберите язык, на котором "
+			u"читать этот чат"_q },
+		{ u"LuminaChatLangIncomingPending"_q, u"Сообщения, которые вы "
+			u"получаете, будут переводиться на язык {1}, как только "
+			u"LuminaGram определит, на каком языке пишут в этом чате"_q },
+		{ u"LuminaChatLangIncomingDefault"_q, u"Сообщения, которые вы "
+			u"получаете: используется язык по умолчанию — {1}"_q },
+		{ u"LuminaChatLangIncomingPicker"_q, u"Язык чтения этого чата"_q },
+		{ u"LuminaChatLangTurnOn"_q, u"Переводить этот чат на язык {1}"_q },
+		{ u"LuminaChatLangOutgoingChat"_q, u"Сообщения, которые вы "
+			u"отправляете, переводятся на язык {1}, запомненный для "
+			u"этого чата"_q },
+		{ u"LuminaChatLangOutgoingAuto"_q, u"Сообщения, которые вы "
+			u"отправляете, переводятся на язык, на котором пишут в этом "
+			u"чате; о нём LuminaGram один раз спрашивает перед отправкой "
+			u"первого сообщения"_q },
+		{ u"LuminaChatLangOutgoingGlobal"_q, u"Сообщения, которые вы "
+			u"отправляете, переводятся на язык {1}, заданный для всех "
+			u"чатов в настройках"_q },
+		{ u"LuminaChatLangOutgoingOff"_q, u"Сообщения, которые вы "
+			u"отправляете, уходят как есть, без перевода"_q },
+		{ u"LuminaChatLangOutgoingDefault"_q, u"Сообщения, которые вы "
+			u"отправляете: используется язык по умолчанию — тот, на "
+			u"котором пишут в этом чате"_q },
 
 		// Names of the languages LuminaGram can translate into.
 		{ u"LuminaLangEn"_q, u"Английский"_q },
@@ -252,6 +269,7 @@ namespace {
 
 		// Appearance: sticker size.
 		{ u"LuminaAppearanceStickerSizeHeader"_q, u"Размер стикеров"_q },
+		{ u"LuminaStickerSizeChoice"_q, u"{1}%"_q },
 		{ u"LuminaStickerSizeChoiceDefault"_q, u"{1}% (по умолчанию)"_q },
 		{ u"LuminaStickerSizeInfo"_q, u"Насколько крупно стикеры "
 			u"рисуются в чатах — и отправленные, и полученные. "
@@ -602,8 +620,10 @@ namespace {
 		{ u"LuminaProfileShowRegistrationDate"_q,
 			u"Показывать дату регистрации"_q },
 		{ u"LuminaProfileRegistrationDate"_q, u"Дата регистрации"_q },
+		{ u"LuminaProfileRegistrationApprox"_q, u"~ {1}"_q },
 		{ u"LuminaProfileShowDcId"_q, u"Показывать дата-центр"_q },
 		{ u"LuminaProfileDcId"_q, u"Дата-центр"_q },
+		{ u"LuminaProfileDcIdValue"_q, u"DC{1}"_q },
 		{ u"LuminaProfileShowChatDate"_q, u"Показывать дату создания"_q },
 		{ u"LuminaProfileChatCreated"_q, u"Создан"_q },
 

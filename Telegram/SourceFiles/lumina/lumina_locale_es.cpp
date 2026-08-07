@@ -16,7 +16,6 @@ namespace {
 // The divider paragraphs quote the rows they talk about; Spanish quotes those
 // with angle quotes, and the text inside them has to keep matching the row it
 // names - LuminaTranslateSendLangAuto, LuminaTranslateBeforeSendConfirm,
-// LuminaTranslateModeAll, LuminaTranslateModeManual,
 // LuminaAllowSaveRestricted, LuminaForwardNoCaptionTitle and
 // LuminaMessageDetails (both quoted by LuminaMessageActionsInfo),
 // LuminaSaveSticker (quoted by LuminaSaveStickersInfo), LuminaUndoSendUndo
@@ -84,15 +83,6 @@ namespace {
 			u"«Confirmar antes de enviar» muestra primero la traducción junto "
 			u"al original, para que puedas enviar cualquiera de los dos; si "
 			u"está desactivado, la traducción se envía directamente."_q },
-		{ u"LuminaTranslateModeHeader"_q, u"Traducir mensajes entrantes"_q },
-		{ u"LuminaTranslateModeAll"_q, u"En todos los chats"_q },
-		{ u"LuminaTranslateModeManual"_q, u"Solo los chats que yo active"_q },
-		{ u"LuminaTranslateModeInfo"_q, u"Con «Solo los chats que yo active», "
-			u"abre un chat y usa el botón «Traducir» de la parte superior "
-			u"para activarlo ahí; los demás chats quedan intactos. «En todos "
-			u"los chats» envía una petición por mensaje a tu servicio de "
-			u"traducción: si tu clave tiene cuota limitada, déjalo en «Solo "
-			u"los chats que yo active»."_q },
 		{ u"LuminaTranslateReceiveHeader"_q, u"Recepción"_q },
 		{ u"LuminaDualLanguageDisplay"_q,
 			u"Mostrar el original y la traducción juntos"_q },
@@ -101,14 +91,6 @@ namespace {
 		{ u"LuminaTranslateReceiveInfo"_q, u"Los mensajes entrantes conservan "
 			u"su texto original a tamaño completo, con la traducción "
 			u"debajo."_q },
-		{ u"LuminaTranslateScopeHeader"_q, u"Alcance"_q },
-		{ u"LuminaTranslateScopePrivate"_q, u"Chats privados"_q },
-		{ u"LuminaTranslateScopeGroup"_q, u"Grupos y canales"_q },
-		{ u"LuminaTranslateScopeInfo"_q, u"Los chats que quedan fuera del "
-			u"alcance se dejan intactos en ambos sentidos: no se traducen "
-			u"cuando los lees y los mensajes que envías allí salen sin "
-			u"traducir. Aun así, siempre puedes traducir a mano cualquier "
-			u"mensaje suelto."_q },
 		{ u"LuminaTranslateProviderHeader"_q, u"Servicio"_q },
 		{ u"LuminaTranslateProvider"_q, u"Servicio de traducción"_q },
 		// The other provider names are the services' own brands and are not
@@ -173,6 +155,39 @@ namespace {
 		// because that is what a screen reader reads out before the press.
 		{ u"LuminaTranslateChatToggle"_q, u"Traducir este chat"_q },
 		{ u"LuminaTranslateChatShowOriginal"_q, u"Mostrar original"_q },
+
+		// Right-clicking that button: the one place that states this
+		// conversation's language pair. Every row names its direction first
+		// and in full - «los mensajes que recibes» / «los mensajes que
+		// envías» - because «entrantes» and «salientes» on their own would
+		// leave the reader guessing whose messages are meant. {1} is a
+		// language name, capitalised the way the pickers list it, so these
+		// rows take it bare, without the article Spanish would put before a
+		// lower-case one; LuminaTrSendConfirmMessage already does the same.
+		{ u"LuminaChatLangIncoming"_q,
+			u"Los mensajes que recibes se traducen a {1}"_q },
+		{ u"LuminaChatLangIncomingOff"_q, u"Los mensajes que recibes no se "
+			u"traducen: elige en qué idioma quieres leer este chat"_q },
+		{ u"LuminaChatLangIncomingPending"_q, u"Los mensajes que recibes se "
+			u"traducirían a {1}, en cuanto LuminaGram reconozca el idioma en "
+			u"que está escrito este chat"_q },
+		{ u"LuminaChatLangIncomingDefault"_q,
+			u"Los mensajes que recibes: usar el predeterminado, {1}"_q },
+		{ u"LuminaChatLangIncomingPicker"_q, u"Idioma de lectura de este "
+			u"chat"_q },
+		{ u"LuminaChatLangTurnOn"_q, u"Traducir este chat a {1}"_q },
+		{ u"LuminaChatLangOutgoingChat"_q, u"Los mensajes que envías se "
+			u"traducen a {1}, que se recuerda para este chat"_q },
+		{ u"LuminaChatLangOutgoingAuto"_q, u"Los mensajes que envías se "
+			u"traducen al idioma en que está escrito este chat; LuminaGram lo "
+			u"pregunta una vez antes de enviar el primero"_q },
+		{ u"LuminaChatLangOutgoingGlobal"_q, u"Los mensajes que envías se "
+			u"traducen a {1}, el idioma configurado para todos los chats en "
+			u"Ajustes"_q },
+		{ u"LuminaChatLangOutgoingOff"_q, u"Los mensajes que envías salen tal "
+			u"como los escribes, sin traducir"_q },
+		{ u"LuminaChatLangOutgoingDefault"_q, u"Los mensajes que envías: usar "
+			u"el predeterminado, el idioma en que está escrito este chat"_q },
 
 		// Names of the languages LuminaGram can translate into, in the order
 		// the pickers show them. Spanish writes language names in lower case
@@ -509,6 +524,7 @@ namespace {
 		{ u"LuminaProfileCardTitle"_q, u"Tarjeta de perfil"_q },
 		{ u"LuminaProfileChatCreated"_q, u"Creado"_q },
 		{ u"LuminaProfileDcId"_q, u"Centro de datos"_q },
+		{ u"LuminaProfileDcIdValue"_q, u"DC{1}"_q },
 		{ u"LuminaProfileInfoHeader"_q, u"Perfil"_q },
 		{ u"LuminaProfileInfoInfo"_q, u"Líneas adicionales en las páginas de "
 			u"perfil, todas calculadas en este dispositivo: no se le pide "
@@ -517,6 +533,7 @@ namespace {
 			u"cuenta y se muestra con un «~». El centro de datos es el que "
 			u"almacena la foto de perfil. La fecha de creación es cuando se "
 			u"creó un grupo o un canal."_q },
+		{ u"LuminaProfileRegistrationApprox"_q, u"~ {1}"_q },
 		{ u"LuminaProfileRegistrationDate"_q, u"Fecha de registro"_q },
 		{ u"LuminaProfileShowChatDate"_q, u"Mostrar fecha de creación"_q },
 		{ u"LuminaProfileShowDcId"_q, u"Mostrar centro de datos"_q },
@@ -621,6 +638,7 @@ namespace {
 			u"los chats silenciados con el color de acento normal en lugar "
 			u"del gris silenciado."_q },
 		{ u"LuminaStickerSavedTo"_q, u"Sticker guardado en {1}"_q },
+		{ u"LuminaStickerSizeChoice"_q, u"{1}%"_q },
 		{ u"LuminaStickerSizeChoiceDefault"_q, u"{1}% (predeterminado)"_q },
 		{ u"LuminaStickerSizeInfo"_q, u"El tamaño con que se dibujan los "
 			u"stickers en los chats, tanto los que envías como los que "

@@ -75,15 +75,6 @@ namespace {
 			u"«Göndermeden önce onayla» çeviriyi önce orijinalin yanında "
 			u"gösterir, böylece ikisinden birini gönderebilirsiniz; kapalıyken "
 			u"çeviri doğrudan gönderilir."_q },
-		{ u"LuminaTranslateModeHeader"_q, u"Gelen mesajları çevir"_q },
-		{ u"LuminaTranslateModeAll"_q, u"Her sohbette"_q },
-		{ u"LuminaTranslateModeManual"_q, u"Yalnızca açtığım sohbetler"_q },
-		{ u"LuminaTranslateModeInfo"_q, u"«Yalnızca açtığım sohbetler» "
-			u"seçiliyken bir sohbeti açın ve üstündeki «Çevir» düğmesine "
-			u"basarak o sohbette çeviriyi açın; diğer sohbetlere "
-			u"dokunulmaz. «Her sohbette» seçeneği çeviri hizmetinize mesaj "
-			u"başına bir istek gönderir; kotalı bir anahtar kullanıyorsanız "
-			u"«Yalnızca açtığım sohbetler» seçeneğinde bırakın."_q },
 		{ u"LuminaTranslateReceiveHeader"_q, u"Alma"_q },
 		{ u"LuminaDualLanguageDisplay"_q,
 			u"Orijinali ve çeviriyi birlikte göster"_q },
@@ -91,13 +82,6 @@ namespace {
 		{ u"LuminaTranslateReadLangFollow"_q, u"Arayüz dili"_q },
 		{ u"LuminaTranslateReceiveInfo"_q, u"Gelen mesajlar orijinal metnini "
 			u"tam boyutta korur, çeviri ise altında gösterilir."_q },
-		{ u"LuminaTranslateScopeHeader"_q, u"Kapsam"_q },
-		{ u"LuminaTranslateScopePrivate"_q, u"Özel sohbetler"_q },
-		{ u"LuminaTranslateScopeGroup"_q, u"Gruplar ve kanallar"_q },
-		{ u"LuminaTranslateScopeInfo"_q, u"Kapsam dışındaki sohbetlere her "
-			u"iki yönde de dokunulmaz: okurken çevrilmezler ve oraya "
-			u"gönderdiğiniz mesajlar çevrilmeden gider. Yine de herhangi bir "
-			u"mesajı elle çevirebilirsiniz."_q },
 		{ u"LuminaTranslateProviderHeader"_q, u"Hizmet"_q },
 		{ u"LuminaTranslateProvider"_q, u"Çeviri hizmeti"_q },
 		// The other provider names are the services' own brands and are not
@@ -161,6 +145,33 @@ namespace {
 		// what pressing the button will do, not what the chat is doing now.
 		{ u"LuminaTranslateChatToggle"_q, u"Bu sohbeti çevir"_q },
 		{ u"LuminaTranslateChatShowOriginal"_q, u"Orijinali göster"_q },
+
+		// Right-clicking that button: the one place that states this
+		// conversation's language pair. Every line names its direction first
+		// and in full.
+		{ u"LuminaChatLangIncoming"_q,
+			u"Aldığınız mesajlar {1} diline çevrilir"_q },
+		{ u"LuminaChatLangIncomingOff"_q, u"Aldığınız mesajlar çevrilmiyor — "
+			u"bu sohbeti hangi dilde okuyacağınızı seçin"_q },
+		{ u"LuminaChatLangIncomingPending"_q, u"Aldığınız mesajlar, "
+			u"LuminaGram bu sohbetin hangi dilde yazıldığını tanıdığında {1} "
+			u"diline çevrilecek"_q },
+		{ u"LuminaChatLangIncomingDefault"_q,
+			u"Aldığınız mesajlar: varsayılanı, yani {1} dilini kullan"_q },
+		{ u"LuminaChatLangIncomingPicker"_q, u"Bu sohbeti şu dilde oku"_q },
+		{ u"LuminaChatLangTurnOn"_q, u"Bu sohbeti {1} diline çevir"_q },
+		{ u"LuminaChatLangOutgoingChat"_q, u"Gönderdiğiniz mesajlar {1} "
+			u"diline çevrilir — bu sohbet için hatırlanan dil"_q },
+		{ u"LuminaChatLangOutgoingAuto"_q, u"Gönderdiğiniz mesajlar bu "
+			u"sohbetin yazıldığı dile çevrilir; LuminaGram bu dili ilk mesaj "
+			u"gitmeden önce bir kez sorar"_q },
+		{ u"LuminaChatLangOutgoingGlobal"_q, u"Gönderdiğiniz mesajlar {1} "
+			u"diline çevrilir; bu dil Ayarlar'da tüm sohbetler için "
+			u"belirlenmiştir"_q },
+		{ u"LuminaChatLangOutgoingOff"_q, u"Gönderdiğiniz mesajlar "
+			u"yazdığınız gibi, çevrilmeden gider"_q },
+		{ u"LuminaChatLangOutgoingDefault"_q, u"Gönderdiğiniz mesajlar: "
+			u"varsayılanı, yani bu sohbetin yazıldığı dili kullan"_q },
 
 		// Names of the languages LuminaGram can translate into, in the order
 		// the pickers show them.

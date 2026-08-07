@@ -67,25 +67,12 @@ namespace {
 			u"會在每個聊天第一次詢問要用哪個語言，之後就記住。開啟「傳送前"
 			u"確認」時，會先把譯文與原文並排顯示，讓你選擇要傳送哪一個；"
 			u"關閉時譯文會直接傳送出去。"_q },
-		{ u"LuminaTranslateModeHeader"_q, u"翻譯收到的訊息"_q },
-		{ u"LuminaTranslateModeAll"_q, u"所有聊天"_q },
-		{ u"LuminaTranslateModeManual"_q, u"只在我開啟的聊天"_q },
-		{ u"LuminaTranslateModeInfo"_q, u"選「只在我開啟的聊天」時，到某個"
-			u"聊天頂部點「翻譯」按鈕即可為該聊天開啟，其他聊天不受影響。"
-			u"「所有聊天」會為每一則訊息向你的翻譯服務送出一次請求；如果"
-			u"金鑰是按用量計費的，請維持「只在我開啟的聊天」。"_q },
 		{ u"LuminaTranslateReceiveHeader"_q, u"接收"_q },
 		{ u"LuminaDualLanguageDisplay"_q, u"同時顯示原文與譯文"_q },
 		{ u"LuminaTranslateReadLang"_q, u"閱讀語言"_q },
 		{ u"LuminaTranslateReadLangFollow"_q, u"介面語言"_q },
 		{ u"LuminaTranslateReceiveInfo"_q, u"收到的訊息會以原本的大小保留"
 			u"原文，譯文顯示在下方。"_q },
-		{ u"LuminaTranslateScopeHeader"_q, u"適用範圍"_q },
-		{ u"LuminaTranslateScopePrivate"_q, u"私人聊天"_q },
-		{ u"LuminaTranslateScopeGroup"_q, u"群組與頻道"_q },
-		{ u"LuminaTranslateScopeInfo"_q, u"不在適用範圍內的聊天，兩個方向都"
-			u"不會處理：你閱讀時不會翻譯，你在那裡傳送的訊息也會以原文送出。"
-			u"你仍然可以手動翻譯任何一則訊息。"_q },
 		{ u"LuminaTranslateProviderHeader"_q, u"服務"_q },
 		{ u"LuminaTranslateProvider"_q, u"翻譯服務"_q },
 		{ u"LuminaTranslateProviderLlm"_q, u"LLM（相容 OpenAI）"_q },
@@ -141,6 +128,28 @@ namespace {
 		// what pressing the button will do, not what the chat is doing now.
 		{ u"LuminaTranslateChatToggle"_q, u"翻譯這個聊天"_q },
 		{ u"LuminaTranslateChatShowOriginal"_q, u"顯示原文"_q },
+
+		// The per-chat language panel that button opens: one subtitle for the
+		// messages you receive, one for the messages you send.
+		{ u"LuminaChatLangIncoming"_q, u"你收到的訊息會翻譯成{1}"_q },
+		{ u"LuminaChatLangIncomingDefault"_q, u"你收到的訊息：使用預設，"
+			u"也就是{1}"_q },
+		{ u"LuminaChatLangIncomingOff"_q, u"你收到的訊息不會翻譯——選擇要"
+			u"用哪個語言閱讀這個聊天"_q },
+		{ u"LuminaChatLangIncomingPending"_q, u"等 LuminaGram 認出這個聊天"
+			u"使用的語言後，你收到的訊息就會翻譯成{1}"_q },
+		{ u"LuminaChatLangIncomingPicker"_q, u"閱讀這個聊天的語言"_q },
+		{ u"LuminaChatLangOutgoingAuto"_q, u"你傳送的訊息會翻譯成這個聊天"
+			u"使用的語言；LuminaGram 會在第一則送出前先問一次是哪個語言"_q },
+		{ u"LuminaChatLangOutgoingChat"_q, u"你傳送的訊息會翻譯成{1}，"
+			u"這個聊天會記住這個選擇"_q },
+		{ u"LuminaChatLangOutgoingDefault"_q, u"你傳送的訊息：使用預設，"
+			u"也就是這個聊天使用的語言"_q },
+		{ u"LuminaChatLangOutgoingGlobal"_q, u"你傳送的訊息會翻譯成{1}，"
+			u"也就是在設定裡為所有聊天選擇的語言"_q },
+		{ u"LuminaChatLangOutgoingOff"_q, u"你傳送的訊息會照原文送出，"
+			u"不會翻譯"_q },
+		{ u"LuminaChatLangTurnOn"_q, u"把這個聊天翻譯成{1}"_q },
 
 		// Names of the languages LuminaGram can translate into, in the order
 		// the pickers show them.
@@ -418,12 +427,14 @@ namespace {
 		{ u"LuminaProfileCardTitle"_q, u"個人名片"_q },
 		{ u"LuminaProfileChatCreated"_q, u"建立於"_q },
 		{ u"LuminaProfileDcId"_q, u"資料中心"_q },
+		{ u"LuminaProfileDcIdValue"_q, u"DC{1}"_q },
 		{ u"LuminaProfileInfoHeader"_q, u"個人檔案"_q },
 		{ u"LuminaProfileInfoInfo"_q, u"個人檔案頁面上額外的幾行資訊，全部都"
 			u"在這台裝置上算出來——不會向 Telegram 詢問任何東西。部分帳號的"
 			u"註冊日期由 Telegram 自己提供；其餘的則是依帳號編號推估，並以"
 			u"「~」標示。資料中心指的是存放大頭貼的那一個。建立日期是群組或"
 			u"頻道被建立的時間。"_q },
+		{ u"LuminaProfileRegistrationApprox"_q, u"~ {1}"_q },
 		{ u"LuminaProfileRegistrationDate"_q, u"註冊日期"_q },
 		{ u"LuminaProfileShowChatDate"_q, u"顯示建立日期"_q },
 		{ u"LuminaProfileShowDcId"_q, u"顯示資料中心"_q },
@@ -500,6 +511,7 @@ namespace {
 		{ u"LuminaShowMutedCountInfo"_q, u"將已靜音聊天的未讀角標以正常"
 			u"強調色顯示，而非靜音灰色。"_q },
 		{ u"LuminaStickerSavedTo"_q, u"貼圖已儲存到 {1}"_q },
+		{ u"LuminaStickerSizeChoice"_q, u"{1}%"_q },
 		{ u"LuminaStickerSizeChoiceDefault"_q, u"{1}%（預設）"_q },
 		{ u"LuminaStickerSizeInfo"_q, u"貼圖在聊天中顯示的大小——你傳送的和"
 			u"你收到的都適用。動態表情符號、骰子與禮物貼圖維持它們自己的"

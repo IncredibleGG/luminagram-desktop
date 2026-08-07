@@ -76,17 +76,6 @@ namespace {
 			u"terjemahan di samping teks asli lebih dulu, sehingga Anda bisa "
 			u"mengirim salah satunya; jika dimatikan, terjemahan langsung "
 			u"dikirim."_q },
-		{ u"LuminaTranslateModeHeader"_q, u"Terjemahkan pesan masuk"_q },
-		{ u"LuminaTranslateModeAll"_q, u"Di setiap obrolan"_q },
-		{ u"LuminaTranslateModeManual"_q,
-			u"Hanya obrolan yang saya aktifkan"_q },
-		{ u"LuminaTranslateModeInfo"_q, u"Dengan «Hanya obrolan yang saya "
-			u"aktifkan», buka sebuah obrolan lalu gunakan tombol "
-			u"«Terjemahkan» di bagian atasnya untuk mengaktifkannya di sana; "
-			u"obrolan lain dibiarkan apa adanya. «Di setiap obrolan» "
-			u"mengirim satu permintaan per pesan ke layanan terjemahan Anda "
-			u"— jika kunci Anda berkuota, biarkan pada «Hanya obrolan yang "
-			u"saya aktifkan»."_q },
 		{ u"LuminaTranslateReceiveHeader"_q, u"Penerimaan"_q },
 		{ u"LuminaDualLanguageDisplay"_q,
 			u"Tampilkan teks asli dan terjemahan bersamaan"_q },
@@ -95,14 +84,6 @@ namespace {
 		{ u"LuminaTranslateReceiveInfo"_q, u"Pesan masuk tetap menampilkan "
 			u"teks aslinya dalam ukuran penuh, dengan terjemahan di "
 			u"bawahnya."_q },
-		{ u"LuminaTranslateScopeHeader"_q, u"Cakupan"_q },
-		{ u"LuminaTranslateScopePrivate"_q, u"Obrolan pribadi"_q },
-		{ u"LuminaTranslateScopeGroup"_q, u"Grup dan kanal"_q },
-		{ u"LuminaTranslateScopeInfo"_q, u"Obrolan di luar cakupan dibiarkan "
-			u"apa adanya di kedua arah: pesannya tidak diterjemahkan saat Anda "
-			u"baca, dan pesan yang Anda kirim di sana dikirim tanpa "
-			u"terjemahan. Anda tetap bisa menerjemahkan pesan mana pun secara "
-			u"manual."_q },
 		{ u"LuminaTranslateProviderHeader"_q, u"Layanan"_q },
 		{ u"LuminaTranslateProvider"_q, u"Layanan terjemahan"_q },
 		{ u"LuminaTranslateProviderLlm"_q, u"LLM (kompatibel OpenAI)"_q },
@@ -162,6 +143,30 @@ namespace {
 		// The per-chat translate button in the chat top bar.
 		{ u"LuminaTranslateChatToggle"_q, u"Terjemahkan obrolan ini"_q },
 		{ u"LuminaTranslateChatShowOriginal"_q, u"Tampilkan asli"_q },
+		{ u"LuminaChatLangIncoming"_q,
+			u"Pesan yang Anda terima diterjemahkan ke {1}"_q },
+		{ u"LuminaChatLangIncomingOff"_q, u"Pesan yang Anda terima tidak "
+			u"diterjemahkan — pilih bahasa untuk membaca obrolan ini"_q },
+		{ u"LuminaChatLangIncomingPending"_q, u"Pesan yang Anda terima "
+			u"akan diterjemahkan ke {1}, begitu LuminaGram mengenali "
+			u"bahasa yang dipakai di obrolan ini"_q },
+		{ u"LuminaChatLangIncomingDefault"_q,
+			u"Pesan yang Anda terima: pakai bawaan, {1}"_q },
+		{ u"LuminaChatLangIncomingPicker"_q, u"Baca obrolan ini dalam"_q },
+		{ u"LuminaChatLangTurnOn"_q, u"Terjemahkan obrolan ini ke {1}"_q },
+		{ u"LuminaChatLangOutgoingChat"_q, u"Pesan yang Anda kirim "
+			u"diterjemahkan ke {1}, yang diingat untuk obrolan ini"_q },
+		{ u"LuminaChatLangOutgoingAuto"_q, u"Pesan yang Anda kirim "
+			u"diterjemahkan ke bahasa yang dipakai di obrolan ini, dan "
+			u"LuminaGram menanyakannya sekali sebelum pesan "
+			u"pertama dikirim"_q },
+		{ u"LuminaChatLangOutgoingGlobal"_q, u"Pesan yang Anda kirim "
+			u"diterjemahkan ke {1}, bahasa yang diatur untuk semua obrolan "
+			u"di Pengaturan"_q },
+		{ u"LuminaChatLangOutgoingOff"_q, u"Pesan yang Anda kirim "
+			u"keluar apa adanya, tanpa diterjemahkan"_q },
+		{ u"LuminaChatLangOutgoingDefault"_q, u"Pesan yang Anda kirim: "
+			u"pakai bawaan, yaitu bahasa yang dipakai di obrolan ini"_q },
 
 		// Names of the languages LuminaGram can translate into, in the order
 		// the pickers show them.

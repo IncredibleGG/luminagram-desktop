@@ -76,16 +76,6 @@ namespace {
 			u"tradução ao lado do original primeiro, para você enviar "
 			u"qualquer uma das duas; com a opção desativada, a tradução é "
 			u"enviada na hora."_q },
-		{ u"LuminaTranslateModeHeader"_q, u"Traduzir mensagens recebidas"_q },
-		{ u"LuminaTranslateModeAll"_q, u"Em todas as conversas"_q },
-		{ u"LuminaTranslateModeManual"_q,
-			u"Somente as conversas que eu ativar"_q },
-		{ u"LuminaTranslateModeInfo"_q, u"Com «Somente as conversas que eu "
-			u"ativar», abra uma conversa e use o botão «Traduzir» no topo "
-			u"dela para ligar a tradução ali; as demais ficam intactas. «Em "
-			u"todas as conversas» envia uma requisição por mensagem ao seu "
-			u"serviço de tradução — com uma chave paga por uso, deixe em "
-			u"«Somente as conversas que eu ativar»."_q },
 		{ u"LuminaTranslateReceiveHeader"_q, u"Recebimento"_q },
 		{ u"LuminaDualLanguageDisplay"_q,
 			u"Mostrar o original e a tradução juntos"_q },
@@ -94,14 +84,6 @@ namespace {
 		{ u"LuminaTranslateReceiveInfo"_q, u"As mensagens recebidas mantêm o "
 			u"texto original em tamanho normal, com a tradução exibida "
 			u"abaixo."_q },
-		{ u"LuminaTranslateScopeHeader"_q, u"Onde se aplica"_q },
-		{ u"LuminaTranslateScopePrivate"_q, u"Conversas privadas"_q },
-		{ u"LuminaTranslateScopeGroup"_q, u"Grupos e canais"_q },
-		{ u"LuminaTranslateScopeInfo"_q, u"As conversas que ficam de fora "
-			u"não são afetadas nos dois sentidos: não são traduzidas quando "
-			u"você as lê, e as mensagens que você envia nelas saem sem "
-			u"tradução. Você ainda pode traduzir qualquer mensagem "
-			u"individual à mão."_q },
 		{ u"LuminaTranslateProviderHeader"_q, u"Serviço"_q },
 		{ u"LuminaTranslateProvider"_q, u"Serviço de tradução"_q },
 		{ u"LuminaTranslateProviderLlm"_q, u"LLM (compatível com OpenAI)"_q },
@@ -162,6 +144,33 @@ namespace {
 		// The per-chat translate button in the chat top bar.
 		{ u"LuminaTranslateChatToggle"_q, u"Traduzir esta conversa"_q },
 		{ u"LuminaTranslateChatShowOriginal"_q, u"Mostrar original"_q },
+		{ u"LuminaChatLangIncoming"_q,
+			u"As mensagens que você recebe são traduzidas para {1}"_q },
+		{ u"LuminaChatLangIncomingDefault"_q,
+			u"Mensagens que você recebe: usar o padrão, {1}"_q },
+		{ u"LuminaChatLangIncomingOff"_q, u"As mensagens que você recebe "
+			u"não são traduzidas — escolha o idioma para ler esta "
+			u"conversa"_q },
+		{ u"LuminaChatLangIncomingPending"_q, u"As mensagens que você "
+			u"recebe serão traduzidas para {1} assim que o LuminaGram "
+			u"reconhecer o idioma em que esta conversa é escrita"_q },
+		{ u"LuminaChatLangIncomingPicker"_q, u"Ler esta conversa em"_q },
+		{ u"LuminaChatLangOutgoingAuto"_q, u"As mensagens que você envia "
+			u"são traduzidas para o idioma em que esta conversa é "
+			u"escrita, que o LuminaGram pergunta uma vez antes de a "
+			u"primeira mensagem sair"_q },
+		{ u"LuminaChatLangOutgoingChat"_q, u"As mensagens que você envia "
+			u"são traduzidas para {1}, o idioma lembrado nesta "
+			u"conversa"_q },
+		{ u"LuminaChatLangOutgoingDefault"_q, u"Mensagens que você envia: "
+			u"usar o padrão, o idioma em que esta conversa é "
+			u"escrita"_q },
+		{ u"LuminaChatLangOutgoingGlobal"_q, u"As mensagens que você "
+			u"envia são traduzidas para {1}, o idioma definido para "
+			u"todas as conversas nas Configurações"_q },
+		{ u"LuminaChatLangOutgoingOff"_q, u"As mensagens que você envia "
+			u"saem como digitadas, sem tradução"_q },
+		{ u"LuminaChatLangTurnOn"_q, u"Traduzir esta conversa para {1}"_q },
 
 		// Names of the languages LuminaGram can translate into.
 		{ u"LuminaLangEn"_q, u"Inglês"_q },

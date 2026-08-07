@@ -71,25 +71,12 @@ namespace {
 			u"会在每个聊天第一次询问要用哪种语言，之后就记住。开启“发送前"
 			u"确认”时，会先把译文与原文并排显示，让你选择要发送哪一个；"
 			u"关闭时译文会直接发送出去。"_q },
-		{ u"LuminaTranslateModeHeader"_q, u"翻译收到的消息"_q },
-		{ u"LuminaTranslateModeAll"_q, u"所有聊天"_q },
-		{ u"LuminaTranslateModeManual"_q, u"只在我开启的聊天"_q },
-		{ u"LuminaTranslateModeInfo"_q, u"选“只在我开启的聊天”时，到某个"
-			u"聊天顶部点“翻译”按钮即可为该聊天开启，其他聊天不受影响。"
-			u"“所有聊天”会为每一条消息向你的翻译服务发送一次请求；如果"
-			u"密钥是按用量计费的，请保持“只在我开启的聊天”。"_q },
 		{ u"LuminaTranslateReceiveHeader"_q, u"接收"_q },
 		{ u"LuminaDualLanguageDisplay"_q, u"同时显示原文与译文"_q },
 		{ u"LuminaTranslateReadLang"_q, u"阅读语言"_q },
 		{ u"LuminaTranslateReadLangFollow"_q, u"界面语言"_q },
 		{ u"LuminaTranslateReceiveInfo"_q, u"收到的消息会以原本的大小保留"
 			u"原文，译文显示在下方。"_q },
-		{ u"LuminaTranslateScopeHeader"_q, u"适用范围"_q },
-		{ u"LuminaTranslateScopePrivate"_q, u"私聊"_q },
-		{ u"LuminaTranslateScopeGroup"_q, u"群组与频道"_q },
-		{ u"LuminaTranslateScopeInfo"_q, u"不在适用范围内的聊天，两个方向都"
-			u"不会处理：你阅读时不会翻译，你在那里发送的消息也会以原文发出。"
-			u"你仍然可以手动翻译任何一条消息。"_q },
 		{ u"LuminaTranslateProviderHeader"_q, u"服务"_q },
 		{ u"LuminaTranslateProvider"_q, u"翻译服务"_q },
 		// The other provider names are the services' own brands and are not
@@ -147,6 +134,30 @@ namespace {
 		// what pressing the button will do, not what the chat is doing now.
 		{ u"LuminaTranslateChatToggle"_q, u"翻译此聊天"_q },
 		{ u"LuminaTranslateChatShowOriginal"_q, u"显示原文"_q },
+
+		// Right-clicking that button: the per-chat language menu, the one
+		// place that states this conversation's language pair. Every row
+		// names its direction in full - the messages you receive, or the ones
+		// you send - because a shorter label would leave the reader guessing.
+		{ u"LuminaChatLangIncoming"_q, u"你收到的消息会翻译成{1}"_q },
+		{ u"LuminaChatLangIncomingOff"_q, u"你收到的消息不会翻译——选择用哪种"
+			u"语言阅读这个聊天"_q },
+		{ u"LuminaChatLangIncomingPending"_q, u"你收到的消息将翻译成{1}，但要"
+			u"等 LuminaGram 认出这个聊天用的是哪种语言"_q },
+		{ u"LuminaChatLangIncomingDefault"_q, u"你收到的消息：使用默认设置，"
+			u"{1}"_q },
+		{ u"LuminaChatLangIncomingPicker"_q, u"用哪种语言阅读这个聊天"_q },
+		{ u"LuminaChatLangTurnOn"_q, u"把这个聊天翻译成{1}"_q },
+		{ u"LuminaChatLangOutgoingChat"_q, u"你发送的消息会翻译成{1}，已为这个"
+			u"聊天记住"_q },
+		{ u"LuminaChatLangOutgoingAuto"_q, u"你发送的消息会翻译成这个聊天所用"
+			u"的语言，LuminaGram 会在第一条发出前询问一次"_q },
+		{ u"LuminaChatLangOutgoingGlobal"_q, u"你发送的消息会翻译成{1}，这是在"
+			u"设置中为所有聊天设定的语言"_q },
+		{ u"LuminaChatLangOutgoingOff"_q,
+			u"你发送的消息按原文发出，不会翻译"_q },
+		{ u"LuminaChatLangOutgoingDefault"_q, u"你发送的消息：使用默认设置，"
+			u"这个聊天所用的语言"_q },
 
 		// Names of the languages LuminaGram can translate into, in the order
 		// the pickers show them.

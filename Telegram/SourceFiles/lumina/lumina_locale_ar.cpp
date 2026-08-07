@@ -75,15 +75,6 @@ namespace {
 			u"يتذكّرها. ويعرض خيار «التأكيد قبل الإرسال» الترجمة بجانب النص "
 			u"الأصلي أولاً، لتتمكن من إرسال أيّهما شئت؛ وعند إيقافه تُرسَل "
 			u"الترجمة مباشرةً."_q },
-		{ u"LuminaTranslateModeHeader"_q, u"ترجمة الرسائل الواردة"_q },
-		{ u"LuminaTranslateModeAll"_q, u"في كل الدردشات"_q },
-		{ u"LuminaTranslateModeManual"_q, u"الدردشات التي أُفعّلها فقط"_q },
-		{ u"LuminaTranslateModeInfo"_q,
-			u"مع خيار «الدردشات التي أُفعّلها فقط»، افتح محادثة واضغط زر "
-			u"«الترجمة» في الأعلى لتفعيلها في تلك المحادثة، وتبقى بقية "
-			u"الدردشات كما هي. ويرسل خيار «في كل الدردشات» طلبًا واحدًا لكل "
-			u"رسالة إلى خدمة الترجمة لديك — فإذا كان مفتاحك محدود الاستخدام، "
-			u"فأبقِه على «الدردشات التي أُفعّلها فقط»."_q },
 		{ u"LuminaTranslateReceiveHeader"_q, u"الاستقبال"_q },
 		{ u"LuminaDualLanguageDisplay"_q,
 			u"عرض النص الأصلي والترجمة معًا"_q },
@@ -92,13 +83,6 @@ namespace {
 		{ u"LuminaTranslateReceiveInfo"_q,
 			u"تحتفظ الرسائل الواردة بنصها الأصلي بالحجم الكامل، مع عرض الترجمة "
 			u"تحته."_q },
-		{ u"LuminaTranslateScopeHeader"_q, u"النطاق"_q },
-		{ u"LuminaTranslateScopePrivate"_q, u"الدردشات الخاصة"_q },
-		{ u"LuminaTranslateScopeGroup"_q, u"المجموعات والقنوات"_q },
-		{ u"LuminaTranslateScopeInfo"_q,
-			u"الدردشات خارج النطاق لا تتأثر في الاتجاهين: فلا تُترجَم أثناء "
-			u"قراءتك لها، والرسائل التي ترسلها فيها تخرج دون ترجمة. ويظل "
-			u"بإمكانك ترجمة أي رسالة بمفردها يدويًا."_q },
 		{ u"LuminaTranslateProviderHeader"_q, u"الخدمة"_q },
 		{ u"LuminaTranslateProvider"_q, u"خدمة الترجمة"_q },
 		// The other provider names are the services' own brands and are not
@@ -162,6 +146,36 @@ namespace {
 		// what pressing the button will do, not what the chat is doing now.
 		{ u"LuminaTranslateChatToggle"_q, u"ترجمة هذه المحادثة"_q },
 		{ u"LuminaTranslateChatShowOriginal"_q, u"عرض النص الأصلي"_q },
+
+		// The per-chat language panel that button opens: one subtitle for the
+		// messages you receive, one for the messages you send.
+		{ u"LuminaChatLangIncoming"_q,
+			u"الرسائل التي تستقبلها تُترجَم إلى {1}"_q },
+		{ u"LuminaChatLangIncomingDefault"_q,
+			u"الرسائل التي تستقبلها: استخدام الافتراضي، أي {1}"_q },
+		{ u"LuminaChatLangIncomingOff"_q,
+			u"الرسائل التي تستقبلها لا تُترجَم — اختر اللغة التي تقرأ "
+			u"بها هذه الدردشة"_q },
+		{ u"LuminaChatLangIncomingPending"_q,
+			u"الرسائل التي تستقبلها ستُترجَم إلى {1} بمجرد أن يتعرّف "
+			u"LuminaGram على اللغة التي كُتبت بها هذه الدردشة"_q },
+		{ u"LuminaChatLangIncomingPicker"_q, u"لغة قراءة هذه الدردشة"_q },
+		{ u"LuminaChatLangOutgoingAuto"_q,
+			u"الرسائل التي ترسلها تُترجَم إلى اللغة التي كُتبت بها "
+			u"هذه الدردشة، وهي لغة يسألك عنها LuminaGram مرة واحدة "
+			u"قبل خروج أول رسالة"_q },
+		{ u"LuminaChatLangOutgoingChat"_q,
+			u"الرسائل التي ترسلها تُترجَم إلى {1}، وهي اللغة "
+			u"المحفوظة لهذه الدردشة"_q },
+		{ u"LuminaChatLangOutgoingDefault"_q,
+			u"الرسائل التي ترسلها: استخدام الافتراضي، أي اللغة "
+			u"التي كُتبت بها هذه الدردشة"_q },
+		{ u"LuminaChatLangOutgoingGlobal"_q,
+			u"الرسائل التي ترسلها تُترجَم إلى {1}، وهي اللغة "
+			u"المحدَّدة لكل الدردشات في الإعدادات"_q },
+		{ u"LuminaChatLangOutgoingOff"_q,
+			u"الرسائل التي ترسلها تخرج كما كُتبت، دون ترجمة"_q },
+		{ u"LuminaChatLangTurnOn"_q, u"ترجمة هذه الدردشة إلى {1}"_q },
 
 		// Names of the languages LuminaGram can translate into, in the order
 		// the pickers show them.
@@ -370,8 +384,10 @@ namespace {
 		{ u"LuminaProfileCardTitle"_q, u"بطاقة التعريف"_q },
 		{ u"LuminaProfileChatCreated"_q, u"أُنشئت في"_q },
 		{ u"LuminaProfileDcId"_q, u"مركز البيانات"_q },
+		{ u"LuminaProfileDcIdValue"_q, u"DC{1}"_q },
 		{ u"LuminaProfileInfoHeader"_q, u"الملف الشخصي"_q },
 		{ u"LuminaProfileInfoInfo"_q, u"سطور إضافية في صفحات الملفات الشخصية، تُحسب كلها على هذا الجهاز — فلا يُطلب شيء من Telegram. ويوفّر Telegram نفسه تاريخ التسجيل لبعض الحسابات؛ أما البقية فيُقدَّر من رقم الحساب ويُعرض مع علامة «~». ومركز البيانات هو المركز الذي يخزّن صورة الملف الشخصي. أما تاريخ الإنشاء فهو تاريخ إنشاء المجموعة أو القناة."_q },
+		{ u"LuminaProfileRegistrationApprox"_q, u"~ {1}"_q },
 		{ u"LuminaProfileRegistrationDate"_q, u"تاريخ التسجيل"_q },
 		{ u"LuminaProfileShowChatDate"_q, u"إظهار تاريخ الإنشاء"_q },
 		{ u"LuminaProfileShowDcId"_q, u"إظهار مركز البيانات"_q },
@@ -414,6 +430,7 @@ namespace {
 		{ u"LuminaShowMutedCount"_q, u"إظهار عدد غير المقروء دائمًا"_q },
 		{ u"LuminaShowMutedCountInfo"_q, u"يرسم شارة غير المقروء للدردشات المكتومة باللون المميّز العادي بدلاً من الرمادي المكتوم."_q },
 		{ u"LuminaStickerSavedTo"_q, u"تم حفظ الملصق في {1}"_q },
+		{ u"LuminaStickerSizeChoice"_q, u"{1}%"_q },
 		{ u"LuminaStickerSizeChoiceDefault"_q, u"{1}% (افتراضي)"_q },
 		{ u"LuminaStickerSizeInfo"_q, u"حجم رسم الملصقات في الدردشات — التي ترسلها والتي تستقبلها. أما الإيموجي المتحركة والنرد وملصقات الهدايا فتحتفظ بأحجامها الخاصة. ويقيس Telegram Desktop الملصق مرة واحدة ثم يتذكّره، فلا يسري الحجم الجديد إلا عند تشغيل التطبيق في المرة التالية."_q },
 		{ u"LuminaTimeWithSeconds"_q, u"إظهار الثواني في وقت الرسالة"_q },

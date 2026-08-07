@@ -66,16 +66,6 @@ namespace {
 			u"پیش از ارسال» ابتدا ترجمه را کنار متن اصلی نشان می‌دهد تا "
 			u"بتوانید هر کدام را بفرستید؛ اگر خاموش باشد، ترجمه بی‌درنگ "
 			u"ارسال می‌شود."_q },
-		{ u"LuminaTranslateModeHeader"_q, u"ترجمهٔ پیام‌های دریافتی"_q },
-		{ u"LuminaTranslateModeAll"_q, u"در همهٔ گفتگوها"_q },
-		{ u"LuminaTranslateModeManual"_q,
-			u"فقط گفتگوهایی که خودم روشن می‌کنم"_q },
-		{ u"LuminaTranslateModeInfo"_q, u"با گزینهٔ «فقط گفتگوهایی که خودم "
-			u"روشن می‌کنم»، یک گفتگو را باز کنید و دکمهٔ «ترجمه» در بالای آن "
-			u"را بزنید تا برای همان گفتگو روشن شود؛ بقیهٔ گفتگوها دست‌نخورده "
-			u"می‌مانند. «در همهٔ گفتگوها» برای هر پیام یک درخواست به سرویس "
-			u"ترجمهٔ شما می‌فرستد — اگر کلید شما سهمیه‌ای است، آن را روی "
-			u"«فقط گفتگوهایی که خودم روشن می‌کنم» بگذارید."_q },
 		{ u"LuminaTranslateReceiveHeader"_q, u"دریافت"_q },
 		{ u"LuminaDualLanguageDisplay"_q,
 			u"نمایش هم‌زمان متن اصلی و ترجمه"_q },
@@ -84,13 +74,6 @@ namespace {
 		{ u"LuminaTranslateReceiveInfo"_q, u"پیام‌های دریافتی متن اصلی خود "
 			u"را در اندازهٔ کامل نگه می‌دارند و ترجمه زیر آن نمایش داده "
 			u"می‌شود."_q },
-		{ u"LuminaTranslateScopeHeader"_q, u"دامنهٔ اعمال"_q },
-		{ u"LuminaTranslateScopePrivate"_q, u"گفتگوهای خصوصی"_q },
-		{ u"LuminaTranslateScopeGroup"_q, u"گروه‌ها و کانال‌ها"_q },
-		{ u"LuminaTranslateScopeInfo"_q, u"گفتگوهای خارج از این دامنه در هر "
-			u"دو جهت دست‌نخورده می‌مانند: هنگام خواندن ترجمه نمی‌شوند و "
-			u"پیام‌هایی که آنجا می‌فرستید بدون ترجمه ارسال می‌شوند. همچنان "
-			u"می‌توانید هر پیام را به‌صورت دستی ترجمه کنید."_q },
 		{ u"LuminaTranslateProviderHeader"_q, u"سرویس"_q },
 		{ u"LuminaTranslateProvider"_q, u"سرویس ترجمه"_q },
 		{ u"LuminaTranslateProviderLlm"_q, u"LLM (سازگار با OpenAI)"_q },
@@ -152,6 +135,33 @@ namespace {
 		// The per-chat translate button in the chat top bar.
 		{ u"LuminaTranslateChatToggle"_q, u"ترجمهٔ این گفتگو"_q },
 		{ u"LuminaTranslateChatShowOriginal"_q, u"نمایش متن اصلی"_q },
+		{ u"LuminaChatLangIncoming"_q, u"پیام‌هایی که دریافت می‌کنید به {1} "
+			u"ترجمه می‌شوند"_q },
+		{ u"LuminaChatLangIncomingDefault"_q, u"پیام‌هایی که دریافت "
+			u"می‌کنید: استفاده از پیش‌فرض، {1}"_q },
+		{ u"LuminaChatLangIncomingOff"_q, u"پیام‌هایی که دریافت می‌کنید "
+			u"ترجمه نمی‌شوند — زبانی را برای خواندن این گفتگو انتخاب "
+			u"کنید"_q },
+		{ u"LuminaChatLangIncomingPending"_q, u"پیام‌هایی که دریافت "
+			u"می‌کنید به {1} ترجمه خواهند شد، به‌محض اینکه LuminaGram "
+			u"زبانی را که این گفتگو با آن نوشته می‌شود تشخیص دهد"_q },
+		{ u"LuminaChatLangIncomingPicker"_q, u"زبان خواندن این گفتگو"_q },
+		{ u"LuminaChatLangOutgoingAuto"_q, u"پیام‌هایی که می‌فرستید به "
+			u"زبانی که این گفتگو با آن نوشته می‌شود ترجمه می‌شوند؛ "
+			u"LuminaGram پیش از ارسال نخستین پیام یک‌بار دربارهٔ آن "
+			u"می‌پرسد"_q },
+		{ u"LuminaChatLangOutgoingChat"_q, u"پیام‌هایی که می‌فرستید به {1} "
+			u"ترجمه می‌شوند، زبانی که برای این گفتگو به خاطر سپرده شده "
+			u"است"_q },
+		{ u"LuminaChatLangOutgoingDefault"_q, u"پیام‌هایی که می‌فرستید: "
+			u"استفاده از پیش‌فرض، یعنی زبانی که این گفتگو با آن نوشته "
+			u"می‌شود"_q },
+		{ u"LuminaChatLangOutgoingGlobal"_q, u"پیام‌هایی که می‌فرستید به "
+			u"{1} ترجمه می‌شوند، زبانی که در تنظیمات برای همهٔ گفتگوها "
+			u"تعیین شده است"_q },
+		{ u"LuminaChatLangOutgoingOff"_q, u"پیام‌هایی که می‌فرستید "
+			u"همان‌گونه که نوشته‌اید ارسال می‌شوند و ترجمه نمی‌شوند"_q },
+		{ u"LuminaChatLangTurnOn"_q, u"ترجمهٔ این گفتگو به {1}"_q },
 
 		// Names of the languages LuminaGram can translate into.
 		{ u"LuminaLangEn"_q, u"انگلیسی"_q },
@@ -359,8 +369,10 @@ namespace {
 		{ u"LuminaProfileCardTitle"_q, u"کارت معرفی"_q },
 		{ u"LuminaProfileChatCreated"_q, u"ساخته‌شده در"_q },
 		{ u"LuminaProfileDcId"_q, u"مرکز داده"_q },
+		{ u"LuminaProfileDcIdValue"_q, u"DC{1}"_q },
 		{ u"LuminaProfileInfoHeader"_q, u"نمایه"_q },
 		{ u"LuminaProfileInfoInfo"_q, u"خط‌های اضافی در صفحه‌های نمایه که همه روی همین دستگاه به دست می‌آیند — چیزی از Telegram پرسیده نمی‌شود. تاریخ ثبت‌نام برخی حساب‌ها را خودِ Telegram می‌دهد؛ برای بقیه از روی شمارهٔ حساب تخمین زده می‌شود و با «~» نشان داده می‌شود. مرکز داده همان مرکزی است که عکس نمایه را ذخیره می‌کند. تاریخ ساخت، زمان ساخته‌شدن یک گروه یا کانال است."_q },
+		{ u"LuminaProfileRegistrationApprox"_q, u"~ {1}"_q },
 		{ u"LuminaProfileRegistrationDate"_q, u"تاریخ ثبت‌نام"_q },
 		{ u"LuminaProfileShowChatDate"_q, u"نمایش تاریخ ساخت"_q },
 		{ u"LuminaProfileShowDcId"_q, u"نمایش مرکز داده"_q },
@@ -403,6 +415,7 @@ namespace {
 		{ u"LuminaShowMutedCount"_q, u"همیشه نمایش شمار نخوانده"_q },
 		{ u"LuminaShowMutedCountInfo"_q, u"نشان نخواندهٔ گفتگوهای بی‌صدا را به‌جای خاکستری کم‌رنگ با رنگ تأکید عادی رسم می‌کند."_q },
 		{ u"LuminaStickerSavedTo"_q, u"استیکر در {1} ذخیره شد"_q },
+		{ u"LuminaStickerSizeChoice"_q, u"{1}%"_q },
 		{ u"LuminaStickerSizeChoiceDefault"_q, u"{1}% (پیش‌فرض)"_q },
 		{ u"LuminaStickerSizeInfo"_q, u"استیکرها در گفتگوها با چه اندازه‌ای رسم شوند — هم آن‌هایی که می‌فرستید و هم آن‌هایی که دریافت می‌کنید. ایموجی‌های متحرک، تاس و استیکرهای هدیه اندازهٔ خودشان را نگه می‌دارند. Telegram Desktop اندازهٔ یک استیکر را یک‌بار می‌سنجد و به خاطر می‌سپارد، پس اندازهٔ تازه از راه‌اندازی بعدی برنامه اعمال می‌شود."_q },
 		{ u"LuminaTimeWithSeconds"_q, u"نمایش ثانیه در زمان پیام"_q },

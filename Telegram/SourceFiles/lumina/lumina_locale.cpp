@@ -101,29 +101,16 @@ struct Registration {
 			"\"Confirm before sending\" shows the translation next to the "
 			"original first, so you can send either one; with it off the "
 			"translation goes out straight away."_q },
-		{ u"LuminaTranslateModeHeader"_q, u"Translate incoming messages"_q },
-		{ u"LuminaTranslateModeAll"_q, u"In every chat"_q },
-		{ u"LuminaTranslateModeManual"_q, u"Only chats I turn on"_q },
-		{ u"LuminaTranslateModeInfo"_q, u"With \"Only chats I turn on\", open "
-			"a chat and use the Translate button at the top of it to switch "
-			"translation on there; every other chat is left alone. \"In every "
-			"chat\" sends one request per message to your translation service "
-			"- on a metered key, leave this on \"Only chats I turn on\"."_q },
 		{ u"LuminaTranslateReceiveHeader"_q, u"Receiving"_q },
 		{ u"LuminaDualLanguageDisplay"_q,
 			u"Show original and translation together"_q },
 		{ u"LuminaTranslateReadLang"_q, u"Read in"_q },
 		{ u"LuminaTranslateReadLangFollow"_q, u"Interface language"_q },
-		{ u"LuminaTranslateReceiveInfo"_q, u"Incoming messages keep their "
-			"original text in full size, with the translation shown "
-			"underneath."_q },
-		{ u"LuminaTranslateScopeHeader"_q, u"Where it applies"_q },
-		{ u"LuminaTranslateScopePrivate"_q, u"Private chats"_q },
-		{ u"LuminaTranslateScopeGroup"_q, u"Groups and channels"_q },
-		{ u"LuminaTranslateScopeInfo"_q, u"Chats outside the scope are left "
-			"alone in both directions: they are not translated as you read "
-			"them, and messages you send there go out untranslated. You can "
-			"still translate any single message by hand."_q },
+		{ u"LuminaTranslateReceiveInfo"_q, u"With both languages shown, an "
+			"incoming message keeps its original text at full size and its "
+			"translation appears underneath; otherwise you see the "
+			"translation on its own. Choose which chats are translated in "
+			"each chat, from the translate button in its title bar."_q },
 		{ u"LuminaTranslateProviderHeader"_q, u"Service"_q },
 		{ u"LuminaTranslateProvider"_q, u"Translation service"_q },
 		// The other provider names are the services' own brands and are not

@@ -51,6 +51,13 @@ jobs:
       UPLOAD_ARTIFACT: "true"
       ONLY_CACHE: "false"
       PREPARE_PATH: "Telegram/build/prepare/prepare.py"
+      # LuminaGram: the account's own api_id, held in this repository's
+      # Actions secrets. A build made with TDESKTOP_API_TEST compiles and
+      # starts but cannot sign in, so a build meant for a person has to carry
+      # real credentials. Both are empty in a fork with no secrets set, and
+      # the build step falls back to the test mode there rather than failing.
+      LUMINA_API_ID: ${{ secrets.TDESKTOP_API_ID }}
+      LUMINA_API_HASH: ${{ secrets.TDESKTOP_API_HASH }}
 
     steps:
       - name: Get repository name.
@@ -108,11 +115,18 @@ jobs:
             echo "ARTIFACT_NAME=Telegram" >> $GITHUB_ENV
           fi
 
+          # Real credentials when the secrets are set, upstream's test mode
+          # otherwise - a build without them compiles but cannot sign in.
+          API="-D TDESKTOP_API_TEST=ON"
+          if [ -n "$LUMINA_API_ID" ] && [ -n "$LUMINA_API_HASH" ]; then
+            API="-D TDESKTOP_API_ID=$LUMINA_API_ID -D TDESKTOP_API_HASH=$LUMINA_API_HASH"
+          fi
+
           ./configure.sh \
           -D CMAKE_CONFIGURATION_TYPES=Debug \
           -D CMAKE_COMPILE_WARNING_AS_ERROR=ON \
           -D CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=NO \
-          -D TDESKTOP_API_TEST=ON \
+          $API \
           -D DESKTOP_APP_DISABLE_AUTOUPDATE=OFF \
           -D DESKTOP_APP_DISABLE_CRASH_REPORTS=OFF \
           $DEFINE

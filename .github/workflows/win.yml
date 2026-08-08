@@ -62,6 +62,13 @@ jobs:
       UPLOAD_ARTIFACT: "true"
       ONLY_CACHE: "false"
       PREPARE_PATH: "Telegram/build/prepare/prepare.py"
+      # LuminaGram: the account's own api_id, held in this repository's
+      # Actions secrets. A build made with TDESKTOP_API_TEST compiles and
+      # starts but cannot sign in, so a build meant for a person has to carry
+      # real credentials. Both are empty in a fork with no secrets set, and
+      # the build step falls back to the test mode there rather than failing.
+      LUMINA_API_ID: ${{ secrets.TDESKTOP_API_ID }}
+      LUMINA_API_HASH: ${{ secrets.TDESKTOP_API_HASH }}
 
     defaults:
       run:
@@ -205,9 +212,11 @@ jobs:
           echo "ARTIFACT_NAME=$ARTIFACT_NAME" >> $GITHUB_ENV
 
           API="-D TDESKTOP_API_TEST=ON"
-          if [ $GITHUB_REF == 'refs/heads/nightly' ]; then
-            echo "Use the open credentials."
-            API="-D TDESKTOP_API_ID=611335 -D TDESKTOP_API_HASH=d524b414d21f4d37f08684c1df41ac9c"
+          if [ -n "$LUMINA_API_ID" ] && [ -n "$LUMINA_API_HASH" ]; then
+            echo "Using this account's own credentials."
+            API="-D TDESKTOP_API_ID=$LUMINA_API_ID -D TDESKTOP_API_HASH=$LUMINA_API_HASH"
+          else
+            echo "No credentials in secrets - test mode, this build cannot sign in."
           fi
           echo "TDESKTOP_BUILD_API=$API" >> $GITHUB_ENV
 

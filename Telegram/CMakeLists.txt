@@ -2509,6 +2509,13 @@ set(entitlement_sources
 target_sources(Telegram PRIVATE ${entitlement_sources})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Telegram PREFIX Resources FILES ${entitlement_sources})
 
+# LuminaGram: this fork intentionally keeps some upstream helpers defined but
+# unused (e.g. the disabled MtpChecker, per-section AddToggle helpers). GCC's
+# -Werror turns that into a hard build failure on Linux only. Warn, don't fail.
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(Telegram PRIVATE -Wno-error=unused-function)
+endif()
+
 target_include_directories(Telegram PRIVATE ${src_loc})
 
 target_compile_definitions(Telegram

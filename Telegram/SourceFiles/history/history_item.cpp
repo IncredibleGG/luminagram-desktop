@@ -3069,7 +3069,15 @@ bool HistoryItem::forbidsForward() const {
 bool HistoryItem::forbidsSaving() const {
 	// LuminaGram: optionally allow local save/copy/download from restricted
 	// chats. Off by default; only affects local device actions.
-	if (Lumina::Settings::Instance().allowSaveRestricted()) {
+	//
+	// PARKED. `allowSaveRestricted` belongs to the grey (ToS-risky) cluster,
+	// held back project-wide until the final batch. The master gate is first in
+	// the condition so it short-circuits before the preference is read at all -
+	// a hand-edited luminagram.json cannot reach this early return. The read is
+	// kept verbatim because the final batch needs it; to unpark, flip
+	// Lumina::GreyFeaturesUnlocked() and change nothing here.
+	if (Lumina::GreyFeaturesUnlocked()
+		&& Lumina::Settings::Instance().allowSaveRestricted()) {
 		return false;
 	}
 	if (forbidsForward()) {

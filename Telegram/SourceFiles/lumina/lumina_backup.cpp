@@ -236,19 +236,23 @@ void Wipe(bytes::vector &data) {
 		openssl::HmacSha256(macKey, Bytes(input))));
 }
 
-// The ToS-grey cluster is parked project-wide. The three keys still exist and
-// two of them still have live readers - `stealthOnline` at api_updates.cpp:999
-// and `stealthTyping` at api_send_progress.cpp:116 - but F-02 deleted every row
-// that could set them, so on this client they can only ever be false.
+// The ToS-grey cluster is parked project-wide. The keys still exist and three
+// of them still have live readers - `allowSaveRestricted` at
+// history_item.cpp, `stealthOnline` at api_updates.cpp and `stealthTyping` at
+// api_send_progress.cpp - but F-02 deleted every row that could set them, and
+// each reader now sits behind Lumina::GreyFeaturesUnlocked(), so on this client
+// they can only ever be false.
 //
-// A backup file is the one remaining way to write them. Without this, importing
-// a file that carries `stealthOnline: true` (a hand-edited one, or one from a
-// future Android build that grows the rows Android does not have today) would
-// silently put this client into permanent always-offline / never-typing mode,
-// and there is no row left anywhere to turn it back off. So neither direction
-// of this feature carries the cluster: export drops it, and import drops it
-// again rather than trusting the file.
+// A backup file is the one remaining way to write the values themselves. The
+// master gate already makes a written value inert, so this is belt and braces
+// rather than the only defence - but it stays, and it covers the whole cluster:
+// a restored profile should not carry grey values forward into the final batch
+// that unparks them, silently switching a feature on that the user never chose
+// on this device. `allowSaveRestricted` matters most of the three, so it is
+// dropped here too. Neither direction carries the cluster: export drops it, and
+// import drops it again rather than trusting the file.
 void RemoveParkedKeys(QJsonObject &data) {
+	data.remove(u"allowSaveRestricted"_q);
 	data.remove(u"stealthOnline"_q);
 	data.remove(u"stealthTyping"_q);
 	data.remove(u"stealthReadReceipts"_q);

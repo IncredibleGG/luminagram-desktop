@@ -113,7 +113,13 @@ void SendProgressManager::send(const Key &key, int progress) {
 	if (skipRequest(key)) {
 		return;
 	}
-	if (Lumina::Settings::Instance().stealthTyping()) {
+	// PARKED: `stealthTyping` is grey (ToS-risky) and held back project-wide
+	// until the final batch. The master gate short-circuits before the
+	// preference is read, so no hand-edited luminagram.json can enable it. The
+	// read is kept verbatim for the final batch; to unpark, flip
+	// Lumina::GreyFeaturesUnlocked() and change nothing here.
+	if (Lumina::GreyFeaturesUnlocked()
+		&& Lumina::Settings::Instance().stealthTyping()) {
 		return; // LuminaGram: suppress typing / send-action broadcasts.
 	}
 	using Type = SendProgressType;

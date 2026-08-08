@@ -757,6 +757,84 @@ namespace {
 			u"menciones, las etiquetas y los comandos de bots nunca se "
 			u"reescriben. Las reglas se quedan en este dispositivo y nunca se "
 			u"envían a Telegram."_q },
+		// vault + fake crash
+		{ u"LuminaVaultHeader"_q, u"Caja fuerte de disfraz"_q },
+		{ u"LuminaVaultEnable"_q, u"Activar la caja fuerte"_q },
+		{ u"LuminaVaultInfo"_q, u"Todo lo que hay aquí permanece en este dispositivo. La "
+			u"caja fuerte oculta LuminaGram tras una app de apariencia "
+			u"inofensiva, y solo el código secreto te devuelve a la app "
+			u"real."_q },
+		{ u"LuminaVaultMode"_q, u"Modo de la caja fuerte"_q },
+		{ u"LuminaVaultModePasswordDoor"_q, u"Puerta con contraseña"_q },
+		{ u"LuminaVaultModeDecoyApp"_q, u"App señuelo"_q },
+		{ u"LuminaVaultModePasswordDoorInfo"_q, u"Al iniciar LuminaGram se pide una "
+			u"contraseña. El código secreto abre la app real; cualquier "
+			u"otra cosa abre el señuelo, y nunca avisa de que era "
+			u"incorrecta."_q },
+		{ u"LuminaVaultModeDecoyAppInfo"_q, u"Al iniciar LuminaGram se abre el señuelo "
+			u"directamente. Introduce en él tu código secreto para "
+			u"llegar a la app real."_q },
+		{ u"LuminaVaultSkin"_q, u"Estilo de la app señuelo"_q },
+		{ u"LuminaVaultSkinNotepad"_q, u"Notas"_q },
+		{ u"LuminaVaultSkinCalculator"_q, u"Calculadora"_q },
+		{ u"LuminaVaultSkinHintCalculator"_q, u"Para desbloquear desde la calculadora, "
+			u"escribe el código secreto y pulsa la tecla de igual."_q },
+		{ u"LuminaVaultSkinHintNotepad"_q, u"Para desbloquear desde las notas, haz que el "
+			u"código secreto sea toda la nota y luego haz doble clic en "
+			u"la barra de título de Notas."_q },
+		{ u"LuminaVaultSecretCode"_q, u"Código secreto"_q },
+		{ u"LuminaVaultSecretCodeDialogTitle"_q, u"Código secreto"_q },
+		{ u"LuminaDisguiseDecoyCodeSet"_q, u"Establecido"_q },
+		{ u"LuminaDisguiseDecoyCodeNotSet"_q, u"Sin establecer"_q },
+		{ u"LuminaVaultNoCodeInfo"_q, u"La caja fuerte permanece desactivada hasta que "
+			u"establezcas un código secreto."_q },
+		{ u"LuminaVaultCalculatorCodeInfo"_q, u"Este código no se puede escribir en el "
+			u"teclado de la calculadora, así que se muestra el señuelo "
+			u"de notas en su lugar. Usa solo dígitos, un punto y + - * / "
+			u"si quieres la calculadora."_q },
+		{ u"LuminaVaultDisclaimer"_q, u"Esto frena una mirada por encima del hombro, no "
+			u"una inspección informada: el programa sigue llamándose "
+			u"LuminaGram en el administrador de tareas, y cualquiera que "
+			u"pueda leer los archivos de este dispositivo puede llegar a "
+			u"tu cuenta. La caja fuerte aparece la próxima vez que se "
+			u"inicia LuminaGram, y cerrar el señuelo cierra LuminaGram. "
+			u"Si alguna vez olvidas el código, elimina "
+			u"tdata/luminagram.json y tdata/luminagram_private.json de "
+			u"la carpeta de datos de LuminaGram: la caja fuerte se "
+			u"desactiva sola y LuminaGram se inicia con normalidad."_q },
+		{ u"LuminaSecurityFakeCrashHeader"_q, u"Desbloqueo con fallo falso"_q },
+		{ u"LuminaSecurityFakeCrashEnable"_q, u"Activar desbloqueo con fallo falso"_q },
+		{ u"LuminaSecurityFakeCrashCode"_q, u"Código de fallo falso"_q },
+		{ u"LuminaSecurityFakeCrashCodeDialogTitle"_q, u"Código de fallo falso"_q },
+		{ u"LuminaSecurityFakeCrashCodeHint"_q, u"Código"_q },
+		{ u"LuminaSecurityFakeCrashCodeSet"_q, u"Establecido"_q },
+		{ u"LuminaSecurityFakeCrashCodeNotSet"_q, u"Sin establecer"_q },
+		{ u"LuminaSecurityFakeCrashCodeSameAsPasscode"_q, u"Este código no puede ser igual "
+			u"que tu código de acceso."_q },
+		{ u"LuminaSecurityFakeCrashInfo"_q, u"Cuando esto está activado, escribir el "
+			u"código de fallo falso en la pantalla de bloqueo cierra "
+			u"LuminaGram de inmediato en lugar de desbloquearlo, sin "
+			u"ningún mensaje y sin dejar nada en pantalla: para quien "
+			u"esté mirando, la aplicación se ha bloqueado. El código es "
+			u"independiente de tu código de acceso, se guarda solo en "
+			u"este dispositivo y nunca se envía a ninguna parte."_q },
+		{ u"LuminaSecurityFakeCrashBiometricInfo"_q, u"Mientras esto esté activado y haya "
+			u"un código establecido, el desbloqueo con Touch ID, Windows "
+			u"Hello o la contraseña del sistema queda desactivado: una "
+			u"huella abre la aplicación sin pedir nunca el código de "
+			u"acceso, así que pasaría de largo junto a este código. "
+			u"Borrar el código, o desactivar esto, los devuelve."_q },
+		{ u"LuminaSecurityFakeCrashNoCodeInfo"_q, u"Todavía no hay ningún código "
+			u"establecido, así que no ocurrirá nada en la pantalla de "
+			u"bloqueo."_q },
+		{ u"LuminaSecurityFakeCrashNoPasscodeInfo"_q, u"LuminaGram no tiene código de "
+			u"acceso, así que la pantalla de bloqueo nunca aparece y "
+			u"este código nunca se pide. Activa primero el código de "
+			u"acceso en Privacidad y seguridad."_q },
+		{ u"LuminaSecurityFakeCrashCodeClashInfo"_q, u"Este código ahora es igual que tu "
+			u"código de acceso, así que nunca se activará: el código de "
+			u"acceso desbloquea la aplicación en su lugar. Elige un "
+			u"código diferente."_q },
 	};
 }
 

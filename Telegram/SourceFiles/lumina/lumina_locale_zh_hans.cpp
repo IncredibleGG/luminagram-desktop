@@ -593,6 +593,77 @@ namespace {
 			u"词匹配。带有任何格式的消息会原样发出，链接、提及、话题标签和机器"
 			u"人命令也永远不会被改写。规则只保存在这台设备上，绝不会发送给"
 			u" Telegram。"_q },
+		// vault + fake crash
+		{ u"LuminaVaultHeader"_q, u"伪装保险箱"_q },
+		{ u"LuminaVaultEnable"_q, u"保险箱开关"_q },
+		{ u"LuminaVaultInfo"_q, u"这里的一切都只保存在本机。保险箱把 "
+			u"LuminaGram 藏在一个不起眼的 App "
+			u"后面，只有输入秘密密码才能回到真正的 App。"_q },
+		{ u"LuminaVaultMode"_q, u"保险箱模式"_q },
+		{ u"LuminaVaultModePasswordDoor"_q, u"密码门"_q },
+		{ u"LuminaVaultModeDecoyApp"_q, u"直接伪装"_q },
+		{ u"LuminaVaultModePasswordDoorInfo"_q, u"启动 "
+			u"LuminaGram 时会先要求输入密码。输入秘"
+			u"密密码进入真正的 App；输入其他内容则打开假 "
+			u"App，而且永远不会提示密码错误。"_q },
+		{ u"LuminaVaultModeDecoyAppInfo"_q, u"启动 LuminaGram "
+			u"时直接打开假 App。在假 App 中输入秘密密"
+			u"码即可进入真正的 App。"_q },
+		{ u"LuminaVaultSkin"_q, u"假 App 样式"_q },
+		{ u"LuminaVaultSkinNotepad"_q, u"记事本"_q },
+		{ u"LuminaVaultSkinCalculator"_q, u"计算器"_q },
+		{ u"LuminaVaultSkinHintCalculator"_q, u"要从计算器解锁，请输入秘密密"
+			u"码，然后按等号键。"_q },
+		{ u"LuminaVaultSkinHintNotepad"_q, u"要从记事本解锁，请让整篇便笺只"
+			u"有秘密密码，然后双击“记事本”标题栏。"_q },
+		{ u"LuminaVaultSecretCode"_q, u"秘密密码"_q },
+		{ u"LuminaVaultSecretCodeDialogTitle"_q, u"秘密密码"_q },
+		{ u"LuminaDisguiseDecoyCodeSet"_q, u"已设置"_q },
+		{ u"LuminaDisguiseDecoyCodeNotSet"_q, u"未设置"_q },
+		{ u"LuminaVaultNoCodeInfo"_q, u"在你设置秘密密码之前，保险箱不会"
+			u"生效。"_q },
+		{ u"LuminaVaultCalculatorCodeInfo"_q, u"这个密码无法在计算器键盘上输"
+			u"入，因此会改用记事本假 App。如果你想用计算器，"
+			u"请只使用数字、小数点和 + - * /。"_q },
+		{ u"LuminaVaultDisclaimer"_q, u"这只挡得住别人不经意的一瞥，挡不"
+			u"住真正懂行的检查：程序在任务管理器里仍然叫 "
+			u"LuminaGram，任何能读取本机文件的人都能"
+			u"读到你的账号。保险箱会在下次启动 "
+			u"LuminaGram 时出现，关闭假 App 就"
+			u"等于退出 LuminaGram。万一你忘了密码，"
+			u"请从 LuminaGram 数据文件夹中删除 "
+			u"tdata/luminagram.json 和 "
+			u"tdata/luminagram_private.json："
+			u"保险箱就会自动关闭，LuminaGram 也会正"
+			u"常启动。"_q },
+		{ u"LuminaSecurityFakeCrashHeader"_q, u"假崩溃解锁"_q },
+		{ u"LuminaSecurityFakeCrashEnable"_q, u"启用假崩溃解锁"_q },
+		{ u"LuminaSecurityFakeCrashCode"_q, u"假崩溃密码"_q },
+		{ u"LuminaSecurityFakeCrashCodeDialogTitle"_q, u"假崩溃密码"_q },
+		{ u"LuminaSecurityFakeCrashCodeHint"_q, u"密码"_q },
+		{ u"LuminaSecurityFakeCrashCodeSet"_q, u"已设置"_q },
+		{ u"LuminaSecurityFakeCrashCodeNotSet"_q, u"未设置"_q },
+		{ u"LuminaSecurityFakeCrashCodeSameAsPasscode"_q, u"此密码不能与你的密码"
+			u"锁相同。"_q },
+		{ u"LuminaSecurityFakeCrashInfo"_q, u"开启后，在锁屏界面输入假崩溃"
+			u"密码不会解锁，而是立刻关闭 LuminaGram："
+			u"没有任何提示，屏幕上也不留下任何东西——在旁人看"
+			u"来，就是应用崩溃了。这个密码与你的密码锁相互独立，"
+			u"只保存在本机，绝不会发送到任何地方。"_q },
+		{ u"LuminaSecurityFakeCrashBiometricInfo"_q, u"在此功能开启且已设置密"
+			u"码期间，使用 Touch ID、"
+			u"Windows Hello 或系统密码解锁会被停"
+			u"用：指纹解锁根本不会询问密码锁，也就会直接绕过这"
+			u"个密码。清除密码或关闭此功能后，它们会恢复。"_q },
+		{ u"LuminaSecurityFakeCrashNoCodeInfo"_q, u"还没有设置密码，因此锁屏"
+			u"时不会有任何反应。"_q },
+		{ u"LuminaSecurityFakeCrashNoPasscodeInfo"_q, u"LuminaGram "
+			u"没有设置密码锁，因此锁屏界面永远不会出现，也就永"
+			u"远不会用到这个密码。请先在“隐私与安全”中开启密"
+			u"码锁。"_q },
+		{ u"LuminaSecurityFakeCrashCodeClashInfo"_q, u"这个密码现在与你的密码"
+			u"锁相同，因此永远不会触发——密码锁会先解锁应用。"
+			u"请换一个密码。"_q },
 	};
 }
 

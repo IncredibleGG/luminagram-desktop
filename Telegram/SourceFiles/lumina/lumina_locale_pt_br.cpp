@@ -719,6 +719,81 @@ namespace {
 			u"menções, hashtags e comandos de bots nunca são reescritos. As "
 			u"regras ficam neste dispositivo e nunca são enviadas ao "
 			u"Telegram."_q },
+		// vault + fake crash
+		{ u"LuminaVaultHeader"_q, u"Cofre de disfarce"_q },
+		{ u"LuminaVaultEnable"_q, u"Ativar cofre"_q },
+		{ u"LuminaVaultInfo"_q, u"Tudo aqui fica somente neste dispositivo. O cofre "
+			u"esconde o LuminaGram atrás de um app de aparência "
+			u"inofensiva, e só o código secreto leva você de volta ao "
+			u"app real."_q },
+		{ u"LuminaVaultMode"_q, u"Modo do cofre"_q },
+		{ u"LuminaVaultModePasswordDoor"_q, u"Porta com senha"_q },
+		{ u"LuminaVaultModeDecoyApp"_q, u"App falso"_q },
+		{ u"LuminaVaultModePasswordDoorInfo"_q, u"Ao iniciar o LuminaGram, uma senha é "
+			u"pedida. O código secreto abre o app real; qualquer outra "
+			u"coisa abre o app falso, e nunca avisa que estava errada."_q },
+		{ u"LuminaVaultModeDecoyAppInfo"_q, u"Ao iniciar o LuminaGram, o app falso abre "
+			u"direto. Digite nele seu código secreto para chegar ao app "
+			u"real."_q },
+		{ u"LuminaVaultSkin"_q, u"Estilo do app falso"_q },
+		{ u"LuminaVaultSkinNotepad"_q, u"Notas"_q },
+		{ u"LuminaVaultSkinCalculator"_q, u"Calculadora"_q },
+		{ u"LuminaVaultSkinHintCalculator"_q, u"Para desbloquear pela calculadora, digite "
+			u"o código secreto e pressione a tecla de igual."_q },
+		{ u"LuminaVaultSkinHintNotepad"_q, u"Para desbloquear pelas notas, faça o código "
+			u"secreto ser a nota inteira e depois dê um duplo clique na "
+			u"barra de título de Notas."_q },
+		{ u"LuminaVaultSecretCode"_q, u"Código secreto"_q },
+		{ u"LuminaVaultSecretCodeDialogTitle"_q, u"Código secreto"_q },
+		{ u"LuminaDisguiseDecoyCodeSet"_q, u"Definido"_q },
+		{ u"LuminaDisguiseDecoyCodeNotSet"_q, u"Não definido"_q },
+		{ u"LuminaVaultNoCodeInfo"_q, u"O cofre fica desligado até você definir um código "
+			u"secreto."_q },
+		{ u"LuminaVaultCalculatorCodeInfo"_q, u"Este código não pode ser digitado no "
+			u"teclado da calculadora, então a nota falsa é mostrada no "
+			u"lugar dela. Use apenas dígitos, um ponto e + - * / se "
+			u"quiser a calculadora."_q },
+		{ u"LuminaVaultDisclaimer"_q, u"Isto engana um olhar por cima do ombro, não uma "
+			u"inspeção bem-informada: o programa continua se chamando "
+			u"LuminaGram no gerenciador de tarefas, e quem conseguir ler "
+			u"os arquivos deste dispositivo consegue chegar à sua conta. "
+			u"O cofre aparece na próxima vez que o LuminaGram iniciar, e "
+			u"fechar o app falso encerra o LuminaGram. Se algum dia você "
+			u"esquecer o código, exclua tdata/luminagram.json e "
+			u"tdata/luminagram_private.json da pasta de dados do "
+			u"LuminaGram: o cofre então se desliga sozinho e o "
+			u"LuminaGram inicia normalmente."_q },
+		{ u"LuminaSecurityFakeCrashHeader"_q, u"Desbloqueio com falha falsa"_q },
+		{ u"LuminaSecurityFakeCrashEnable"_q, u"Ativar desbloqueio com falha falsa"_q },
+		{ u"LuminaSecurityFakeCrashCode"_q, u"Código de falha falsa"_q },
+		{ u"LuminaSecurityFakeCrashCodeDialogTitle"_q, u"Código de falha falsa"_q },
+		{ u"LuminaSecurityFakeCrashCodeHint"_q, u"Código"_q },
+		{ u"LuminaSecurityFakeCrashCodeSet"_q, u"Definido"_q },
+		{ u"LuminaSecurityFakeCrashCodeNotSet"_q, u"Não definido"_q },
+		{ u"LuminaSecurityFakeCrashCodeSameAsPasscode"_q, u"Este código não pode ser igual "
+			u"à sua senha de bloqueio."_q },
+		{ u"LuminaSecurityFakeCrashInfo"_q, u"Quando isto está ativado, digitar o código "
+			u"de falha falsa na tela de bloqueio fecha o LuminaGram na "
+			u"hora em vez de desbloqueá-lo, sem nenhuma mensagem e sem "
+			u"deixar nada na tela — para quem estiver olhando, o app "
+			u"travou. O código é separado da sua senha de bloqueio, fica "
+			u"somente neste dispositivo e nunca é enviado a lugar algum."_q },
+		{ u"LuminaSecurityFakeCrashBiometricInfo"_q, u"Enquanto isto estiver ativado e "
+			u"houver um código definido, o desbloqueio com Touch ID, "
+			u"Windows Hello ou a senha do sistema fica desligado: a "
+			u"digital abre o app sem nunca pedir a senha de bloqueio, "
+			u"então passaria direto por este código. Apagar o código, ou "
+			u"desativar isto, traz tudo de volta."_q },
+		{ u"LuminaSecurityFakeCrashNoCodeInfo"_q, u"Nenhum código foi definido ainda, "
+			u"então nada vai acontecer na tela de bloqueio."_q },
+		{ u"LuminaSecurityFakeCrashNoPasscodeInfo"_q, u"O LuminaGram não tem senha de "
+			u"bloqueio, então a tela de bloqueio nunca aparece e este "
+			u"código nunca é pedido. Ative primeiro a senha de bloqueio "
+			u"em Privacidade e segurança."_q },
+		{ u"LuminaSecurityFakeCrashCodeClashInfo"_q, u"Este código agora é igual à sua "
+			u"senha de bloqueio, então ele nunca vai funcionar — a senha "
+			u"desbloqueia o app no lugar dele. Escolha um código "
+			u"diferente."_q },
 	};
 }
 

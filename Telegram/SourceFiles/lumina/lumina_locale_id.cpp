@@ -661,6 +661,23 @@ namespace {
 			u"biaya verifikasi, atau meminta kode — sebuah pengingat sekali "
 			u"muncul agar Anda berhati-hati. Pesan tidak pernah diblokir atau "
 			u"diubah. Pemeriksaan berjalan luring di perangkat Anda."_q },
+		// link preview + voice confirm
+		{ u"LuminaPrivacyDisableLinkPreview"_q, u"Nonaktifkan pratinjau tautan "
+			u"secara bawaan"_q },
+		{ u"LuminaLinkPreviewInfo"_q, u"Pesan yang Anda tulis dari awal "
+			u"dikirim tanpa pratinjau tautan, dan kolom tulis tidak pernah "
+			u"meminta Telegram membuka tautan yang ditempel saat Anda "
+			u"mengetik. Pratinjau yang sudah terlampir, dan pesan yang Anda "
+			u"sunting, dibiarkan apa adanya. Untuk tetap melampirkan pratinjau "
+			u"pada satu pesan, beri tombol untuk «Alihkan pratinjau tautan» di "
+			u"Pengaturan > Pintasan papan ketik, lalu tekan saat menulis."_q },
+		{ u"LuminaVoiceConfirmTitle"_q, u"Pesan suara dan video"_q },
+		{ u"LuminaVoiceConfirmRow"_q, u"Konfirmasi sebelum kirim"_q },
+		{ u"LuminaVoiceConfirmInfo"_q, u"Bertanya sebelum pesan suara atau "
+			u"pesan video bulat yang sudah direkam dikirim. Membatalkan "
+			u"pertanyaan itu membuang rekaman, kecuali di pratinjau dengar, "
+			u"yang membiarkan rekaman tetap ada. Pengiriman terjadwal tidak "
+			u"pernah ditanyakan."_q },
 	};
 }
 

@@ -7,6 +7,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "lumina/lumina_voice_confirm_settings.h"
 
+#include "lumina/lumina_locale.h"
 #include "lumina/lumina_voice_confirm.h"
 #include "ui/vertical_list.h"
 #include "ui/widgets/buttons.h"
@@ -20,15 +21,13 @@ void AddVoiceConfirmRows(
 		not_null<Ui::VerticalLayout*> container,
 		not_null<Window::SessionController*> controller) {
 	Ui::AddSkip(container);
-	Ui::AddSubsectionTitle(
-		container,
-		rpl::single(u"Voice and video messages"_q));
+	Ui::AddSubsectionTitle(container, TrValue(u"LuminaVoiceConfirmTitle"_q));
 
 	// Recomputed from the store rather than only from the click, so a value
 	// restored from a backup, or changed in a second window, is reflected.
 	const auto button = container->add(object_ptr<Ui::SettingsButton>(
 		container,
-		rpl::single(u"Confirm before sending"_q),
+		TrValue(u"LuminaVoiceConfirmRow"_q),
 		st::settingsButtonNoIcon
 	))->toggleOn(rpl::single(
 		ConfirmVoiceSend()
@@ -41,12 +40,7 @@ void AddVoiceConfirmRows(
 	}, button->lifetime());
 
 	Ui::AddSkip(container);
-	Ui::AddDividerText(
-		container,
-		rpl::single(u"Ask before a recorded voice or round video message is "
-			"sent. Backing out of that question discards the recording, "
-			"except in the listen preview, where it leaves the recording "
-			"alone. Scheduled sends are never asked about."_q));
+	Ui::AddDividerText(container, TrValue(u"LuminaVoiceConfirmInfo"_q));
 }
 
 } // namespace Lumina

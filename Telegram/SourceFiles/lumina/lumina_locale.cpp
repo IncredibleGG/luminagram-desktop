@@ -497,6 +497,22 @@ struct Registration {
 		{ u"LuminaPrivacyCryptoClipboardGuardInfo"_q, u"Ask before pasting what looks like a crypto wallet address into a message. Clipboard-hijacking malware can swap a copied address for a scammer's without you noticing, and the paste is the last moment you can catch it. The check runs on this device and nothing is sent anywhere."_q },
 		{ u"LuminaPrivacyScamKeywordWarning"_q, u"Scam keyword warning"_q },
 		{ u"LuminaPrivacyScamKeywordWarningInfo"_q, u"When a message from someone not in your contacts mentions common scam tactics — money transfers, gift cards, crypto “investments”, verification fees or asking for codes — show a one-time reminder to stay cautious. The message is never blocked or changed. Checks run offline on your device."_q },
+		// link preview + voice confirm
+		{ u"LuminaPrivacyDisableLinkPreview"_q, u"Disable link preview by "
+			"default"_q },
+		{ u"LuminaLinkPreviewInfo"_q, u"Messages you write from scratch are "
+			"sent without a link preview, and the composer never asks "
+			"Telegram to look a pasted link up while you type. A preview that "
+			"is already attached, and a message you edit, are left as they "
+			"are. To attach a preview to one message anyway, give \"Toggle "
+			"link preview\" a key in Settings > Keyboard shortcuts and press "
+			"it while composing."_q },
+		{ u"LuminaVoiceConfirmTitle"_q, u"Voice and video messages"_q },
+		{ u"LuminaVoiceConfirmRow"_q, u"Confirm before sending"_q },
+		{ u"LuminaVoiceConfirmInfo"_q, u"Ask before a recorded voice or round "
+			"video message is sent. Backing out of that question discards the "
+			"recording, except in the listen preview, where it leaves the "
+			"recording alone. Scheduled sends are never asked about."_q },
 	};
 	return result;
 }

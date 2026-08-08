@@ -449,6 +449,22 @@ namespace {
 		{ u"LuminaUndoSendUndo"_q, u"Geri al"_q },
 		{ u"LuminaUndoSendWindow"_q, u"Göndermeyi geri alma penceresi"_q },
 		{ u"LuminaUndoSendWindowInfo"_q, u"Düz metin mesajlarını gönderilmeden önce {1} saniye boyunca bir «Geri al» düğmesinin arkasında bekletir. Metniniz bu süre boyunca mesaj kutusunda kalır ve kutu ancak mesaj gerçekten gittiğinde temizlenir; bu yüzden «Geri al» metni olduğu yerde bırakır — hiçbir şey alınıp geri konmaz. Yeniden göndermek, başka bir sohbet açmak ya da uygulamadan çıkmak, bekletilen mesajı hemen gönderir. Medya, sesli, düzenlenmiş, iletilen ve zamanlanmış mesajlar hiçbir zaman bekletilmez; bir forum konusundan ya da bir yorum dizisinden gönderilen mesajlar da bekletilmez."_q },
+		// exif strip + text replace
+		{ u"LuminaExifStripRow"_q, u"Göndermeden önce fotoğrafın konumunu kaldır"_q },
+		{ u"LuminaExifStripInfo"_q, u"Bir fotoğraf yüklenmeden önce, kameranın JPEG dosyasının içine yazdığı GPS koordinatlarını siler — fotoğrafı her zamanki sıkıştırılmış biçimde gönderdiğinizde de dosya olarak gönderdiğinizde de. Yalnızca konum etiketleri gider: yön, kamera ve tarih etiketleri olduğu gibi kalır, böylece dosya olarak gönderilen bir fotoğraf yine doğru yönde görünür. Diskteki kendi kopyanız hiçbir zaman değiştirilmez. Bu; videoları, bir fotoğrafa XMP ile ya da kameranın kendi üretici notlarıyla yazılmış konumu ve bazı telefonların aynı dosyaya sıkıştırdığı ikinci görüntü kopyasını kapsamaz."_q },
+		{ u"LuminaReplacerTitle"_q, u"Metin değiştirici"_q },
+		{ u"LuminaReplacerHeader"_q, u"Kurallar"_q },
+		{ u"LuminaReplacerAdd"_q, u"Kural ekle"_q },
+		{ u"LuminaReplacerEdit"_q, u"Kuralı düzenle"_q },
+		{ u"LuminaReplacerFrom"_q, u"Değiştir"_q },
+		{ u"LuminaReplacerTo"_q, u"Şununla"_q },
+		{ u"LuminaReplacerEnable"_q, u"Gönderdiğim mesajlardaki metni değiştir"_q },
+		{ u"LuminaReplacerNone"_q, u"Yok"_q },
+		{ u"LuminaReplacerNothing"_q, u"(hiçbir şey)"_q },
+		{ u"LuminaReplacerEmpty"_q, u"Henüz kural yok. Gönderdiğiniz mesajlardaki metni değiştirmeye başlamak için bir kural ekleyin."_q },
+		{ u"LuminaReplacerFull"_q, u"Kurallar yukarıdan aşağıya sırayla uygulanır. Liste dolu — yenisini eklemek için bir kuralı silin."_q },
+		{ u"LuminaReplacerListInfo"_q, u"Kurallar yukarıdan aşağıya sırayla uygulanır ve her kural, bir üstündeki kuralın ürettiği metin üzerinde çalışır."_q },
+		{ u"LuminaReplacerAbout"_q, u"Gönderdiğiniz her mesajda bir kısaltmayı, kastettiğiniz ifadeyle değiştirir — «brb», «be right back» olur. Eşleşme büyük/küçük harfe duyarlıdır ve yalnızca tam kelimeleri tutar. Herhangi bir biçimlendirme taşıyan mesaj tam olarak yazdığınız gibi gönderilir; bağlantılar, bahsetmeler, etiketler ve bot komutları asla yeniden yazılmaz. Kurallar bu cihazda kalır ve hiçbir zaman Telegram'a gönderilmez."_q },
 	};
 }
 

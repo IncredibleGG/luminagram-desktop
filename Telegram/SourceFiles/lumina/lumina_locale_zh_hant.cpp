@@ -539,6 +539,34 @@ namespace {
 			u"或結束程式，都會立刻把保留中的訊息送出。媒體、語音、已編輯、"
 			u"轉發與定時訊息永遠不會被保留，從論壇主題或留言串中傳送的訊息"
 			u"也不會。"_q },
+		// exif strip + text replace
+		{ u"LuminaExifStripRow"_q, u"傳送前移除相片位置資訊"_q },
+		{ u"LuminaExifStripInfo"_q, u"在上傳之前，抹除相機寫進 JPEG 相片裡的"
+			u" GPS 座標——無論你是以一般的壓縮方式傳送相片，還是以檔案形式傳"
+			u"送。只有位置標籤會被移除：方向、相機與日期標籤原封不動，所以以檔"
+			u"案形式傳送的相片依然是正的。你磁碟上的那份檔案永遠不會被修改。這"
+			u"不涵蓋影片，也不涵蓋由 XMP 或相機自家的製造商註記寫進相片的位"
+			u"置，或是某些手機塞進同一個檔案裡的第二份影像。"_q },
+		{ u"LuminaReplacerTitle"_q, u"文字取代"_q },
+		{ u"LuminaReplacerHeader"_q, u"規則"_q },
+		{ u"LuminaReplacerAdd"_q, u"新增規則"_q },
+		{ u"LuminaReplacerEdit"_q, u"編輯規則"_q },
+		{ u"LuminaReplacerFrom"_q, u"取代"_q },
+		{ u"LuminaReplacerTo"_q, u"為"_q },
+		{ u"LuminaReplacerEnable"_q, u"取代我傳送的訊息中的文字"_q },
+		{ u"LuminaReplacerNone"_q, u"無"_q },
+		{ u"LuminaReplacerNothing"_q, u"（空）"_q },
+		{ u"LuminaReplacerEmpty"_q, u"還沒有任何規則。新增一則，就能開始取代你"
+			u"傳送的訊息中的文字。"_q },
+		{ u"LuminaReplacerFull"_q, u"規則會由上而下依序套用。清單已滿——請先刪"
+			u"除一則規則，才能再新增。"_q },
+		{ u"LuminaReplacerListInfo"_q, u"規則會由上而下依序套用，每一則處理的"
+			u"都是上一則取代後的結果。"_q },
+		{ u"LuminaReplacerAbout"_q, u"在你傳送的每一則訊息裡，把縮寫換成你真正"
+			u"想說的話——「brb」會變成「be right back」。比對區分大小寫，而且只"
+			u"以整個單字為單位。含有任何格式的訊息會原封不動地送出，連結、提"
+			u"及、主題標籤與機器人指令也永遠不會被改寫。規則只留在這台裝置上，"
+			u"絕不會傳送給 Telegram。"_q },
 	};
 }
 

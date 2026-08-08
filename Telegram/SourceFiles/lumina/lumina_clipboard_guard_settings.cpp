@@ -8,6 +8,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "lumina/lumina_clipboard_guard_settings.h"
 
 #include "lumina/lumina_clipboard_guard.h"
+#include "lumina/lumina_locale.h"
 #include "ui/vertical_list.h"
 #include "ui/widgets/buttons.h"
 #include "ui/wrap/vertical_layout.h"
@@ -22,7 +23,7 @@ void AddCryptoGuardRows(
 	Ui::AddSkip(container);
 	const auto button = container->add(object_ptr<Ui::SettingsButton>(
 		container,
-		rpl::single(u"Crypto address paste guard"_q),
+		TrValue(u"LuminaPrivacyCryptoClipboardGuard"_q),
 		st::settingsButtonNoIcon
 	))->toggleOn(CryptoClipboardGuardValue());
 	button->toggledChanges(
@@ -32,11 +33,7 @@ void AddCryptoGuardRows(
 	Ui::AddSkip(container);
 	Ui::AddDividerText(
 		container,
-		rpl::single(u"Ask before pasting what looks like a crypto wallet "
-			"address into a message. Clipboard-hijacking malware can swap a "
-			"copied address for a scammer's without you noticing, and the "
-			"paste is the last moment you can catch it. The check runs on "
-			"this device and nothing is sent anywhere."_q));
+		TrValue(u"LuminaPrivacyCryptoClipboardGuardInfo"_q));
 }
 
 } // namespace Lumina

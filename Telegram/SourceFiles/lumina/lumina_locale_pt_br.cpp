@@ -644,6 +644,24 @@ namespace {
 			u"mídia, de voz, editadas, encaminhadas e agendadas nunca são "
 			u"retidas, e o mesmo vale para mensagens enviadas de um tópico de "
 			u"fórum ou de uma thread de comentários."_q },
+		// clipboard guard + scam watch
+		{ u"LuminaPrivacyCryptoClipboardGuard"_q, u"Proteção ao colar endereço "
+			u"de cripto"_q },
+		{ u"LuminaPrivacyCryptoClipboardGuardInfo"_q, u"Pergunta antes de "
+			u"colar em uma mensagem algo que parece um endereço de carteira de "
+			u"criptomoedas. Malware que sequestra a área de transferência pode "
+			u"trocar o endereço copiado pelo de um golpista sem você perceber, "
+			u"e colar é o último momento em que dá para notar. A verificação é "
+			u"feita neste aparelho e nada é enviado para lugar nenhum."_q },
+		{ u"LuminaPrivacyScamKeywordWarning"_q, u"Aviso de palavras de "
+			u"golpe"_q },
+		{ u"LuminaPrivacyScamKeywordWarningInfo"_q, u"Quando uma mensagem de "
+			u"alguém que não está nos seus contatos menciona táticas comuns de "
+			u"golpe — transferências de dinheiro, cartões-presente, "
+			u"“investimentos” em cripto, taxas de verificação ou pedir códigos "
+			u"— é exibido um lembrete único para você ter cuidado. A mensagem "
+			u"nunca é bloqueada nem alterada. As verificações são feitas "
+			u"off-line no seu dispositivo."_q },
 	};
 }
 

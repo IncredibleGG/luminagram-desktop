@@ -449,6 +449,11 @@ namespace {
 		{ u"LuminaUndoSendUndo"_q, u"Geri al"_q },
 		{ u"LuminaUndoSendWindow"_q, u"Göndermeyi geri alma penceresi"_q },
 		{ u"LuminaUndoSendWindowInfo"_q, u"Düz metin mesajlarını gönderilmeden önce {1} saniye boyunca bir «Geri al» düğmesinin arkasında bekletir. Metniniz bu süre boyunca mesaj kutusunda kalır ve kutu ancak mesaj gerçekten gittiğinde temizlenir; bu yüzden «Geri al» metni olduğu yerde bırakır — hiçbir şey alınıp geri konmaz. Yeniden göndermek, başka bir sohbet açmak ya da uygulamadan çıkmak, bekletilen mesajı hemen gönderir. Medya, sesli, düzenlenmiş, iletilen ve zamanlanmış mesajlar hiçbir zaman bekletilmez; bir forum konusundan ya da bir yorum dizisinden gönderilen mesajlar da bekletilmez."_q },
+		// clipboard guard + scam watch
+		{ u"LuminaPrivacyCryptoClipboardGuard"_q, u"Kripto adresi yapıştırma koruması"_q },
+		{ u"LuminaPrivacyCryptoClipboardGuardInfo"_q, u"Bir mesaja kripto cüzdan adresine benzeyen bir şey yapıştırmadan önce sorar. Panoyu ele geçiren kötü amaçlı yazılımlar, kopyaladığın adresi sen fark etmeden bir dolandırıcının adresiyle değiştirebilir ve yapıştırma, bunu yakalayabileceğin son andır. Denetim bu cihazda yapılır ve hiçbir yere hiçbir şey gönderilmez."_q },
+		{ u"LuminaPrivacyScamKeywordWarning"_q, u"Dolandırıcılık kelime uyarısı"_q },
+		{ u"LuminaPrivacyScamKeywordWarningInfo"_q, u"Kişilerinizde olmayan birinden gelen bir mesaj yaygın dolandırıcılık taktiklerinden söz ettiğinde — para transferi, hediye kartı, kripto “yatırımı”, doğrulama ücreti veya kod isteme — dikkatli olmanız için tek seferlik bir hatırlatma gösterilir. Mesaj asla engellenmez veya değiştirilmez. Kontroller cihazınızda çevrimdışı çalışır."_q },
 	};
 }
 

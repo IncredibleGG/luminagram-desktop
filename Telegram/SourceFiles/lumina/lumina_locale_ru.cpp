@@ -712,6 +712,80 @@ namespace {
 			u"или ветки комментариев."_q },
 		{ u"LuminaUndoSendBulletin"_q, u"Отправка сообщения…"_q },
 		{ u"LuminaUndoSendUndo"_q, u"Отмена"_q },
+		// vault + fake crash
+		{ u"LuminaVaultHeader"_q, u"Сейф маскировки"_q },
+		{ u"LuminaVaultEnable"_q, u"Включить сейф"_q },
+		{ u"LuminaVaultInfo"_q, u"Всё здесь остаётся только на этом устройстве. Сейф "
+			u"прячет LuminaGram за безобидным на вид приложением, и "
+			u"вернуть вас в настоящее может только секретный код."_q },
+		{ u"LuminaVaultMode"_q, u"Режим сейфа"_q },
+		{ u"LuminaVaultModePasswordDoor"_q, u"Дверь с паролем"_q },
+		{ u"LuminaVaultModeDecoyApp"_q, u"Приложение-обманка"_q },
+		{ u"LuminaVaultModePasswordDoorInfo"_q, u"При запуске LuminaGram спрашивает "
+			u"пароль. Секретный код открывает настоящее приложение; "
+			u"любой другой открывает обманку и никогда не сообщает, что "
+			u"он был неверным."_q },
+		{ u"LuminaVaultModeDecoyAppInfo"_q, u"При запуске LuminaGram сразу открывается "
+			u"обманка. Введите в ней секретный код, чтобы попасть в "
+			u"настоящее приложение."_q },
+		{ u"LuminaVaultSkin"_q, u"Вид приложения-обманки"_q },
+		{ u"LuminaVaultSkinNotepad"_q, u"Заметки"_q },
+		{ u"LuminaVaultSkinCalculator"_q, u"Калькулятор"_q },
+		{ u"LuminaVaultSkinHintCalculator"_q, u"Чтобы разблокировать из калькулятора, "
+			u"наберите секретный код и нажмите клавишу равенства."_q },
+		{ u"LuminaVaultSkinHintNotepad"_q, u"Чтобы разблокировать из заметок, сделайте "
+			u"секретный код всем текстом заметки, а затем дважды "
+			u"щёлкните заголовок окна «Заметки»."_q },
+		{ u"LuminaVaultSecretCode"_q, u"Секретный код"_q },
+		{ u"LuminaVaultSecretCodeDialogTitle"_q, u"Секретный код"_q },
+		{ u"LuminaDisguiseDecoyCodeSet"_q, u"Задан"_q },
+		{ u"LuminaDisguiseDecoyCodeNotSet"_q, u"Не задан"_q },
+		{ u"LuminaVaultNoCodeInfo"_q, u"Сейф не работает, пока вы не зададите секретный "
+			u"код."_q },
+		{ u"LuminaVaultCalculatorCodeInfo"_q, u"Этот код нельзя набрать на клавиатуре "
+			u"калькулятора, поэтому вместо неё показывается "
+			u"обманка-заметки. Если вам нужен калькулятор, используйте "
+			u"только цифры, точку и + - * /."_q },
+		{ u"LuminaVaultDisclaimer"_q, u"Это спасает от взгляда через плечо, но не от "
+			u"осведомлённой проверки: в диспетчере задач программа "
+			u"по-прежнему называется LuminaGram, и любой, кто может "
+			u"прочитать файлы этого устройства, может добраться до "
+			u"вашего аккаунта. Сейф появляется при следующем запуске "
+			u"LuminaGram, а закрытие обманки завершает LuminaGram. Если "
+			u"вы забудете код, удалите tdata/luminagram.json и "
+			u"tdata/luminagram_private.json из папки данных LuminaGram: "
+			u"сейф тогда сам выключится, и LuminaGram запустится обычным "
+			u"образом."_q },
+		{ u"LuminaSecurityFakeCrashHeader"_q, u"Разблокировка ложным сбоем"_q },
+		{ u"LuminaSecurityFakeCrashEnable"_q, u"Включить разблокировку ложным сбоем"_q },
+		{ u"LuminaSecurityFakeCrashCode"_q, u"Код ложного сбоя"_q },
+		{ u"LuminaSecurityFakeCrashCodeDialogTitle"_q, u"Код ложного сбоя"_q },
+		{ u"LuminaSecurityFakeCrashCodeHint"_q, u"Код"_q },
+		{ u"LuminaSecurityFakeCrashCodeSet"_q, u"Задан"_q },
+		{ u"LuminaSecurityFakeCrashCodeNotSet"_q, u"Не задан"_q },
+		{ u"LuminaSecurityFakeCrashCodeSameAsPasscode"_q, u"Этот код не может совпадать с "
+			u"вашим код-паролем."_q },
+		{ u"LuminaSecurityFakeCrashInfo"_q, u"Когда это включено, ввод кода ложного сбоя "
+			u"на экране блокировки не разблокирует LuminaGram, а сразу "
+			u"закрывает его — без сообщений и без единого следа на "
+			u"экране: со стороны выглядит так, будто приложение упало. "
+			u"Код не связан с вашим код-паролем, хранится только на этом "
+			u"устройстве и никуда не отправляется."_q },
+		{ u"LuminaSecurityFakeCrashBiometricInfo"_q, u"Пока это включено и код задан, "
+			u"разблокировка с помощью Touch ID, Windows Hello или пароля "
+			u"системы отключена: отпечаток открывает приложение, вообще "
+			u"не спрашивая код-пароль, и потому прошёл бы мимо этого "
+			u"кода. Если убрать код или выключить это, они снова "
+			u"заработают."_q },
+		{ u"LuminaSecurityFakeCrashNoCodeInfo"_q, u"Код ещё не задан, поэтому на экране "
+			u"блокировки ничего не произойдёт."_q },
+		{ u"LuminaSecurityFakeCrashNoPasscodeInfo"_q, u"В LuminaGram не задан код-пароль, "
+			u"поэтому экран блокировки не появляется и этот код никогда "
+			u"не запрашивается. Сначала включите код-пароль в разделе "
+			u"«Конфиденциальность»."_q },
+		{ u"LuminaSecurityFakeCrashCodeClashInfo"_q, u"Теперь этот код совпадает с вашим "
+			u"код-паролем, поэтому он никогда не сработает — приложение "
+			u"разблокирует код-пароль. Выберите другой код."_q },
 	};
 }
 

@@ -8,6 +8,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "lumina/lumina_vault_settings.h"
 
 #include "lang/lang_keys.h"
+#include "lumina/lumina_locale.h"
 #include "lumina/lumina_vault.h"
 #include "lumina/lumina_vault_calculator.h"
 #include "settings/settings_common.h"
@@ -33,12 +34,13 @@ constexpr auto kCodeMaxLength = 128;
 
 // Every label and toggle is recomputed from the store on any change, so a
 // value restored from a backup or written elsewhere is reflected without this
-// page having to know which row owns which key.
+// page having to know which row owns which key. LangChanges() is merged in
+// because every text these produce is itself a translated string.
 [[nodiscard]] rpl::producer<QString> TextValue(Fn<QString()> compute) {
 	return rpl::single(
 		rpl::empty
 	) | rpl::then(
-		VaultChanges()
+		rpl::merge(VaultChanges(), LangChanges())
 	) | rpl::map([compute = std::move(compute)] {
 		return compute();
 	});
@@ -86,24 +88,21 @@ void AddValueRow(
 }
 
 [[nodiscard]] QString VaultModeName() {
-	return (CurrentVaultMode() == VaultMode::DecoyApp)
-		? u"Decoy app"_q
-		: u"Password door"_q;
+	return Tr((CurrentVaultMode() == VaultMode::DecoyApp)
+		? u"LuminaVaultModeDecoyApp"_q
+		: u"LuminaVaultModePasswordDoor"_q);
 }
 
 [[nodiscard]] QString VaultSkinName() {
-	return (CurrentVaultSkin() == VaultSkin::Calculator)
-		? u"Calculator"_q
-		: u"Notepad"_q;
+	return Tr((CurrentVaultSkin() == VaultSkin::Calculator)
+		? u"LuminaVaultSkinCalculator"_q
+		: u"LuminaVaultSkinNotepad"_q);
 }
 
 [[nodiscard]] QString VaultModeInfo() {
-	return (CurrentVaultMode() == VaultMode::DecoyApp)
-		? u"Starting LuminaGram opens the decoy straight away. Enter your "
-			"secret code in it to reach the real app."_q
-		: u"Starting LuminaGram asks for a password. The secret code opens "
-			"the real app; anything else opens the decoy, and never says "
-			"that it was wrong."_q;
+	return Tr((CurrentVaultMode() == VaultMode::DecoyApp)
+		? u"LuminaVaultModeDecoyAppInfo"_q
+		: u"LuminaVaultModePasswordDoorInfo"_q);
 }
 
 // Keyed on the skin the gate will really show, not the one that is selected:
@@ -111,25 +110,21 @@ void AddValueRow(
 // notepad, and printing the calculator instructions there would send the user
 // to a decoy they will never see.
 [[nodiscard]] QString VaultSkinHint() {
-	return (EffectiveVaultSkin() == VaultSkin::Calculator)
-		? u"To unlock from the calculator, type the secret code and press "
-			"the equals key."_q
-		: u"To unlock from the notepad, make the secret code the whole note, "
-			"then double-click the Notes title bar."_q;
+	return Tr((EffectiveVaultSkin() == VaultSkin::Calculator)
+		? u"LuminaVaultSkinHintCalculator"_q
+		: u"LuminaVaultSkinHintNotepad"_q);
 }
 
 [[nodiscard]] QString VaultInfo() {
 	auto lines = QStringList();
-	lines.push_back(u"Everything here stays on this device. The vault hides "
-		"LuminaGram behind a harmless-looking app, and only the secret code "
-		"gets you back into the real one."_q);
+	lines.push_back(Tr(u"LuminaVaultInfo"_q));
 	if (!VaultEnabled()) {
 		return lines.join(u"\n\n"_q);
 	}
 	lines.push_back(VaultModeInfo());
 	lines.push_back(VaultSkinHint());
 	if (!VaultCodeIsSet()) {
-		lines.push_back(u"The vault stays off until you set a secret code."_q);
+		lines.push_back(Tr(u"LuminaVaultNoCodeInfo"_q));
 	} else if ((CurrentVaultSkin() == VaultSkin::Calculator)
 		&& !CalculatorCanType(VaultCode())) {
 		// The password door accepts any code, but the calculator keypad can
@@ -139,33 +134,20 @@ void AddValueRow(
 		// so the gate substitutes the notepad. Say so: the alternative is a
 		// user who was promised a calculator and is handed a notepad with no
 		// explanation.
-		lines.push_back(u"This code cannot be typed on the calculator keypad, "
-			"so the notepad decoy is shown instead. Use only digits, a dot "
-			"and + - * / if you want the calculator."_q);
+		lines.push_back(Tr(u"LuminaVaultCalculatorCodeInfo"_q));
 	}
 	return lines.join(u"\n\n"_q);
 }
 
-[[nodiscard]] QString VaultDisclaimer() {
-	return u"This defeats a glance over your shoulder, not an informed "
-		"inspector: the program is still called LuminaGram in the task "
-		"manager, and anyone who can read this device's files can read your "
-		"account. The vault appears the next time LuminaGram starts, and "
-		"closing the decoy quits LuminaGram. If you ever forget the code, "
-		"delete tdata/luminagram.json and tdata/luminagram_private.json from "
-		"your LuminaGram data folder: the vault then turns itself off and "
-		"LuminaGram starts normally."_q;
-}
-
 void ShowModePicker(not_null<Window::SessionController*> controller) {
 	const auto options = std::vector<QString>{
-		u"Password door"_q,
-		u"Decoy app"_q,
+		Tr(u"LuminaVaultModePasswordDoor"_q),
+		Tr(u"LuminaVaultModeDecoyApp"_q),
 	};
 	const auto selected = (CurrentVaultMode() == VaultMode::DecoyApp) ? 1 : 0;
 	controller->show(Box([=](not_null<Ui::GenericBox*> box) {
 		SingleChoiceBox(box, {
-			.title = rpl::single(u"Vault mode"_q),
+			.title = TrValue(u"LuminaVaultMode"_q),
 			.options = options,
 			.initialSelection = selected,
 			.callback = [=](int index) {
@@ -179,15 +161,15 @@ void ShowModePicker(not_null<Window::SessionController*> controller) {
 
 void ShowSkinPicker(not_null<Window::SessionController*> controller) {
 	const auto options = std::vector<QString>{
-		u"Notepad"_q,
-		u"Calculator"_q,
+		Tr(u"LuminaVaultSkinNotepad"_q),
+		Tr(u"LuminaVaultSkinCalculator"_q),
 	};
 	const auto selected = (CurrentVaultSkin() == VaultSkin::Calculator)
 		? 1
 		: 0;
 	controller->show(Box([=](not_null<Ui::GenericBox*> box) {
 		SingleChoiceBox(box, {
-			.title = rpl::single(u"Decoy app style"_q),
+			.title = TrValue(u"LuminaVaultSkin"_q),
 			.options = options,
 			.initialSelection = selected,
 			.callback = [=](int index) {
@@ -200,13 +182,13 @@ void ShowSkinPicker(not_null<Window::SessionController*> controller) {
 }
 
 void EditCodeBox(not_null<Ui::GenericBox*> box) {
-	box->setTitle(rpl::single(u"Secret code"_q));
+	box->setTitle(TrValue(u"LuminaVaultSecretCodeDialogTitle"_q));
 
 	const auto field = box->addRow(object_ptr<Ui::InputField>(
 		box,
 		st::defaultInputField,
 		Ui::InputField::Mode::SingleLine,
-		rpl::single(u"Secret code"_q),
+		TrValue(u"LuminaVaultSecretCode"_q),
 		VaultCode()));
 	field->setMaxLength(kCodeMaxLength);
 	box->setFocusCallback([=] {
@@ -230,10 +212,10 @@ void AddVaultRows(
 		not_null<Ui::VerticalLayout*> container,
 		not_null<Window::SessionController*> controller) {
 	Ui::AddSkip(container);
-	Ui::AddSubsectionTitle(container, rpl::single(u"Disguise vault"_q));
+	Ui::AddSubsectionTitle(container, TrValue(u"LuminaVaultHeader"_q));
 	AddToggleRow(
 		container,
-		rpl::single(u"Enable vault"_q),
+		TrValue(u"LuminaVaultEnable"_q),
 		[] { return VaultEnabled(); },
 		[](bool value) { SetVaultEnabled(value); });
 
@@ -249,12 +231,12 @@ void AddVaultRows(
 
 	AddValueRow(
 		details,
-		rpl::single(u"Vault mode"_q),
+		TrValue(u"LuminaVaultMode"_q),
 		[] { return VaultModeName(); },
 		[=] { ShowModePicker(controller); });
 	AddValueRow(
 		details,
-		rpl::single(u"Decoy app style"_q),
+		TrValue(u"LuminaVaultSkin"_q),
 		[] { return VaultSkinName(); },
 		[=] { ShowSkinPicker(controller); });
 
@@ -265,14 +247,20 @@ void AddVaultRows(
 	// already looking at an unlocked LuminaGram.
 	AddValueRow(
 		details,
-		rpl::single(u"Secret code"_q),
-		[] { return VaultCodeIsSet() ? u"Set"_q : u"Not set"_q; },
+		TrValue(u"LuminaVaultSecretCode"_q),
+		[] {
+			// The two "Set" / "Not set" values are Android's own keys for
+			// this very row, so the two platforms cannot drift apart.
+			return Tr(VaultCodeIsSet()
+				? u"LuminaDisguiseDecoyCodeSet"_q
+				: u"LuminaDisguiseDecoyCodeNotSet"_q);
+		},
 		[=] { controller->show(Box(EditCodeBox)); });
 
 	Ui::AddSkip(container);
 	Ui::AddDividerText(container, TextValue([] { return VaultInfo(); }));
 	Ui::AddSkip(container);
-	Ui::AddDividerText(container, rpl::single(VaultDisclaimer()));
+	Ui::AddDividerText(container, TrValue(u"LuminaVaultDisclaimer"_q));
 }
 
 } // namespace Lumina

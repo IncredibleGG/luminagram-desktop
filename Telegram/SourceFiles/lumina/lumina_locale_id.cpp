@@ -643,6 +643,82 @@ namespace {
 			u"diteruskan, dan pesan terjadwal tidak pernah ditahan, begitu "
 			u"pula pesan yang dikirim dari topik forum atau utas "
 			u"komentar."_q },
+		// vault + fake crash
+		{ u"LuminaVaultHeader"_q, u"Brankas penyamaran"_q },
+		{ u"LuminaVaultEnable"_q, u"Aktifkan brankas"_q },
+		{ u"LuminaVaultInfo"_q, u"Semua di sini hanya tersimpan di perangkat ini. Brankas "
+			u"menyembunyikan LuminaGram di balik aplikasi yang terlihat "
+			u"biasa, dan hanya kode rahasia yang membawa Anda kembali ke "
+			u"aplikasi asli."_q },
+		{ u"LuminaVaultMode"_q, u"Mode brankas"_q },
+		{ u"LuminaVaultModePasswordDoor"_q, u"Pintu kata sandi"_q },
+		{ u"LuminaVaultModeDecoyApp"_q, u"Aplikasi umpan"_q },
+		{ u"LuminaVaultModePasswordDoorInfo"_q, u"Saat LuminaGram dijalankan, kata sandi "
+			u"akan diminta. Kode rahasia membuka aplikasi asli; apa pun "
+			u"yang lain membuka aplikasi umpan, dan tidak pernah memberi "
+			u"tahu bahwa kodenya salah."_q },
+		{ u"LuminaVaultModeDecoyAppInfo"_q, u"Saat LuminaGram dijalankan, aplikasi umpan "
+			u"langsung terbuka. Masukkan kode rahasia Anda di sana untuk "
+			u"masuk ke aplikasi asli."_q },
+		{ u"LuminaVaultSkin"_q, u"Gaya aplikasi umpan"_q },
+		{ u"LuminaVaultSkinNotepad"_q, u"Catatan"_q },
+		{ u"LuminaVaultSkinCalculator"_q, u"Kalkulator"_q },
+		{ u"LuminaVaultSkinHintCalculator"_q, u"Untuk membuka dari kalkulator, ketik kode "
+			u"rahasia lalu tekan tombol sama dengan."_q },
+		{ u"LuminaVaultSkinHintNotepad"_q, u"Untuk membuka dari catatan, jadikan kode "
+			u"rahasia sebagai seluruh isi catatan, lalu klik dua kali "
+			u"bilah judul Catatan."_q },
+		{ u"LuminaVaultSecretCode"_q, u"Kode rahasia"_q },
+		{ u"LuminaVaultSecretCodeDialogTitle"_q, u"Kode rahasia"_q },
+		{ u"LuminaDisguiseDecoyCodeSet"_q, u"Diatur"_q },
+		{ u"LuminaDisguiseDecoyCodeNotSet"_q, u"Belum diatur"_q },
+		{ u"LuminaVaultNoCodeInfo"_q, u"Brankas tetap nonaktif sampai Anda mengatur kode "
+			u"rahasia."_q },
+		{ u"LuminaVaultCalculatorCodeInfo"_q, u"Kode ini tidak dapat diketik pada papan "
+			u"tombol kalkulator, jadi catatan umpan yang ditampilkan "
+			u"sebagai gantinya. Gunakan hanya angka, satu titik, dan + - "
+			u"* / jika Anda ingin kalkulator."_q },
+		{ u"LuminaVaultDisclaimer"_q, u"Ini menghalangi lirikan sekilas dari balik bahu "
+			u"Anda, bukan pemeriksaan orang yang paham: program ini "
+			u"tetap bernama LuminaGram di pengelola tugas, dan siapa pun "
+			u"yang bisa membaca berkas perangkat ini bisa menjangkau "
+			u"akun Anda. Brankas muncul saat LuminaGram dijalankan "
+			u"berikutnya, dan menutup aplikasi umpan berarti keluar dari "
+			u"LuminaGram. Jika suatu saat Anda lupa kodenya, hapus "
+			u"tdata/luminagram.json dan tdata/luminagram_private.json "
+			u"dari folder data LuminaGram: brankas lalu mematikan "
+			u"dirinya sendiri dan LuminaGram berjalan normal."_q },
+		{ u"LuminaSecurityFakeCrashHeader"_q, u"Buka kunci crash palsu"_q },
+		{ u"LuminaSecurityFakeCrashEnable"_q, u"Aktifkan buka kunci crash palsu"_q },
+		{ u"LuminaSecurityFakeCrashCode"_q, u"Kode crash palsu"_q },
+		{ u"LuminaSecurityFakeCrashCodeDialogTitle"_q, u"Kode crash palsu"_q },
+		{ u"LuminaSecurityFakeCrashCodeHint"_q, u"Kode"_q },
+		{ u"LuminaSecurityFakeCrashCodeSet"_q, u"Diatur"_q },
+		{ u"LuminaSecurityFakeCrashCodeNotSet"_q, u"Belum diatur"_q },
+		{ u"LuminaSecurityFakeCrashCodeSameAsPasscode"_q, u"Kode ini tidak boleh sama "
+			u"dengan kode sandi kunci Anda."_q },
+		{ u"LuminaSecurityFakeCrashInfo"_q, u"Saat aktif, mengetik kode crash palsu di "
+			u"layar kunci akan langsung menutup LuminaGram alih-alih "
+			u"membukanya, tanpa pesan apa pun dan tanpa meninggalkan apa "
+			u"pun di layar — bagi siapa pun yang melihat, aplikasi "
+			u"tampak crash. Kode ini terpisah dari kode sandi kunci "
+			u"Anda, disimpan hanya di perangkat ini, dan tidak pernah "
+			u"dikirim ke mana pun."_q },
+		{ u"LuminaSecurityFakeCrashBiometricInfo"_q, u"Selama ini aktif dan kode sudah "
+			u"diatur, membuka kunci dengan Touch ID, Windows Hello, atau "
+			u"kata sandi sistem dimatikan: sidik jari membuka aplikasi "
+			u"tanpa pernah meminta kode sandi, sehingga akan melewati "
+			u"kode ini begitu saja. Menghapus kode, atau mematikan opsi "
+			u"ini, akan mengembalikannya."_q },
+		{ u"LuminaSecurityFakeCrashNoCodeInfo"_q, u"Belum ada kode yang diatur, jadi tidak "
+			u"akan terjadi apa-apa di layar kunci."_q },
+		{ u"LuminaSecurityFakeCrashNoPasscodeInfo"_q, u"LuminaGram tidak memiliki kode "
+			u"sandi kunci, jadi layar kunci tidak pernah muncul dan kode "
+			u"ini tidak pernah diminta. Aktifkan dulu kode sandi kunci "
+			u"di Privasi dan Keamanan."_q },
+		{ u"LuminaSecurityFakeCrashCodeClashInfo"_q, u"Kode ini kini sama dengan kode "
+			u"sandi kunci Anda, jadi tidak akan pernah berfungsi — kode "
+			u"sandi yang membuka aplikasi. Pilih kode lain."_q },
 	};
 }
 

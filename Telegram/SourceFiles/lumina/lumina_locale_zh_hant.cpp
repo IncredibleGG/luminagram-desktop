@@ -539,6 +539,77 @@ namespace {
 			u"或結束程式，都會立刻把保留中的訊息送出。媒體、語音、已編輯、"
 			u"轉發與定時訊息永遠不會被保留，從論壇主題或留言串中傳送的訊息"
 			u"也不會。"_q },
+		// vault + fake crash
+		{ u"LuminaVaultHeader"_q, u"偽裝保險箱"_q },
+		{ u"LuminaVaultEnable"_q, u"保險箱開關"_q },
+		{ u"LuminaVaultInfo"_q, u"這裡的一切都只保存在本機。保險箱會把 "
+			u"LuminaGram 藏在一個不起眼的 App "
+			u"後面，只有輸入秘密密碼才能回到真正的 App。"_q },
+		{ u"LuminaVaultMode"_q, u"保險箱模式"_q },
+		{ u"LuminaVaultModePasswordDoor"_q, u"密碼門"_q },
+		{ u"LuminaVaultModeDecoyApp"_q, u"直接偽裝"_q },
+		{ u"LuminaVaultModePasswordDoorInfo"_q, u"啟動 "
+			u"LuminaGram 時會先要求輸入密碼。輸入秘"
+			u"密密碼會進入真正的 App；輸入其他內容則會開啟"
+			u"假 App，而且永遠不會提示密碼錯誤。"_q },
+		{ u"LuminaVaultModeDecoyAppInfo"_q, u"啟動 LuminaGram "
+			u"時會直接開啟假 App。在假 App 中輸入秘密"
+			u"密碼即可進入真正的 App。"_q },
+		{ u"LuminaVaultSkin"_q, u"假 App 樣式"_q },
+		{ u"LuminaVaultSkinNotepad"_q, u"記事本"_q },
+		{ u"LuminaVaultSkinCalculator"_q, u"計算機"_q },
+		{ u"LuminaVaultSkinHintCalculator"_q, u"要從計算機解鎖，請輸入秘密密"
+			u"碼，然後按等號鍵。"_q },
+		{ u"LuminaVaultSkinHintNotepad"_q, u"要從記事本解鎖，請讓整篇筆記只"
+			u"有秘密密碼，然後按兩下「記事本」標題列。"_q },
+		{ u"LuminaVaultSecretCode"_q, u"秘密密碼"_q },
+		{ u"LuminaVaultSecretCodeDialogTitle"_q, u"秘密密碼"_q },
+		{ u"LuminaDisguiseDecoyCodeSet"_q, u"已設定"_q },
+		{ u"LuminaDisguiseDecoyCodeNotSet"_q, u"未設定"_q },
+		{ u"LuminaVaultNoCodeInfo"_q, u"在你設定秘密密碼之前，保險箱不會"
+			u"生效。"_q },
+		{ u"LuminaVaultCalculatorCodeInfo"_q, u"這個密碼無法用計算機鍵盤輸入，"
+			u"因此會改用記事本假 App。如果你想用計算機，請"
+			u"只使用數字、小數點和 + - * /。"_q },
+		{ u"LuminaVaultDisclaimer"_q, u"這只擋得住別人不經意的一瞥，擋不"
+			u"住真正懂行的檢查：程式在工作管理員裡仍然叫 "
+			u"LuminaGram，任何能讀取本機檔案的人都能"
+			u"讀到你的帳號。保險箱會在下次啟動 "
+			u"LuminaGram 時出現，關閉假 App 就"
+			u"等於結束 LuminaGram。萬一你忘了密碼，"
+			u"請從 LuminaGram 資料夾中刪除 "
+			u"tdata/luminagram.json 與 "
+			u"tdata/luminagram_private.json："
+			u"保險箱就會自動關閉，LuminaGram 也會正"
+			u"常啟動。"_q },
+		{ u"LuminaSecurityFakeCrashHeader"_q, u"假當機解鎖"_q },
+		{ u"LuminaSecurityFakeCrashEnable"_q, u"啟用假當機解鎖"_q },
+		{ u"LuminaSecurityFakeCrashCode"_q, u"假當機密碼"_q },
+		{ u"LuminaSecurityFakeCrashCodeDialogTitle"_q, u"假當機密碼"_q },
+		{ u"LuminaSecurityFakeCrashCodeHint"_q, u"密碼"_q },
+		{ u"LuminaSecurityFakeCrashCodeSet"_q, u"已設定"_q },
+		{ u"LuminaSecurityFakeCrashCodeNotSet"_q, u"未設定"_q },
+		{ u"LuminaSecurityFakeCrashCodeSameAsPasscode"_q, u"此密碼不能與你的密碼"
+			u"鎖相同。"_q },
+		{ u"LuminaSecurityFakeCrashInfo"_q, u"開啟後，在鎖定畫面輸入假當機"
+			u"密碼不會解鎖，而是立刻關閉 LuminaGram："
+			u"不會有任何提示，畫面上也不會留下任何東西——在旁"
+			u"人看來就是應用程式當掉了。這個密碼與你的密碼鎖互"
+			u"相獨立，只保存在本機，絕不會傳送到任何地方。"_q },
+		{ u"LuminaSecurityFakeCrashBiometricInfo"_q, u"在此功能開啟且已設定密"
+			u"碼期間，使用 Touch ID、"
+			u"Windows Hello 或系統密碼解鎖會被停"
+			u"用：指紋解鎖根本不會詢問密碼鎖，也就會直接繞過這"
+			u"個密碼。清除密碼或關閉此功能後，它們就會恢復。"_q },
+		{ u"LuminaSecurityFakeCrashNoCodeInfo"_q, u"還沒有設定密碼，因此鎖定"
+			u"畫面上不會有任何反應。"_q },
+		{ u"LuminaSecurityFakeCrashNoPasscodeInfo"_q, u"LuminaGram "
+			u"沒有設定密碼鎖，因此鎖定畫面永遠不會出現，也就永"
+			u"遠不會用到這個密碼。請先在「隱私與安全性」中開啟"
+			u"密碼鎖。"_q },
+		{ u"LuminaSecurityFakeCrashCodeClashInfo"_q, u"這個密碼現在與你的密碼"
+			u"鎖相同，因此永遠不會觸發——密碼鎖會先把應用程式"
+			u"解鎖。請換一個密碼。"_q },
 	};
 }
 

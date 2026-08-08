@@ -11,6 +11,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "core/core_settings.h"
 #include "lang/lang_keys.h"
 #include "lumina/lumina_fake_crash.h"
+#include "lumina/lumina_locale.h"
 #include "main/main_domain.h"
 #include "settings/settings_common.h"
 #include "storage/storage_domain.h"
@@ -36,11 +37,13 @@ constexpr auto kCodeMaxLength = 64;
 // Every label, toggle and paragraph on the block is recomputed from the store
 // on any change to it, and on any change to the local passcode - the second
 // one matters because two of the warnings below are about the passcode, and
-// the passcode is edited on a completely different page.
+// the passcode is edited on a completely different page. LangChanges() is
+// merged in because every text they produce is itself a translated string.
 [[nodiscard]] rpl::producer<> Changes() {
 	return rpl::merge(
 		FakeCrashChanges(),
-		Core::App().domain().local().localPasscodeChanged());
+		Core::App().domain().local().localPasscodeChanged(),
+		LangChanges());
 }
 
 [[nodiscard]] rpl::producer<QString> LabelValue(Fn<QString()> compute) {
@@ -85,12 +88,12 @@ constexpr auto kCodeMaxLength = 64;
 
 void AddToggleRow(
 		not_null<Ui::VerticalLayout*> container,
-		const QString &label,
+		rpl::producer<QString> label,
 		Fn<bool()> checked,
 		Fn<void(bool)> save) {
 	const auto button = container->add(object_ptr<Ui::SettingsButton>(
 		container,
-		rpl::single(label),
+		std::move(label),
 		st::settingsButtonNoIcon
 	))->toggleOn(FlagValue(std::move(checked)));
 	button->toggledChanges(
@@ -103,19 +106,19 @@ void AddToggleRow(
 // section helpers have to be reached through the global namespace.
 void AddValueRow(
 		not_null<Ui::VerticalLayout*> container,
-		const QString &label,
+		rpl::producer<QString> label,
 		Fn<QString()> value,
 		Fn<void()> activate) {
 	::Settings::AddButtonWithLabel(
 		container,
-		rpl::single(label),
+		std::move(label),
 		LabelValue(std::move(value)),
 		st::settingsButtonNoIcon
 	)->setClickedCallback(std::move(activate));
 }
 
 void EditCodeBox(not_null<Ui::GenericBox*> box) {
-	box->setTitle(rpl::single(u"Fake-crash code"_q));
+	box->setTitle(TrValue(u"LuminaSecurityFakeCrashCodeDialogTitle"_q));
 
 	// Shown in the clear, deliberately, and unlike Android - which masks the
 	// field. The row behind this box only says "Set", so without this there is
@@ -128,7 +131,7 @@ void EditCodeBox(not_null<Ui::GenericBox*> box) {
 		box,
 		st::defaultInputField,
 		Ui::InputField::Mode::SingleLine,
-		rpl::single(u"Code"_q),
+		TrValue(u"LuminaSecurityFakeCrashCodeHint"_q),
 		FakeCrashCode()));
 	field->setMaxLength(kCodeMaxLength);
 	box->setFocusCallback([=] {
@@ -145,7 +148,7 @@ void EditCodeBox(not_null<Ui::GenericBox*> box) {
 		// is worth refusing at the one moment we can explain why.
 		if (CodeIsLocalPasscode(entered)) {
 			box->uiShow()->showBox(Ui::MakeInformBox(
-				u"This code can't be the same as your passcode lock."_q));
+				Tr(u"LuminaSecurityFakeCrashCodeSameAsPasscode"_q)));
 			return;
 		}
 		SetFakeCrashCode(entered);
@@ -165,38 +168,25 @@ void EditCodeBox(not_null<Ui::GenericBox*> box) {
 // than a paragraph that grows a sentence.
 [[nodiscard]] QString AboutText() {
 	auto lines = QStringList();
-	lines.append(u"When this is on, typing the fake-crash code on the lock "
-		"screen closes LuminaGram straight away instead of unlocking it, "
-		"with no message and nothing left on screen - to anyone watching, "
-		"the app crashed. The code is separate from your passcode lock, it "
-		"is kept on this device only, and it is never sent anywhere."_q);
+	lines.append(Tr(u"LuminaSecurityFakeCrashInfo"_q));
 
 	// The decision recorded in the port plan (§6 Q3): a fingerprint opens the
 	// app without the passcode field ever being touched, and would therefore
 	// walk straight past the duress code. Said here because the toggle that
 	// causes it is here, and the system-unlock switch that stops working is
 	// on a different page entirely.
-	lines.append(u"While this is on and a code is set, unlocking with Touch "
-		"ID, Windows Hello or your system password is turned off: a "
-		"fingerprint opens the app without ever asking for the passcode, so "
-		"it would go straight past this code. Clearing the code, or turning "
-		"this off, brings it back."_q);
+	lines.append(Tr(u"LuminaSecurityFakeCrashBiometricInfo"_q));
 
 	if (FakeCrashEnabled() && FakeCrashCode().isEmpty()) {
-		lines.append(u"No code is set yet, so nothing will happen on the "
-			"lock screen."_q);
+		lines.append(Tr(u"LuminaSecurityFakeCrashNoCodeInfo"_q));
 	}
 	if (FakeCrashEnabled() && !HasLocalPasscode()) {
-		lines.append(u"LuminaGram has no passcode lock, so the lock screen "
-			"never appears and this code is never asked for. Turn on the "
-			"passcode lock in Privacy and Security first."_q);
+		lines.append(Tr(u"LuminaSecurityFakeCrashNoPasscodeInfo"_q));
 	}
 	if (FakeCrashArmed() && CodeIsLocalPasscode(FakeCrashCode())) {
 		// Only reachable by changing the passcode lock to the duress code
 		// after setting it, which the passcode page knows nothing about.
-		lines.append(u"This code is now the same as your passcode lock, so it "
-			"will never fire - the passcode unlocks the app instead. Choose a "
-			"different code."_q);
+		lines.append(Tr(u"LuminaSecurityFakeCrashCodeClashInfo"_q));
 	}
 	return lines.join(u" "_q);
 }
@@ -207,10 +197,12 @@ void AddFakeCrashRows(
 		not_null<Ui::VerticalLayout*> container,
 		not_null<Window::SessionController*> controller) {
 	Ui::AddSkip(container);
-	Ui::AddSubsectionTitle(container, rpl::single(u"Fake-crash unlock"_q));
+	Ui::AddSubsectionTitle(
+		container,
+		TrValue(u"LuminaSecurityFakeCrashHeader"_q));
 	AddToggleRow(
 		container,
-		u"Enable fake-crash unlock"_q,
+		TrValue(u"LuminaSecurityFakeCrashEnable"_q),
 		[] { return FakeCrashEnabled(); },
 		[](bool value) { SetFakeCrashEnabled(value); });
 
@@ -226,8 +218,12 @@ void AddFakeCrashRows(
 	)->finishAnimating()->entity();
 	AddValueRow(
 		codeBlock,
-		u"Fake-crash code"_q,
-		[] { return FakeCrashCode().isEmpty() ? u"Not set"_q : u"Set"_q; },
+		TrValue(u"LuminaSecurityFakeCrashCode"_q),
+		[] {
+			return Tr(FakeCrashCode().isEmpty()
+				? u"LuminaSecurityFakeCrashCodeNotSet"_q
+				: u"LuminaSecurityFakeCrashCodeSet"_q);
+		},
 		[=] { controller->show(Box(EditCodeBox)); });
 
 	Ui::AddSkip(container);

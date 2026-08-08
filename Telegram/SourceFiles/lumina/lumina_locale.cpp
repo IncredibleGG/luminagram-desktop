@@ -513,6 +513,22 @@ struct Registration {
 			"video message is sent. Backing out of that question discards the "
 			"recording, except in the listen preview, where it leaves the "
 			"recording alone. Scheduled sends are never asked about."_q },
+		// exif strip + text replace
+		{ u"LuminaExifStripRow"_q, u"Remove photo location before sending"_q },
+		{ u"LuminaExifStripInfo"_q, u"Erase the GPS coordinates a camera stored inside a JPEG photo before it is uploaded — both when you send the photo the ordinary compressed way and when you send it as a file. Only the location tags go: orientation, camera and date tags are left exactly as they were, so a photo sent as a file still shows the right way up. Your own copy of the file on disk is never modified. This does not cover videos, a location written into a photo by XMP or by a camera's own maker notes, or the second copy of the picture that some phones tuck into the same file."_q },
+		{ u"LuminaReplacerTitle"_q, u"Text replacer"_q },
+		{ u"LuminaReplacerHeader"_q, u"Rules"_q },
+		{ u"LuminaReplacerAdd"_q, u"Add rule"_q },
+		{ u"LuminaReplacerEdit"_q, u"Edit rule"_q },
+		{ u"LuminaReplacerFrom"_q, u"Replace"_q },
+		{ u"LuminaReplacerTo"_q, u"With"_q },
+		{ u"LuminaReplacerEnable"_q, u"Replace text in messages I send"_q },
+		{ u"LuminaReplacerNone"_q, u"None"_q },
+		{ u"LuminaReplacerNothing"_q, u"(nothing)"_q },
+		{ u"LuminaReplacerEmpty"_q, u"No rules yet. Add one to start replacing text in the messages you send."_q },
+		{ u"LuminaReplacerFull"_q, u"Rules are applied in order, from the top. The list is full - delete a rule to add another."_q },
+		{ u"LuminaReplacerListInfo"_q, u"Rules are applied in order, from the top, and each one works on what the one above it produced."_q },
+		{ u"LuminaReplacerAbout"_q, u"Swap a shorthand for the phrase you meant in every message you send - \"brb\" becomes \"be right back\". Matching is case-sensitive and matches whole words. A message that carries any formatting is sent exactly as typed, and links, mentions, hashtags and bot commands are never rewritten. Rules stay on this device and are never sent to Telegram."_q },
 	};
 	return result;
 }

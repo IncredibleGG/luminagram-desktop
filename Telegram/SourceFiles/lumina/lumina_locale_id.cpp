@@ -678,6 +678,45 @@ namespace {
 			u"pertanyaan itu membuang rekaman, kecuali di pratinjau dengar, "
 			u"yang membiarkan rekaman tetap ada. Pengiriman terjadwal tidak "
 			u"pernah ditanyakan."_q },
+		// exif strip + text replace
+		{ u"LuminaExifStripRow"_q, u"Hapus lokasi foto sebelum mengirim"_q },
+		{ u"LuminaExifStripInfo"_q, u"Menghapus koordinat GPS yang disimpan "
+			u"kamera di dalam foto JPEG sebelum foto itu diunggah — baik saat "
+			u"kamu mengirim foto dengan cara terkompresi biasa maupun saat "
+			u"mengirimnya sebagai file. Hanya tag lokasi yang hilang: tag "
+			u"orientasi, kamera, dan tanggal dibiarkan persis seperti semula, "
+			u"jadi foto yang dikirim sebagai file tetap tampil menghadap arah "
+			u"yang benar. Salinan file milikmu sendiri di penyimpanan tidak "
+			u"pernah diubah. Ini tidak mencakup video, lokasi yang ditulis ke "
+			u"dalam foto oleh XMP atau oleh catatan pabrikan kamera itu "
+			u"sendiri, maupun salinan kedua gambar yang diselipkan sebagian "
+			u"ponsel ke dalam file yang sama."_q },
+		{ u"LuminaReplacerTitle"_q, u"Pengganti teks"_q },
+		{ u"LuminaReplacerHeader"_q, u"Aturan"_q },
+		{ u"LuminaReplacerAdd"_q, u"Tambah aturan"_q },
+		{ u"LuminaReplacerEdit"_q, u"Edit aturan"_q },
+		{ u"LuminaReplacerFrom"_q, u"Ganti"_q },
+		{ u"LuminaReplacerTo"_q, u"Dengan"_q },
+		{ u"LuminaReplacerEnable"_q, u"Ganti teks pada pesan yang saya "
+			u"kirim"_q },
+		{ u"LuminaReplacerNone"_q, u"Tidak ada"_q },
+		{ u"LuminaReplacerNothing"_q, u"(kosong)"_q },
+		{ u"LuminaReplacerEmpty"_q, u"Belum ada aturan. Tambahkan satu untuk "
+			u"mulai mengganti teks pada pesan yang kamu kirim."_q },
+		{ u"LuminaReplacerFull"_q, u"Aturan diterapkan berurutan dari atas. "
+			u"Daftar sudah penuh — hapus satu aturan untuk menambah yang "
+			u"lain."_q },
+		{ u"LuminaReplacerListInfo"_q, u"Aturan diterapkan berurutan dari "
+			u"atas, dan setiap aturan bekerja pada hasil aturan di "
+			u"atasnya."_q },
+		{ u"LuminaReplacerAbout"_q, u"Menukar singkatan dengan frasa yang "
+			u"kamu maksud di setiap pesan yang kamu kirim — «brb» menjadi «be "
+			u"right back». Pencocokan membedakan huruf besar/kecil dan hanya "
+			u"berlaku untuk kata utuh. Pesan yang membawa format apa pun "
+			u"dikirim persis seperti yang diketik, dan tautan, sebutan, "
+			u"tagar, serta perintah bot tidak pernah ditulis ulang. Aturan "
+			u"tetap berada di perangkat ini dan tidak pernah dikirim ke "
+			u"Telegram."_q },
 	};
 }
 

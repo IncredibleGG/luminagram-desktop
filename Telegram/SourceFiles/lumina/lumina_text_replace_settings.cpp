@@ -8,6 +8,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "lumina/lumina_text_replace_settings.h"
 
 #include "lang/lang_keys.h"
+#include "lumina/lumina_locale.h"
 #include "lumina/lumina_text_replace.h"
 #include "settings/settings_common.h"
 #include "ui/layers/generic_box.h"
@@ -31,11 +32,13 @@ namespace {
 // count, not a dimension - nothing here is measured in pixels.
 constexpr auto kPreviewMaxLength = 40;
 
+// LangChanges() is merged in because the computed label is itself a
+// LuminaGram string when there are no rules.
 [[nodiscard]] rpl::producer<QString> LabelValue(Fn<QString()> compute) {
 	return rpl::single(
 		rpl::empty
 	) | rpl::then(
-		TextReplaceChanges()
+		rpl::merge(TextReplaceChanges(), LangChanges())
 	) | rpl::map([compute = std::move(compute)] {
 		return compute();
 	});
@@ -57,7 +60,7 @@ constexpr auto kPreviewMaxLength = 40;
 	result.replace(QChar(u'\r'), QChar(u' '));
 	result = result.trimmed();
 	if (result.isEmpty()) {
-		return u"(nothing)"_q;
+		return Tr(u"LuminaReplacerNothing"_q);
 	} else if (result.size() > kPreviewMaxLength) {
 		return result.left(kPreviewMaxLength) + QChar(0x2026);
 	}
@@ -85,15 +88,15 @@ constexpr auto kPreviewMaxLength = 40;
 // know who opened it or hold a pointer back into it.
 void EditRuleBox(not_null<Ui::GenericBox*> box, TextReplaceRule rule) {
 	const auto adding = rule.id.isEmpty();
-	box->setTitle(rpl::single(adding
-		? u"Add rule"_q
-		: u"Edit rule"_q));
+	box->setTitle(TrValue(adding
+		? u"LuminaReplacerAdd"_q
+		: u"LuminaReplacerEdit"_q));
 
 	const auto from = box->addRow(object_ptr<Ui::InputField>(
 		box,
 		st::defaultInputField,
 		Ui::InputField::Mode::SingleLine,
-		rpl::single(u"Replace"_q),
+		TrValue(u"LuminaReplacerFrom"_q),
 		rule.from));
 	from->setMaxLength(kTextReplaceFromMaxLength);
 
@@ -101,7 +104,7 @@ void EditRuleBox(not_null<Ui::GenericBox*> box, TextReplaceRule rule) {
 		box,
 		st::defaultInputField,
 		Ui::InputField::Mode::SingleLine,
-		rpl::single(u"With"_q),
+		TrValue(u"LuminaReplacerTo"_q),
 		rule.to));
 	to->setMaxLength(kTextReplaceToMaxLength);
 
@@ -163,7 +166,7 @@ void EditRuleBox(not_null<Ui::GenericBox*> box, TextReplaceRule rule) {
 void RulesBox(not_null<Ui::GenericBox*> box) {
 	box->setStyle(st::layerBox);
 	box->setWidth(st::boxWideWidth);
-	box->setTitle(rpl::single(u"Text replacer"_q));
+	box->setTitle(TrValue(u"LuminaReplacerTitle"_q));
 
 	// The list is rebuilt wholesale, so it gets a layout of its own rather
 	// than clearing the box's - GenericBox owns its content layout and wraps
@@ -180,11 +183,11 @@ void RulesBox(not_null<Ui::GenericBox*> box) {
 		const auto full = (int(rules.size()) >= kTextReplaceMaxRules);
 
 		Ui::AddSkip(content);
-		Ui::AddSubsectionTitle(content, rpl::single(u"Rules"_q));
+		Ui::AddSubsectionTitle(content, TrValue(u"LuminaReplacerHeader"_q));
 		if (!full) {
 			const auto add = ::Settings::AddButtonWithIcon(
 				content,
-				rpl::single(u"Add rule"_q),
+				TrValue(u"LuminaReplacerAdd"_q),
 				st::settingsButtonActive,
 				{ &st::menuIconAdd });
 			add->setClickedCallback([=] {
@@ -202,14 +205,11 @@ void RulesBox(not_null<Ui::GenericBox*> box) {
 			});
 		}
 		Ui::AddSkip(content);
-		Ui::AddDividerText(content, rpl::single(rules.empty()
-			? u"No rules yet. Add one to start replacing text in the "
-				"messages you send."_q
+		Ui::AddDividerText(content, TrValue(rules.empty()
+			? u"LuminaReplacerEmpty"_q
 			: full
-			? u"Rules are applied in order, from the top. The list is "
-				"full - delete a rule to add another."_q
-			: u"Rules are applied in order, from the top, and each one "
-				"works on what the one above it produced."_q));
+			? u"LuminaReplacerFull"_q
+			: u"LuminaReplacerListInfo"_q));
 		content->resizeToWidth(width);
 	};
 	(*rebuild)();
@@ -219,7 +219,12 @@ void RulesBox(not_null<Ui::GenericBox*> box) {
 	// children immediately, and the click that caused the write may still be
 	// on the stack inside one of the rows about to go. The subscription lives
 	// on `content`, so nothing here outlives the list it rebuilds.
-	TextReplaceChanges(
+	//
+	// LangChanges() is merged in because the rows carry a snapshot of the
+	// preview text, and an empty replacement previews as a LuminaGram string.
+	rpl::merge(
+		TextReplaceChanges(),
+		LangChanges()
 	) | rpl::on_next([=] {
 		Ui::PostponeCall(content, [=] {
 			(*rebuild)();
@@ -237,11 +242,11 @@ void AddTextReplaceRows(
 		not_null<Ui::VerticalLayout*> container,
 		not_null<Window::SessionController*> controller) {
 	Ui::AddSkip(container);
-	Ui::AddSubsectionTitle(container, rpl::single(u"Text replacer"_q));
+	Ui::AddSubsectionTitle(container, TrValue(u"LuminaReplacerTitle"_q));
 
 	const auto toggle = container->add(object_ptr<Ui::SettingsButton>(
 		container,
-		rpl::single(u"Replace text in messages I send"_q),
+		TrValue(u"LuminaReplacerEnable"_q),
 		st::settingsButtonNoIcon
 	))->toggleOn(FlagValue([] { return TextReplaceEnabled(); }));
 	toggle->toggledChanges(
@@ -251,10 +256,12 @@ void AddTextReplaceRows(
 
 	::Settings::AddButtonWithLabel(
 		container,
-		rpl::single(u"Rules"_q),
+		TrValue(u"LuminaReplacerHeader"_q),
 		LabelValue([] {
 			const auto count = int(TextReplaceRules().size());
-			return count ? QString::number(count) : u"None"_q;
+			return count
+				? QString::number(count)
+				: Tr(u"LuminaReplacerNone"_q);
 		}),
 		st::settingsButtonNoIcon
 	)->setClickedCallback([=] {
@@ -262,14 +269,7 @@ void AddTextReplaceRows(
 	});
 
 	Ui::AddSkip(container);
-	Ui::AddDividerText(
-		container,
-		rpl::single(u"Swap a shorthand for the phrase you meant in every "
-			"message you send - \"brb\" becomes \"be right back\". Matching "
-			"is case-sensitive and matches whole words. A message that "
-			"carries any formatting is sent exactly as typed, and links, "
-			"mentions, hashtags and bot commands are never rewritten. Rules "
-			"stay on this device and are never sent to Telegram."_q));
+	Ui::AddDividerText(container, TrValue(u"LuminaReplacerAbout"_q));
 }
 
 } // namespace Lumina

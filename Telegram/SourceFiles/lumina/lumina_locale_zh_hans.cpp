@@ -565,6 +565,34 @@ namespace {
 		{ u"LuminaVoiceConfirmInfo"_q, u"在录好的语音或圆形视频消息发出前先询"
 			u"问你。取消这个询问会丢弃录音，只有试听预览中例外——那里会保留录"
 			u"音。定时发送永远不会询问。"_q },
+		// exif strip + text replace
+		{ u"LuminaExifStripRow"_q, u"发送前移除照片位置信息"_q },
+		{ u"LuminaExifStripInfo"_q, u"在上传之前，抹掉相机写进 JPEG 照片里的"
+			u" GPS 坐标——无论你是以普通的压缩方式发送照片，还是以文件形式发"
+			u"送。只有位置标签会被移除：方向、相机和日期标签完全保留原样，所以"
+			u"以文件形式发送的照片依然是正的。你磁盘上的那份文件永远不会被修"
+			u"改。这不涵盖视频，也不涵盖由 XMP 或相机自家的制造商注释写进照片"
+			u"的位置，或是某些手机塞进同一个文件里的第二份图像。"_q },
+		{ u"LuminaReplacerTitle"_q, u"文字替换"_q },
+		{ u"LuminaReplacerHeader"_q, u"规则"_q },
+		{ u"LuminaReplacerAdd"_q, u"添加规则"_q },
+		{ u"LuminaReplacerEdit"_q, u"编辑规则"_q },
+		{ u"LuminaReplacerFrom"_q, u"替换"_q },
+		{ u"LuminaReplacerTo"_q, u"为"_q },
+		{ u"LuminaReplacerEnable"_q, u"替换我发送的消息中的文字"_q },
+		{ u"LuminaReplacerNone"_q, u"无"_q },
+		{ u"LuminaReplacerNothing"_q, u"（空）"_q },
+		{ u"LuminaReplacerEmpty"_q, u"还没有任何规则。添加一条，就能开始替换你"
+			u"发送的消息中的文字。"_q },
+		{ u"LuminaReplacerFull"_q, u"规则按从上到下的顺序套用。列表已满——请先"
+			u"删除一条规则，才能再添加。"_q },
+		{ u"LuminaReplacerListInfo"_q, u"规则按从上到下的顺序套用，每一条处理"
+			u"的都是上一条替换后的结果。"_q },
+		{ u"LuminaReplacerAbout"_q, u"在你发送的每一条消息里，把简写换成你真正"
+			u"想说的话——“brb”会变成“be right back”。匹配区分大小写，而且只按整"
+			u"词匹配。带有任何格式的消息会原样发出，链接、提及、话题标签和机器"
+			u"人命令也永远不会被改写。规则只保存在这台设备上，绝不会发送给"
+			u" Telegram。"_q },
 	};
 }
 

@@ -718,6 +718,45 @@ namespace {
 			u"descarta la grabación, salvo en la escucha previa, donde la "
 			u"grabación se conserva. Los envíos programados nunca se "
 			u"preguntan."_q },
+		// exif strip + text replace
+		{ u"LuminaExifStripRow"_q, u"Eliminar la ubicación de la foto antes "
+			u"de enviarla"_q },
+		{ u"LuminaExifStripInfo"_q, u"Borra las coordenadas GPS que la cámara "
+			u"guardó dentro de una foto JPEG antes de subirla, tanto si "
+			u"envías la foto de la forma comprimida habitual como si la "
+			u"envías como archivo. Solo se van las etiquetas de ubicación: "
+			u"las de orientación, cámara y fecha se quedan tal cual, así que "
+			u"una foto enviada como archivo sigue viéndose derecha. Tu propia "
+			u"copia del archivo en el disco nunca se modifica. Esto no cubre "
+			u"los vídeos, ni la ubicación que XMP o las notas del fabricante "
+			u"de la cámara escriben en una foto, ni la segunda copia de la "
+			u"imagen que algunos teléfonos meten en el mismo archivo."_q },
+		{ u"LuminaReplacerTitle"_q, u"Reemplazo de texto"_q },
+		{ u"LuminaReplacerHeader"_q, u"Reglas"_q },
+		{ u"LuminaReplacerAdd"_q, u"Añadir regla"_q },
+		{ u"LuminaReplacerEdit"_q, u"Editar regla"_q },
+		{ u"LuminaReplacerFrom"_q, u"Reemplazar"_q },
+		{ u"LuminaReplacerTo"_q, u"Por"_q },
+		{ u"LuminaReplacerEnable"_q, u"Reemplazar texto en los mensajes que "
+			u"envío"_q },
+		{ u"LuminaReplacerNone"_q, u"Ninguna"_q },
+		{ u"LuminaReplacerNothing"_q, u"(nada)"_q },
+		{ u"LuminaReplacerEmpty"_q, u"Todavía no hay reglas. Añade una para "
+			u"empezar a reemplazar texto en los mensajes que envías."_q },
+		{ u"LuminaReplacerFull"_q, u"Las reglas se aplican en orden, de "
+			u"arriba abajo. La lista está llena: elimina una regla para "
+			u"añadir otra."_q },
+		{ u"LuminaReplacerListInfo"_q, u"Las reglas se aplican en orden, de "
+			u"arriba abajo, y cada una actúa sobre lo que produjo la "
+			u"anterior."_q },
+		{ u"LuminaReplacerAbout"_q, u"Cambia una abreviatura por la frase que "
+			u"querías decir en cada mensaje que envías: «brb» se convierte en "
+			u"«be right back». La coincidencia distingue mayúsculas y solo "
+			u"abarca palabras completas. Un mensaje que lleve cualquier "
+			u"formato se envía tal como lo escribiste, y los enlaces, las "
+			u"menciones, las etiquetas y los comandos de bots nunca se "
+			u"reescriben. Las reglas se quedan en este dispositivo y nunca se "
+			u"envían a Telegram."_q },
 	};
 }
 

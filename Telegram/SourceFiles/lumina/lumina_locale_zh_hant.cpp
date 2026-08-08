@@ -539,6 +539,18 @@ namespace {
 			u"或結束程式，都會立刻把保留中的訊息送出。媒體、語音、已編輯、"
 			u"轉發與定時訊息永遠不會被保留，從論壇主題或留言串中傳送的訊息"
 			u"也不會。"_q },
+		// link preview + voice confirm
+		{ u"LuminaPrivacyDisableLinkPreview"_q, u"預設停用連結預覽"_q },
+		{ u"LuminaLinkPreviewInfo"_q, u"你新寫的訊息會不帶連結預覽傳送，輸入框"
+			u"也不會在你打字時要求 Telegram 去解析貼上的連結。已經附"
+			u"上的預覽，以及你編輯的訊息，都會保持原樣。若想單獨為某則訊息附上"
+			u"預覽，可以在設定 > 鍵盤快速鍵中為「切換連結預覽」指定一個按鍵，"
+			u"撰寫時按下即可。"_q },
+		{ u"LuminaVoiceConfirmTitle"_q, u"語音與影片訊息"_q },
+		{ u"LuminaVoiceConfirmRow"_q, u"傳送前確認"_q },
+		{ u"LuminaVoiceConfirmInfo"_q, u"在錄好的語音或圓形影片訊息送出前先詢"
+			u"問你。取消這個詢問會捨棄錄音，只有試聽預覽中例外——那裡會保留錄"
+			u"音。定時傳送永遠不會詢問。"_q },
 	};
 }
 

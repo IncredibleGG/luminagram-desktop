@@ -644,6 +644,23 @@ namespace {
 			u"mídia, de voz, editadas, encaminhadas e agendadas nunca são "
 			u"retidas, e o mesmo vale para mensagens enviadas de um tópico de "
 			u"fórum ou de uma thread de comentários."_q },
+		// link preview + voice confirm
+		{ u"LuminaPrivacyDisableLinkPreview"_q, u"Desativar a prévia de links "
+			u"por padrão"_q },
+		{ u"LuminaLinkPreviewInfo"_q, u"As mensagens que você escreve do zero "
+			u"são enviadas sem prévia de link, e o campo de digitação nunca "
+			u"pede ao Telegram que resolva um link colado enquanto você "
+			u"digita. Uma prévia já anexada, e uma mensagem que você edita, "
+			u"ficam como estão. Para anexar mesmo assim uma prévia a uma "
+			u"mensagem específica, atribua uma tecla a «Alternar prévia do "
+			u"link» em Configurações > Atalhos de teclado e pressione-a "
+			u"enquanto escreve."_q },
+		{ u"LuminaVoiceConfirmTitle"_q, u"Mensagens de voz e vídeo"_q },
+		{ u"LuminaVoiceConfirmRow"_q, u"Confirmar antes de enviar"_q },
+		{ u"LuminaVoiceConfirmInfo"_q, u"Perguntar antes de enviar uma "
+			u"mensagem de voz ou um vídeo redondo já gravado. Desistir dessa "
+			u"pergunta descarta a gravação, exceto na prévia de audição, onde "
+			u"a gravação é mantida. Envios agendados nunca são perguntados."_q },
 	};
 }
 

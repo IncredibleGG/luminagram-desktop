@@ -449,6 +449,12 @@ namespace {
 		{ u"LuminaUndoSendUndo"_q, u"Geri al"_q },
 		{ u"LuminaUndoSendWindow"_q, u"Göndermeyi geri alma penceresi"_q },
 		{ u"LuminaUndoSendWindowInfo"_q, u"Düz metin mesajlarını gönderilmeden önce {1} saniye boyunca bir «Geri al» düğmesinin arkasında bekletir. Metniniz bu süre boyunca mesaj kutusunda kalır ve kutu ancak mesaj gerçekten gittiğinde temizlenir; bu yüzden «Geri al» metni olduğu yerde bırakır — hiçbir şey alınıp geri konmaz. Yeniden göndermek, başka bir sohbet açmak ya da uygulamadan çıkmak, bekletilen mesajı hemen gönderir. Medya, sesli, düzenlenmiş, iletilen ve zamanlanmış mesajlar hiçbir zaman bekletilmez; bir forum konusundan ya da bir yorum dizisinden gönderilen mesajlar da bekletilmez."_q },
+		// link preview + voice confirm
+		{ u"LuminaPrivacyDisableLinkPreview"_q, u"Bağlantı önizlemesini varsayılan olarak kapat"_q },
+		{ u"LuminaLinkPreviewInfo"_q, u"Sıfırdan yazdığınız mesajlar bağlantı önizlemesi olmadan gönderilir ve yazma alanı, siz yazarken yapıştırdığınız bir bağlantıyı çözmesini Telegram'dan hiç istemez. Zaten eklenmiş bir önizleme ile düzenlediğiniz bir mesaj olduğu gibi bırakılır. Yine de tek bir mesaja önizleme eklemek için Ayarlar > Klavye kısayolları bölümünde «Bağlantı önizlemesini aç/kapat» işlevine bir tuş atayın ve yazarken bu tuşa basın."_q },
+		{ u"LuminaVoiceConfirmTitle"_q, u"Sesli ve görüntülü mesajlar"_q },
+		{ u"LuminaVoiceConfirmRow"_q, u"Göndermeden önce onayla"_q },
+		{ u"LuminaVoiceConfirmInfo"_q, u"Kaydedilmiş bir sesli mesaj ya da yuvarlak video mesajı gönderilmeden önce sorar. Bu sorudan vazgeçmek kaydı siler; yalnızca dinleme önizlemesinde kayıt olduğu gibi kalır. Zamanlanmış gönderimler için hiçbir zaman sorulmaz."_q },
 	};
 }
 

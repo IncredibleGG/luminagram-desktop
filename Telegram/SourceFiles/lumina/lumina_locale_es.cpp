@@ -681,6 +681,24 @@ namespace {
 			u"inmediato. Los mensajes multimedia, de voz, editados, "
 			u"reenviados y programados nunca se retienen, y tampoco los "
 			u"enviados desde un tema de foro o un hilo de comentarios."_q },
+		// link preview + voice confirm
+		{ u"LuminaPrivacyDisableLinkPreview"_q, u"Desactivar la vista previa "
+			u"de enlaces por defecto"_q },
+		{ u"LuminaLinkPreviewInfo"_q, u"Los mensajes que escribes desde cero "
+			u"se envían sin vista previa de enlaces, y el campo de escritura "
+			u"nunca le pide a Telegram que resuelva un enlace pegado mientras "
+			u"escribes. Una vista previa ya adjunta, y un mensaje que editas, "
+			u"se dejan tal como están. Para adjuntar de todos modos una vista "
+			u"previa a un mensaje concreto, asigna una tecla a «Alternar vista "
+			u"previa del enlace» en Ajustes > Atajos de teclado y púlsala "
+			u"mientras redactas."_q },
+		{ u"LuminaVoiceConfirmTitle"_q, u"Mensajes de voz y de video"_q },
+		{ u"LuminaVoiceConfirmRow"_q, u"Confirmar antes de enviar"_q },
+		{ u"LuminaVoiceConfirmInfo"_q, u"Preguntar antes de enviar un mensaje "
+			u"de voz o un video redondo ya grabado. Cancelar esa pregunta "
+			u"descarta la grabación, salvo en la escucha previa, donde la "
+			u"grabación se conserva. Los envíos programados nunca se "
+			u"preguntan."_q },
 	};
 }
 

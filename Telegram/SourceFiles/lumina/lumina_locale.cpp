@@ -492,6 +492,22 @@ struct Registration {
 		{ u"LuminaUndoSendUndo"_q, u"Undo"_q },
 		{ u"LuminaUndoSendWindow"_q, u"Undo send window"_q },
 		{ u"LuminaUndoSendWindowInfo"_q, u"Hold a plain text message for {1} seconds behind an Undo button before it is sent. Your text stays in the message box the whole time and the box clears only once the message really goes out, so Undo simply leaves it where it is - nothing is taken away and put back. Sending again, opening another chat, or quitting sends the held message straight away. Media, voice, edited, forwarded and scheduled messages are never held, and neither are messages sent from a forum topic or a comment thread."_q },
+		// link preview + voice confirm
+		{ u"LuminaPrivacyDisableLinkPreview"_q, u"Disable link preview by "
+			"default"_q },
+		{ u"LuminaLinkPreviewInfo"_q, u"Messages you write from scratch are "
+			"sent without a link preview, and the composer never asks "
+			"Telegram to look a pasted link up while you type. A preview that "
+			"is already attached, and a message you edit, are left as they "
+			"are. To attach a preview to one message anyway, give \"Toggle "
+			"link preview\" a key in Settings > Keyboard shortcuts and press "
+			"it while composing."_q },
+		{ u"LuminaVoiceConfirmTitle"_q, u"Voice and video messages"_q },
+		{ u"LuminaVoiceConfirmRow"_q, u"Confirm before sending"_q },
+		{ u"LuminaVoiceConfirmInfo"_q, u"Ask before a recorded voice or round "
+			"video message is sent. Backing out of that question discards the "
+			"recording, except in the listen preview, where it leaves the "
+			"recording alone. Scheduled sends are never asked about."_q },
 	};
 	return result;
 }

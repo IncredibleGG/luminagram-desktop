@@ -542,6 +542,18 @@ namespace {
 			u"原处——不会先拿走再放回。再次发送、打开另一个聊天或退出应用，"
 			u"都会立刻把暂缓的消息发出去。媒体、语音、已编辑、转发和定时"
 			u"消息永远不会被暂缓，从论坛话题或评论串中发送的消息也不会。"_q },
+		// link preview + voice confirm
+		{ u"LuminaPrivacyDisableLinkPreview"_q, u"默认禁用链接预览"_q },
+		{ u"LuminaLinkPreviewInfo"_q, u"你新写的消息会不带链接预览发送，输入框"
+			u"也不会在你打字时让 Telegram 去解析粘贴的链接。已经附上"
+			u"的预览，以及你编辑的消息，都保持原样。若想单独给某条消息附上预览，"
+			u"可以在设置 > 键盘快捷键中给“切换链接预览”指定一个按键，撰写"
+			u"时按下即可。"_q },
+		{ u"LuminaVoiceConfirmTitle"_q, u"语音和视频消息"_q },
+		{ u"LuminaVoiceConfirmRow"_q, u"发送前确认"_q },
+		{ u"LuminaVoiceConfirmInfo"_q, u"在录好的语音或圆形视频消息发出前先询"
+			u"问你。取消这个询问会丢弃录音，只有试听预览中例外——那里会保留录"
+			u"音。定时发送永远不会询问。"_q },
 	};
 }
 

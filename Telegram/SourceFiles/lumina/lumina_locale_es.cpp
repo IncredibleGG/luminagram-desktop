@@ -681,6 +681,25 @@ namespace {
 			u"inmediato. Los mensajes multimedia, de voz, editados, "
 			u"reenviados y programados nunca se retienen, y tampoco los "
 			u"enviados desde un tema de foro o un hilo de comentarios."_q },
+		// clipboard guard + scam watch
+		{ u"LuminaPrivacyCryptoClipboardGuard"_q, u"Protección al pegar "
+			u"direcciones cripto"_q },
+		{ u"LuminaPrivacyCryptoClipboardGuardInfo"_q, u"Pregunta antes de "
+			u"pegar en un mensaje algo que parece una dirección de monedero de "
+			u"criptomonedas. El malware que secuestra el portapapeles puede "
+			u"cambiar la dirección que copiaste por la de un estafador sin que "
+			u"te des cuenta, y pegarla es el último momento en el que puedes "
+			u"detectarlo. La comprobación se hace en este dispositivo y no se "
+			u"envía nada a ninguna parte."_q },
+		{ u"LuminaPrivacyScamKeywordWarning"_q, u"Aviso de palabras de "
+			u"estafa"_q },
+		{ u"LuminaPrivacyScamKeywordWarningInfo"_q, u"Cuando un mensaje de "
+			u"alguien que no está en tus contactos menciona tácticas de estafa "
+			u"habituales —transferencias de dinero, tarjetas de regalo, "
+			u"«inversiones» en criptomonedas, tarifas de verificación o pedir "
+			u"códigos— se muestra un recordatorio único para que tengas "
+			u"cuidado. El mensaje nunca se bloquea ni se modifica. Las "
+			u"comprobaciones se realizan sin conexión en tu dispositivo."_q },
 	};
 }
 

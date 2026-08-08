@@ -643,6 +643,24 @@ namespace {
 			u"diteruskan, dan pesan terjadwal tidak pernah ditahan, begitu "
 			u"pula pesan yang dikirim dari topik forum atau utas "
 			u"komentar."_q },
+		// clipboard guard + scam watch
+		{ u"LuminaPrivacyCryptoClipboardGuard"_q, u"Perlindungan tempel alamat "
+			u"kripto"_q },
+		{ u"LuminaPrivacyCryptoClipboardGuardInfo"_q, u"Menanyakan sebelum "
+			u"menempelkan sesuatu yang tampak seperti alamat dompet kripto ke "
+			u"dalam pesan. Malware pembajak papan klip bisa menukar alamat "
+			u"yang Anda salin dengan alamat penipu tanpa Anda sadari, dan saat "
+			u"menempel adalah kesempatan terakhir untuk menangkapnya. "
+			u"Pemeriksaan dilakukan di perangkat ini dan tidak ada yang "
+			u"dikirim ke mana pun."_q },
+		{ u"LuminaPrivacyScamKeywordWarning"_q, u"Peringatan kata "
+			u"penipuan"_q },
+		{ u"LuminaPrivacyScamKeywordWarningInfo"_q, u"Saat pesan dari "
+			u"seseorang yang tidak ada di kontak Anda menyebutkan taktik "
+			u"penipuan umum — transfer uang, kartu hadiah, “investasi” kripto, "
+			u"biaya verifikasi, atau meminta kode — sebuah pengingat sekali "
+			u"muncul agar Anda berhati-hati. Pesan tidak pernah diblokir atau "
+			u"diubah. Pemeriksaan berjalan luring di perangkat Anda."_q },
 	};
 }
 

@@ -7,6 +7,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "lumina/lumina_scam_watch_settings.h"
 
+#include "lumina/lumina_locale.h"
 #include "lumina/lumina_scam_watch.h"
 #include "ui/vertical_list.h"
 #include "ui/widgets/buttons.h"
@@ -22,7 +23,7 @@ void AddScamWarningRows(
 	Ui::AddSkip(container);
 	const auto button = container->add(object_ptr<Ui::SettingsButton>(
 		container,
-		rpl::single(u"Scam keyword warning"_q),
+		TrValue(u"LuminaPrivacyScamKeywordWarning"_q),
 		st::settingsButtonNoIcon
 	))->toggleOn(ScamKeywordWarningEnabledValue());
 	button->toggledChanges(
@@ -32,12 +33,7 @@ void AddScamWarningRows(
 	Ui::AddSkip(container);
 	Ui::AddDividerText(
 		container,
-		rpl::single(u"When a message from someone not in your contacts "
-			u"mentions common scam tactics — money transfers, gift cards, "
-			u"crypto “investments”, verification fees or asking for codes — "
-			u"show a one-time reminder to stay cautious. The message is "
-			u"never blocked or changed. Checks run offline on your "
-			u"device."_q));
+		TrValue(u"LuminaPrivacyScamKeywordWarningInfo"_q));
 }
 
 } // namespace Lumina

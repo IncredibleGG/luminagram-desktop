@@ -492,6 +492,11 @@ struct Registration {
 		{ u"LuminaUndoSendUndo"_q, u"Undo"_q },
 		{ u"LuminaUndoSendWindow"_q, u"Undo send window"_q },
 		{ u"LuminaUndoSendWindowInfo"_q, u"Hold a plain text message for {1} seconds behind an Undo button before it is sent. Your text stays in the message box the whole time and the box clears only once the message really goes out, so Undo simply leaves it where it is - nothing is taken away and put back. Sending again, opening another chat, or quitting sends the held message straight away. Media, voice, edited, forwarded and scheduled messages are never held, and neither are messages sent from a forum topic or a comment thread."_q },
+		// clipboard guard + scam watch
+		{ u"LuminaPrivacyCryptoClipboardGuard"_q, u"Crypto address paste guard"_q },
+		{ u"LuminaPrivacyCryptoClipboardGuardInfo"_q, u"Ask before pasting what looks like a crypto wallet address into a message. Clipboard-hijacking malware can swap a copied address for a scammer's without you noticing, and the paste is the last moment you can catch it. The check runs on this device and nothing is sent anywhere."_q },
+		{ u"LuminaPrivacyScamKeywordWarning"_q, u"Scam keyword warning"_q },
+		{ u"LuminaPrivacyScamKeywordWarningInfo"_q, u"When a message from someone not in your contacts mentions common scam tactics — money transfers, gift cards, crypto “investments”, verification fees or asking for codes — show a one-time reminder to stay cautious. The message is never blocked or changed. Checks run offline on your device."_q },
 	};
 	return result;
 }

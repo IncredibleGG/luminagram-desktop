@@ -539,6 +539,17 @@ namespace {
 			u"或結束程式，都會立刻把保留中的訊息送出。媒體、語音、已編輯、"
 			u"轉發與定時訊息永遠不會被保留，從論壇主題或留言串中傳送的訊息"
 			u"也不會。"_q },
+		// clipboard guard + scam watch
+		{ u"LuminaPrivacyCryptoClipboardGuard"_q, u"加密貨幣地址貼上保護"_q },
+		{ u"LuminaPrivacyCryptoClipboardGuardInfo"_q, u"把看起來像加密貨幣錢包"
+			u"地址的內容貼進訊息前先問你一聲。剪貼簿劫持惡意軟體可能在你毫無察"
+			u"覺的情況下，把你複製的地址換成騙徒的地址，而貼上正是你能發現它的"
+			u"最後一刻。檢查在本機進行，不會把任何內容傳送出去。"_q },
+		{ u"LuminaPrivacyScamKeywordWarning"_q, u"詐騙關鍵字警告"_q },
+		{ u"LuminaPrivacyScamKeywordWarningInfo"_q, u"當不在你聯絡人中的人傳來"
+			u"的訊息提到常見詐騙手法（匯款、禮品卡、加密貨幣「投資」、驗證費或"
+			u"索取驗證碼）時，顯示一次性提醒，提醒你保持警覺。訊息永遠不會被攔"
+			u"截或修改。檢查在你的裝置上離線執行。"_q },
 	};
 }
 

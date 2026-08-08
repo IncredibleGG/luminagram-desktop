@@ -542,6 +542,17 @@ namespace {
 			u"原处——不会先拿走再放回。再次发送、打开另一个聊天或退出应用，"
 			u"都会立刻把暂缓的消息发出去。媒体、语音、已编辑、转发和定时"
 			u"消息永远不会被暂缓，从论坛话题或评论串中发送的消息也不会。"_q },
+		// clipboard guard + scam watch
+		{ u"LuminaPrivacyCryptoClipboardGuard"_q, u"加密货币地址粘贴保护"_q },
+		{ u"LuminaPrivacyCryptoClipboardGuardInfo"_q, u"把看起来像加密货币钱包"
+			u"地址的内容粘贴进消息前先问你一声。剪贴板劫持恶意软件可能在你毫无"
+			u"察觉的情况下，把你复制的地址换成骗子的地址，而粘贴正是你能发现它"
+			u"的最后一刻。检查在本机进行，不会把任何内容发送出去。"_q },
+		{ u"LuminaPrivacyScamKeywordWarning"_q, u"诈骗关键词警告"_q },
+		{ u"LuminaPrivacyScamKeywordWarningInfo"_q, u"当不在你联系人中的人发来"
+			u"的消息提到常见诈骗手段（汇款、礼品卡、加密货币“投资”、验证费或索"
+			u"要验证码）时，显示一次性提醒，提醒你保持警惕。消息永远不会被拦截"
+			u"或修改。检查在你的设备上离线运行。"_q },
 	};
 }
 

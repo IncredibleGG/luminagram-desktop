@@ -48,15 +48,20 @@ jobs:
     runs-on: ${{ matrix.arch == 'arm64' && 'windows-11-arm' || ((github.event_name == 'pull_request' || startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/nightly') && 'depot-windows-latest-16' || 'windows-latest') }}
 
     strategy:
+      # LuminaGram: one configuration, the one that gets shipped. Upstream
+      # builds twelve because it supports twelve; every extra one here is a
+      # way for a build nobody installs to fail and take the one that matters
+      # down with it, which is exactly what happened - the 32-bit job failed
+      # while the x64 job was still fetching libraries, and fail-fast killed
+      # it before it compiled a line.
+      #
+      # Ninja rather than MSBuild: MSBuild dies with a StackOverflowException
+      # on this tree, found the hard way while this was still being built on
+      # a VM.
       matrix:
-        arch: [x64_x86, x64, arm64]
-        qt: ["", qt6]
-        generator: ["", "Ninja Multi-Config"]
-        exclude:
-          - arch: arm64
-            qt: ""
-          - arch: x64_x86
-            qt: qt6
+        arch: [x64]
+        qt: [""]
+        generator: ["Ninja Multi-Config"]
 
     env:
       UPLOAD_ARTIFACT: "true"
@@ -84,7 +89,13 @@ jobs:
 
       - name: Get repository name.
         shell: bash
-        run: echo "REPO_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
+        # LuminaGram: a fixed short name, not the repository's own. Every
+        # object file is written under this directory, and the deepest of them
+        # - kimageformats under Ninja Multi-Config - sits close enough to
+        # MSVC's path limit that the ten characters between "tdesktop" and
+        # "luminagram-desktop" are the difference between compiling and
+        # "fatal error C1083: Cannot open compiler generated file: ''".
+        run: echo "REPO_NAME=tdesktop" >> $GITHUB_ENV
 
       - name: Clone.
         uses: actions/checkout@v7

@@ -226,7 +226,7 @@ private:
 
 class MtpChecker : public Checker {
 public:
-	MtpChecker(base::weak_ptr<Main::Session> session, bool testing);
+	[[maybe_unused]] MtpChecker(base::weak_ptr<Main::Session> session, bool testing);
 
 	void start() override;
 

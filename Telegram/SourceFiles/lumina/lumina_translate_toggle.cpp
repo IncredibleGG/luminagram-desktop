@@ -54,6 +54,28 @@ void SetChatTranslating(not_null<History*> history, bool enabled) {
 		enabled ? ChatTranslateDefaultTo(history) : LanguageId());
 }
 
+bool ChatTranslationExcluded(not_null<History*> history) {
+	using Flag = PeerData::TranslationFlag;
+	return (history->peer->translationFlag() == Flag::Disabled);
+}
+
+void SetChatTranslationExcluded(
+		not_null<History*> history,
+		bool excluded) {
+	using Flag = PeerData::TranslationFlag;
+	const auto peer = history->peer;
+	if (excluded == (peer->translationFlag() == Flag::Disabled)) {
+		return;
+	} else if (excluded) {
+		// Stop it here as well as excluding it. The flag withdraws the OFFER,
+		// and a chat already being translated keeps its own translation until
+		// something clears it - so without this the chat the user just told
+		// us to leave alone would go on being translated until it was closed.
+		SetChatTranslatingTo(history, LanguageId());
+	}
+	peer->saveTranslationDisabled(excluded);
+}
+
 void SetChatTranslatingTo(not_null<History*> history, LanguageId id) {
 	const auto peer = history->peer;
 	using Flag = PeerData::TranslationFlag;

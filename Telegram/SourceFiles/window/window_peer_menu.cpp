@@ -62,6 +62,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/controls/feature_list.h"
 #include "ui/ui_utility.h"
 #include "lumina/lumina_translate_gating.h"
+#include "lumina/lumina_translate_toggle.h"
 #include "main/main_app_config.h"
 #include "main/main_session.h"
 #include "main/main_session_settings.h"
@@ -1070,19 +1071,18 @@ void Filler::addTranslate() {
 	// exactly the chats a user would want to overrule it on - the fourth place
 	// in this fork where the same gate hid the same feature. Whether a chat is
 	// translated is the user's call; the source language is the engine's.
-	const auto translating = history->translatedTo().known();
+	const auto translating = Lumina::ChatTranslating(history)
+		&& !Lumina::ChatTranslationExcluded(history);
+	// Turning it off excludes the chat rather than merely stopping it. A stop
+	// lasts until the next message the detector recognises, which then offers
+	// the chat again - so the one row that says "no" to a conversation has to
+	// be the one that makes it stick, and it has to mean the same thing here
+	// as it does in the title bar's language menu.
 	const auto setTranslating = [=](bool enabled) {
-		const auto peer = history->peer;
-		using Flag = PeerData::TranslationFlag;
-		if (enabled && (peer->translationFlag() == Flag::Disabled)) {
-			peer->saveTranslationDisabled(false);
-		}
-		const auto to = enabled
-			? Ui::ChooseTranslateTo(history)
-			: LanguageId();
-		history->translateTo(to);
-		if (const auto migrated = history->migrateFrom()) {
-			migrated->translateTo(to);
+		if (enabled) {
+			Lumina::SetChatTranslating(history, true);
+		} else {
+			Lumina::SetChatTranslationExcluded(history, true);
 		}
 	};
 	const auto text = tr::lng_context_translate(tr::now);

@@ -93,6 +93,17 @@ namespace Lumina {
 // offer the action, with ChatTranslateAvailable().
 void SetChatTranslating(not_null<History*> history, bool enabled);
 
+// Whether this chat is one the user has said to leave alone.
+//
+// This is Telegram's own per-peer flag, not a preference of ours: it is stored
+// on the account rather than on this device, so a chat excluded here stays
+// excluded on the phone and after a reinstall. It also stops the offer at the
+// source - the detector no longer proposes this chat at all - which a local
+// "off" could not do, because the next recognised message would propose it
+// again.
+[[nodiscard]] bool ChatTranslationExcluded(not_null<History*> history);
+void SetChatTranslationExcluded(not_null<History*> history, bool excluded);
+
 // The same write, with the target named instead of resolved. An empty
 // LanguageId turns translation off, so SetChatTranslating() is a two-line
 // wrapper over this rather than a second copy of the steps - which matters

@@ -59,7 +59,7 @@ void AddRow(
 // row still has to name one: empty means the interface language, and that is
 // what the messages would actually arrive in.
 [[nodiscard]] QString IncomingRow(not_null<History*> history) {
-	if (!ChatTranslating(history)) {
+	if (ChatTranslationExcluded(history) || !ChatTranslating(history)) {
 		return Tr(u"LuminaChatLangThemOff"_q);
 	}
 	const auto stored = TranslateReadLanguage();
@@ -102,7 +102,8 @@ void FillIncoming(
 				Tr(u"LuminaChatLangThemTitle"_q),
 				Tr(u"LuminaChatLangNone"_q),
 				OffCode(),
-				(ChatTranslating(opened)
+				((ChatTranslating(opened)
+					&& !ChatTranslationExcluded(opened))
 					? TranslateReadLanguage()
 					: OffCode()),
 				[=](QString code) {
@@ -110,12 +111,19 @@ void FillIncoming(
 					if (!strong) {
 						return;
 					} else if (code == OffCode()) {
-						SetChatTranslating(strong, false);
+						// Excluding rather than merely stopping. Stopping
+						// lasts until the next message this chat is
+						// recognised from, and the offer comes straight
+						// back - which reads as the choice not having
+						// been taken.
+						SetChatTranslationExcluded(strong, true);
 						return;
 					}
 					// Order matters: the language is what this chat is about
 					// to be translated into, so it has to be stored before
-					// the translation starts reading it.
+					// the translation starts reading it. Naming a language
+					// also takes the chat back off the excluded list, which
+					// SetChatTranslatingTo() does on the way through.
 					SetTranslateReadLanguage(code);
 					SetChatTranslating(strong, true);
 				});

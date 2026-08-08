@@ -14,6 +14,10 @@
 - Update the entry this application owns in Add or Remove Programs. The
   updater was writing to the one belonging to a real Telegram Desktop
   installed beside it.
+- Leave a conversation out of translation from inside it: the "not
+  translated" entry in the title bar's language menu now excludes that
+  chat for good, rather than stopping until its next message. The
+  exclusion is stored on the account, so it holds on your phone too.
 - Translate the settings for Telegram's AI editor, which had been left as
   English written into the code.
 

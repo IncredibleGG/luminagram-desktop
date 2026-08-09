@@ -171,6 +171,43 @@ namespace {
 		{ u"LuminaChatLangMeTitle"_q, u"Перевод моих сообщений"_q },
 		{ u"LuminaChatLangNone"_q, u"Выключен"_q },
 
+		// The chat's tone (register): the third row of the translate menu
+		// and the box it opens. The instruction the engine is actually sent
+		// is written in English and is not one of these strings.
+		{ u"LuminaChatRegister"_q, u"Тон этого чата: {1}"_q },
+		{ u"LuminaChatRegisterOff"_q, u"Тон этого чата: не задан"_q },
+		{ u"LuminaChatRegisterTitle"_q, u"Тон этого чата"_q },
+		{ u"LuminaChatRegisterNone"_q, u"Не задан"_q },
+		{ u"LuminaChatRegisterNoneInfo"_q, u"Переводить как обычно, без "
+			u"указаний о тоне."_q },
+		{ u"LuminaChatRegisterClient"_q, u"Клиент"_q },
+		{ u"LuminaChatRegisterClientInfo"_q, u"Вежливый деловой язык; "
+			u"формальные обращения там, где язык их различает."_q },
+		{ u"LuminaChatRegisterColleague"_q, u"Коллега"_q },
+		{ u"LuminaChatRegisterColleagueInfo"_q, u"Обычный рабочий язык — "
+			u"вежливо, но без официоза."_q },
+		{ u"LuminaChatRegisterFriend"_q, u"Друг"_q },
+		{ u"LuminaChatRegisterFriendInfo"_q, u"Разговорная, неформальная "
+			u"речь, как с другом."_q },
+		{ u"LuminaChatRegisterFamily"_q, u"Семья"_q },
+		{ u"LuminaChatRegisterFamilyInfo"_q, u"Тёплый, домашний язык."_q },
+		{ u"LuminaChatRegisterElder"_q, u"Старший"_q },
+		{ u"LuminaChatRegisterElderInfo"_q, u"Уважительно и почтительно, но "
+			u"по-человечески тепло."_q },
+		{ u"LuminaChatRegisterRomance"_q, u"Особенный человек"_q },
+		{ u"LuminaChatRegisterRomanceInfo"_q, u"Тепло и игриво, с лёгким "
+			u"флиртом."_q },
+		{ u"LuminaChatRegisterCustom"_q, u"Своё описание…"_q },
+		{ u"LuminaChatRegisterCustomInfo"_q, u"Опишите эти отношения своими "
+			u"словами."_q },
+		{ u"LuminaChatRegisterCustomTitle"_q, u"Опишите эти отношения"_q },
+		{ u"LuminaChatRegisterCustomHint"_q, u"например: мой научный "
+			u"руководитель — уважительно, но не сухо"_q },
+		{ u"LuminaChatRegisterUnsupported"_q, u"Текущий движок перевода не "
+			u"учитывает тон"_q },
+		{ u"LuminaChatRegisterDeepL"_q, u"DeepL: только формально/неформально "
+			u"и не для всех языков"_q },
+
 		// The tray menu and the taskbar button's jump list, the one menu that
 		// named Telegram rather than this app: upstream builds both from
 		// lng_open_from_tray / lng_quit_from_tray. The "{1}" is the app name,

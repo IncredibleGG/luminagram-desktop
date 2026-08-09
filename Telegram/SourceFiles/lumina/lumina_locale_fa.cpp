@@ -150,6 +150,44 @@ namespace {
 		{ u"LuminaChatLangMeTitle"_q, u"زبان ترجمهٔ پیام‌های من"_q },
 		{ u"LuminaChatLangNone"_q, u"ترجمه نمی‌شود"_q },
 
+		// The chat's tone (register): the third row of the translate menu
+		// and the box it opens. The instruction the engine is actually sent
+		// is written in English and is not one of these strings.
+		{ u"LuminaChatRegister"_q, u"لحن این گفت‌وگو: {1}"_q },
+		{ u"LuminaChatRegisterOff"_q, u"لحن این گفت‌وگو: تعیین‌نشده"_q },
+		{ u"LuminaChatRegisterTitle"_q, u"لحن این گفت‌وگو"_q },
+		{ u"LuminaChatRegisterNone"_q, u"تعیین‌نشده"_q },
+		{ u"LuminaChatRegisterNoneInfo"_q, u"ترجمهٔ معمول، بدون هیچ دستور "
+			u"لحنی."_q },
+		{ u"LuminaChatRegisterClient"_q, u"مشتری"_q },
+		{ u"LuminaChatRegisterClientInfo"_q, u"زبان کاری مؤدب و رسمی؛ در "
+			u"زبان‌هایی که صیغهٔ احترام دارند، رسمی."_q },
+		{ u"LuminaChatRegisterColleague"_q, u"همکار"_q },
+		{ u"LuminaChatRegisterColleagueInfo"_q, u"زبان روزمرهٔ کاری؛ مؤدب اما "
+			u"نه خشک."_q },
+		{ u"LuminaChatRegisterFriend"_q, u"دوست"_q },
+		{ u"LuminaChatRegisterFriendInfo"_q, u"زبان خودمانی و محاوره‌ای، مثل "
+			u"حرف زدن با دوست."_q },
+		{ u"LuminaChatRegisterFamily"_q, u"خانواده"_q },
+		{ u"LuminaChatRegisterFamilyInfo"_q, u"زبان گرم و خودمانیِ داخل "
+			u"خانه."_q },
+		{ u"LuminaChatRegisterElder"_q, u"بزرگ‌تر"_q },
+		{ u"LuminaChatRegisterElderInfo"_q, u"محترمانه و با احترام، اما گرم و "
+			u"صمیمی نه اداری."_q },
+		{ u"LuminaChatRegisterRomance"_q, u"کسی که دوستش داری"_q },
+		{ u"LuminaChatRegisterRomanceInfo"_q, u"گرم و بازیگوش، با کمی "
+			u"دلبری."_q },
+		{ u"LuminaChatRegisterCustom"_q, u"دلخواه…"_q },
+		{ u"LuminaChatRegisterCustomInfo"_q, u"این رابطه را با کلمات خودت "
+			u"توصیف کن."_q },
+		{ u"LuminaChatRegisterCustomTitle"_q, u"این رابطه را توصیف کنید"_q },
+		{ u"LuminaChatRegisterCustomHint"_q, u"مثلاً: استاد راهنمایم؛ "
+			u"محترمانه اما نه خشک"_q },
+		{ u"LuminaChatRegisterUnsupported"_q, u"موتور ترجمهٔ فعلی لحن را "
+			u"نادیده می‌گیرد"_q },
+		{ u"LuminaChatRegisterDeepL"_q, u"DeepL: فقط رسمی/غیررسمی و تنها برای "
+			u"برخی زبان‌ها"_q },
+
 		// Telegram's own AI editor, which carries a Translate tab of its
 		// own.
 		{ u"LuminaAiEditorHeader"_q, u"ویرایشگر هوش مصنوعی Telegram"_q },

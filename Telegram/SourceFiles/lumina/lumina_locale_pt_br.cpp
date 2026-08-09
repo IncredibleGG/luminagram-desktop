@@ -159,6 +159,44 @@ namespace {
 		{ u"LuminaChatLangMeTitle"_q, u"Traduzir minhas mensagens para"_q },
 		{ u"LuminaChatLangNone"_q, u"Sem tradução"_q },
 
+		// The chat's tone (register): the third row of the translate menu
+		// and the box it opens. The instruction the engine is actually sent
+		// is written in English and is not one of these strings.
+		{ u"LuminaChatRegister"_q, u"Tom desta conversa: {1}"_q },
+		{ u"LuminaChatRegisterOff"_q, u"Tom desta conversa: não definido"_q },
+		{ u"LuminaChatRegisterTitle"_q, u"Tom desta conversa"_q },
+		{ u"LuminaChatRegisterNone"_q, u"Não definido"_q },
+		{ u"LuminaChatRegisterNoneInfo"_q, u"Traduzir normalmente, sem "
+			u"nenhuma instrução de tom."_q },
+		{ u"LuminaChatRegisterClient"_q, u"Cliente"_q },
+		{ u"LuminaChatRegisterClientInfo"_q, u"Linguagem comercial educada e "
+			u"profissional; formas formais onde o idioma as tiver."_q },
+		{ u"LuminaChatRegisterColleague"_q, u"Colega de trabalho"_q },
+		{ u"LuminaChatRegisterColleagueInfo"_q, u"Linguagem de trabalho do "
+			u"dia a dia: cordial, mas sem formalidade excessiva."_q },
+		{ u"LuminaChatRegisterFriend"_q, u"Amigo"_q },
+		{ u"LuminaChatRegisterFriendInfo"_q, u"Linguagem informal e "
+			u"coloquial, como se fala com um amigo."_q },
+		{ u"LuminaChatRegisterFamily"_q, u"Família"_q },
+		{ u"LuminaChatRegisterFamilyInfo"_q, u"Linguagem calorosa e familiar, "
+			u"do jeito que se fala em casa."_q },
+		{ u"LuminaChatRegisterElder"_q, u"Pessoa mais velha"_q },
+		{ u"LuminaChatRegisterElderInfo"_q, u"Respeitoso e deferente, mas "
+			u"caloroso, não corporativo."_q },
+		{ u"LuminaChatRegisterRomance"_q, u"Alguém especial"_q },
+		{ u"LuminaChatRegisterRomanceInfo"_q, u"Caloroso e brincalhão, com um "
+			u"toque de flerte."_q },
+		{ u"LuminaChatRegisterCustom"_q, u"Personalizado…"_q },
+		{ u"LuminaChatRegisterCustomInfo"_q, u"Descreva a relação com suas "
+			u"próprias palavras."_q },
+		{ u"LuminaChatRegisterCustomTitle"_q, u"Descreva esta relação"_q },
+		{ u"LuminaChatRegisterCustomHint"_q, u"ex.: meu orientador — "
+			u"respeitoso, mas sem rigidez"_q },
+		{ u"LuminaChatRegisterUnsupported"_q, u"O mecanismo de tradução atual "
+			u"ignora o tom"_q },
+		{ u"LuminaChatRegisterDeepL"_q, u"DeepL: apenas formal/informal e só "
+			u"em alguns idiomas"_q },
+
 		// Telegram's own AI editor, whose Translate tab overlaps ours.
 		{ u"LuminaAiEditorHeader"_q, u"Editor de IA do Telegram"_q },
 		{ u"LuminaAiEditorKeep"_q, u"Manter o editor de IA do Telegram"_q },

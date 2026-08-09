@@ -14,7 +14,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "lang/translate_mtproto_provider.h"
 #include "lang/translate_provider.h"
 #include "lumina/lumina_locale.h"
+#include "lumina/lumina_register.h"
 #include "lumina/lumina_settings.h"
+#include "main/main_session.h"
 
 #include <QtCore/QJsonArray>
 #include <QtCore/QJsonDocument>
@@ -467,10 +469,24 @@ void DeepLEngine::translate(
 	const auto host = key.endsWith(u":fx"_q)
 		? u"https://api-free.deepl.com"_q
 		: u"https://api.deepl.com"_q;
-	const auto body = QJsonDocument(QJsonObject{
+	auto fields = QJsonObject{
 		{ u"text"_q, QJsonArray{ text } },
 		{ u"target_lang"_q, DeepLLanguageCode(toCode) },
-	}).toJson(QJsonDocument::Compact);
+	};
+	// The chat's register, as much of it as DeepL's one formal/informal axis
+	// can carry. Absent whenever it cannot carry any of it - no register, a
+	// free-form description, or a target language DeepL does not document
+	// formality for, which would make the whole request fail rather than the
+	// tone be ignored. See lumina_register.h.
+	const auto formality = RegisterDeepLFormality(
+		ResolveRegisterDialog(registerDialog()),
+		toCode);
+	if (!formality.isEmpty()) {
+		fields.insert(u"formality"_q, formality);
+	}
+	const auto body = QJsonDocument(
+		fields
+	).toJson(QJsonDocument::Compact);
 	const auto headers = std::vector<HttpHeader>{
 		{ "Authorization", "DeepL-Auth-Key " + key.toUtf8() },
 		{ "Content-Type", "application/json" },
@@ -542,9 +558,15 @@ void LlmEngine::translate(
 	if (baseUrl.isEmpty()) {
 		baseUrl = DefaultLlmBaseUrl();
 	}
+	// The chat's register is APPENDED to the user's own system prompt, never
+	// substituted for it: the global prompt keeps saying whatever it says
+	// about how this user wants things translated, and the register only adds
+	// how it should sound in this one conversation. Empty when the chat has
+	// none, which leaves the prompt exactly as it is today.
 	const auto prompt = LlmPrompt().replace(
 		u"{lang}"_q,
-		LanguageEnglishName(toCode));
+		LanguageEnglishName(toCode))
+		+ RegisterPromptSuffix(ResolveRegisterDialog(registerDialog()));
 	const auto body = QJsonDocument(QJsonObject{
 		{ u"model"_q, LlmModel() },
 		{ u"temperature"_q, 0.2 },
@@ -655,6 +677,16 @@ public:
 		return _primary->id();
 	}
 
+	// Both tiers, so that a caller which named the chat keeps having named it
+	// after a retry. The Telegram tier has nowhere to put a register, but a
+	// chain that quietly dropped the hint on the way through would be a bug
+	// waiting for the day the secondary is something else.
+	void setRegisterDialog(RegisterDialog dialog) override {
+		TranslateEngine::setRegisterDialog(dialog);
+		_primary->setRegisterDialog(dialog);
+		_secondary->setRegisterDialog(dialog);
+	}
+
 	void translate(
 			const QString &text,
 			const QString &toCode,
@@ -679,8 +711,11 @@ private:
 // must stay false - see the note on CreateTranslateProvider() in the header.
 class EngineProvider final : public Ui::TranslateProvider {
 public:
-	explicit EngineProvider(std::unique_ptr<TranslateEngine> engine)
-	: _engine(std::move(engine)) {
+	EngineProvider(
+		not_null<Main::Session*> session,
+		std::unique_ptr<TranslateEngine> engine)
+	: _sessionId(session->uniqueId())
+	, _engine(std::move(engine)) {
 	}
 
 	[[nodiscard]] bool supportsMessageId() const override {
@@ -696,6 +731,18 @@ public:
 			done({ .error = Ui::TranslateProviderError::Unknown });
 			return;
 		}
+		// The one path that knows which chat it is translating, so the
+		// register never has to be guessed from what is on screen. Set on
+		// every request rather than once: one provider serves every chat this
+		// session translates, and a stale hint would apply one chat's tone to
+		// another's messages. A request without a peer id clears it back to
+		// "unknown", which resolves to the active chat.
+		_engine->setRegisterDialog(request.peerId
+			? RegisterDialog{
+				.sessionId = _sessionId,
+				.peerId = request.peerId,
+			}
+			: RegisterDialog());
 		_engine->translate(
 			text,
 			TargetLanguageCode(to),
@@ -709,6 +756,7 @@ public:
 	}
 
 private:
+	const uint64 _sessionId = 0;
 	const std::unique_ptr<TranslateEngine> _engine;
 
 };
@@ -1074,7 +1122,8 @@ void TranslateText(
 		Main::Session *session,
 		const QString &text,
 		const QString &toCode,
-		Fn<void(TranslateResult)> done) {
+		Fn<void(TranslateResult)> done,
+		RegisterDialog dialog) {
 	Expects(done != nullptr);
 
 	auto created = MakeCurrentTranslateEngine(session);
@@ -1082,6 +1131,7 @@ void TranslateText(
 		done({ .error = TranslateError::Unavailable });
 		return;
 	}
+	created->setRegisterDialog(dialog);
 	const auto holder = std::make_shared<std::unique_ptr<TranslateEngine>>(
 		std::move(created));
 	holder->get()->translate(text, toCode, [=](TranslateResult result) {
@@ -1107,7 +1157,7 @@ std::unique_ptr<Ui::TranslateProvider> CreateTranslateProvider(
 	if (!engine) {
 		return nullptr;
 	}
-	return std::make_unique<EngineProvider>(std::move(engine));
+	return std::make_unique<EngineProvider>(session, std::move(engine));
 }
 
 } // namespace Lumina

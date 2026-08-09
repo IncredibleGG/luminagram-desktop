@@ -7,6 +7,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #pragma once
 
+#include "lumina/lumina_register.h" // RegisterDialog.
 #include "spellcheck/spellcheck_types.h" // LanguageId.
 
 #include <rpl/producer.h>
@@ -222,6 +223,31 @@ public:
 		const QString &toCode,
 		Fn<void(TranslateResult)> done) = 0;
 
+	// Which chat the NEXT translate() belongs to, for the per-chat register
+	// (lumina/lumina_register.h): the LLM prompt suffix and DeepL's formality
+	// parameter are looked up against it while the request body is built.
+	//
+	// It is a hint and not a parameter of translate() because translate() has
+	// call sites in files this feature does not own, and because most of them
+	// genuinely do not know: the send pipeline, the composer preview and the
+	// selection translator all translate whatever chat is on screen. Leaving
+	// it unset (the default) is therefore not an error - the register falls
+	// back to Lumina::ActiveRegisterDialog(), which is what Android does for
+	// every path, including the ones desktop can answer exactly.
+	//
+	// It is deliberately sticky rather than one-shot: an engine belongs to one
+	// caller, and the caller that knows the chat sets it before every request.
+	// Read it through Lumina::ResolveRegisterDialog().
+	virtual void setRegisterDialog(RegisterDialog dialog) {
+		_registerDialog = dialog;
+	}
+	[[nodiscard]] RegisterDialog registerDialog() const {
+		return _registerDialog;
+	}
+
+private:
+	RegisterDialog _registerDialog;
+
 };
 
 // Null for an unknown id, and for TelegramProviderId() without a session.
@@ -243,11 +269,17 @@ public:
 // you would an api().request() callback. Prefer holding a
 // MakeCurrentTranslateEngine() result when a call site translates repeatedly -
 // this builds a fresh engine, and therefore a fresh network stack, per call.
+//
+// `dialog` is the chat this text belongs to, for the per-chat register. It is
+// optional because most one-shot call sites are translating the chat that is
+// on screen anyway, which is what an unset value resolves to; pass it when the
+// call site holds a History and the answer can be exact instead.
 void TranslateText(
 	Main::Session *session,
 	const QString &text,
 	const QString &toCode,
-	Fn<void(TranslateResult)> done);
+	Fn<void(TranslateResult)> done,
+	RegisterDialog dialog = {});
 
 // The tdesktop routing hook, called from Ui::CreateTranslateProvider().
 //
@@ -261,6 +293,11 @@ void TranslateText(
 // cannot use and which the Telegram fallback would then be handed with no text
 // in it. It also correctly disables the instant-view rich translation path,
 // which is server-side only.
+//
+// This is also the one path that can NAME the chat a translation belongs to:
+// Ui::TranslateProviderRequest carries a peer id, so the per-chat register is
+// resolved against the chat the message is actually in rather than against
+// whichever chat happens to be on screen.
 [[nodiscard]] std::unique_ptr<Ui::TranslateProvider> CreateTranslateProvider(
 	not_null<Main::Session*> session);
 

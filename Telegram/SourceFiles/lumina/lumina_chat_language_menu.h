@@ -39,6 +39,20 @@ namespace Lumina {
 //                     with Ui::ChooseTranslateTo() as the inherited value
 //   outgoing target   Lumina::DialogSendLanguage() / SetDialogSendLanguage()
 //                     with Lumina::TranslateSendLanguage() as the global one
+//   tone / register   Lumina::DialogRegister() / SetDialogRegister()
+//                     (lumina/lumina_register.h), which has no global at all
+//
+// The third row is not a third direction: it is the one answer that governs
+// both of the rows above. What breaks first across languages is not the
+// meaning but the politeness level, and neither a source language nor a target
+// language says which one this conversation wants - only the relationship
+// does. So the row names the relationship, and the translation of everything
+// that arrives and everything that is sent is asked to speak in it.
+//
+// It is also the one row that can be honest about the engine underneath it: an
+// engine with no channel for tone (the free Google endpoint, Telegram's own)
+// gets a grey line under the row saying so, rather than a setting that reads as
+// having worked and silently did nothing.
 //
 // !! THE TWO DIRECTIONS ARE NOT STORED THE SAME WAY, and the menu cannot hide
 // that. The outgoing lock is a preference: it is keyed by session and peer, it

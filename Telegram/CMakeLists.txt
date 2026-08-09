@@ -1913,6 +1913,8 @@ PRIVATE
     lumina/lumina_recent_limits.h
     lumina/lumina_recent_limits_settings.cpp
     lumina/lumina_recent_limits_settings.h
+    lumina/lumina_register.cpp
+    lumina/lumina_register.h
     lumina/lumina_registration_date.cpp
     lumina/lumina_registration_date.h
     lumina/lumina_save_to_saved.cpp

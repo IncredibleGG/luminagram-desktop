@@ -158,6 +158,44 @@ namespace {
 		{ u"LuminaChatLangMeTitle"_q, u"Pesan saya, diterjemahkan ke"_q },
 		{ u"LuminaChatLangNone"_q, u"Tidak diterjemahkan"_q },
 
+		// The chat's tone (register): the third row of the translate menu
+		// and the box it opens. The instruction the engine is actually sent
+		// is written in English and is not one of these strings.
+		{ u"LuminaChatRegister"_q, u"Nada obrolan ini: {1}"_q },
+		{ u"LuminaChatRegisterOff"_q, u"Nada obrolan ini: belum diatur"_q },
+		{ u"LuminaChatRegisterTitle"_q, u"Nada obrolan ini"_q },
+		{ u"LuminaChatRegisterNone"_q, u"Belum diatur"_q },
+		{ u"LuminaChatRegisterNoneInfo"_q, u"Terjemahkan seperti biasa, tanpa "
+			u"instruksi nada apa pun."_q },
+		{ u"LuminaChatRegisterClient"_q, u"Klien"_q },
+		{ u"LuminaChatRegisterClientInfo"_q, u"Bahasa bisnis yang sopan dan "
+			u"profesional; bentuk formal pada bahasa yang memilikinya."_q },
+		{ u"LuminaChatRegisterColleague"_q, u"Rekan kerja"_q },
+		{ u"LuminaChatRegisterColleagueInfo"_q, u"Bahasa kerja sehari-hari — "
+			u"sopan, tetapi tidak kaku."_q },
+		{ u"LuminaChatRegisterFriend"_q, u"Teman"_q },
+		{ u"LuminaChatRegisterFriendInfo"_q, u"Bahasa santai dan akrab, "
+			u"seperti berbicara dengan teman."_q },
+		{ u"LuminaChatRegisterFamily"_q, u"Keluarga"_q },
+		{ u"LuminaChatRegisterFamilyInfo"_q, u"Bahasa hangat dan akrab "
+			u"seperti di rumah."_q },
+		{ u"LuminaChatRegisterElder"_q, u"Orang yang lebih tua"_q },
+		{ u"LuminaChatRegisterElderInfo"_q, u"Hormat dan santun, tetapi tetap "
+			u"hangat, bukan kaku."_q },
+		{ u"LuminaChatRegisterRomance"_q, u"Orang spesial"_q },
+		{ u"LuminaChatRegisterRomanceInfo"_q, u"Hangat dan jenaka, dengan "
+			u"sedikit sentuhan menggoda."_q },
+		{ u"LuminaChatRegisterCustom"_q, u"Khusus…"_q },
+		{ u"LuminaChatRegisterCustomInfo"_q, u"Jelaskan hubungan ini dengan "
+			u"kata-katamu sendiri."_q },
+		{ u"LuminaChatRegisterCustomTitle"_q, u"Jelaskan hubungan ini"_q },
+		{ u"LuminaChatRegisterCustomHint"_q, u"mis. dosen pembimbing saya — "
+			u"hormat tapi tidak kaku"_q },
+		{ u"LuminaChatRegisterUnsupported"_q, u"Mesin terjemahan saat ini "
+			u"mengabaikan nada"_q },
+		{ u"LuminaChatRegisterDeepL"_q, u"DeepL: hanya formal/informal dan "
+			u"hanya untuk sebagian bahasa"_q },
+
 		// Telegram's own AI editor, whose Translate tab overlaps ours.
 		{ u"LuminaAiEditorHeader"_q, u"Editor AI Telegram"_q },
 		{ u"LuminaAiEditorKeep"_q, u"Pertahankan editor AI Telegram"_q },

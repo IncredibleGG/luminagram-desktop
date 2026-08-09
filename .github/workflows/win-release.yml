@@ -1,0 +1,389 @@
+name: Windows Release.
+
+# Produces the two things a person can actually install: the Inno Setup
+# installer and the portable zip, both from a Release build.
+#
+# This is deliberately separate from win.yml. That one is the fast Debug loop
+# that runs on every push; this one builds every third-party library twice
+# (Debug *and* Release halves) and then optimises the whole application, so it
+# is measured in hours, not minutes. Manual trigger only.
+
+on:
+  workflow_dispatch:
+    inputs:
+      only_cache:
+        description: 'Build only the third-party libraries, to fill the cache. Produces no packages.'
+        type: boolean
+        default: false
+
+jobs:
+
+  windows-release:
+    name: Windows Release
+    # A cold run has to build Release Qt on top of Debug Qt and may come close
+    # to the six hour job limit. If it times out, run once with only_cache set
+    # to fill the library cache, then run again to build and package.
+    runs-on: windows-latest
+
+    env:
+      ONLY_CACHE: ${{ inputs.only_cache }}
+      PREPARE_PATH: "Telegram/build/prepare/prepare.py"
+      # LuminaGram: the account's own api_id, held in this repository's
+      # Actions secrets. A build made with TDESKTOP_API_TEST compiles and
+      # starts but cannot sign in, so a build meant for a person has to carry
+      # real credentials. Both are empty in a fork with no secrets set, and
+      # the build step falls back to the test mode there rather than failing.
+      LUMINA_API_ID: ${{ secrets.TDESKTOP_API_ID }}
+      LUMINA_API_HASH: ${{ secrets.TDESKTOP_API_HASH }}
+      # The value setup.iss switches on, and the folder the modules live in.
+      # Both follow from the one architecture this workflow ships.
+      BUILD_TARGET: "win64"
+      MODULES_ARCH: "x64"
+      # CMake's OUTPUT_NAME for the Telegram target, which setup.iss expects
+      # to find next to Updater.exe, and the folder name inside the zip.
+      BINARY_NAME: "LuminaGram"
+
+    defaults:
+      run:
+        shell: cmd
+
+    steps:
+      - name: Prepare directories.
+        run: |
+          mkdir %userprofile%\TBuild\Libraries
+          mklink /d %GITHUB_WORKSPACE%\TBuild %userprofile%\TBuild
+          echo TBUILD=%GITHUB_WORKSPACE%\TBuild>>%GITHUB_ENV%
+          echo LibrariesPath=%GITHUB_WORKSPACE%\TBuild\Libraries\win64>>%GITHUB_ENV%
+
+      - name: Get repository name.
+        shell: bash
+        # LuminaGram: a fixed short name, not the repository's own. Every
+        # object file is written under this directory, and the deepest of them
+        # - kimageformats under Ninja Multi-Config - sits close enough to
+        # MSVC's path limit that the ten characters between "tdesktop" and
+        # "luminagram-desktop" are the difference between compiling and
+        # "fatal error C1083: Cannot open compiler generated file: ''".
+        run: echo "REPO_NAME=tdesktop" >> $GITHUB_ENV
+
+      - name: Clone.
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+          path: ${{ env.TBUILD }}\${{ env.REPO_NAME }}
+
+      - name: First set up.
+        shell: bash
+        run: |
+          DOCPATH=$TBUILD/$REPO_NAME/docs/building-win.md
+          SDK="$(grep "SDK version" $DOCPATH | sed -r 's/.*\*\*(.*)\*\* SDK version.*/\1/')"
+          echo "SDK=$SDK" >> $GITHUB_ENV
+
+          sed -i '/CMAKE_${lang}_FLAGS_DEBUG_INIT/s/${_Zi}//' "$PROGRAMFILES"/CMake/share/cmake*/Modules/Platform/Windows-MSVC.cmake
+
+          echo "$(sha256sum $TBUILD/$REPO_NAME/$PREPARE_PATH | awk '{ print $1 }')" >> CACHE_KEY.txt
+          echo "$SDK" >> CACHE_KEY.txt
+          echo "CACHE_KEY=$(sha256sum CACHE_KEY.txt | awk '{ print $1 }')" >> $GITHUB_ENV
+
+          echo "Configurate git for cherry-picks."
+          git config --global user.email "you@example.com"
+          git config --global user.name "Sample"
+
+      - uses: Eden-CI/msvc-dev-cmd@master
+        name: Native Tools Command Prompt.
+        with:
+          arch: x64
+          sdk: ${{ env.SDK }}
+          toolset: '14.44'
+
+      - name: NuGet sources.
+        run: |
+          nuget sources Disable -Name "Microsoft Visual Studio Offline Packages"
+          nuget sources Add -Source https://api.nuget.org/v3/index.json & exit 0
+
+      - name: ThirdParty cache.
+        id: cache-third-party
+        # Shared with win.yml on purpose: msys64, jom, gyp and python are the
+        # same tools whichever configuration is being built.
+        uses: actions/cache@v6
+        with:
+          path: ${{ env.TBUILD }}\ThirdParty
+          key: ${{ runner.OS }}-${{ runner.arch }}-third-party-${{ env.CACHE_KEY }}
+          restore-keys: ${{ runner.OS }}-${{ runner.arch }}-third-party-
+
+      - name: Libraries cache.
+        id: cache-libs
+        # A key of its own, never win.yml's. That cache holds libraries built
+        # with skip-release, so it has no Release halves at all; restoring it
+        # here would hand the linker a tree that only looks complete.
+        uses: actions/cache@v6
+        with:
+          path: |
+            ${{ env.LibrariesPath }}\*
+            !${{ env.LibrariesPath }}\cache_keys
+            !${{ env.LibrariesPath }}\[qQ]t[_-]*
+            ${{ env.LibrariesPath }}\cache_keys\*
+            !${{ env.LibrariesPath }}\cache_keys\[qQ]t[_-]*
+          key: ${{ runner.OS }}-x64-libs-release-v1-${{ env.CACHE_KEY }}
+          restore-keys: ${{ runner.OS }}-x64-libs-release-v1-
+
+      - name: Qt cache.
+        id: cache-qt
+        uses: actions/cache@v6
+        with:
+          path: |
+            ${{ env.LibrariesPath }}\[qQ]t[_-]*
+            ${{ env.LibrariesPath }}\cache_keys\[qQ]t[_-]*
+          key: ${{ runner.OS }}-x64-qt-release-${{ env.CACHE_KEY }}
+          restore-keys: ${{ runner.OS }}-x64-qt-release-
+
+      - name: Libraries.
+        # No skip-release here, and that is the whole difference from win.yml.
+        # prepare.py scopes every "release:" block behind that option, so with
+        # it the Release variants of openssl, zlib, lzma, ffmpeg, Qt and the
+        # rest are simply never built - and a Release LuminaGram has nothing
+        # to link against. It roughly doubles this step.
+        run: |
+          %TBUILD%\%REPO_NAME%\Telegram\build\prepare\win.bat silent
+
+      - name: Read the API credentials.
+        shell: bash
+        run: |
+          API="-D TDESKTOP_API_TEST=ON"
+          if [ -n "$LUMINA_API_ID" ] && [ -n "$LUMINA_API_HASH" ]; then
+            echo "Using this account's own credentials."
+            API="-D TDESKTOP_API_ID=$LUMINA_API_ID -D TDESKTOP_API_HASH=$LUMINA_API_HASH"
+          else
+            echo "No credentials in secrets - test mode, this build cannot sign in."
+          fi
+          echo "TDESKTOP_BUILD_API=$API" >> $GITHUB_ENV
+
+      - name: Read the version.
+        shell: bash
+        # core/version.h is what the built binary reports, so it is what the
+        # packages are named after. Reproducing build.bat's arithmetic:
+        #
+        #   AppVersionStr      major.minor.patch, always three parts  (:69)
+        #   AppVersionStrSmall the same, but "major.minor" when patch is 0
+        #   AppVersionStrFull  AppVersionStr, plus ".beta" on the beta
+        #                      channel or "_<alpha>" for a closed alpha (:72)
+        #
+        # and those become iscc's MyAppVersionZero / MyAppVersion /
+        # MyAppVersionFull respectively (build.bat:217).
+        #
+        # The catch is that version.h's own AppVersionStr is *not* build.bat's
+        # AppVersionStr - set_version.py writes versionStrSmall into it. So
+        # the three parts come from the AppVersion integer, and version.h's
+        # string is used only to check the two files still agree.
+        run: |
+          set -e
+          VERSION_H="$TBUILD/$REPO_NAME/Telegram/SourceFiles/core/version.h"
+
+          number=$(sed -n 's/^constexpr auto AppVersion = \([0-9][0-9]*\);.*/\1/p' "$VERSION_H")
+          declared=$(sed -n 's/^constexpr auto AppVersionStr = "\([^"]*\)".*/\1/p' "$VERSION_H")
+          beta=$(sed -n 's/^constexpr auto AppBetaVersion = \([a-z][a-z]*\);.*/\1/p' "$VERSION_H")
+          alpha=$(sed -n 's/^#define TDESKTOP_REQUESTED_ALPHA_VERSION (\([0-9][0-9]*\)ULL).*/\1/p' "$VERSION_H")
+
+          if [ -z "$number" ] || [ -z "$declared" ] || [ -z "$beta" ] || [ -z "$alpha" ]; then
+            echo "Could not read the version out of $VERSION_H."
+            exit 1
+          fi
+
+          major=$(( number / 1000000 ))
+          minor=$(( (number / 1000) % 1000 ))
+          patch=$(( number % 1000 ))
+
+          zero="$major.$minor.$patch"
+          if [ "$patch" -eq 0 ]; then
+            small="$major.$minor"
+          else
+            small="$zero"
+          fi
+
+          if [ "$declared" != "$small" ]; then
+            echo "version.h disagrees with itself: AppVersion $number means $small,"
+            echo "but AppVersionStr says \"$declared\". Run Telegram/build/set_version."
+            exit 1
+          fi
+
+          if [ "$alpha" != "0" ]; then
+            echo "This is a closed alpha ($alpha). That build needs Packer.exe and"
+            echo "a signed key file from DesktopPrivate, neither of which exists here,"
+            echo "and build.bat skips the installer for it entirely."
+            exit 1
+          elif [ "$beta" = "true" ]; then
+            full="$zero.beta"
+          else
+            full="$zero"
+          fi
+
+          echo "Building $full."
+          echo "LG_APP_VERSION=$small" >> $GITHUB_ENV
+          echo "LG_APP_VERSION_ZERO=$zero" >> $GITHUB_ENV
+          echo "LG_APP_VERSION_FULL=$full" >> $GITHUB_ENV
+          echo "LG_SETUP_FILE=tsetup-x64.$full.exe" >> $GITHUB_ENV
+          echo "LG_PORTABLE_FILE=tportable-x64.$full.zip" >> $GITHUB_ENV
+
+      - name: Find Inno Setup and 7-Zip.
+        shell: pwsh
+        # Both ship in the windows runner image, but neither is guaranteed to
+        # be on PATH and the Inno Setup directory carries its major version in
+        # its name. Look for them, install Inno Setup if it really is absent,
+        # and fail here rather than three hours later at packaging time.
+        run: |
+          $roots = @($env:ProgramFiles, ${env:ProgramFiles(x86)}) | Where-Object { $_ }
+
+          function Find-Iscc {
+            $onPath = (Get-Command ISCC.exe -ErrorAction SilentlyContinue).Source
+            if ($onPath) { return $onPath }
+            foreach ($root in $script:roots) {
+              $found = Get-ChildItem -Path $root -Directory -Filter 'Inno Setup *' -ErrorAction SilentlyContinue |
+                Sort-Object Name -Descending |
+                ForEach-Object { Join-Path $_.FullName 'ISCC.exe' } |
+                Where-Object { Test-Path $_ } |
+                Select-Object -First 1
+              if ($found) { return $found }
+            }
+            return $null
+          }
+
+          $iscc = Find-Iscc
+          if (-not $iscc) {
+            Write-Host 'Inno Setup not found, installing it.'
+            choco install innosetup -y --no-progress
+            $iscc = Find-Iscc
+          }
+          if (-not $iscc) { throw 'Inno Setup is not available and could not be installed.' }
+          Write-Host "ISCC: $iscc"
+          Add-Content -Path $env:GITHUB_ENV -Value "ISCC=$iscc"
+
+          $sevenzip = (Get-Command 7z.exe -ErrorAction SilentlyContinue).Source
+          if (-not $sevenzip) {
+            $sevenzip = $roots |
+              ForEach-Object { Join-Path $_ '7-Zip\7z.exe' } |
+              Where-Object { Test-Path $_ } |
+              Select-Object -First 1
+          }
+          if (-not $sevenzip) { throw '7-Zip is not available.' }
+          Write-Host "7z: $sevenzip"
+          Add-Content -Path $env:GITHUB_ENV -Value "SEVENZIP=$sevenzip"
+
+          # choco leaves its exit code behind and the pwsh wrapper would hand
+          # it back as the step's. Every real failure above threw instead.
+          exit 0
+
+      - name: Free up some disk space.
+        shell: bash
+        run: find $LibrariesPath '(' '(' ! '(' -name '*.lib' -o -name '*.a' -o -name '*.exe' -o -name '*.h' -o -name '*.hpp' -o -name '*.inc' -o -name '*.cmake' -o -name '*.pc' -o -path '*/include/*' -o -path '*/objects-*' -o -path '*/cache_keys/*' -o -path '*/patches/*' -o -path '*/nv-codec-headers/*' ')' -type f ')' -o -empty ')' -delete
+
+      - name: LuminaGram build.
+        if: env.ONLY_CACHE == 'false'
+        # Differences from win.yml, all of them on purpose:
+        #  - Release rather than Debug, which is the point of this workflow.
+        #  - No CMAKE_COMPILE_WARNING_AS_ERROR. Every push already has to pass
+        #    that gate in win.yml; a release build should not be stopped by a
+        #    warning only the optimiser knows how to emit.
+        #  - No LTO, unlike build.bat. It is where most of the link time and
+        #    memory would go, and this runner has four cores.
+        #  - Debug information still off, so no PDBs: nothing we ship contains
+        #    them and there is no symbol server to send them to. Drop the
+        #    CMAKE_MSVC_DEBUG_INFORMATION_FORMAT line to get them back.
+        run: |
+          cd %TBUILD%\%REPO_NAME%\Telegram
+
+          call configure.bat ^
+          -G "Ninja Multi-Config" ^
+          %TDESKTOP_BUILD_API% ^
+          -D CMAKE_CONFIGURATION_TYPES=Release ^
+          -D CMAKE_MSVC_DEBUG_INFORMATION_FORMAT= ^
+          -D DESKTOP_APP_DISABLE_AUTOUPDATE=OFF ^
+          -D DESKTOP_APP_DISABLE_CRASH_REPORTS=OFF
+          if errorlevel 1 exit /b 1
+
+          cmake --build ..\out --config Release --parallel
+          if errorlevel 1 exit /b 1
+
+      - name: Check the build output.
+        if: env.ONLY_CACHE == 'false'
+        run: |
+          set "RELEASE_PATH=%TBUILD%\%REPO_NAME%\out\Release"
+          echo RELEASE_PATH=%RELEASE_PATH%>>%GITHUB_ENV%
+          if not exist "%RELEASE_PATH%\%BINARY_NAME%.exe" (
+            echo %BINARY_NAME%.exe not found in %RELEASE_PATH%.
+            exit /b 1
+          )
+          if not exist "%RELEASE_PATH%\Updater.exe" (
+            echo Updater.exe not found in %RELEASE_PATH%.
+            exit /b 1
+          )
+          if not exist "%RELEASE_PATH%\modules\%MODULES_ARCH%\d3d\d3dcompiler_47.dll" (
+            echo d3dcompiler_47.dll not found - setup.iss and the portable zip both need it.
+            exit /b 1
+          )
+
+      - name: Build the installer.
+        if: env.ONLY_CACHE == 'false'
+        # The same defines build.bat passes at :217. SKIP_SIGN is ours: the
+        # script's SignTool=sha256 needs a code signing certificate we do not
+        # have, so it is compiled out here and only here.
+        run: |
+          "%ISCC%" ^
+          /dMyAppVersion=%LG_APP_VERSION% ^
+          /dMyAppVersionZero=%LG_APP_VERSION_ZERO% ^
+          /dMyAppVersionFull=%LG_APP_VERSION_FULL% ^
+          "/dReleasePath=%RELEASE_PATH%" ^
+          "/dMyBuildTarget=%BUILD_TARGET%" ^
+          /dSKIP_SIGN ^
+          "%TBUILD%\%REPO_NAME%\Telegram\build\setup.iss"
+          if errorlevel 1 exit /b 1
+
+          if not exist "%RELEASE_PATH%\%LG_SETUP_FILE%" (
+            echo %LG_SETUP_FILE% was not produced.
+            exit /b 1
+          )
+
+      - name: Build the portable package.
+        if: env.ONLY_CACHE == 'false'
+        # build.bat:294-315 - the zip holds one folder named after the binary,
+        # containing the executable and the d3d compiler and nothing else.
+        # Updater.exe deliberately stays out of it, as it does upstream.
+        run: |
+          set "PORTABLE_ROOT=%TBUILD%\%REPO_NAME%\out\portable"
+          echo PORTABLE_ROOT=%PORTABLE_ROOT%>>%GITHUB_ENV%
+
+          mkdir "%PORTABLE_ROOT%\%BINARY_NAME%\modules\%MODULES_ARCH%\d3d"
+          if errorlevel 1 exit /b 1
+
+          copy /Y "%RELEASE_PATH%\%BINARY_NAME%.exe" "%PORTABLE_ROOT%\%BINARY_NAME%\"
+          if errorlevel 1 exit /b 1
+
+          copy /Y "%RELEASE_PATH%\modules\%MODULES_ARCH%\d3d\d3dcompiler_47.dll" "%PORTABLE_ROOT%\%BINARY_NAME%\modules\%MODULES_ARCH%\d3d\"
+          if errorlevel 1 exit /b 1
+
+          cd /d "%PORTABLE_ROOT%"
+
+          rem 7z.exe is not a shell builtin, so the folder argument stays
+          rem unquoted: a trailing backslash inside quotes is an escaped quote
+          rem to the C runtime, and the name has no spaces to protect anyway.
+          "%SEVENZIP%" a -mx9 "%LG_PORTABLE_FILE%" %BINARY_NAME%\
+          if errorlevel 1 exit /b 1
+
+          "%SEVENZIP%" t "%LG_PORTABLE_FILE%"
+          if errorlevel 1 exit /b 1
+
+      - name: Collect artifact.
+        if: env.ONLY_CACHE == 'false'
+        run: |
+          mkdir artifact
+          move "%RELEASE_PATH%\%LG_SETUP_FILE%" artifact\
+          if errorlevel 1 exit /b 1
+          move "%PORTABLE_ROOT%\%LG_PORTABLE_FILE%" artifact\
+          if errorlevel 1 exit /b 1
+
+      - uses: actions/upload-artifact@v7
+        name: Upload artifact.
+        if: env.ONLY_CACHE == 'false'
+        with:
+          name: LuminaGram ${{ env.LG_APP_VERSION_FULL }} Windows x64
+          # Already compressed, twice over - do not spend minutes on it again.
+          compression-level: 0
+          path: artifact\

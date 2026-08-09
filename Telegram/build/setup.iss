@@ -34,7 +34,14 @@ CloseApplications=force
 DisableDirPage=no
 DisableProgramGroupPage=no
 WizardStyle=modern
+; Signing needs a code signing certificate, which CI does not have. Compiling
+; the directive out - rather than pointing it at a sign tool that does nothing
+; - keeps this the one true path: an unsigned build has to say so, and a build
+; with a certificate signs by default, without anyone remembering to undo a
+; workaround.
+#ifndef SKIP_SIGN
 SignTool=sha256
+#endif
 
 #if MyBuildTarget == "winarm"
   ArchitecturesAllowed="arm64"

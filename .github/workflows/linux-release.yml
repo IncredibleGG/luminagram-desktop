@@ -1,0 +1,338 @@
+name: Linux Release.
+
+# Produces the one Linux artifact the desktop update line can actually ship:
+# out/Release LuminaGram + Updater, small enough to fit inside an update
+# package. UnpackUpdate() stores the unpacked size in an int32 and refuses
+# anything over 1 GB, and linux.yml's Debug binary alone is 1.23 GB - it can
+# never be published.
+#
+# Deliberately separate from linux.yml. That one is the fast Debug loop that
+# runs on every push. Manual trigger only.
+#
+# Note what is *not* different here: the container. Unlike Windows and macOS,
+# the third-party libraries on Linux are baked into the Rocky Linux image, and
+# gen_dockerfile is already invoked with DEBUG= and LTO= - both empty, both
+# therefore false - so those libraries are built -O3 with no debug info and
+# carry no Debug/Release split at all. There is no prepare.py here and no
+# skip-release to undo; the only thing that changes configuration is the
+# application build itself, through CONFIG and CMAKE_CONFIGURATION_TYPES.
+
+on:
+  workflow_dispatch:
+    inputs:
+      only_cache:
+        description: 'Build only the container image, to fill the cache. Produces no package.'
+        type: boolean
+        default: false
+
+jobs:
+
+  linux-release:
+    name: Rocky Linux 8 Release
+    # A cold run builds the whole library image before it reaches the
+    # application and may come close to the six hour job limit. If it times
+    # out, run once with only_cache set to fill the image cache, then run
+    # again to build and package.
+    runs-on: ubuntu-latest
+
+    env:
+      ONLY_CACHE: ${{ inputs.only_cache }}
+      IMAGE_TAG: tdesktop:centos_env
+      # LuminaGram: the account's own api_id, held in this repository's
+      # Actions secrets. A build made with TDESKTOP_API_TEST compiles and
+      # starts but cannot sign in, so a build meant for a person has to carry
+      # real credentials. Both are empty in a fork with no secrets set, and
+      # the build step falls back to the test mode there rather than failing.
+      LUMINA_API_ID: ${{ secrets.TDESKTOP_API_ID }}
+      LUMINA_API_HASH: ${{ secrets.TDESKTOP_API_HASH }}
+      # CMake's OUTPUT_NAME for the Telegram target. publish-desktop.sh looks
+      # for exactly this name, not Telegram.
+      BINARY_NAME: "LuminaGram"
+
+    steps:
+      - name: Clone.
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - name: First set up.
+        run: |
+          sudo apt update
+          curl -sSL https://install.python-poetry.org | python3 -
+          curl -sSL https://github.com/ccache/ccache/releases/download/v4.13.6/ccache-4.13.6-linux-x86_64-glibc.tar.xz \
+          | sudo tar xJ -C /usr/local/bin --strip-components=1 ccache-4.13.6-linux-x86_64-glibc/ccache
+          echo "CCACHE_DIR=$RUNNER_TEMP/.tdesktop-cache" >> $GITHUB_ENV
+          cd Telegram/build/docker/centos_env
+          poetry install
+          DOCKERFILE=$(DEBUG= LTO= poetry run gen_dockerfile)
+          echo "$DOCKERFILE" > Dockerfile
+          rm -rf __pycache__
+
+      - name: Free up some disk space.
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
+        with:
+          tool-cache: true
+
+      - name: Set up Docker Buildx.
+        id: setup-buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Libraries cache.
+        id: cache-libs
+        # Keys of its own, never linux.yml's - the instruction everywhere else
+        # in this repository is that a Release workflow must not read a cache a
+        # Debug workflow filled. Here the image would in fact be identical, but
+        # the isolation costs one cold run and removes the question entirely.
+        #
+        # The prefix also deliberately does not start with "Linux-libs-", which
+        # is linux.yml's restore-keys prefix - otherwise the Debug workflow
+        # would start restoring this cache on every push.
+        uses: actions/cache@v6
+        with:
+          path: |
+            ${{ runner.temp }}/.buildx-cache
+            ${{ runner.temp }}/.mount-cache
+          key: ${{ runner.OS }}-release-libs-v1-${{ hashFiles('Telegram/build/docker/centos_env/**') }}
+          restore-keys: ${{ runner.OS }}-release-libs-v1-
+
+      - name: Restore Docker cache mounts.
+        uses: reproducible-containers/buildkit-cache-dance@5422eac04292c961a382e0f584ea0f03ad9da723
+        with:
+          builder: ${{ steps.setup-buildx.outputs.name }}
+          cache-dir: ${{ runner.temp }}/.mount-cache
+          dockerfile: Telegram/build/docker/centos_env/Dockerfile
+          skip-extraction: ${{ steps.cache-libs.outputs.cache-hit }}
+
+      - name: Libraries.
+        uses: docker/build-push-action@v7
+        with:
+          context: Telegram/build/docker/centos_env
+          load: ${{ env.ONLY_CACHE == 'false' }}
+          tags: ${{ env.IMAGE_TAG }}
+          cache-from: type=local,src=${{ runner.temp }}/.buildx-cache
+          cache-to: type=local,dest=${{ runner.temp }}/.buildx-cache-new,mode=max
+
+      - name: Move cache.
+        run: |
+          rm -rf ${{ runner.temp }}/.buildx-cache
+          mv ${{ runner.temp }}/.buildx-cache{-new,}
+
+      - name: Read the API credentials.
+        run: |
+          API="-D TDESKTOP_API_TEST=ON"
+          if [ -n "$LUMINA_API_ID" ] && [ -n "$LUMINA_API_HASH" ]; then
+            echo "Using this account's own credentials."
+            API="-D TDESKTOP_API_ID=$LUMINA_API_ID -D TDESKTOP_API_HASH=$LUMINA_API_HASH"
+          else
+            echo "No credentials in secrets - test mode, this build cannot sign in."
+          fi
+          echo "TDESKTOP_BUILD_API=$API" >> $GITHUB_ENV
+
+      - name: Read the version.
+        if: env.ONLY_CACHE == 'false'
+        # Only used to name the artifact, but naming it wrong is how a package
+        # ends up announcing one version and containing another.
+        #
+        #   AppVersionStr      major.minor.patch, always three parts
+        #   AppVersionStrSmall the same, but "major.minor" when patch is 0
+        #   AppVersionStrFull  AppVersionStr plus ".beta" on the beta channel
+        #
+        # set_version.py writes versionStrSmall into version.h's AppVersionStr,
+        # so the three parts come from the AppVersion integer and the string is
+        # only used to check the two files still agree. Telegram/build/version
+        # is checked too, because publish-desktop.sh refuses to publish unless
+        # its AppVersion matches the number on the command line.
+        run: |
+          set -e
+          VERSION_H="Telegram/SourceFiles/core/version.h"
+          VERSION_FILE="Telegram/build/version"
+
+          number=$(sed -n 's/^constexpr auto AppVersion = \([0-9][0-9]*\);.*/\1/p' "$VERSION_H")
+          declared=$(sed -n 's/^constexpr auto AppVersionStr = "\([^"]*\)".*/\1/p' "$VERSION_H")
+          beta=$(sed -n 's/^constexpr auto AppBetaVersion = \([a-z][a-z]*\);.*/\1/p' "$VERSION_H")
+          alpha=$(sed -n 's/^#define TDESKTOP_REQUESTED_ALPHA_VERSION (\([0-9][0-9]*\)ULL).*/\1/p' "$VERSION_H")
+
+          if [ -z "$number" ] || [ -z "$declared" ] || [ -z "$beta" ] || [ -z "$alpha" ]; then
+            echo "Could not read the version out of $VERSION_H."
+            exit 1
+          fi
+
+          packed=$(awk '/^AppVersion / {print $2}' "$VERSION_FILE")
+          if [ "$packed" != "$number" ]; then
+            echo "Telegram/build/version says AppVersion=$packed, version.h says $number."
+            echo "Run Telegram/build/set_version so the two agree."
+            exit 1
+          fi
+
+          major=$(( number / 1000000 ))
+          minor=$(( (number / 1000) % 1000 ))
+          patch=$(( number % 1000 ))
+
+          zero="$major.$minor.$patch"
+          if [ "$patch" -eq 0 ]; then
+            small="$major.$minor"
+          else
+            small="$zero"
+          fi
+
+          if [ "$declared" != "$small" ]; then
+            echo "version.h disagrees with itself: AppVersion $number means $small,"
+            echo "but AppVersionStr says \"$declared\". Run Telegram/build/set_version."
+            exit 1
+          fi
+
+          if [ "$alpha" != "0" ]; then
+            echo "This is a closed alpha ($alpha), which needs a signed key file"
+            echo "from DesktopPrivate that does not exist here."
+            exit 1
+          elif [ "$beta" = "true" ]; then
+            full="$zero.beta"
+          else
+            full="$zero"
+          fi
+
+          echo "Building $full."
+          echo "LG_APP_VERSION_FULL=$full" >> $GITHUB_ENV
+          echo "LG_PACKAGE_FILE=LuminaGram-$full-linux-x86_64.zip" >> $GITHUB_ENV
+
+      - name: Restore LuminaGram cache.
+        id: cache-tdesktop
+        if: env.ONLY_CACHE == 'false'
+        # Release object files, not Debug ones. Sharing linux.yml's ccache
+        # would never produce a wrong object - ccache hashes the compiler flags
+        # - but it would be a hundred percent miss rate on the way in and would
+        # evict that workflow's entries on the way out.
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ runner.OS }}-release-tdesktop-${{ github.run_id }}
+          restore-keys: ${{ runner.OS }}-release-tdesktop-
+
+      - name: LuminaGram build.
+        if: env.ONLY_CACHE == 'false'
+        # Differences from linux.yml, all of them on purpose:
+        #  - CONFIG=Release, which is what build.sh inside the container hands
+        #    to "cmake --build --config", plus the matching
+        #    CMAKE_CONFIGURATION_TYPES so the Ninja Multi-Config tree has a
+        #    Release configuration to build at all. Both are needed: the first
+        #    picks the configuration, the second creates it.
+        #  - Release flags rather than the Debug overrides. -O3 -DNDEBUG is
+        #    what CMake would use anyway; it is spelled out only so
+        #    -fpch-preprocess can be added, which is what lets ccache handle
+        #    the precompiled header (the Debug job adds it for the same
+        #    reason). No -g anywhere, which is most of the difference between
+        #    1.23 GB and something shippable.
+        #  - No CMAKE_COMPILE_WARNING_AS_ERROR. Every push already has to pass
+        #    that gate in linux.yml; a release build should not be stopped by a
+        #    warning only the optimiser knows how to emit.
+        #  - CMAKE_BUILD_PARALLEL_LEVEL pinned to the core count. The container
+        #    build.sh runs "cmake --build" with no -j, so Ninja would default
+        #    to cores+2; at -O3 the heavy translation units want far more
+        #    memory than they do at -O0, and an out-of-memory kill three hours
+        #    in reads as a random compiler crash.
+        run: |
+          ccache -z
+
+          docker run --rm \
+          -u $(id -u) \
+          -v $PWD:/usr/src/tdesktop \
+          -v ${{ env.CCACHE_DIR }}:/var/cache/ccache \
+          -e CONFIG=Release \
+          -e CMAKE_BUILD_PARALLEL_LEVEL=$(nproc) \
+          -e CCACHE_SLOPPINESS=pch_defines,time_macros \
+          $IMAGE_TAG \
+          env -u CCACHE_DISABLE /usr/src/tdesktop/Telegram/build/docker/centos_env/build.sh \
+          -D CMAKE_CONFIGURATION_TYPES=Release \
+          -D CMAKE_C_FLAGS_RELEASE="-O3 -DNDEBUG -fpch-preprocess" \
+          -D CMAKE_CXX_FLAGS_RELEASE="-O3 -DNDEBUG -fpch-preprocess" \
+          $TDESKTOP_BUILD_API \
+          -D DESKTOP_APP_DISABLE_AUTOUPDATE=OFF \
+          -D DESKTOP_APP_DISABLE_CRASH_REPORTS=OFF
+
+      - name: Count ccache misses.
+        id: ccache-stats
+        if: env.ONLY_CACHE == 'false'
+        run: |
+          MISSES=$(ccache --print-stats | sed -n 's/^cache_miss\t//p' | head -1)
+          case "$MISSES" in (*[!0-9]*|'') MISSES=0;; esac
+          echo "misses=$MISSES" >> $GITHUB_OUTPUT
+          echo "ccache misses this run: $MISSES"
+
+      - name: Save LuminaGram cache.
+        # The '0' fallback matters: on an only_cache run the counting step is
+        # skipped, its output is the empty string, and fromJSON('') is an error
+        # rather than a false condition.
+        if: env.ONLY_CACHE == 'false' && fromJSON(steps.ccache-stats.outputs.misses || '0') > 300
+        # Saved from whatever branch this ran on, unlike linux.yml which only
+        # saves from the default branch: this workflow is manual and rare, so
+        # there is no stream of pushes to fill the cache from.
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ steps.cache-tdesktop.outputs.cache-primary-key }}
+
+      - name: Check the build output.
+        if: env.ONLY_CACHE == 'false'
+        # Both files, under their LuminaGram names - not Telegram. Updater is
+        # a separate binary on Linux and belongs in the package: without it the
+        # client keeps whatever Updater is already installed forever.
+        run: |
+          set -e
+          RELEASE_PATH="$PWD/out/Release"
+          echo "RELEASE_PATH=$RELEASE_PATH" >> $GITHUB_ENV
+
+          for file in "$BINARY_NAME" Updater; do
+            if [ ! -f "$RELEASE_PATH/$file" ]; then
+              echo "$file not found in $RELEASE_PATH."
+              ls -la "$RELEASE_PATH" || true
+              exit 1
+            fi
+          done
+          echo "Build successfully done! :)"
+
+      - name: Report the size.
+        if: env.ONLY_CACHE == 'false'
+        # UnpackUpdate() keeps the unpacked size in an int32 and rejects
+        # anything over 1 GB outright, so a binary near that number cannot be
+        # shipped no matter how well it compresses. linux.yml's Debug binary is
+        # 1.23 GB on its own; a Release one should land in the low hundreds of
+        # MB. file(1) is printed as well - "not stripped" here is expected,
+        # what matters is that there is no debug_info section to strip.
+        run: |
+          cd "$RELEASE_PATH"
+          ls -l "$BINARY_NAME" Updater
+          du -ch "$BINARY_NAME" Updater | tail -1
+          file "$BINARY_NAME" || true
+          BYTES=$(stat -c %s "$BINARY_NAME")
+          BYTES=$((BYTES + $(stat -c %s Updater)))
+          echo "unpacked size: ${BYTES} bytes"
+          if [ "$BYTES" -ge 1073741824 ]; then
+            echo "::warning::the two binaries total ${BYTES} bytes - at or over the 1 GB limit UnpackUpdate() enforces, so this cannot be published as an update."
+          fi
+
+      - name: Package the binaries.
+        if: env.ONLY_CACHE == 'false'
+        # Zipped inside the job rather than handed to upload-artifact as loose
+        # files, because upload-artifact does not preserve the executable bit
+        # (it is a documented limitation) and lgpacker reads S_IXUSR off every
+        # file it packs. An update whose LuminaGram arrives without +x installs
+        # and then will not start.
+        #
+        # publish-desktop.sh expands one level of nested zip out of an artifact
+        # before it looks for the binary, so this shape is what it expects.
+        run: |
+          set -e
+          cd "$RELEASE_PATH"
+          mkdir -p "$GITHUB_WORKSPACE/artifact"
+          zip -qj "$GITHUB_WORKSPACE/artifact/$LG_PACKAGE_FILE" "$BINARY_NAME" Updater
+          unzip -l "$GITHUB_WORKSPACE/artifact/$LG_PACKAGE_FILE"
+          unzip -tq "$GITHUB_WORKSPACE/artifact/$LG_PACKAGE_FILE"
+
+      - uses: actions/upload-artifact@v7
+        name: Upload artifact.
+        if: env.ONLY_CACHE == 'false'
+        with:
+          name: LuminaGram ${{ env.LG_APP_VERSION_FULL }} Linux x86_64
+          # Already compressed - do not spend minutes on it again.
+          compression-level: 0
+          path: artifact/

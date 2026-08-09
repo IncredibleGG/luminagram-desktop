@@ -1,0 +1,299 @@
+name: MacOS Release.
+
+# Produces the one macOS artifact the desktop update line can actually ship:
+# an out/Release LuminaGram.app small enough to fit inside an update package.
+# UnpackUpdate() stores the unpacked size in an int32 and refuses anything over
+# 1 GB, and mac.yml's Debug bundle is 2.38 GB - it can never be published.
+#
+# Deliberately separate from mac.yml. That one is the fast Debug loop that runs
+# on every push and hands prepare/mac.sh "skip-release", so every third-party
+# library exists only in its Debug half - Qt is configured "-debug", not
+# "-debug-and-release". This one builds both halves and then optimises the
+# whole application, so it is measured in hours, not minutes. Manual only.
+
+on:
+  workflow_dispatch:
+    inputs:
+      only_cache:
+        description: 'Build only the third-party libraries, to fill the cache. Produces no package.'
+        type: boolean
+        default: false
+
+jobs:
+
+  macos-release:
+    name: MacOS Release
+    # A cold run builds Qt twice over before it even reaches the application
+    # and may come close to the six hour job limit. If it times out, run once
+    # with only_cache set to fill the library cache, then run again to build.
+    runs-on: macos-latest
+
+    env:
+      ONLY_CACHE: ${{ inputs.only_cache }}
+      PREPARE_PATH: "Telegram/build/prepare/prepare.py"
+      # LuminaGram: the account's own api_id, held in this repository's
+      # Actions secrets. A build made with TDESKTOP_API_TEST compiles and
+      # starts but cannot sign in, so a build meant for a person has to carry
+      # real credentials. Both are empty in a fork with no secrets set, and
+      # the build step falls back to the test mode there rather than failing.
+      LUMINA_API_ID: ${{ secrets.TDESKTOP_API_ID }}
+      LUMINA_API_HASH: ${{ secrets.TDESKTOP_API_HASH }}
+      # CMake's OUTPUT_NAME for the Telegram target, and the bundle it lands
+      # in. publish-desktop.sh looks for exactly this name.
+      BINARY_NAME: "LuminaGram"
+      BUNDLE_NAME: "LuminaGram.app"
+
+    steps:
+      - name: Get repository name.
+        run: echo "REPO_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
+
+      - name: Clone.
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+          path: ${{ env.REPO_NAME }}
+
+      - name: First set up.
+        run: |
+          sudo chown -R `whoami`:admin /usr/local/share
+
+          brew update
+          brew upgrade || true
+          brew install automake libtool meson nasm ninja pkg-config
+
+          # Disable spotlight.
+          sudo mdutil -a -i off
+
+          sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+          sudo sed -i '' '/CMAKE_${lang}_FLAGS_DEBUG_INIT/s/ -g//' /opt/homebrew/share/cmake/Modules/Compiler/GNU.cmake
+
+      - name: Make room for the Release halves.
+        # The runner image starts with roughly 14 GB free and mac.yml already
+        # spends much of it on Debug-only libraries. Adding the Release half of
+        # every one of them - Qt above all, which is built -debug-and-release
+        # with -force-debug-info - does not fit, and a full disk shows up hours
+        # later as an unrelated-looking compiler error. The iOS simulator
+        # runtimes are the largest thing on the image we never touch.
+        #
+        # Xcode itself is left alone on purpose: /Applications/Xcode.app is a
+        # symlink to one of the versioned bundles on this image, so deleting
+        # those would take the toolchain with them.
+        run: |
+          echo "--- before ---"; df -h /
+          xcrun simctl delete all || true
+          sudo rm -rf /Library/Developer/CoreSimulator/Profiles/Runtimes || true
+          sudo rm -rf /Library/Developer/CoreSimulator/Volumes || true
+          sudo rm -rf ~/Library/Developer/CoreSimulator/Caches || true
+          sudo rm -rf ~/Library/Developer/Xcode/iOS\ DeviceSupport || true
+          echo "--- after ---"; df -h /
+
+      - name: Libraries cache.
+        id: cache-libs
+        # A key of its own, never mac.yml's. That cache was filled with
+        # skip-release, so it holds no Release halves at all; restoring it here
+        # would hand the linker a tree that only looks complete and the failure
+        # would not appear until link time, hours in.
+        #
+        # The prefix also deliberately does not start with "macOS-libs-", which
+        # is mac.yml's restore-keys prefix - otherwise the Debug workflow would
+        # start restoring this cache and rebuild half of it on every push.
+        uses: actions/cache@v6
+        with:
+          path: |
+            Libraries
+            ThirdParty
+          key: ${{ runner.OS }}-release-libs-v1-${{ hashFiles(format('{0}/{1}', env.REPO_NAME, env.PREPARE_PATH)) }}
+          restore-keys: ${{ runner.OS }}-release-libs-v1-
+
+      - name: Libraries.
+        # No skip-release here, and that is the whole difference from mac.yml.
+        # prepare.py hides every "release:" block behind that option, so with it
+        # Qt is configured "-debug" instead of "-debug-and-release" and
+        # rnnoise, tg_owt, breakpad, crashpad and tde2e build a Debug half
+        # alone - a Release LuminaGram would have nothing to link against.
+        # It roughly doubles this step.
+        run: |
+          ./$REPO_NAME/Telegram/build/prepare/mac.sh silent
+
+      - name: Free up some disk space.
+        run: find Libraries '(' '(' ! '(' -name '*.a' -o -name '*.h' -o -name '*.hpp' -o -name '*.inc' -o -name '*.cmake' -o -path '*/include/*' -o -path '*/objects-*' -o -path '*/cache_keys/*' -o -path '*/patches/*' -o -perm +111 ')' -type f ')' -o -empty ')' -delete
+
+      - name: Read the API credentials.
+        run: |
+          API="-D TDESKTOP_API_TEST=ON"
+          if [ -n "$LUMINA_API_ID" ] && [ -n "$LUMINA_API_HASH" ]; then
+            echo "Using this account's own credentials."
+            API="-D TDESKTOP_API_ID=$LUMINA_API_ID -D TDESKTOP_API_HASH=$LUMINA_API_HASH"
+          else
+            echo "No credentials in secrets - test mode, this build cannot sign in."
+          fi
+          echo "TDESKTOP_BUILD_API=$API" >> $GITHUB_ENV
+
+      - name: Read the version.
+        if: env.ONLY_CACHE == 'false'
+        # Only used to name the artifact, but naming it wrong is how a package
+        # ends up announcing one version and containing another.
+        #
+        #   AppVersionStr      major.minor.patch, always three parts
+        #   AppVersionStrSmall the same, but "major.minor" when patch is 0
+        #   AppVersionStrFull  AppVersionStr plus ".beta" on the beta channel
+        #
+        # set_version.py writes versionStrSmall into version.h's AppVersionStr,
+        # so the three parts come from the AppVersion integer and the string is
+        # only used to check the two files still agree. Telegram/build/version
+        # is checked too, because publish-desktop.sh refuses to publish unless
+        # its AppVersion matches the number on the command line.
+        run: |
+          set -e
+          VERSION_H="$REPO_NAME/Telegram/SourceFiles/core/version.h"
+          VERSION_FILE="$REPO_NAME/Telegram/build/version"
+
+          number=$(sed -n 's/^constexpr auto AppVersion = \([0-9][0-9]*\);.*/\1/p' "$VERSION_H")
+          declared=$(sed -n 's/^constexpr auto AppVersionStr = "\([^"]*\)".*/\1/p' "$VERSION_H")
+          beta=$(sed -n 's/^constexpr auto AppBetaVersion = \([a-z][a-z]*\);.*/\1/p' "$VERSION_H")
+          alpha=$(sed -n 's/^#define TDESKTOP_REQUESTED_ALPHA_VERSION (\([0-9][0-9]*\)ULL).*/\1/p' "$VERSION_H")
+
+          if [ -z "$number" ] || [ -z "$declared" ] || [ -z "$beta" ] || [ -z "$alpha" ]; then
+            echo "Could not read the version out of $VERSION_H."
+            exit 1
+          fi
+
+          packed=$(awk '/^AppVersion / {print $2}' "$VERSION_FILE")
+          if [ "$packed" != "$number" ]; then
+            echo "Telegram/build/version says AppVersion=$packed, version.h says $number."
+            echo "Run Telegram/build/set_version so the two agree."
+            exit 1
+          fi
+
+          major=$(( number / 1000000 ))
+          minor=$(( (number / 1000) % 1000 ))
+          patch=$(( number % 1000 ))
+
+          zero="$major.$minor.$patch"
+          if [ "$patch" -eq 0 ]; then
+            small="$major.$minor"
+          else
+            small="$zero"
+          fi
+
+          if [ "$declared" != "$small" ]; then
+            echo "version.h disagrees with itself: AppVersion $number means $small,"
+            echo "but AppVersionStr says \"$declared\". Run Telegram/build/set_version."
+            exit 1
+          fi
+
+          if [ "$alpha" != "0" ]; then
+            echo "This is a closed alpha ($alpha), which needs a signed key file"
+            echo "from DesktopPrivate that does not exist here."
+            exit 1
+          elif [ "$beta" = "true" ]; then
+            full="$zero.beta"
+          else
+            full="$zero"
+          fi
+
+          echo "Building $full."
+          echo "LG_APP_VERSION_FULL=$full" >> $GITHUB_ENV
+          echo "LG_PACKAGE_FILE=LuminaGram-$full-macOS-arm64.zip" >> $GITHUB_ENV
+
+      - name: LuminaGram build.
+        if: env.ONLY_CACHE == 'false'
+        # Differences from mac.yml, all of them on purpose:
+        #  - Release rather than Debug, which is the point of this workflow.
+        #  - No CMAKE_COMPILE_WARNING_AS_ERROR. Every push already has to pass
+        #    that gate in mac.yml; a release build should not be stopped by a
+        #    warning only the optimiser knows how to emit.
+        #  - Debug information off, so no DWARF of ours and no dSYM: nothing we
+        #    ship carries symbols and there is no symbol server to send them
+        #    to. It is also most of the difference between 2.38 GB and a bundle
+        #    that fits in an update package. Drop the two XCODE_ATTRIBUTE lines
+        #    to get symbols back.
+        run: |
+          cd $REPO_NAME/Telegram
+
+          ./configure.sh \
+          -D CMAKE_CONFIGURATION_TYPES=Release \
+          -D CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=NO \
+          -D CMAKE_XCODE_ATTRIBUTE_GCC_GENERATE_DEBUGGING_SYMBOLS=NO \
+          -D CMAKE_XCODE_ATTRIBUTE_DEBUG_INFORMATION_FORMAT=dwarf \
+          $TDESKTOP_BUILD_API \
+          -D DESKTOP_APP_DISABLE_AUTOUPDATE=OFF \
+          -D DESKTOP_APP_DISABLE_CRASH_REPORTS=OFF
+
+          cmake --build ../out --config Release --parallel
+
+      - name: Check the build output.
+        if: env.ONLY_CACHE == 'false'
+        # The same three things build.sh checks for a mac release build. The
+        # bundle is what gets packed, so what matters is what is inside it -
+        # out/Release/Updater next to it is only a copy.
+        run: |
+          set -e
+          RELEASE_PATH="$GITHUB_WORKSPACE/$REPO_NAME/out/Release"
+          echo "RELEASE_PATH=$RELEASE_PATH" >> $GITHUB_ENV
+
+          if [ ! -d "$RELEASE_PATH/$BUNDLE_NAME" ]; then
+            echo "$BUNDLE_NAME not found in $RELEASE_PATH."
+            ls -la "$RELEASE_PATH" || true
+            exit 1
+          fi
+          if [ ! -f "$RELEASE_PATH/$BUNDLE_NAME/Contents/MacOS/$BINARY_NAME" ]; then
+            echo "$BUNDLE_NAME/Contents/MacOS/$BINARY_NAME is missing."
+            exit 1
+          fi
+          if [ ! -f "$RELEASE_PATH/$BUNDLE_NAME/Contents/Frameworks/Updater" ]; then
+            echo "$BUNDLE_NAME/Contents/Frameworks/Updater is missing - the client"
+            echo "looks for exactly that path when it applies an update."
+            exit 1
+          fi
+          if [ ! -f "$RELEASE_PATH/$BUNDLE_NAME/Contents/Helpers/crashpad_handler" ]; then
+            echo "::warning::crashpad_handler is missing from the bundle; crash reports will not be collected."
+          fi
+
+      - name: Report the size.
+        if: env.ONLY_CACHE == 'false'
+        # UnpackUpdate() keeps the unpacked size in an int32 and rejects
+        # anything over 1 GB outright, so a bundle near that number cannot be
+        # shipped no matter how well it compresses. mac.yml's Debug bundle is
+        # 2.38 GB; a Release one should land in the low hundreds of MB.
+        run: |
+          cd "$RELEASE_PATH"
+          echo "--- bundle ---"
+          du -sh "$BUNDLE_NAME"
+          echo "--- ten largest files inside it ---"
+          find "$BUNDLE_NAME" -type f -exec stat -f '%z %N' {} + | sort -rn | head -10
+          KB=$(du -sk "$BUNDLE_NAME" | awk '{print $1}')
+          echo "unpacked size: ${KB} KB"
+          if [ "$KB" -ge 1048576 ]; then
+            echo "::warning::${BUNDLE_NAME} is ${KB} KB - at or over the 1 GB limit UnpackUpdate() enforces, so this cannot be published as an update."
+          fi
+
+      - name: Package the bundle.
+        if: env.ONLY_CACHE == 'false'
+        # Zipped inside the job rather than handed to upload-artifact as loose
+        # files, because upload-artifact does not preserve the executable bit
+        # (it is a documented limitation) and lgpacker reads S_IXUSR off every
+        # file it packs. An update whose Contents/MacOS/LuminaGram arrives
+        # without +x installs and then will not start.
+        #
+        # publish-desktop.sh expands one level of nested zip out of an artifact
+        # before it looks for LuminaGram.app, so this shape is what it expects.
+        run: |
+          set -e
+          cd "$RELEASE_PATH"
+          mkdir -p "$GITHUB_WORKSPACE/artifact"
+          # -y keeps symlinks as symlinks rather than copying their targets;
+          # lgpacker skips them, but silently doubling a file would be worse.
+          zip -qry "$GITHUB_WORKSPACE/artifact/$LG_PACKAGE_FILE" "$BUNDLE_NAME"
+          unzip -tq "$GITHUB_WORKSPACE/artifact/$LG_PACKAGE_FILE"
+          ls -la "$GITHUB_WORKSPACE/artifact"
+
+      - uses: actions/upload-artifact@v7
+        name: Upload artifact.
+        if: env.ONLY_CACHE == 'false'
+        with:
+          name: LuminaGram ${{ env.LG_APP_VERSION_FULL }} macOS arm64
+          # Already compressed - do not spend minutes on it again.
+          compression-level: 0
+          path: artifact/

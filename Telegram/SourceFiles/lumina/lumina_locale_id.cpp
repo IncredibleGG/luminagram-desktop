@@ -876,6 +876,45 @@ namespace {
 		{ u"LuminaStoriesHidePostEntryInfo"_q, u"Menyembunyikan tombol kamera "
 			u"untuk memposting cerita Anda sendiri, di daftar obrolan dan di "
 			u"halaman profil."_q },
+
+		// Voice to text (F-32), keys shared with Android's
+		// LuminaLocale / LuminaVoiceToTextActivity.
+		{ u"LuminaVoiceToTextTitle"_q, u"Suara ke Teks"_q },
+		{ u"LuminaSttEnable"_q, u"Aktifkan suara ke teks"_q },
+		{ u"LuminaSttEngine"_q, u"Mesin"_q },
+		{ u"LuminaSttEngineWhisper"_q, u"OpenAI Whisper (kunci sendiri)"_q },
+		{ u"LuminaSttEngineGoogle"_q, u"Google (kunci sendiri)"_q },
+		{ u"LuminaSttKey"_q, u"Kunci API"_q },
+		{ u"LuminaSttBaseUrl"_q, u"URL dasar"_q },
+		{ u"LuminaSttModel"_q, u"Model"_q },
+		{ u"LuminaSttInfoDesktop"_q, u"Transkripsi memakai kunci API dan kuota Anda sendiri; "
+			u"LuminaGram tidak pernah menyediakan kunci. Pesan suara "
+			u"diunggah ke layanan yang Anda pilih di bawah, jadi "
+			u"aktifkan ini hanya untuk layanan yang Anda percayai "
+			u"menerima pesan Anda."_q },
+		{ u"LuminaSttVoskUnsupported"_q, u"Mesin luring (Vosk) belum didukung di desktop: ia perlu "
+			u"pustaka native dan model suara yang dipaketkan terpisah "
+			u"untuk Windows, macOS, dan Linux. Sampai saat itu, "
+			u"transkripsi di desktop hanya lewat awan."_q },
+		{ u"LuminaSttUiMenuItem"_q, u"Transkripsikan"_q },
+		{ u"LuminaSttUiPickTitle"_q, u"Suara ke teks"_q },
+		{ u"LuminaSttUiFetching"_q, u"Mengunduh pesan suara…"_q },
+		{ u"LuminaSttUiTranscribing"_q, u"Mentranskripsi…"_q },
+		{ u"LuminaSttUiTranslation"_q, u"Terjemahan"_q },
+		{ u"LuminaSttUiError"_q, u"Transkripsi gagal"_q },
+		{ u"LuminaSttUiNoText"_q, u"Tidak ada ucapan terdeteksi"_q },
+		{ u"LuminaSttUiNoKey"_q, u"Kunci API belum diatur. Tambahkan di Pengaturan, "
+			u"LuminaGram, Suara ke Teks."_q },
+		{ u"LuminaSttUiTooLarge"_q, u"Pesan suara ini terlalu besar untuk mesin yang dipilih."_q },
+		{ u"LuminaSttUiRoundUnsupported"_q, u"Google Speech tidak dapat membaca pesan video. Pilih "
+			u"Whisper untuk video bundar."_q },
+		{ u"LuminaSttAutoTranslate"_q, u"Terjemahkan setelah transkripsi"_q },
+		{ u"LuminaSttAutoTranslateInfo"_q, u"Bila pesan suara ditranskripsikan ke bahasa yang tidak "
+			u"Anda baca, LuminaGram langsung menerjemahkannya dan "
+			u"menampilkan transkripnya lebih dulu, lalu terjemahannya. "
+			u"Jika transkrip sudah dalam bahasa bacaan Anda, tidak ada "
+			u"yang diterjemahkan dan kuota tidak terpakai, dan bila "
+			u"terjemahan gagal transkrip tetap tampil."_q },
 	};
 }
 

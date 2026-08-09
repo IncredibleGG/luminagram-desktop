@@ -117,5 +117,8 @@ void AddBookmarkRow(
 void AddSelectFromAuthorRow(
 	not_null<Ui::PopupMenu*> menu,
 	const MessageMenuContext &context);
+void AddVoiceToTextRow(
+	not_null<Ui::PopupMenu*> menu,
+	const MessageMenuContext &context);
 
 } // namespace Lumina

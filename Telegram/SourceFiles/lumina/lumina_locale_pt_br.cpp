@@ -877,6 +877,47 @@ namespace {
 		{ u"LuminaStoriesHidePostEntryInfo"_q, u"Oculta o botão de câmera usado "
 			u"para publicar o seu próprio story, na lista de conversas e nos "
 			u"perfis."_q },
+
+		// Voice to text (F-32), keys shared with Android's
+		// LuminaLocale / LuminaVoiceToTextActivity.
+		{ u"LuminaVoiceToTextTitle"_q, u"Voz para texto"_q },
+		{ u"LuminaSttEnable"_q, u"Ativar voz para texto"_q },
+		{ u"LuminaSttEngine"_q, u"Mecanismo"_q },
+		{ u"LuminaSttEngineWhisper"_q, u"OpenAI Whisper (sua própria chave)"_q },
+		{ u"LuminaSttEngineGoogle"_q, u"Google (sua própria chave)"_q },
+		{ u"LuminaSttKey"_q, u"Chave de API"_q },
+		{ u"LuminaSttBaseUrl"_q, u"URL base"_q },
+		{ u"LuminaSttModel"_q, u"Modelo"_q },
+		{ u"LuminaSttInfoDesktop"_q, u"A transcrição usa sua própria chave de API e sua própria "
+			u"cota; o LuminaGram nunca fornece uma chave. A mensagem de "
+			u"voz é enviada ao serviço escolhido abaixo, então ative "
+			u"isso apenas para um serviço ao qual você aceite enviar "
+			u"suas mensagens."_q },
+		{ u"LuminaSttVoskUnsupported"_q, u"O mecanismo offline (Vosk) ainda não é compatível no "
+			u"desktop: ele precisa de uma biblioteca nativa e de um "
+			u"modelo de voz empacotados separadamente para Windows, "
+			u"macOS e Linux. Até lá, a transcrição no desktop é somente "
+			u"na nuvem."_q },
+		{ u"LuminaSttUiMenuItem"_q, u"Transcrever"_q },
+		{ u"LuminaSttUiPickTitle"_q, u"Voz para texto"_q },
+		{ u"LuminaSttUiFetching"_q, u"Baixando a mensagem de voz…"_q },
+		{ u"LuminaSttUiTranscribing"_q, u"Transcrevendo…"_q },
+		{ u"LuminaSttUiTranslation"_q, u"Tradução"_q },
+		{ u"LuminaSttUiError"_q, u"Falha na transcrição"_q },
+		{ u"LuminaSttUiNoText"_q, u"Nenhuma fala detectada"_q },
+		{ u"LuminaSttUiNoKey"_q, u"Nenhuma chave de API definida. Adicione uma em "
+			u"Configurações, LuminaGram, Voz para texto."_q },
+		{ u"LuminaSttUiTooLarge"_q, u"Esta mensagem de voz é grande demais para o mecanismo "
+			u"selecionado."_q },
+		{ u"LuminaSttUiRoundUnsupported"_q, u"O Google Speech não lê mensagens de vídeo. Escolha o "
+			u"Whisper para vídeos redondos."_q },
+		{ u"LuminaSttAutoTranslate"_q, u"Traduzir depois de transcrever"_q },
+		{ u"LuminaSttAutoTranslateInfo"_q, u"Quando uma mensagem de voz é transcrita em um idioma que "
+			u"você não lê, o LuminaGram traduz na hora e mostra "
+			u"primeiro a transcrição e depois a tradução. Se a "
+			u"transcrição já estiver no seu idioma de leitura, nada é "
+			u"traduzido e nenhuma cota é gasta, e se a tradução falhar "
+			u"a transcrição continua na tela."_q },
 	};
 }
 

@@ -736,6 +736,40 @@ namespace {
 		{ u"LuminaStoriesHidePostEntry"_q, u"同时隐藏发布入口"_q },
 		{ u"LuminaStoriesHidePostEntryInfo"_q, u"隐藏聊天列表与个人"
 			u"资料页上用来发布自己动态的相机按钮。"_q },
+
+		// Voice to text (F-32), keys shared with Android's
+		// LuminaLocale / LuminaVoiceToTextActivity.
+		{ u"LuminaVoiceToTextTitle"_q, u"语音转文字"_q },
+		{ u"LuminaSttEnable"_q, u"启用语音转文字"_q },
+		{ u"LuminaSttEngine"_q, u"引擎"_q },
+		{ u"LuminaSttEngineWhisper"_q, u"OpenAI Whisper（自带 key）"_q },
+		{ u"LuminaSttEngineGoogle"_q, u"Google（自带 key）"_q },
+		{ u"LuminaSttKey"_q, u"API 密钥"_q },
+		{ u"LuminaSttBaseUrl"_q, u"接口地址"_q },
+		{ u"LuminaSttModel"_q, u"模型"_q },
+		{ u"LuminaSttInfoDesktop"_q, u"转录用的是你自己的 API key、花你自己的额度，"
+			u"LuminaGram 不提供 key。语音文件会上传"
+			u"到你选的服务，因此只有在你愿意把消息交给该服务时才开"
+			u"启。"_q },
+		{ u"LuminaSttVoskUnsupported"_q, u"离线引擎（Vosk）桌面版尚未支持：它需要在 Windows"
+			u"、macOS、Linux 各自打包原生库与语音模型。"
+			u"在那之前，桌面版的转录只有云端引擎。"_q },
+		{ u"LuminaSttUiMenuItem"_q, u"转文字"_q },
+		{ u"LuminaSttUiPickTitle"_q, u"语音转文字"_q },
+		{ u"LuminaSttUiFetching"_q, u"正在下载语音消息…"_q },
+		{ u"LuminaSttUiTranscribing"_q, u"转录中…"_q },
+		{ u"LuminaSttUiTranslation"_q, u"译文"_q },
+		{ u"LuminaSttUiError"_q, u"转录失败"_q },
+		{ u"LuminaSttUiNoText"_q, u"没听出文字"_q },
+		{ u"LuminaSttUiNoKey"_q, u"尚未设置 API 密钥。请到“设置、LuminaGram"
+			u"、语音转文字”填入。"_q },
+		{ u"LuminaSttUiTooLarge"_q, u"这条语音消息超过所选引擎的大小上限。"_q },
+		{ u"LuminaSttUiRoundUnsupported"_q, u"Google Speech 无法读取视频消息。圆形视"
+			u"频请改用 Whisper。"_q },
+		{ u"LuminaSttAutoTranslate"_q, u"转完自动翻译"_q },
+		{ u"LuminaSttAutoTranslateInfo"_q, u"语音转出的文字如果不是你的阅读语言，会自动接着翻译，"
+			u"先显示转录原文，再显示译文。转录语言和阅读语言相同就"
+			u"直接跳过，不浪费额度；翻译失败时仍会保留转录原文。"_q },
 	};
 }
 

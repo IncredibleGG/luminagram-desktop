@@ -585,6 +585,42 @@ namespace {
 		{ u"LuminaStoriesFullyOffInfo"_q, u"يزيل القصص من التطبيق بالكامل: الشريط أعلى قائمة المحادثات والشريط في الأرشيف، والحلقات الملوّنة حول الصور الرمزية، وقسم القصص وتبويب القصص في الملفات الشخصية، وإشعارات القصص. لا يتغيّر أي شيء على خوادم تيليجرام — قصصك وقصص الآخرين تبقى كما هي، لكنها لا تُعرض هنا."_q },
 		{ u"LuminaStoriesHidePostEntry"_q, u"إخفاء زر النشر أيضًا"_q },
 		{ u"LuminaStoriesHidePostEntryInfo"_q, u"يخفي زر الكاميرا المستخدم لنشر قصتك في قائمة المحادثات وفي الملفات الشخصية."_q },
+
+		// Voice to text (F-32), keys shared with Android's
+		// LuminaLocale / LuminaVoiceToTextActivity.
+		{ u"LuminaVoiceToTextTitle"_q, u"تحويل الصوت إلى نص"_q },
+		{ u"LuminaSttEnable"_q, u"تفعيل تحويل الصوت إلى نص"_q },
+		{ u"LuminaSttEngine"_q, u"المحرّك"_q },
+		{ u"LuminaSttEngineWhisper"_q, u"OpenAI Whisper (مفتاحك الخاص)"_q },
+		{ u"LuminaSttEngineGoogle"_q, u"Google (مفتاحك الخاص)"_q },
+		{ u"LuminaSttKey"_q, u"مفتاح API"_q },
+		{ u"LuminaSttBaseUrl"_q, u"عنوان الواجهة"_q },
+		{ u"LuminaSttModel"_q, u"النموذج"_q },
+		{ u"LuminaSttInfoDesktop"_q, u"يعمل التفريغ بمفتاح API الخاص بك ومن حصتك أنت، ولا يوفّر "
+			u"LuminaGram أي مفتاح. يُرفع المقطع الصوتي إلى الخدمة التي "
+			u"تختارها أدناه، فلا تفعّل هذا إلا لخدمة تقبل إرسال رسائلك "
+			u"إليها."_q },
+		{ u"LuminaSttVoskUnsupported"_q, u"المحرّك دون اتصال (Vosk) غير مدعوم بعد على سطح المكتب: "
+			u"فهو يحتاج مكتبة أصلية ونموذجًا صوتيًا يُحزم لكل من "
+			u"Windows وmacOS وLinux على حدة. حتى ذلك الحين، التفريغ هنا "
+			u"سحابي فقط."_q },
+		{ u"LuminaSttUiMenuItem"_q, u"تحويل إلى نص"_q },
+		{ u"LuminaSttUiPickTitle"_q, u"تحويل الصوت إلى نص"_q },
+		{ u"LuminaSttUiFetching"_q, u"جارٍ تنزيل الرسالة الصوتية…"_q },
+		{ u"LuminaSttUiTranscribing"_q, u"جارٍ التحويل…"_q },
+		{ u"LuminaSttUiTranslation"_q, u"الترجمة"_q },
+		{ u"LuminaSttUiError"_q, u"فشل التحويل"_q },
+		{ u"LuminaSttUiNoText"_q, u"لم يُكتشف أي كلام"_q },
+		{ u"LuminaSttUiNoKey"_q, u"لم يُضبط مفتاح API. أضفه من الإعدادات ثم LuminaGram ثم "
+			u"تحويل الصوت إلى نص."_q },
+		{ u"LuminaSttUiTooLarge"_q, u"هذه الرسالة الصوتية أكبر ممّا يقبله المحرّك المختار."_q },
+		{ u"LuminaSttUiRoundUnsupported"_q, u"لا يستطيع Google Speech قراءة رسائل الفيديو. اختر Whisper "
+			u"للفيديو الدائري."_q },
+		{ u"LuminaSttAutoTranslate"_q, u"الترجمة بعد التفريغ"_q },
+		{ u"LuminaSttAutoTranslateInfo"_q, u"عندما يُفرّغ مقطع صوتي إلى لغة لا تقرأها، يترجمه "
+			u"LuminaGram فورًا ويعرض النص المفرّغ أولًا ثم الترجمة. لا "
+			u"تُجرى أي ترجمة إذا كان النص بلغة القراءة لديك، وإذا فشلت "
+			u"الترجمة يبقى النص المفرّغ ظاهرًا."_q },
 	};
 }
 

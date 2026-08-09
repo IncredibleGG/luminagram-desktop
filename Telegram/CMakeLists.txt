@@ -1800,6 +1800,8 @@ PRIVATE
     settings/sections/settings_lumina_tools.h
     settings/sections/settings_lumina_translate.cpp
     settings/sections/settings_lumina_translate.h
+    settings/sections/settings_lumina_voice.cpp
+    settings/sections/settings_lumina_voice.h
     lumina/lumina_ai_editor.cpp
     lumina/lumina_ai_editor.h
     lumina/lumina_backup.cpp
@@ -1955,6 +1957,8 @@ PRIVATE
     lumina/lumina_time_format.h
     lumina/lumina_time_format_settings.cpp
     lumina/lumina_time_format_settings.h
+    lumina/lumina_transcribers.cpp
+    lumina/lumina_transcribers.h
     lumina/lumina_translate_caption.cpp
     lumina/lumina_translate_caption.h
     lumina/lumina_translate_gating.cpp
@@ -1995,6 +1999,8 @@ PRIVATE
     lumina/lumina_voice_confirm.h
     lumina/lumina_voice_confirm_settings.cpp
     lumina/lumina_voice_confirm_settings.h
+    lumina/lumina_voice_to_text.cpp
+    lumina/lumina_voice_to_text.h
     settings/sections/settings_folders.cpp
     settings/sections/settings_folders.h
     settings/sections/settings_global_ttl.cpp

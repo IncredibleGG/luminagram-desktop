@@ -572,6 +572,43 @@ namespace {
 		{ u"LuminaStoriesFullyOffInfo"_q, u"استوری‌ها را از کل برنامه حذف می‌کند: نوار بالای فهرست گفتگوها و نوار داخل بایگانی، حلقه‌های رنگی دور تصاویر پروفایل، بخش استوری و زبانهٔ «استوری» در نمایه‌ها، و اعلان‌های استوری. هیچ چیزی روی سرورهای تلگرام تغییر نمی‌کند — استوری‌های شما و دیگران دست‌نخورده می‌مانند و فقط اینجا نمایش داده نمی‌شوند."_q },
 		{ u"LuminaStoriesHidePostEntry"_q, u"دکمهٔ انتشار هم پنهان شود"_q },
 		{ u"LuminaStoriesHidePostEntryInfo"_q, u"دکمهٔ دوربین برای انتشار استوری خودتان را در فهرست گفتگوها و نمایه‌ها پنهان می‌کند."_q },
+
+		// Voice to text (F-32), keys shared with Android's
+		// LuminaLocale / LuminaVoiceToTextActivity.
+		{ u"LuminaVoiceToTextTitle"_q, u"تبدیل گفتار به متن"_q },
+		{ u"LuminaSttEnable"_q, u"فعال‌سازی تبدیل گفتار به متن"_q },
+		{ u"LuminaSttEngine"_q, u"موتور"_q },
+		{ u"LuminaSttEngineWhisper"_q, u"OpenAI Whisper (کلید خودتان)"_q },
+		{ u"LuminaSttEngineGoogle"_q, u"Google (کلید خودتان)"_q },
+		{ u"LuminaSttKey"_q, u"کلید API"_q },
+		{ u"LuminaSttBaseUrl"_q, u"آدرس پایه"_q },
+		{ u"LuminaSttModel"_q, u"مدل"_q },
+		{ u"LuminaSttInfoDesktop"_q, u"رونویسی با کلید API و سهمیهٔ خود شما انجام می‌شود و "
+			u"LuminaGram هیچ کلیدی ارائه نمی‌دهد. پیام صوتی به سرویسی "
+			u"که در پایین انتخاب می‌کنید آپلود می‌شود؛ پس فقط برای "
+			u"سرویسی روشن کنید که به آن اعتماد دارید."_q },
+		{ u"LuminaSttVoskUnsupported"_q, u"موتور آفلاین (Vosk) هنوز در نسخهٔ دسکتاپ پشتیبانی "
+			u"نمی‌شود: به یک کتابخانهٔ بومی و یک مدل گفتاری نیاز دارد "
+			u"که باید جداگانه برای Windows، macOS و Linux بسته‌بندی "
+			u"شود. تا آن زمان، رونویسی اینجا فقط ابری است."_q },
+		{ u"LuminaSttUiMenuItem"_q, u"به متن"_q },
+		{ u"LuminaSttUiPickTitle"_q, u"تبدیل گفتار به متن"_q },
+		{ u"LuminaSttUiFetching"_q, u"در حال دانلود پیام صوتی…"_q },
+		{ u"LuminaSttUiTranscribing"_q, u"در حال رونویسی…"_q },
+		{ u"LuminaSttUiTranslation"_q, u"ترجمه"_q },
+		{ u"LuminaSttUiError"_q, u"رونویسی ناموفق بود"_q },
+		{ u"LuminaSttUiNoText"_q, u"گفتاری تشخیص داده نشد"_q },
+		{ u"LuminaSttUiNoKey"_q, u"کلید API تنظیم نشده است. آن را از تنظیمات، LuminaGram، "
+			u"تبدیل گفتار به متن اضافه کنید."_q },
+		{ u"LuminaSttUiTooLarge"_q, u"این پیام صوتی برای موتور انتخاب‌شده بزرگ است."_q },
+		{ u"LuminaSttUiRoundUnsupported"_q, u"Google Speech نمی‌تواند پیام‌های ویدئویی را بخواند. برای "
+			u"ویدئوی دایره‌ای Whisper را انتخاب کنید."_q },
+		{ u"LuminaSttAutoTranslate"_q, u"ترجمه پس از پیاده‌سازی"_q },
+		{ u"LuminaSttAutoTranslateInfo"_q, u"اگر متن پیاده‌شدهٔ پیام صوتی به زبانی باشد که نمی‌خوانید، "
+			u"LuminaGram بی‌درنگ آن را ترجمه می‌کند و ابتدا متن اصلی و "
+			u"سپس ترجمه را نشان می‌دهد. اگر زبان متن همان زبان خواندن "
+			u"شما باشد ترجمه انجام نمی‌شود و سهمیه هدر نمی‌رود؛ اگر "
+			u"ترجمه شکست بخورد، متن اصلی باقی می‌ماند."_q },
 	};
 }
 

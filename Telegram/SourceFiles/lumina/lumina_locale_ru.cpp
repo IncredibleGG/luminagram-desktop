@@ -947,6 +947,45 @@ namespace {
 		{ u"LuminaStoriesHidePostEntryInfo"_q, u"Скрывает кнопку камеры "
 			u"для публикации своей истории в списке чатов "
 			u"и в профилях."_q },
+
+		// Voice to text (F-32), keys shared with Android's
+		// LuminaLocale / LuminaVoiceToTextActivity.
+		{ u"LuminaVoiceToTextTitle"_q, u"Голос в текст"_q },
+		{ u"LuminaSttEnable"_q, u"Включить голос в текст"_q },
+		{ u"LuminaSttEngine"_q, u"Движок"_q },
+		{ u"LuminaSttEngineWhisper"_q, u"OpenAI Whisper (свой ключ)"_q },
+		{ u"LuminaSttEngineGoogle"_q, u"Google (свой ключ)"_q },
+		{ u"LuminaSttKey"_q, u"Ключ API"_q },
+		{ u"LuminaSttBaseUrl"_q, u"Базовый URL"_q },
+		{ u"LuminaSttModel"_q, u"Модель"_q },
+		{ u"LuminaSttInfoDesktop"_q, u"Расшифровка работает на вашем собственном ключе API и "
+			u"вашей квоте - LuminaGram не предоставляет ключ. Голосовое "
+			u"сообщение загружается в выбранный сервис, поэтому "
+			u"включайте это только для сервиса, которому готовы "
+			u"доверить свои сообщения."_q },
+		{ u"LuminaSttVoskUnsupported"_q, u"Офлайн-движок (Vosk) пока не поддерживается в десктопной "
+			u"версии: ему нужна нативная библиотека и голосовая модель, "
+			u"собранные отдельно для Windows, macOS и Linux. До тех пор "
+			u"расшифровка здесь только облачная."_q },
+		{ u"LuminaSttUiMenuItem"_q, u"В текст"_q },
+		{ u"LuminaSttUiPickTitle"_q, u"Голос в текст"_q },
+		{ u"LuminaSttUiFetching"_q, u"Загрузка голосового сообщения…"_q },
+		{ u"LuminaSttUiTranscribing"_q, u"Распознавание…"_q },
+		{ u"LuminaSttUiTranslation"_q, u"Перевод"_q },
+		{ u"LuminaSttUiError"_q, u"Не удалось распознать"_q },
+		{ u"LuminaSttUiNoText"_q, u"Речь не распознана"_q },
+		{ u"LuminaSttUiNoKey"_q, u"Ключ API не задан. Добавьте его в Настройках, LuminaGram, "
+			u"Голос в текст."_q },
+		{ u"LuminaSttUiTooLarge"_q, u"Это голосовое сообщение слишком большое для выбранного "
+			u"движка."_q },
+		{ u"LuminaSttUiRoundUnsupported"_q, u"Google Speech не читает видеосообщения. Для круглых видео "
+			u"выберите Whisper."_q },
+		{ u"LuminaSttAutoTranslate"_q, u"Переводить после расшифровки"_q },
+		{ u"LuminaSttAutoTranslateInfo"_q, u"Если расшифровка оказалась не на языке чтения, LuminaGram "
+			u"сразу переведёт её и покажет сначала расшифровку, затем "
+			u"перевод. Когда язык совпадает с языком чтения, перевод "
+			u"пропускается и квота не тратится, а при ошибке перевода "
+			u"расшифровка всё равно остаётся на экране."_q },
 	};
 }
 

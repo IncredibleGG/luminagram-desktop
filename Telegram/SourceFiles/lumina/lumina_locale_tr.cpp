@@ -586,6 +586,43 @@ namespace {
 		{ u"LuminaStoriesFullyOffInfo"_q, u"Hikâyeleri uygulamanın tamamından kaldırır: sohbet listesinin üstündeki şerit ve arşivdeki şerit, profil fotoğraflarındaki renkli halkalar, profillerdeki hikâye bölümü ile Hikâyeler sekmesi ve hikâye bildirimleri. Telegram sunucularında hiçbir şey değişmez — sizin ve başkalarının hikâyeleri olduğu gibi kalır, yalnızca burada gösterilmez."_q },
 		{ u"LuminaStoriesHidePostEntry"_q, u"Paylaşma düğmesini de gizle"_q },
 		{ u"LuminaStoriesHidePostEntryInfo"_q, u"Sohbet listesinde ve profillerde kendi hikâyenizi paylaşmak için kullanılan kamera düğmesini gizler."_q },
+
+		// Voice to text (F-32), keys shared with Android's
+		// LuminaLocale / LuminaVoiceToTextActivity.
+		{ u"LuminaVoiceToTextTitle"_q, u"Sesi Yazıya Dönüştür"_q },
+		{ u"LuminaSttEnable"_q, u"Sesi yazıya dönüştürmeyi etkinleştir"_q },
+		{ u"LuminaSttEngine"_q, u"Motor"_q },
+		{ u"LuminaSttEngineWhisper"_q, u"OpenAI Whisper (kendi anahtarın)"_q },
+		{ u"LuminaSttEngineGoogle"_q, u"Google (kendi anahtarın)"_q },
+		{ u"LuminaSttKey"_q, u"API anahtarı"_q },
+		{ u"LuminaSttBaseUrl"_q, u"Temel URL"_q },
+		{ u"LuminaSttModel"_q, u"Model"_q },
+		{ u"LuminaSttInfoDesktop"_q, u"Dönüştürme kendi API anahtarını ve kendi kotanı kullanır; "
+			u"LuminaGram anahtar sağlamaz. Sesli mesaj aşağıda seçtiğin "
+			u"servise yüklenir, bu yüzden bunu yalnızca mesajlarını "
+			u"göndermeye razı olduğun bir servis için aç."_q },
+		{ u"LuminaSttVoskUnsupported"_q, u"Çevrimdışı motor (Vosk) masaüstünde henüz desteklenmiyor: "
+			u"Windows, macOS ve Linux için ayrı ayrı paketlenmiş yerel "
+			u"bir kitaplık ve ses modeli gerekiyor. O zamana kadar "
+			u"masaüstünde dönüştürme yalnızca bulut üzerinden çalışır."_q },
+		{ u"LuminaSttUiMenuItem"_q, u"Yazıya dönüştür"_q },
+		{ u"LuminaSttUiPickTitle"_q, u"Sesi yazıya dönüştür"_q },
+		{ u"LuminaSttUiFetching"_q, u"Sesli mesaj indiriliyor…"_q },
+		{ u"LuminaSttUiTranscribing"_q, u"Dönüştürülüyor…"_q },
+		{ u"LuminaSttUiTranslation"_q, u"Çeviri"_q },
+		{ u"LuminaSttUiError"_q, u"Dönüştürme başarısız"_q },
+		{ u"LuminaSttUiNoText"_q, u"Konuşma algılanmadı"_q },
+		{ u"LuminaSttUiNoKey"_q, u"API anahtarı ayarlanmamış. Ayarlar, LuminaGram, Sesi "
+			u"Yazıya Dönüştür bölümünden ekle."_q },
+		{ u"LuminaSttUiTooLarge"_q, u"Bu sesli mesaj seçilen motor için çok büyük."_q },
+		{ u"LuminaSttUiRoundUnsupported"_q, u"Google Speech video mesajlarını okuyamaz. Yuvarlak "
+			u"videolar için Whisper'ı seç."_q },
+		{ u"LuminaSttAutoTranslate"_q, u"Yazıya döktükten sonra çevir"_q },
+		{ u"LuminaSttAutoTranslateInfo"_q, u"Bir sesli mesaj okumadığın bir dile dönüştürülürse "
+			u"LuminaGram bunu hemen çevirir ve önce metni, ardından "
+			u"çeviriyi gösterir. Metin zaten okuma dilindeyse çeviri "
+			u"yapılmaz ve kota harcanmaz; çeviri başarısız olursa metin "
+			u"yine de ekranda kalır."_q },
 	};
 }
 

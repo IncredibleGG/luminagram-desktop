@@ -429,14 +429,12 @@ jobs:
         # script's SignTool=sha256 needs a code signing certificate we do not
         # have, so it is compiled out here and only here.
         run: |
-          "%ISCC%" ^
-          /dMyAppVersion=%LG_APP_VERSION% ^
-          /dMyAppVersionZero=%LG_APP_VERSION_ZERO% ^
-          /dMyAppVersionFull=%LG_APP_VERSION_FULL% ^
-          "/dReleasePath=%RELEASE_PATH%" ^
-          "/dMyBuildTarget=%BUILD_TARGET%" ^
-          /dSKIP_SIGN ^
-          "%TBUILD%\%REPO_NAME%\Telegram\build\setup.iss"
+          rem One line on purpose. The ^-continued form silently broke here: cmd
+          rem ended the command after the first quoted /d argument, so ISCC ran
+          rem without the script path and the next line was executed as its own
+          rem command. Nothing about that is worth debugging - the whole call is
+          rem ~300 characters, far under cmd's 8191 limit.
+          "%ISCC%" /dMyAppVersion=%LG_APP_VERSION% /dMyAppVersionZero=%LG_APP_VERSION_ZERO% /dMyAppVersionFull=%LG_APP_VERSION_FULL% "/dReleasePath=%RELEASE_PATH%" "/dMyBuildTarget=%BUILD_TARGET%" /dSKIP_SIGN "%TBUILD%\%REPO_NAME%\Telegram\build\setup.iss"
           if errorlevel 1 exit /b 1
 
           if not exist "%RELEASE_PATH%\%LG_SETUP_FILE%" (

@@ -269,6 +269,38 @@ jobs:
             echo "::warning::${BUNDLE_NAME} is ${KB} KB - at or over the 1 GB limit UnpackUpdate() enforces, so this cannot be published as an update."
           fi
 
+      - name: Strip the symbols.
+        if: env.ONLY_CACHE == 'false'
+        # 1.5 GB of the bundle is debug symbols pulled in from the static
+        # libraries. Nothing consumes them: there is no symbol server, and a
+        # breakpad minidump is symbolised from a .sym file rather than from the
+        # shipped binary. They also put the bundle over the 1 GB ceiling that
+        # UnpackUpdate() enforces on the uncompressed payload, so a macOS
+        # update package built from an unstripped bundle is rejected on arrival
+        # and macOS silently never updates.
+        #
+        # strip invalidates the ad-hoc signature the linker applies, and an
+        # arm64 binary with a broken signature is killed on launch rather than
+        # merely warned about - so re-sign, and verify before shipping it.
+        run: |
+          set -e
+          cd "$RELEASE_PATH"
+          before=$(du -sm LuminaGram.app | cut -f1)
+          find LuminaGram.app -type f -perm +111 -print0 |
+            while IFS= read -r -d '' binary; do
+              if file -b "$binary" | grep -q 'Mach-O'; then
+                strip -S -x "$binary" || true
+              fi
+            done
+          codesign --force --deep --sign - LuminaGram.app
+          codesign --verify --deep --strict LuminaGram.app
+          after=$(du -sm LuminaGram.app | cut -f1)
+          echo "bundle ${before} MB -> ${after} MB"
+          if [ "$after" -ge 1000 ]; then
+            echo "Still at or over the 1 GB update ceiling - packages would be rejected."
+            exit 1
+          fi
+
       - name: Package the bundle.
         if: env.ONLY_CACHE == 'false'
         # Zipped inside the job rather than handed to upload-artifact as loose

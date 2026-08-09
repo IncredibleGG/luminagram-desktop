@@ -310,6 +310,19 @@ jobs:
             echo "::warning::the two binaries total ${BYTES} bytes - at or over the 1 GB limit UnpackUpdate() enforces, so this cannot be published as an update."
           fi
 
+      - name: Strip the symbols.
+        if: env.ONLY_CACHE == 'false'
+        # Same reasoning as the macOS job: the symbols are dead weight nobody
+        # reads back, and here they are most of the download. This build stays
+        # under the 1 GB update ceiling either way, so the win is bandwidth.
+        run: |
+          set -e
+          cd "$RELEASE_PATH"
+          before=$(du -sm "$BINARY_NAME" Updater | awk '{t+=$1} END {print t}')
+          strip --strip-all "$BINARY_NAME" Updater
+          after=$(du -sm "$BINARY_NAME" Updater | awk '{t+=$1} END {print t}')
+          echo "binaries ${before} MB -> ${after} MB"
+
       - name: Package the binaries.
         if: env.ONLY_CACHE == 'false'
         # Zipped inside the job rather than handed to upload-artifact as loose

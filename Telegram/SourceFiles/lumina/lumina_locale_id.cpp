@@ -661,6 +661,13 @@ namespace {
 			u"biaya verifikasi, atau meminta kode — sebuah pengingat sekali "
 			u"muncul agar Anda berhati-hati. Pesan tidak pernah diblokir atau "
 			u"diubah. Pemeriksaan berjalan luring di perangkat Anda."_q },
+		// otp guard
+		{ u"LuminaOtpGuardTitle"_q, u"Peringatan"_q },
+		{ u"LuminaOtpGuardMessage"_q, u"Anda akan mengirim kode masuk Telegram Anda kepada orang lain. Siapa pun yang menerimanya bisa masuk ke akun Anda dan membaca semua pesan Anda. Telegram tidak pernah meminta kode ini."_q },
+		{ u"LuminaOtpGuardCancel"_q, u"Jangan kirim"_q },
+		{ u"LuminaOtpGuardSendAnyway"_q, u"Saya paham risikonya, tetap kirim"_q },
+		{ u"LuminaOtpGuard"_q, u"Perlindungan kode masuk"_q },
+		{ u"LuminaOtpGuardInfo"_q, u"Memperingatkan sebelum Anda mengirim pesan yang berisi kode masuk, jika Telegram baru saja mengirimkannya kepada Anda. Pemeriksaan berjalan sepenuhnya di perangkat Anda: tidak ada yang diunggah, dan pesan Anda tidak pernah diubah."_q },
 		// link preview + voice confirm
 		{ u"LuminaPrivacyDisableLinkPreview"_q, u"Nonaktifkan pratinjau tautan "
 			u"secara bawaan"_q },

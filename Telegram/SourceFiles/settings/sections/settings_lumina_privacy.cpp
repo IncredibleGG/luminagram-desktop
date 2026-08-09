@@ -10,6 +10,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "lumina/lumina_profile_extra_settings.h"
 #include "lumina/lumina_exif_strip_settings.h"
 #include "lumina/lumina_scam_watch_settings.h"
+#include "lumina/lumina_otp_guard_settings.h"
 #include "lumina/lumina_clipboard_guard_settings.h"
 #include "lumina/lumina_link_safety_settings.h"
 #include "lumina/lumina_locale.h"
@@ -61,6 +62,7 @@ void LuminaPrivacy::setupContent(not_null<Ui::VerticalLayout*> container) {
 	Lumina::AddLinkSafetyRows(container, controller());
 	Lumina::AddCryptoGuardRows(container, controller());
 	Lumina::AddScamWarningRows(container, controller());
+	Lumina::AddOtpGuardRows(container, controller());
 	Lumina::AddExifStripRows(container, controller());
 	Lumina::AddProfileExtraRows(container, controller());
 }

@@ -94,10 +94,16 @@ using SendInterceptor = Fn<bool(
 	Api::SendOptions options,
 	Fn<void()> proceed)>;
 
-// Interceptors run in registration order. The registry is append-only and
-// lives for the application lifetime, so register from something that lives at
-// least as long, and resolve per-session state from `history` inside the
-// interceptor rather than capturing it here.
+// Interceptors run in registration order, AFTER the OTP guard, which is a
+// fixed first stage inside InterceptSend() and is deliberately not in this
+// registry - lumina/lumina_otp_guard.h and the comment in InterceptSend()
+// explain why nothing may get in front of it. Whatever is registered here
+// therefore sees a message the user has already been asked about, if asking
+// was warranted.
+//
+// The registry is append-only and lives for the application lifetime, so
+// register from something that lives at least as long, and resolve per-session
+// state from `history` inside the interceptor rather than capturing it here.
 //
 // Not synchronised: register and run on the main thread only, which is where
 // every composer calls InterceptSend() from anyway.

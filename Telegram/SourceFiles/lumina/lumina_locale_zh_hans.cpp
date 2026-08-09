@@ -553,6 +553,13 @@ namespace {
 			u"的消息提到常见诈骗手段（汇款、礼品卡、加密货币“投资”、验证费或索"
 			u"要验证码）时，显示一次性提醒，提醒你保持警惕。消息永远不会被拦截"
 			u"或修改。检查在你的设备上离线运行。"_q },
+		// otp guard
+		{ u"LuminaOtpGuardTitle"_q, u"警告"_q },
+		{ u"LuminaOtpGuardMessage"_q, u"你正要把 Telegram 登录码发给别人。对方拿到这组码，就能登录你的账号，看到你所有的消息。Telegram 官方永远不会跟你要这组码。"_q },
+		{ u"LuminaOtpGuardCancel"_q, u"取消发送"_q },
+		{ u"LuminaOtpGuardSendAnyway"_q, u"我知道风险，仍要发送"_q },
+		{ u"LuminaOtpGuard"_q, u"登录码泄露防护"_q },
+		{ u"LuminaOtpGuardInfo"_q, u"当 Telegram 刚给你发过登录码、而你正要发出含有验证码的消息时，先弹出警告。整个判断都在你的设备上完成，不会上传任何内容，也不会改动你的消息。"_q },
 		// link preview + voice confirm
 		{ u"LuminaPrivacyDisableLinkPreview"_q, u"默认禁用链接预览"_q },
 		{ u"LuminaLinkPreviewInfo"_q, u"你新写的消息会不带链接预览发送，输入框"

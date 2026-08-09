@@ -1887,6 +1887,10 @@ PRIVATE
     lumina/lumina_number_format_settings.h
     lumina/lumina_onboarding.cpp
     lumina/lumina_onboarding.h
+    lumina/lumina_otp_guard.cpp
+    lumina/lumina_otp_guard.h
+    lumina/lumina_otp_guard_settings.cpp
+    lumina/lumina_otp_guard_settings.h
     lumina/lumina_panic_wipe.cpp
     lumina/lumina_panic_wipe.h
     lumina/lumina_panic_wipe_settings.cpp

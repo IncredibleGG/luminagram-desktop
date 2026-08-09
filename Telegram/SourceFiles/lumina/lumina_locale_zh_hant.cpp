@@ -550,6 +550,13 @@ namespace {
 			u"的訊息提到常見詐騙手法（匯款、禮品卡、加密貨幣「投資」、驗證費或"
 			u"索取驗證碼）時，顯示一次性提醒，提醒你保持警覺。訊息永遠不會被攔"
 			u"截或修改。檢查在你的裝置上離線執行。"_q },
+		// otp guard
+		{ u"LuminaOtpGuardTitle"_q, u"警告"_q },
+		{ u"LuminaOtpGuardMessage"_q, u"你正要把 Telegram 登入碼傳給別人。對方拿到這組碼，就能登入你的帳號，看到你所有的訊息。Telegram 官方永遠不會跟你要這組碼。"_q },
+		{ u"LuminaOtpGuardCancel"_q, u"取消傳送"_q },
+		{ u"LuminaOtpGuardSendAnyway"_q, u"我知道風險，仍要傳送"_q },
+		{ u"LuminaOtpGuard"_q, u"登入碼外洩防護"_q },
+		{ u"LuminaOtpGuardInfo"_q, u"當 Telegram 剛寄給你登入碼、而你正要送出含有驗證碼的訊息時，先跳出警告。整個判斷都在你的裝置上完成，不會上傳任何內容，也不會更動你的訊息。"_q },
 		// link preview + voice confirm
 		{ u"LuminaPrivacyDisableLinkPreview"_q, u"預設停用連結預覽"_q },
 		{ u"LuminaLinkPreviewInfo"_q, u"你新寫的訊息會不帶連結預覽傳送，輸入框"

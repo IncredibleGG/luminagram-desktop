@@ -700,6 +700,13 @@ namespace {
 			u"códigos— se muestra un recordatorio único para que tengas "
 			u"cuidado. El mensaje nunca se bloquea ni se modifica. Las "
 			u"comprobaciones se realizan sin conexión en tu dispositivo."_q },
+		// otp guard
+		{ u"LuminaOtpGuardTitle"_q, u"Advertencia"_q },
+		{ u"LuminaOtpGuardMessage"_q, u"Estás a punto de enviar tu código de inicio de sesión de Telegram a otra persona. Quien lo reciba podrá entrar en tu cuenta y leer todos tus mensajes. Telegram nunca te pedirá este código."_q },
+		{ u"LuminaOtpGuardCancel"_q, u"No enviar"_q },
+		{ u"LuminaOtpGuardSendAnyway"_q, u"Entiendo el riesgo, enviar igualmente"_q },
+		{ u"LuminaOtpGuard"_q, u"Protección del código de acceso"_q },
+		{ u"LuminaOtpGuardInfo"_q, u"Te avisa antes de enviar un mensaje que contenga un código de inicio de sesión, si Telegram acaba de enviarte uno. La comprobación se hace por completo en tu dispositivo: no se sube nada y tu mensaje nunca se modifica."_q },
 		// link preview + voice confirm
 		{ u"LuminaPrivacyDisableLinkPreview"_q, u"Desactivar la vista previa "
 			u"de enlaces por defecto"_q },

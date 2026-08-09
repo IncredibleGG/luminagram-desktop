@@ -454,6 +454,13 @@ namespace {
 		{ u"LuminaPrivacyCryptoClipboardGuardInfo"_q, u"Bir mesaja kripto cüzdan adresine benzeyen bir şey yapıştırmadan önce sorar. Panoyu ele geçiren kötü amaçlı yazılımlar, kopyaladığın adresi sen fark etmeden bir dolandırıcının adresiyle değiştirebilir ve yapıştırma, bunu yakalayabileceğin son andır. Denetim bu cihazda yapılır ve hiçbir yere hiçbir şey gönderilmez."_q },
 		{ u"LuminaPrivacyScamKeywordWarning"_q, u"Dolandırıcılık kelime uyarısı"_q },
 		{ u"LuminaPrivacyScamKeywordWarningInfo"_q, u"Kişilerinizde olmayan birinden gelen bir mesaj yaygın dolandırıcılık taktiklerinden söz ettiğinde — para transferi, hediye kartı, kripto “yatırımı”, doğrulama ücreti veya kod isteme — dikkatli olmanız için tek seferlik bir hatırlatma gösterilir. Mesaj asla engellenmez veya değiştirilmez. Kontroller cihazınızda çevrimdışı çalışır."_q },
+		// otp guard
+		{ u"LuminaOtpGuardTitle"_q, u"Uyarı"_q },
+		{ u"LuminaOtpGuardMessage"_q, u"Telegram giriş kodunuzu başka birine göndermek üzeresiniz. Bu kodu alan kişi hesabınıza girip tüm mesajlarınızı okuyabilir. Telegram bu kodu sizden asla istemez."_q },
+		{ u"LuminaOtpGuardCancel"_q, u"Gönderme"_q },
+		{ u"LuminaOtpGuardSendAnyway"_q, u"Riski biliyorum, yine de gönder"_q },
+		{ u"LuminaOtpGuard"_q, u"Giriş kodu koruması"_q },
+		{ u"LuminaOtpGuardInfo"_q, u"Telegram size az önce bir giriş kodu gönderdiyse, kod içeren bir mesajı göndermeden önce sizi uyarır. Kontrol tamamen cihazınızda yapılır, hiçbir şey yüklenmez ve mesajınız asla değiştirilmez."_q },
 		// link preview + voice confirm
 		{ u"LuminaPrivacyDisableLinkPreview"_q, u"Bağlantı önizlemesini varsayılan olarak kapat"_q },
 		{ u"LuminaLinkPreviewInfo"_q, u"Sıfırdan yazdığınız mesajlar bağlantı önizlemesi olmadan gönderilir ve yazma alanı, siz yazarken yapıştırdığınız bir bağlantıyı çözmesini Telegram'dan hiç istemez. Zaten eklenmiş bir önizleme ile düzenlediğiniz bir mesaj olduğu gibi bırakılır. Yine de tek bir mesaja önizleme eklemek için Ayarlar > Klavye kısayolları bölümünde «Bağlantı önizlemesini aç/kapat» işlevine bir tuş atayın ve yazarken bu tuşa basın."_q },

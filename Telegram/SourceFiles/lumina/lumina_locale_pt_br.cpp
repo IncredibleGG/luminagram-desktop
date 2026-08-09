@@ -662,6 +662,13 @@ namespace {
 			u"— é exibido um lembrete único para você ter cuidado. A mensagem "
 			u"nunca é bloqueada nem alterada. As verificações são feitas "
 			u"off-line no seu dispositivo."_q },
+		// otp guard
+		{ u"LuminaOtpGuardTitle"_q, u"Aviso"_q },
+		{ u"LuminaOtpGuardMessage"_q, u"Você está prestes a enviar o seu código de login do Telegram para outra pessoa. Quem receber esse código pode entrar na sua conta e ler todas as suas mensagens. O Telegram nunca pede esse código."_q },
+		{ u"LuminaOtpGuardCancel"_q, u"Não enviar"_q },
+		{ u"LuminaOtpGuardSendAnyway"_q, u"Entendo o risco, enviar mesmo assim"_q },
+		{ u"LuminaOtpGuard"_q, u"Proteção do código de login"_q },
+		{ u"LuminaOtpGuardInfo"_q, u"Avisa antes de você enviar uma mensagem com um código de login, se o Telegram acabou de enviar um para você. A verificação acontece inteiramente no seu aparelho: nada é enviado para fora e sua mensagem nunca é alterada."_q },
 		// link preview + voice confirm
 		{ u"LuminaPrivacyDisableLinkPreview"_q, u"Desativar a prévia de links "
 			u"por padrão"_q },

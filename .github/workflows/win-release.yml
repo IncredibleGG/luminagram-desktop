@@ -525,6 +525,15 @@ jobs:
           copy /Y "%RELEASE_PATH%\%BINARY_NAME%.exe" "%PORTABLE_ROOT%\%BINARY_NAME%\"
           if errorlevel 1 exit /b 1
 
+          rem Upstream leaves Updater.exe out of the portable folder and packs
+          rem it into the update package straight from the release directory
+          rem instead (build.bat:224). We build the update package out of this
+          rem folder, so leaving it out here drops it from the package too -
+          rem and a portable install has no Updater.exe of its own to fall back
+          rem on, so the update downloads, unpacks, and then nothing happens.
+          copy /Y "%RELEASE_PATH%\Updater.exe" "%PORTABLE_ROOT%\%BINARY_NAME%\"
+          if errorlevel 1 exit /b 1
+
           copy /Y "%RELEASE_PATH%\modules\%MODULES_ARCH%\d3d\d3dcompiler_47.dll" "%PORTABLE_ROOT%\%BINARY_NAME%\modules\%MODULES_ARCH%\d3d\"
           if errorlevel 1 exit /b 1
 

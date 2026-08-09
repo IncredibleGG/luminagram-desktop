@@ -1925,6 +1925,8 @@ PRIVATE
     lumina/lumina_select_author.h
     lumina/lumina_send_pipeline.cpp
     lumina/lumina_send_pipeline.h
+    lumina/lumina_session_guard.cpp
+    lumina/lumina_session_guard.h
     lumina/lumina_settings.cpp
     lumina/lumina_settings.h
     lumina/lumina_sticker_save.cpp

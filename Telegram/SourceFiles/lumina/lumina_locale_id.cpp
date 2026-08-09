@@ -793,6 +793,30 @@ namespace {
 		{ u"LuminaSecurityFakeCrashCodeClashInfo"_q, u"Kode ini kini sama dengan kode "
 			u"sandi kunci Anda, jadi tidak akan pernah berfungsi — kode "
 			u"sandi yang membuka aplikasi. Pilih kode lain."_q },
+		// login guard (D-32)
+		{ u"LuminaSessionGuardHeader"_q, u"Penjaga login"_q },
+		{ u"LuminaSessionGuard"_q, u"Peringatan login baru"_q },
+		{ u"LuminaSessionGuardInfo"_q, u"Memeriksa perangkat tertaut saat aplikasi dibuka dan memperingatkan Anda tentang sesi apa pun yang belum Anda setujui. Memindai kode QR login berarti memberi orang lain sesi aktif yang bisa membaca seluruh obrolan Anda. Pemeriksaan dilakukan paling sering setiap 30 menit, memakai API resmi Telegram, dan datanya tidak pernah meninggalkan perangkat Anda."_q },
+		{ u"LuminaSessionGuardCheckNow"_q, u"Periksa perangkat tertaut sekarang"_q },
+		{ u"LuminaSessionGuardNoNew"_q, u"Tidak ada login baru. Semua perangkat tertaut sudah Anda setujui."_q },
+		{ u"LuminaSessionGuardCheckFailed"_q, u"Tidak dapat memeriksa perangkat tertaut. Periksa koneksi Anda dan coba lagi."_q },
+		{ u"LuminaSessionAlertTitle"_q, u"Login baru terdeteksi"_q },
+		{ u"LuminaSessionAlertIntro"_q, u"Sebuah perangkat yang belum Anda setujui masuk ke akun Anda. Jika itu bukan Anda, perangkat itu bisa membaca semua obrolan Anda sekarang."_q },
+		{ u"LuminaSessionAlertDevice"_q, u"Perangkat"_q },
+		{ u"LuminaSessionAlertApp"_q, u"Aplikasi"_q },
+		{ u"LuminaSessionAlertIp"_q, u"Alamat IP"_q },
+		{ u"LuminaSessionAlertLocation"_q, u"Lokasi"_q },
+		{ u"LuminaSessionAlertTime"_q, u"Waktu masuk"_q },
+		{ u"LuminaSessionAlertNotMe"_q, u"Bukan saya — akhiri sekarang"_q },
+		{ u"LuminaSessionAlertItsMe"_q, u"Itu saya"_q },
+		{ u"LuminaSessionTerminated"_q, u"Sesi diakhiri"_q },
+		{ u"LuminaSessionTerminateFailed"_q, u"Tidak dapat mengakhiri sesi itu. Buka Pengaturan → Perangkat dan hapus dari sana."_q },
+		{ u"LuminaSession2FAMessage"_q, u"Perangkat itu telah dikeluarkan. Aktifkan Verifikasi Dua Langkah agar tidak ada yang bisa masuk hanya dengan kode."_q },
+		{ u"LuminaSession2FAButton"_q, u"Atur sekarang"_q },
+		{ u"LuminaSessionLater"_q, u"Nanti"_q },
+		{ u"LuminaSessionQrConfirmTitle"_q, u"Izinkan perangkat baru?"_q },
+		{ u"LuminaSessionQrConfirmMessage"_q, u"Anda akan mengizinkan perangkat baru masuk ke akun Anda. Kecuali Anda sendiri yang duduk di depan komputer itu, siapa pun yang mengendalikannya bisa membaca semua pesan Anda. Jangan pernah memindai kode QR login yang dikirimkan orang lain."_q },
+		{ u"LuminaSessionQrConfirmContinue"_q, u"Saya ada di perangkat itu — lanjutkan"_q },
 	};
 }
 

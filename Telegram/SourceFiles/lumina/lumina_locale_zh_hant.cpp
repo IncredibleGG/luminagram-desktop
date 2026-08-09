@@ -661,6 +661,30 @@ namespace {
 		{ u"LuminaSecurityFakeCrashCodeClashInfo"_q, u"這個密碼現在與你的密碼"
 			u"鎖相同，因此永遠不會觸發——密碼鎖會先把應用程式"
 			u"解鎖。請換一個密碼。"_q },
+		// login guard (D-32)
+		{ u"LuminaSessionGuardHeader"_q, u"登入守衛"_q },
+		{ u"LuminaSessionGuard"_q, u"新登入警示"_q },
+		{ u"LuminaSessionGuardInfo"_q, u"App 啟動時檢查你的已連結裝置，發現你沒確認過的登入就立刻提醒。掃描登入 QR code 等於把一個活躍的登入 session 交給對方，對方就能看到你全部的聊天紀錄。檢查最多每 30 分鐘一次，走 Telegram 官方 API，資料不會離開你的裝置。"_q },
+		{ u"LuminaSessionGuardCheckNow"_q, u"立即檢查登入裝置"_q },
+		{ u"LuminaSessionGuardNoNew"_q, u"沒有新的登入，所有已連結裝置都是你確認過的。"_q },
+		{ u"LuminaSessionGuardCheckFailed"_q, u"無法檢查已連結裝置，請確認網路後再試一次。"_q },
+		{ u"LuminaSessionAlertTitle"_q, u"偵測到新登入"_q },
+		{ u"LuminaSessionAlertIntro"_q, u"有一台你沒確認過的裝置登入了你的帳號。如果不是你本人，對方現在就看得到你全部的聊天紀錄。"_q },
+		{ u"LuminaSessionAlertDevice"_q, u"裝置"_q },
+		{ u"LuminaSessionAlertApp"_q, u"App"_q },
+		{ u"LuminaSessionAlertIp"_q, u"IP 位址"_q },
+		{ u"LuminaSessionAlertLocation"_q, u"位置"_q },
+		{ u"LuminaSessionAlertTime"_q, u"登入時間"_q },
+		{ u"LuminaSessionAlertNotMe"_q, u"不是我 — 立即終止此登入"_q },
+		{ u"LuminaSessionAlertItsMe"_q, u"是我"_q },
+		{ u"LuminaSessionTerminated"_q, u"已終止該登入"_q },
+		{ u"LuminaSessionTerminateFailed"_q, u"無法終止該登入。請到「設定 → 裝置」手動移除。"_q },
+		{ u"LuminaSession2FAMessage"_q, u"該裝置已登出。建議開啟兩步驟驗證，這樣別人光拿到驗證碼也登不進來。"_q },
+		{ u"LuminaSession2FAButton"_q, u"立即設定"_q },
+		{ u"LuminaSessionLater"_q, u"稍後再說"_q },
+		{ u"LuminaSessionQrConfirmTitle"_q, u"要授權新裝置登入嗎？"_q },
+		{ u"LuminaSessionQrConfirmMessage"_q, u"你正在授權一個新裝置登入你的帳號。除非你人就在那台電腦前面，否則對方會看到你全部的訊息。絕對不要掃別人傳給你的登入 QR code。"_q },
+		{ u"LuminaSessionQrConfirmContinue"_q, u"我就在那台裝置前，繼續"_q },
 	};
 }
 

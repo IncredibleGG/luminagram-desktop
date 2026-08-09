@@ -563,6 +563,31 @@ struct Registration {
 		{ u"LuminaSecurityFakeCrashNoCodeInfo"_q, u"No code is set yet, so nothing will happen on the lock screen."_q },
 		{ u"LuminaSecurityFakeCrashNoPasscodeInfo"_q, u"LuminaGram has no passcode lock, so the lock screen never appears and this code is never asked for. Turn on the passcode lock in Privacy and Security first."_q },
 		{ u"LuminaSecurityFakeCrashCodeClashInfo"_q, u"This code is now the same as your passcode lock, so it will never fire - the passcode unlocks the app instead. Choose a different code."_q },
+		// login guard (D-32). Keys and texts are Android's; LuminaSessionQr* has no
+		// caller on desktop - see lumina_session_guard.h.
+		{ u"LuminaSessionGuardHeader"_q, u"Login guard"_q },
+		{ u"LuminaSessionGuard"_q, u"New-login alerts"_q },
+		{ u"LuminaSessionGuardInfo"_q, u"Check your linked devices when the app opens and warn you about any session you have not approved. Scanning a login QR code hands whoever showed it a live session that can read all of your chats. Checks run at most once every 30 minutes, use Telegram's own API and never leave your device."_q },
+		{ u"LuminaSessionGuardCheckNow"_q, u"Check linked devices now"_q },
+		{ u"LuminaSessionGuardNoNew"_q, u"No new logins. Every linked device is one you already approved."_q },
+		{ u"LuminaSessionGuardCheckFailed"_q, u"Could not check your linked devices. Check your connection and try again."_q },
+		{ u"LuminaSessionAlertTitle"_q, u"New login detected"_q },
+		{ u"LuminaSessionAlertIntro"_q, u"A device you have not approved is signed in to your account. If this was not you, it can read all of your chats right now."_q },
+		{ u"LuminaSessionAlertDevice"_q, u"Device"_q },
+		{ u"LuminaSessionAlertApp"_q, u"App"_q },
+		{ u"LuminaSessionAlertIp"_q, u"IP address"_q },
+		{ u"LuminaSessionAlertLocation"_q, u"Location"_q },
+		{ u"LuminaSessionAlertTime"_q, u"Signed in"_q },
+		{ u"LuminaSessionAlertNotMe"_q, u"Not me — terminate now"_q },
+		{ u"LuminaSessionAlertItsMe"_q, u"That was me"_q },
+		{ u"LuminaSessionTerminated"_q, u"Session terminated"_q },
+		{ u"LuminaSessionTerminateFailed"_q, u"Could not terminate that session. Open Settings → Devices and remove it there."_q },
+		{ u"LuminaSession2FAMessage"_q, u"That device has been signed out. Turn on Two-Step Verification so nobody can sign in again with just a code."_q },
+		{ u"LuminaSession2FAButton"_q, u"Set up now"_q },
+		{ u"LuminaSessionLater"_q, u"Later"_q },
+		{ u"LuminaSessionQrConfirmTitle"_q, u"Authorise a new device?"_q },
+		{ u"LuminaSessionQrConfirmMessage"_q, u"You are about to authorise a new device to sign in to your account. Unless you are sitting at that computer yourself, whoever controls it will be able to read all of your messages. Never scan a login QR code that someone sent you."_q },
+		{ u"LuminaSessionQrConfirmContinue"_q, u"I am at that device — continue"_q },
 	};
 	return result;
 }

@@ -9,6 +9,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include "lumina/lumina_panic_wipe_settings.h"
 #include "lumina/lumina_fake_crash_settings.h"
+#include "lumina/lumina_session_guard.h"
 #include "lumina/lumina_vault_settings.h"
 #include "lumina/lumina_locale.h"
 #include "ui/wrap/vertical_layout.h"
@@ -41,11 +42,13 @@ rpl::producer<QString> LuminaSecurity::title() {
 // Planned owners, in the order their rows should appear:
 //   W3-A disguise vault (gate, password door, calculator and notepad decoys);
 //   W3-B panic wipe;
-//   W3-C fake-crash duress unlock.
+//   W3-C fake-crash duress unlock;
+//   D-32 login guard (new-login alerts, ported from Android).
 void LuminaSecurity::setupContent(not_null<Ui::VerticalLayout*> container) {
 	Lumina::AddVaultRows(container, controller());
 	Lumina::AddFakeCrashRows(container, controller());
 	Lumina::AddPanicWipeRows(container, controller());
+	Lumina::AddSessionGuardRows(container, controller());
 }
 
 } // namespace Settings

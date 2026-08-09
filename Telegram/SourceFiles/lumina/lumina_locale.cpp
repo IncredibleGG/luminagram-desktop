@@ -563,6 +563,45 @@ struct Registration {
 		{ u"LuminaSecurityFakeCrashNoCodeInfo"_q, u"No code is set yet, so nothing will happen on the lock screen."_q },
 		{ u"LuminaSecurityFakeCrashNoPasscodeInfo"_q, u"LuminaGram has no passcode lock, so the lock screen never appears and this code is never asked for. Turn on the passcode lock in Privacy and Security first."_q },
 		{ u"LuminaSecurityFakeCrashCodeClashInfo"_q, u"This code is now the same as your passcode lock, so it will never fire - the passcode unlocks the app instead. Choose a different code."_q },
+
+		// Voice to text (F-32), keys shared with Android's
+		// LuminaLocale / LuminaVoiceToTextActivity.
+		{ u"LuminaVoiceToTextTitle"_q, u"Voice to Text"_q },
+		{ u"LuminaSttEnable"_q, u"Enable voice to text"_q },
+		{ u"LuminaSttEngine"_q, u"Engine"_q },
+		{ u"LuminaSttEngineWhisper"_q, u"OpenAI Whisper (your own key)"_q },
+		{ u"LuminaSttEngineGoogle"_q, u"Google (your own key)"_q },
+		{ u"LuminaSttKey"_q, u"API key"_q },
+		{ u"LuminaSttBaseUrl"_q, u"Base URL"_q },
+		{ u"LuminaSttModel"_q, u"Model"_q },
+		{ u"LuminaSttInfoDesktop"_q, u"Transcription runs on your own API key and your own quota "
+			u"- LuminaGram never provides a key. The voice message is "
+			u"uploaded to the service you pick below, so only turn this "
+			u"on for a service you are willing to send your messages "
+			u"to."_q },
+		{ u"LuminaSttVoskUnsupported"_q, u"The offline engine (Vosk) is not supported on desktop "
+			u"yet: it needs a native library and a voice model packaged "
+			u"separately for Windows, macOS and Linux. Until then, "
+			u"transcription on desktop is cloud-only."_q },
+		{ u"LuminaSttUiMenuItem"_q, u"Transcribe"_q },
+		{ u"LuminaSttUiPickTitle"_q, u"Voice to text"_q },
+		{ u"LuminaSttUiFetching"_q, u"Downloading the voice message..."_q },
+		{ u"LuminaSttUiTranscribing"_q, u"Transcribing..."_q },
+		{ u"LuminaSttUiTranslation"_q, u"Translation"_q },
+		{ u"LuminaSttUiError"_q, u"Transcription failed"_q },
+		{ u"LuminaSttUiNoText"_q, u"No speech detected"_q },
+		{ u"LuminaSttUiNoKey"_q, u"No API key set. Add one in Settings, LuminaGram, Voice to "
+			u"Text."_q },
+		{ u"LuminaSttUiTooLarge"_q, u"This voice message is too large for the selected engine."_q },
+		{ u"LuminaSttUiRoundUnsupported"_q, u"Google Speech cannot read video messages. Choose Whisper "
+			u"for round videos."_q },
+		{ u"LuminaSttAutoTranslate"_q, u"Translate after transcribing"_q },
+		{ u"LuminaSttAutoTranslateInfo"_q, u"When a voice message is transcribed into a language you "
+			u"do not read, LuminaGram translates it straight away and "
+			u"shows the transcript first, then the translation. Nothing "
+			u"is translated when the transcript is already in your "
+			u"reading language, so no quota is spent, and a translation "
+			u"that fails still leaves the transcript on screen."_q },
 	};
 	return result;
 }

@@ -835,6 +835,47 @@ namespace {
 			u"código de acceso, así que nunca se activará: el código de "
 			u"acceso desbloquea la aplicación en su lugar. Elige un "
 			u"código diferente."_q },
+
+		// Voice to text (F-32), keys shared with Android's
+		// LuminaLocale / LuminaVoiceToTextActivity.
+		{ u"LuminaVoiceToTextTitle"_q, u"Voz a texto"_q },
+		{ u"LuminaSttEnable"_q, u"Activar voz a texto"_q },
+		{ u"LuminaSttEngine"_q, u"Motor"_q },
+		{ u"LuminaSttEngineWhisper"_q, u"OpenAI Whisper (tu propia clave)"_q },
+		{ u"LuminaSttEngineGoogle"_q, u"Google (tu propia clave)"_q },
+		{ u"LuminaSttKey"_q, u"Clave de API"_q },
+		{ u"LuminaSttBaseUrl"_q, u"URL base"_q },
+		{ u"LuminaSttModel"_q, u"Modelo"_q },
+		{ u"LuminaSttInfoDesktop"_q, u"La transcripción usa tu propia clave de API y tu propia "
+			u"cuota; LuminaGram nunca proporciona una clave. El mensaje "
+			u"de voz se sube al servicio que elijas abajo, así que "
+			u"actívalo solo para un servicio al que estés dispuesto a "
+			u"enviar tus mensajes."_q },
+		{ u"LuminaSttVoskUnsupported"_q, u"El motor sin conexión (Vosk) todavía no está disponible "
+			u"en escritorio: necesita una biblioteca nativa y un modelo "
+			u"de voz empaquetados por separado para Windows, macOS y "
+			u"Linux. Hasta entonces, la transcripción en escritorio es "
+			u"solo en la nube."_q },
+		{ u"LuminaSttUiMenuItem"_q, u"Transcribir"_q },
+		{ u"LuminaSttUiPickTitle"_q, u"Voz a texto"_q },
+		{ u"LuminaSttUiFetching"_q, u"Descargando el mensaje de voz…"_q },
+		{ u"LuminaSttUiTranscribing"_q, u"Transcribiendo…"_q },
+		{ u"LuminaSttUiTranslation"_q, u"Traducción"_q },
+		{ u"LuminaSttUiError"_q, u"Error al transcribir"_q },
+		{ u"LuminaSttUiNoText"_q, u"No se detectó voz"_q },
+		{ u"LuminaSttUiNoKey"_q, u"No hay clave de API. Añádela en Ajustes, LuminaGram, Voz "
+			u"a texto."_q },
+		{ u"LuminaSttUiTooLarge"_q, u"Este mensaje de voz es demasiado grande para el motor "
+			u"seleccionado."_q },
+		{ u"LuminaSttUiRoundUnsupported"_q, u"Google Speech no puede leer mensajes de video. Elige "
+			u"Whisper para los videos redondos."_q },
+		{ u"LuminaSttAutoTranslate"_q, u"Traducir tras transcribir"_q },
+		{ u"LuminaSttAutoTranslateInfo"_q, u"Cuando un mensaje de voz se transcribe a un idioma que no "
+			u"lees, LuminaGram lo traduce enseguida y muestra primero "
+			u"la transcripción y después la traducción. Si la "
+			u"transcripción ya está en tu idioma de lectura no se "
+			u"traduce nada y no se gasta cuota, y si la traducción "
+			u"falla la transcripción sigue en pantalla."_q },
 	};
 }
 

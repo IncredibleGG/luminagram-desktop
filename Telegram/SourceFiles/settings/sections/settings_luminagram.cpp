@@ -17,6 +17,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "settings/sections/settings_lumina_security.h"
 #include "settings/sections/settings_lumina_tools.h"
 #include "settings/sections/settings_lumina_translate.h"
+#include "settings/sections/settings_lumina_voice.h"
 #include "settings/settings_common.h"
 #include "ui/widgets/buttons.h"
 #include "ui/wrap/vertical_layout.h"
@@ -72,6 +73,11 @@ void LuminaGram::setupContent() {
 		Lumina::TrValue(u"LuminaTranslateTitle"_q),
 		st::menuIconTranslate,
 		[=] { showOther(LuminaTranslateId()); });
+	AddSectionRow(
+		content,
+		Lumina::TrValue(u"LuminaVoiceToTextTitle"_q),
+		st::menuIconSoundOn,
+		[=] { showOther(LuminaVoiceId()); });
 	AddSectionRow(
 		content,
 		Lumina::TrValue(u"LuminaPrivacyTitle"_q),

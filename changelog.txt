@@ -1,3 +1,10 @@
+7.0.13 (09.08.26)
+
+- Desktop builds can be updated in place again. The update feed had been left
+  at 7.0.11 and listed Windows on its own, so every client that asked was told
+  it was already current, on every platform. The packages it points at are now
+  built and signed here rather than on a build machine that no longer exists.
+
 7.0.12 (08.08.26)
 
 - The translate button in a chat's title bar now opens the pair of languages

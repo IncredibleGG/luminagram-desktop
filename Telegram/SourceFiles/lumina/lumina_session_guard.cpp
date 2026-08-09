@@ -657,7 +657,9 @@ rpl::producer<bool> SessionGuardEnabledValue() {
 
 void SetupSessionGuard(not_null<Window::SessionController*> controller) {
 	try {
-		GuardFor(&controller->session());
+		// GuardFor is [[nodiscard]] - the guard it returns is owned by the
+		// per-session map, so setup only needs it constructed, not held.
+		[[maybe_unused]] const auto guard = GuardFor(&controller->session());
 	} catch (...) {
 	}
 }

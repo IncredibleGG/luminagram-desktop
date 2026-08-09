@@ -11,6 +11,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "core/file_location.h"
 #include "data/data_document.h"
 #include "data/data_document_media.h"
+#include "data/data_file_origin.h"
 #include "data/data_media_types.h"
 #include "data/data_session.h"
 #include "history/history.h"

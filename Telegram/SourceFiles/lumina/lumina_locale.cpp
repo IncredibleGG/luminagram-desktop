@@ -497,6 +497,13 @@ struct Registration {
 		{ u"LuminaPrivacyCryptoClipboardGuardInfo"_q, u"Ask before pasting what looks like a crypto wallet address into a message. Clipboard-hijacking malware can swap a copied address for a scammer's without you noticing, and the paste is the last moment you can catch it. The check runs on this device and nothing is sent anywhere."_q },
 		{ u"LuminaPrivacyScamKeywordWarning"_q, u"Scam keyword warning"_q },
 		{ u"LuminaPrivacyScamKeywordWarningInfo"_q, u"When a message from someone not in your contacts mentions common scam tactics — money transfers, gift cards, crypto “investments”, verification fees or asking for codes — show a one-time reminder to stay cautious. The message is never blocked or changed. Checks run offline on your device."_q },
+		// otp guard
+		{ u"LuminaOtpGuardTitle"_q, u"Warning"_q },
+		{ u"LuminaOtpGuardMessage"_q, u"You are about to send your Telegram login code to someone else. Whoever receives it can sign in to your account and read all of your messages. Telegram will never ask you for this code."_q },
+		{ u"LuminaOtpGuardCancel"_q, u"Don't send"_q },
+		{ u"LuminaOtpGuardSendAnyway"_q, u"I understand the risk, send anyway"_q },
+		{ u"LuminaOtpGuard"_q, u"Login code protection"_q },
+		{ u"LuminaOtpGuardInfo"_q, u"Warn you before sending a message that contains a login code, if Telegram has just sent you one. The check runs entirely on your device — nothing is uploaded, and your message is never changed."_q },
 		// link preview + voice confirm
 		{ u"LuminaPrivacyDisableLinkPreview"_q, u"Disable link preview by "
 			"default"_q },

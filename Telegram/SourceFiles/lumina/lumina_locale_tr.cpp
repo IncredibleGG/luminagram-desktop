@@ -541,6 +541,13 @@ namespace {
 		{ u"LuminaSessionQrConfirmTitle"_q, u"Yeni cihaza izin verilsin mi?"_q },
 		{ u"LuminaSessionQrConfirmMessage"_q, u"Hesabına giriş yapması için yeni bir cihaza izin vermek üzeresin. O bilgisayarın başında bizzat sen oturmuyorsan, cihazı kontrol eden kişi tüm mesajlarını okuyabilir. Birinin sana gönderdiği giriş QR kodunu asla tarama."_q },
 		{ u"LuminaSessionQrConfirmContinue"_q, u"O cihazın başındayım — devam et"_q },
+
+		// Stories, fully off.
+		{ u"LuminaStoriesHeader"_q, u"Hikâyeler"_q },
+		{ u"LuminaStoriesFullyOff"_q, u"Hikâyeleri tamamen kapat"_q },
+		{ u"LuminaStoriesFullyOffInfo"_q, u"Hikâyeleri uygulamanın tamamından kaldırır: sohbet listesinin üstündeki şerit ve arşivdeki şerit, profil fotoğraflarındaki renkli halkalar, profillerdeki hikâye bölümü ile Hikâyeler sekmesi ve hikâye bildirimleri. Telegram sunucularında hiçbir şey değişmez — sizin ve başkalarının hikâyeleri olduğu gibi kalır, yalnızca burada gösterilmez."_q },
+		{ u"LuminaStoriesHidePostEntry"_q, u"Paylaşma düğmesini de gizle"_q },
+		{ u"LuminaStoriesHidePostEntryInfo"_q, u"Sohbet listesinde ve profillerde kendi hikâyenizi paylaşmak için kullanılan kamera düğmesini gizler."_q },
 	};
 }
 

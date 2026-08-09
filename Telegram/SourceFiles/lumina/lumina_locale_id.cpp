@@ -824,6 +824,20 @@ namespace {
 		{ u"LuminaSessionQrConfirmTitle"_q, u"Izinkan perangkat baru?"_q },
 		{ u"LuminaSessionQrConfirmMessage"_q, u"Anda akan mengizinkan perangkat baru masuk ke akun Anda. Kecuali Anda sendiri yang duduk di depan komputer itu, siapa pun yang mengendalikannya bisa membaca semua pesan Anda. Jangan pernah memindai kode QR login yang dikirimkan orang lain."_q },
 		{ u"LuminaSessionQrConfirmContinue"_q, u"Saya ada di perangkat itu — lanjutkan"_q },
+
+		// Stories, fully off.
+		{ u"LuminaStoriesHeader"_q, u"Cerita"_q },
+		{ u"LuminaStoriesFullyOff"_q, u"Matikan cerita sepenuhnya"_q },
+		{ u"LuminaStoriesFullyOffInfo"_q, u"Menghapus cerita dari seluruh "
+			u"aplikasi: baris di atas daftar obrolan dan baris di Arsip, cincin "
+			u"berwarna pada semua foto profil, blok cerita dan tab Cerita di "
+			u"halaman profil, serta notifikasi cerita. Tidak ada yang diubah di "
+			u"server Telegram — cerita Anda dan cerita orang lain tetap ada, "
+			u"hanya saja tidak lagi ditampilkan di sini."_q },
+		{ u"LuminaStoriesHidePostEntry"_q, u"Sembunyikan juga tombol posting"_q },
+		{ u"LuminaStoriesHidePostEntryInfo"_q, u"Menyembunyikan tombol kamera "
+			u"untuk memposting cerita Anda sendiri, di daftar obrolan dan di "
+			u"halaman profil."_q },
 	};
 }
 

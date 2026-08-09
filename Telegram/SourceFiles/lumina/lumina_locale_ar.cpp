@@ -540,6 +540,13 @@ namespace {
 		{ u"LuminaSessionQrConfirmTitle"_q, u"هل تريد تفويض جهاز جديد؟"_q },
 		{ u"LuminaSessionQrConfirmMessage"_q, u"أنت على وشك السماح لجهاز جديد بتسجيل الدخول إلى حسابك. ما لم تكن جالسًا أمام ذلك الجهاز بنفسك، فسيتمكن من يتحكم به من قراءة كل رسائلك. لا تمسح أبدًا رمز QR أرسله لك شخص ما."_q },
 		{ u"LuminaSessionQrConfirmContinue"_q, u"أنا أمام ذلك الجهاز — متابعة"_q },
+
+		// Stories, fully off.
+		{ u"LuminaStoriesHeader"_q, u"القصص"_q },
+		{ u"LuminaStoriesFullyOff"_q, u"إيقاف القصص تمامًا"_q },
+		{ u"LuminaStoriesFullyOffInfo"_q, u"يزيل القصص من التطبيق بالكامل: الشريط أعلى قائمة المحادثات والشريط في الأرشيف، والحلقات الملوّنة حول الصور الرمزية، وقسم القصص وتبويب القصص في الملفات الشخصية، وإشعارات القصص. لا يتغيّر أي شيء على خوادم تيليجرام — قصصك وقصص الآخرين تبقى كما هي، لكنها لا تُعرض هنا."_q },
+		{ u"LuminaStoriesHidePostEntry"_q, u"إخفاء زر النشر أيضًا"_q },
+		{ u"LuminaStoriesHidePostEntryInfo"_q, u"يخفي زر الكاميرا المستخدم لنشر قصتك في قائمة المحادثات وفي الملفات الشخصية."_q },
 	};
 }
 

@@ -695,6 +695,20 @@ namespace {
 		{ u"LuminaSessionQrConfirmTitle"_q, u"要授权新设备登录吗？"_q },
 		{ u"LuminaSessionQrConfirmMessage"_q, u"你正在授权一台新设备登录你的账号。除非你人就在那台电脑前面，否则对方会看到你全部的消息。不要扫别人发给你的登录二维码。"_q },
 		{ u"LuminaSessionQrConfirmContinue"_q, u"我就在那台设备前，继续"_q },
+
+		// Stories, fully off.
+		{ u"LuminaStoriesHeader"_q, u"限时动态"_q },
+		{ u"LuminaStoriesFullyOff"_q, u"完全关闭限时动态"_q },
+		{ u"LuminaStoriesFullyOffInfo"_q, u"把限时动态从整个 App "
+			u"移除：聊天列表上方那一排、归档里的"
+			u"动态列、所有头像上的彩色圆圈、个人资"
+			u"料页的动态区块与「动态」标签页，以及"
+			u"动态通知。不会更动服务器上的任何设置"
+			u"——你和别人的动态都还在，只是这里不"
+			u"再显示。"_q },
+		{ u"LuminaStoriesHidePostEntry"_q, u"同时隐藏发布入口"_q },
+		{ u"LuminaStoriesHidePostEntryInfo"_q, u"隐藏聊天列表与个人"
+			u"资料页上用来发布自己动态的相机按钮。"_q },
 	};
 }
 

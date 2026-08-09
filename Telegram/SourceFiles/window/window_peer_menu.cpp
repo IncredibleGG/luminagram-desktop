@@ -61,6 +61,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/vertical_list.h"
 #include "ui/controls/feature_list.h"
 #include "ui/ui_utility.h"
+#include "lumina/lumina_stories_off.h"
 #include "lumina/lumina_translate_gating.h"
 #include "lumina/lumina_translate_toggle.h"
 #include "main/main_app_config.h"
@@ -664,6 +665,14 @@ void Filler::addInfo() {
 void Filler::addStoryArchive() {
 	const auto channel = _peer ? _peer->asChannel() : nullptr;
 	if (!channel || !channel->canEditStories()) {
+		return;
+	}
+	// LuminaGram: Android hides the camera button that posts your own story.
+	// Telegram Desktop has no such button - nothing in the tree calls
+	// stories.sendStory - and this entry, offered only where you may post
+	// (canEditStories), is the one posting-side entry it does have: a desktop
+	// user publishes by pushing a story out of that archive onto the page.
+	if (Lumina::StoriesPostEntryHidden()) {
 		return;
 	}
 	const auto controller = _controller;

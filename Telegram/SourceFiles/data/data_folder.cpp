@@ -22,6 +22,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "storage/storage_facade.h"
 #include "core/application.h"
 #include "core/core_settings.h"
+#include "lumina/lumina_stories_off.h"
 #include "main/main_account.h"
 #include "main/main_session.h"
 #include "mtproto/mtproto_config.h"
@@ -336,10 +337,22 @@ void Folder::updateStoriesCount(int count, int unread) {
 }
 
 int Folder::storiesCount() const {
+	// LuminaGram: the archive's story counters are the second choke point, and
+	// everything the archive shows about stories is drawn from them - the ring
+	// on the Archive row's userpic (Dialogs::Row::paintUserpic), its "N stories"
+	// preview text (ComposeFolderListEntryText above, which is Android's
+	// DialogCell story line), and the Archive entry that the main menu keeps
+	// alive for stories alone.
+	if (Lumina::StoriesFullyOff()) {
+		return 0;
+	}
 	return _storiesCount;
 }
 
 int Folder::storiesUnreadCount() const {
+	if (Lumina::StoriesFullyOff()) {
+		return 0;
+	}
 	return _storiesUnreadCount;
 }
 

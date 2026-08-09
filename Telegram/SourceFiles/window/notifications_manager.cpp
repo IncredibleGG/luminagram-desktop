@@ -38,6 +38,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "api/api_reactions_notify_settings.h"
 #include "api/api_updates.h"
 #include "apiwrap.h"
+#include "data/data_media_types.h"
+#include "lumina/lumina_stories_off.h"
 #include "main/main_account.h"
 #include "main/main_domain.h"
 #include "main/main_session.h"
@@ -313,6 +315,18 @@ System::SkipState System::skipNotification(
 	const auto type = notification.type;
 	const auto messageType = (type == Data::ItemNotificationType::Message);
 	const auto thread = item->maybeNotificationThread();
+	const auto media = item->media();
+	if (Lumina::StoriesFullyOff() && media && media->storyMention()) {
+		// LuminaGram: stories are off, so nothing about one is announced.
+		//
+		// This is all of Android's story-notification handling that has an
+		// equivalent here. Desktop has no "X posted a story" push at all - there
+		// is no StoryNotification, nothing in Data::Stories ever schedules one -
+		// and no story-reaction notification type; a story mention arrives as an
+		// ordinary item whose media is a MediaStory in mention mode, and this is
+		// the one gate every notification type passes through.
+		return { SkipState::Skip };
+	}
 	if (!thread
 		|| !thread->currentNotification()
 		|| (messageType && item->skipNotification())

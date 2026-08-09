@@ -692,6 +692,21 @@ namespace {
 		{ u"LuminaSessionQrConfirmTitle"_q, u"要授權新裝置登入嗎？"_q },
 		{ u"LuminaSessionQrConfirmMessage"_q, u"你正在授權一個新裝置登入你的帳號。除非你人就在那台電腦前面，否則對方會看到你全部的訊息。絕對不要掃別人傳給你的登入 QR code。"_q },
 		{ u"LuminaSessionQrConfirmContinue"_q, u"我就在那台裝置前，繼續"_q },
+
+		// Stories, fully off.
+		{ u"LuminaStoriesHeader"_q, u"限時動態"_q },
+		{ u"LuminaStoriesFullyOff"_q, u"完全關閉限時動態"_q },
+		{ u"LuminaStoriesFullyOffInfo"_q, u"把限時動態從整個 App "
+			u"移除：聊天列表上方那一排、封存區裡的"
+			u"限動列、所有頭像上的彩色圓圈、個人檔"
+			u"案頁的限動區塊與「限時動態」分頁，以"
+			u"及限動通知。不會更動伺服器上的任何設"
+			u"定——你和別人的限時動態都還在，只是"
+			u"這裡不再顯示。"_q },
+		{ u"LuminaStoriesHidePostEntry"_q, u"同時隱藏發佈入口"_q },
+		{ u"LuminaStoriesHidePostEntryInfo"_q, u"隱藏聊天列表與個人"
+			u"檔案頁上用來發佈自己限時動態的相機"
+			u"按鈕。"_q },
 	};
 }
 

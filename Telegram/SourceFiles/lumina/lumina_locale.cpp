@@ -595,6 +595,13 @@ struct Registration {
 		{ u"LuminaSessionQrConfirmTitle"_q, u"Authorise a new device?"_q },
 		{ u"LuminaSessionQrConfirmMessage"_q, u"You are about to authorise a new device to sign in to your account. Unless you are sitting at that computer yourself, whoever controls it will be able to read all of your messages. Never scan a login QR code that someone sent you."_q },
 		{ u"LuminaSessionQrConfirmContinue"_q, u"I am at that device — continue"_q },
+
+		// Stories, fully off. Key names and texts are Android's, verbatim.
+		{ u"LuminaStoriesHeader"_q, u"Stories"_q },
+		{ u"LuminaStoriesFullyOff"_q, u"Turn stories off completely"_q },
+		{ u"LuminaStoriesFullyOffInfo"_q, u"Removes stories from the whole app: the row above the chat list and the one in Archive, the colored rings on avatars everywhere, the stories block and Stories tab on profiles, and story notifications. Nothing is changed on Telegram's servers — your stories and everyone else's stay exactly as they are, they are simply never shown here."_q },
+		{ u"LuminaStoriesHidePostEntry"_q, u"Also hide the post button"_q },
+		{ u"LuminaStoriesHidePostEntryInfo"_q, u"Hides the camera button used to post your own story, on the chat list and on profiles."_q },
 	};
 	return result;
 }

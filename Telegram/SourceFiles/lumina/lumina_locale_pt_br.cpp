@@ -825,6 +825,20 @@ namespace {
 		{ u"LuminaSessionQrConfirmTitle"_q, u"Autorizar um novo dispositivo?"_q },
 		{ u"LuminaSessionQrConfirmMessage"_q, u"Você está prestes a autorizar um novo dispositivo a entrar na sua conta. A não ser que você mesmo esteja na frente daquele computador, quem o controla vai conseguir ler todas as suas mensagens. Nunca escaneie um QR code de login que alguém enviou para você."_q },
 		{ u"LuminaSessionQrConfirmContinue"_q, u"Estou nesse dispositivo — continuar"_q },
+
+		// Stories, fully off.
+		{ u"LuminaStoriesHeader"_q, u"Stories"_q },
+		{ u"LuminaStoriesFullyOff"_q, u"Desativar os stories completamente"_q },
+		{ u"LuminaStoriesFullyOffInfo"_q, u"Remove os stories do aplicativo "
+			u"inteiro: a faixa acima da lista de conversas e a do arquivo, os "
+			u"anéis coloridos nas fotos de perfil, o bloco de stories e a aba "
+			u"Stories nos perfis, e as notificações de stories. Nada muda nos "
+			u"servidores do Telegram — os seus stories e os dos outros "
+			u"continuam lá, apenas não são mais exibidos aqui."_q },
+		{ u"LuminaStoriesHidePostEntry"_q, u"Ocultar também o botão de publicar"_q },
+		{ u"LuminaStoriesHidePostEntryInfo"_q, u"Oculta o botão de câmera usado "
+			u"para publicar o seu próprio story, na lista de conversas e nos "
+			u"perfis."_q },
 	};
 }
 

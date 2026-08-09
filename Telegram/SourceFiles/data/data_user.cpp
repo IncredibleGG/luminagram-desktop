@@ -17,6 +17,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "storage/localstorage.h"
 #include "storage/storage_account.h"
 #include "storage/storage_user_photos.h"
+#include "lumina/lumina_stories_off.h"
 #include "main/main_session.h"
 #include "data/business/data_business_common.h"
 #include "data/business/data_business_info.h"
@@ -228,14 +229,40 @@ void UserData::setPrivateForwardName(const QString &name) {
 }
 
 bool UserData::hasActiveStories() const {
+	// LuminaGram: THE choke point for "stories, fully off" (lumina_stories_off.h).
+	//
+	// Android has one StoriesUtilities.drawAvatarWithStory() that every ring in
+	// the app is painted by, so it gates the drawing. Desktop has no such point:
+	// Dialogs::Row::paintUserpic(), Info::Profile::TopBar and the participant /
+	// contact rows in peer_list_controllers.cpp each build their own
+	// Ui::OutlineSegment vector. What they DO share is the question they ask
+	// first, and it lands here - PeerData::hasActiveStories() forwards to this
+	// and to ChannelData::hasActiveStories(), and the two callers that skip
+	// PeerData call those two directly. Answering "no" here takes the ring off
+	// the chat list, off search results, off the profile top bar and off every
+	// member list at once, and it also stops a click on an avatar from opening
+	// the viewer, because that is guarded by the same question.
+	//
+	// Asked once per avatar per repaint, so StoriesFullyOff() is a cached bool.
+	if (Lumina::StoriesFullyOff()) {
+		return false;
+	}
 	return flags() & Flag::HasActiveStories;
 }
 
 bool UserData::hasUnreadStories() const {
+	if (Lumina::StoriesFullyOff()) {
+		return false;
+	}
 	return flags() & Flag::HasUnreadStories;
 }
 
 bool UserData::hasActiveVideoStream() const {
+	// The same state: setStoriesState() below clears this flag together with
+	// the two above, and its only readers are the ring's colours.
+	if (Lumina::StoriesFullyOff()) {
+		return false;
+	}
 	return flags() & Flag::HasActiveVideoStream;
 }
 

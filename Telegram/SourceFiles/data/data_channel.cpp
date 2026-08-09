@@ -27,6 +27,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "data/data_saved_messages.h"
 #include "data/data_wall_paper.h"
 #include "data/notify/data_notify_settings.h"
+#include "lumina/lumina_stories_off.h"
 #include "main/main_session.h"
 #include "main/session/send_as_peers.h"
 #include "base/unixtime.h"
@@ -1215,14 +1216,25 @@ const Data::AllowedReactions &ChannelData::allowedReactions() const {
 }
 
 bool ChannelData::hasActiveStories() const {
+	// LuminaGram: the channel half of the ring choke point. See the long note
+	// on UserData::hasActiveStories() in data/data_user.cpp.
+	if (Lumina::StoriesFullyOff()) {
+		return false;
+	}
 	return flags() & Flag::HasActiveStories;
 }
 
 bool ChannelData::hasUnreadStories() const {
+	if (Lumina::StoriesFullyOff()) {
+		return false;
+	}
 	return flags() & Flag::HasUnreadStories;
 }
 
 bool ChannelData::hasActiveVideoStream() const {
+	if (Lumina::StoriesFullyOff()) {
+		return false;
+	}
 	return flags() & Flag::HasActiveVideoStream;
 }
 

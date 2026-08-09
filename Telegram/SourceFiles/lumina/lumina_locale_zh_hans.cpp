@@ -162,6 +162,33 @@ namespace {
 		{ u"LuminaChatLangMeTitle"_q, u"己方的消息，翻译成"_q },
 		{ u"LuminaChatLangNone"_q, u"不翻译"_q },
 
+		// The chat's tone (register): the third row of the translate menu
+		// and the box it opens. The instruction the engine is actually sent
+		// is written in English and is not one of these strings.
+		{ u"LuminaChatRegister"_q, u"这个对话的语气：{1}"_q },
+		{ u"LuminaChatRegisterOff"_q, u"这个对话的语气：未设定"_q },
+		{ u"LuminaChatRegisterTitle"_q, u"这个对话的语气"_q },
+		{ u"LuminaChatRegisterNone"_q, u"未设定"_q },
+		{ u"LuminaChatRegisterNoneInfo"_q, u"照常翻译，不加任何语气指示。"_q },
+		{ u"LuminaChatRegisterClient"_q, u"客户"_q },
+		{ u"LuminaChatRegisterClientInfo"_q, u"礼貌、专业的商务用语；在有敬语的语言中使用敬语。"_q },
+		{ u"LuminaChatRegisterColleague"_q, u"同事"_q },
+		{ u"LuminaChatRegisterColleagueInfo"_q, u"日常职场用语，客气但不生硬。"_q },
+		{ u"LuminaChatRegisterFriend"_q, u"朋友"_q },
+		{ u"LuminaChatRegisterFriendInfo"_q, u"轻松、口语化，就像跟朋友说话。"_q },
+		{ u"LuminaChatRegisterFamily"_q, u"家人"_q },
+		{ u"LuminaChatRegisterFamilyInfo"_q, u"温暖亲近，像在家里说话的语气。"_q },
+		{ u"LuminaChatRegisterElder"_q, u"长辈"_q },
+		{ u"LuminaChatRegisterElderInfo"_q, u"尊敬有礼，但仍然亲切，不像公事公办。"_q },
+		{ u"LuminaChatRegisterRomance"_q, u"暧昧对象"_q },
+		{ u"LuminaChatRegisterRomanceInfo"_q, u"温柔俏皮，带一点撩人的分寸。"_q },
+		{ u"LuminaChatRegisterCustom"_q, u"自定义…"_q },
+		{ u"LuminaChatRegisterCustomInfo"_q, u"用你自己的话描述这段关系。"_q },
+		{ u"LuminaChatRegisterCustomTitle"_q, u"描述这段关系"_q },
+		{ u"LuminaChatRegisterCustomHint"_q, u"例如：我的指导教授，尊敬但别太生硬"_q },
+		{ u"LuminaChatRegisterUnsupported"_q, u"目前的翻译引擎不支持语气"_q },
+		{ u"LuminaChatRegisterDeepL"_q, u"DeepL 只有正式／非正式，且限部分语言"_q },
+
 		// Names of the languages LuminaGram can translate into, in the order
 		// the pickers show them.
 		{ u"LuminaLangEn"_q, u"英语"_q },

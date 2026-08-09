@@ -143,6 +143,33 @@ namespace {
 		{ u"LuminaChatLangMeTitle"_q, u"己方的訊息，翻譯成"_q },
 		{ u"LuminaChatLangNone"_q, u"不翻譯"_q },
 
+		// The chat's tone (register): the third row of the translate menu
+		// and the box it opens. The instruction the engine is actually sent
+		// is written in English and is not one of these strings.
+		{ u"LuminaChatRegister"_q, u"這個對話的語氣：{1}"_q },
+		{ u"LuminaChatRegisterOff"_q, u"這個對話的語氣：未設定"_q },
+		{ u"LuminaChatRegisterTitle"_q, u"這個對話的語氣"_q },
+		{ u"LuminaChatRegisterNone"_q, u"未設定"_q },
+		{ u"LuminaChatRegisterNoneInfo"_q, u"照常翻譯，不加任何語氣指示。"_q },
+		{ u"LuminaChatRegisterClient"_q, u"客戶"_q },
+		{ u"LuminaChatRegisterClientInfo"_q, u"禮貌、專業的商務用語；在有敬語的語言中使用敬語。"_q },
+		{ u"LuminaChatRegisterColleague"_q, u"同事"_q },
+		{ u"LuminaChatRegisterColleagueInfo"_q, u"日常職場用語，客氣但不生硬。"_q },
+		{ u"LuminaChatRegisterFriend"_q, u"朋友"_q },
+		{ u"LuminaChatRegisterFriendInfo"_q, u"輕鬆、口語化，就像跟朋友說話。"_q },
+		{ u"LuminaChatRegisterFamily"_q, u"家人"_q },
+		{ u"LuminaChatRegisterFamilyInfo"_q, u"溫暖親近，像在家裡說話的語氣。"_q },
+		{ u"LuminaChatRegisterElder"_q, u"長輩"_q },
+		{ u"LuminaChatRegisterElderInfo"_q, u"尊敬有禮，但仍然親切，不像公事公辦。"_q },
+		{ u"LuminaChatRegisterRomance"_q, u"曖昧對象"_q },
+		{ u"LuminaChatRegisterRomanceInfo"_q, u"溫柔俏皮，帶一點撩人的分寸。"_q },
+		{ u"LuminaChatRegisterCustom"_q, u"自訂…"_q },
+		{ u"LuminaChatRegisterCustomInfo"_q, u"用你自己的話描述這段關係。"_q },
+		{ u"LuminaChatRegisterCustomTitle"_q, u"描述這段關係"_q },
+		{ u"LuminaChatRegisterCustomHint"_q, u"例如：我的指導教授，尊敬但別太生硬"_q },
+		{ u"LuminaChatRegisterUnsupported"_q, u"目前的翻譯引擎不支援語氣"_q },
+		{ u"LuminaChatRegisterDeepL"_q, u"DeepL 只有正式／非正式，且限部分語言"_q },
+
 		// Telegram's own AI editor, which carries a Translate tab of its own.
 		{ u"LuminaAiEditorHeader"_q, u"Telegram AI 編輯器"_q },
 		{ u"LuminaAiEditorKeep"_q, u"保留 Telegram 的 AI 編輯器"_q },

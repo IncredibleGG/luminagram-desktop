@@ -204,6 +204,55 @@ struct Registration {
 		{ u"LuminaChatLangMeTitle"_q, u"My messages, translated into"_q },
 		{ u"LuminaChatLangNone"_q, u"Not translated"_q },
 
+		// The third row of that menu, and the box it opens: who this person is
+		// to you, and therefore how a translation of this chat should sound.
+		// The relationship is the one thing neither language can state, and it
+		// is what a translation that is otherwise correct gets wrong first.
+		//
+		// Every entry carries a sentence of its own, because the names alone
+		// do not separate them: "Client" and "Colleague" differ only in what
+		// they do to the translation. The last two strings are the caveats -
+		// what the selected engine can actually honour, said out loud rather
+		// than left to look like it worked.
+		//
+		// The instruction the model is actually sent is NOT here. It is
+		// English on purpose, it is read by the model rather than by the user,
+		// and it lives in lumina/lumina_register.cpp.
+		{ u"LuminaChatRegister"_q, u"Tone: {1}"_q },
+		{ u"LuminaChatRegisterOff"_q, u"Tone: not set"_q },
+		{ u"LuminaChatRegisterTitle"_q, u"Tone for this chat"_q },
+		{ u"LuminaChatRegisterNone"_q, u"Not set"_q },
+		{ u"LuminaChatRegisterNoneInfo"_q, u"Translate as usual, with no tone "
+			"instruction."_q },
+		{ u"LuminaChatRegisterClient"_q, u"Client"_q },
+		{ u"LuminaChatRegisterClientInfo"_q, u"Polite, professional business "
+			"language; formal honorifics where the language has them."_q },
+		{ u"LuminaChatRegisterColleague"_q, u"Colleague"_q },
+		{ u"LuminaChatRegisterColleagueInfo"_q, u"Everyday polite workplace "
+			"language — courteous, but not stiff."_q },
+		{ u"LuminaChatRegisterFriend"_q, u"Friend"_q },
+		{ u"LuminaChatRegisterFriendInfo"_q, u"Casual, informal speech, the "
+			"way you talk to a friend."_q },
+		{ u"LuminaChatRegisterFamily"_q, u"Family"_q },
+		{ u"LuminaChatRegisterFamilyInfo"_q, u"Warm, familiar language of the "
+			"kind used at home."_q },
+		{ u"LuminaChatRegisterElder"_q, u"Elder"_q },
+		{ u"LuminaChatRegisterElderInfo"_q, u"Respectful and deferential, but "
+			"still warm rather than corporate."_q },
+		{ u"LuminaChatRegisterRomance"_q, u"Someone special"_q },
+		{ u"LuminaChatRegisterRomanceInfo"_q, u"Warm and playful, with a light "
+			"flirtatious touch."_q },
+		{ u"LuminaChatRegisterCustom"_q, u"Custom…"_q },
+		{ u"LuminaChatRegisterCustomInfo"_q, u"Describe the relationship in "
+			"your own words."_q },
+		{ u"LuminaChatRegisterCustomTitle"_q, u"Describe this relationship"_q },
+		{ u"LuminaChatRegisterCustomHint"_q, u"e.g. my thesis advisor — "
+			"respectful but not stiff"_q },
+		{ u"LuminaChatRegisterUnsupported"_q, u"The current translation engine "
+			"ignores tone"_q },
+		{ u"LuminaChatRegisterDeepL"_q, u"DeepL: formal/informal only, some "
+			"languages"_q },
+
 		// The tray menu and the taskbar button's jump list. Upstream builds
 		// both from lng_open_from_tray / lng_quit_from_tray, whose text is
 		// "Open Telegram" and "Quit Telegram" in every language Telegram

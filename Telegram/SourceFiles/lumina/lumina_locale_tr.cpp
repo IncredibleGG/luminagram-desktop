@@ -165,6 +165,44 @@ namespace {
 		{ u"LuminaChatLangMeTitle"_q, u"Mesajlarımı şu dile çevir"_q },
 		{ u"LuminaChatLangNone"_q, u"Çevrilmiyor"_q },
 
+		// The chat's tone (register): the third row of the translate menu
+		// and the box it opens. The instruction the engine is actually sent
+		// is written in English and is not one of these strings.
+		{ u"LuminaChatRegister"_q, u"Bu sohbetin üslubu: {1}"_q },
+		{ u"LuminaChatRegisterOff"_q, u"Bu sohbetin üslubu: ayarlanmadı"_q },
+		{ u"LuminaChatRegisterTitle"_q, u"Bu sohbetin üslubu"_q },
+		{ u"LuminaChatRegisterNone"_q, u"Ayarlanmadı"_q },
+		{ u"LuminaChatRegisterNoneInfo"_q, u"Her zamanki gibi çevir, üslup "
+			u"yönergesi ekleme."_q },
+		{ u"LuminaChatRegisterClient"_q, u"Müşteri"_q },
+		{ u"LuminaChatRegisterClientInfo"_q, u"Kibar, profesyonel iş dili; "
+			u"nezaket biçimleri olan dillerde resmi biçim."_q },
+		{ u"LuminaChatRegisterColleague"_q, u"İş arkadaşı"_q },
+		{ u"LuminaChatRegisterColleagueInfo"_q, u"Günlük iş dili — nazik ama "
+			u"resmi değil."_q },
+		{ u"LuminaChatRegisterFriend"_q, u"Arkadaş"_q },
+		{ u"LuminaChatRegisterFriendInfo"_q, u"Senli benli, gündelik konuşma "
+			u"dili."_q },
+		{ u"LuminaChatRegisterFamily"_q, u"Aile"_q },
+		{ u"LuminaChatRegisterFamilyInfo"_q, u"Evde konuşulan sıcak, samimi "
+			u"dil."_q },
+		{ u"LuminaChatRegisterElder"_q, u"Büyük"_q },
+		{ u"LuminaChatRegisterElderInfo"_q, u"Saygılı ve hürmetkâr, ama resmi "
+			u"değil sıcak."_q },
+		{ u"LuminaChatRegisterRomance"_q, u"Özel biri"_q },
+		{ u"LuminaChatRegisterRomanceInfo"_q, u"Sıcak ve şakacı, hafif "
+			u"flörtöz bir tonda."_q },
+		{ u"LuminaChatRegisterCustom"_q, u"Özel…"_q },
+		{ u"LuminaChatRegisterCustomInfo"_q, u"Bu ilişkiyi kendi cümlelerinle "
+			u"anlat."_q },
+		{ u"LuminaChatRegisterCustomTitle"_q, u"Bu ilişkiyi anlatın"_q },
+		{ u"LuminaChatRegisterCustomHint"_q, u"örn. tez danışmanım — saygılı "
+			u"ama resmi değil"_q },
+		{ u"LuminaChatRegisterUnsupported"_q, u"Mevcut çeviri motoru üslubu "
+			u"yok sayıyor"_q },
+		{ u"LuminaChatRegisterDeepL"_q, u"DeepL: yalnızca resmi/samimi ve "
+			u"bazı dillerde"_q },
+
 		// The tray menu and the taskbar button's jump list, which upstream
 		// builds from lng_open_from_tray / lng_quit_from_tray - "Telegram" in
 		// every language it serves. The name is substituted bare and cannot

@@ -164,6 +164,44 @@ namespace {
 		{ u"LuminaChatLangMeTitle"_q, u"ترجمة رسائلي إلى"_q },
 		{ u"LuminaChatLangNone"_q, u"بلا ترجمة"_q },
 
+		// The chat's tone (register): the third row of the translate menu
+		// and the box it opens. The instruction the engine is actually sent
+		// is written in English and is not one of these strings.
+		{ u"LuminaChatRegister"_q, u"نبرة هذه المحادثة: {1}"_q },
+		{ u"LuminaChatRegisterOff"_q, u"نبرة هذه المحادثة: غير محددة"_q },
+		{ u"LuminaChatRegisterTitle"_q, u"نبرة هذه المحادثة"_q },
+		{ u"LuminaChatRegisterNone"_q, u"غير محددة"_q },
+		{ u"LuminaChatRegisterNoneInfo"_q, u"الترجمة كالمعتاد، دون أي توجيه "
+			u"للنبرة."_q },
+		{ u"LuminaChatRegisterClient"_q, u"عميل"_q },
+		{ u"LuminaChatRegisterClientInfo"_q, u"لغة عمل مهذبة ورسمية، مع صيغ "
+			u"التبجيل في اللغات التي تملكها."_q },
+		{ u"LuminaChatRegisterColleague"_q, u"زميل عمل"_q },
+		{ u"LuminaChatRegisterColleagueInfo"_q, u"لغة عمل يومية مهذبة، لطيفة "
+			u"دون تكلف."_q },
+		{ u"LuminaChatRegisterFriend"_q, u"صديق"_q },
+		{ u"LuminaChatRegisterFriendInfo"_q, u"لغة عفوية دارجة، كما تتحدث مع "
+			u"صديق."_q },
+		{ u"LuminaChatRegisterFamily"_q, u"العائلة"_q },
+		{ u"LuminaChatRegisterFamilyInfo"_q, u"لغة دافئة ومألوفة كالتي "
+			u"تُستخدم في البيت."_q },
+		{ u"LuminaChatRegisterElder"_q, u"شخص أكبر سناً"_q },
+		{ u"LuminaChatRegisterElderInfo"_q, u"لغة محترمة ومهذبة، لكنها ودودة "
+			u"لا رسمية جافة."_q },
+		{ u"LuminaChatRegisterRomance"_q, u"شخص مميز"_q },
+		{ u"LuminaChatRegisterRomanceInfo"_q, u"لغة دافئة ومرحة مع لمسة غزل "
+			u"خفيفة."_q },
+		{ u"LuminaChatRegisterCustom"_q, u"مخصص…"_q },
+		{ u"LuminaChatRegisterCustomInfo"_q, u"صف هذه العلاقة بكلماتك "
+			u"أنت."_q },
+		{ u"LuminaChatRegisterCustomTitle"_q, u"صف هذه العلاقة"_q },
+		{ u"LuminaChatRegisterCustomHint"_q, u"مثال: مشرف رسالتي، محترم دون "
+			u"تكلف"_q },
+		{ u"LuminaChatRegisterUnsupported"_q, u"محرك الترجمة الحالي يتجاهل "
+			u"النبرة"_q },
+		{ u"LuminaChatRegisterDeepL"_q, u"DeepL: رسمي/غير رسمي فقط، ولبعض "
+			u"اللغات"_q },
+
 		// The tray menu, and the one item on the taskbar button's jump list.
 		// Upstream builds both from lng_open_from_tray / lng_quit_from_tray,
 		// which name Telegram in every language Telegram serves - so the menu

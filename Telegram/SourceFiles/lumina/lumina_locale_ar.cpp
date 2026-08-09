@@ -509,6 +509,13 @@ namespace {
 		{ u"LuminaSecurityFakeCrashNoCodeInfo"_q, u"لم يُعيَّن أي رمز بعد، لذا لن يحدث شيء في شاشة القفل."_q },
 		{ u"LuminaSecurityFakeCrashNoPasscodeInfo"_q, u"لا يوجد في LuminaGram رمز قفل، لذا لا تظهر شاشة القفل أبدًا ولا يُطلب هذا الرمز مطلقًا. فعّل رمز القفل من «الخصوصية والأمان» أولًا."_q },
 		{ u"LuminaSecurityFakeCrashCodeClashInfo"_q, u"أصبح هذا الرمز مطابقًا لرمز القفل الخاص بك، لذا لن يعمل أبدًا — إذ يفتح رمز القفل التطبيق بدلًا منه. اختر رمزًا مختلفًا."_q },
+
+		// Stories, fully off.
+		{ u"LuminaStoriesHeader"_q, u"القصص"_q },
+		{ u"LuminaStoriesFullyOff"_q, u"إيقاف القصص تمامًا"_q },
+		{ u"LuminaStoriesFullyOffInfo"_q, u"يزيل القصص من التطبيق بالكامل: الشريط أعلى قائمة المحادثات والشريط في الأرشيف، والحلقات الملوّنة حول الصور الرمزية، وقسم القصص وتبويب القصص في الملفات الشخصية، وإشعارات القصص. لا يتغيّر أي شيء على خوادم تيليجرام — قصصك وقصص الآخرين تبقى كما هي، لكنها لا تُعرض هنا."_q },
+		{ u"LuminaStoriesHidePostEntry"_q, u"إخفاء زر النشر أيضًا"_q },
+		{ u"LuminaStoriesHidePostEntryInfo"_q, u"يخفي زر الكاميرا المستخدم لنشر قصتك في قائمة المحادثات وفي الملفات الشخصية."_q },
 	};
 }
 

@@ -835,6 +835,21 @@ namespace {
 			u"código de acceso, así que nunca se activará: el código de "
 			u"acceso desbloquea la aplicación en su lugar. Elige un "
 			u"código diferente."_q },
+
+		// Stories, fully off.
+		{ u"LuminaStoriesHeader"_q, u"Historias"_q },
+		{ u"LuminaStoriesFullyOff"_q, u"Desactivar las historias por completo"_q },
+		{ u"LuminaStoriesFullyOffInfo"_q, u"Quita las historias de toda la "
+			u"aplicación: la fila sobre la lista de chats y la del archivo, "
+			u"los anillos de color en las fotos de perfil, el bloque de "
+			u"historias y la pestaña Historias en los perfiles, y las "
+			u"notificaciones de historias. No se cambia nada en los servidores "
+			u"de Telegram: tus historias y las de los demás siguen ahí, "
+			u"simplemente ya no se muestran aquí."_q },
+		{ u"LuminaStoriesHidePostEntry"_q, u"Ocultar también el botón de publicar"_q },
+		{ u"LuminaStoriesHidePostEntryInfo"_q, u"Oculta el botón de cámara para "
+			u"publicar tu propia historia en la lista de chats y en los "
+			u"perfiles."_q },
 	};
 }
 

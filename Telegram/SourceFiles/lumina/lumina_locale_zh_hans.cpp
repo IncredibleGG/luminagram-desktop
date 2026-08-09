@@ -664,6 +664,20 @@ namespace {
 		{ u"LuminaSecurityFakeCrashCodeClashInfo"_q, u"这个密码现在与你的密码"
 			u"锁相同，因此永远不会触发——密码锁会先解锁应用。"
 			u"请换一个密码。"_q },
+
+		// Stories, fully off.
+		{ u"LuminaStoriesHeader"_q, u"限时动态"_q },
+		{ u"LuminaStoriesFullyOff"_q, u"完全关闭限时动态"_q },
+		{ u"LuminaStoriesFullyOffInfo"_q, u"把限时动态从整个 App "
+			u"移除：聊天列表上方那一排、归档里的"
+			u"动态列、所有头像上的彩色圆圈、个人资"
+			u"料页的动态区块与「动态」标签页，以及"
+			u"动态通知。不会更动服务器上的任何设置"
+			u"——你和别人的动态都还在，只是这里不"
+			u"再显示。"_q },
+		{ u"LuminaStoriesHidePostEntry"_q, u"同时隐藏发布入口"_q },
+		{ u"LuminaStoriesHidePostEntryInfo"_q, u"隐藏聊天列表与个人"
+			u"资料页上用来发布自己动态的相机按钮。"_q },
 	};
 }
 

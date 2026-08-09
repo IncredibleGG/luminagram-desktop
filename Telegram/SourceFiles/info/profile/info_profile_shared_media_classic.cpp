@@ -26,6 +26,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "info/profile/info_profile_icon.h"
 #include "info/profile/info_profile_values.h"
 #include "info/stories/info_stories_widget.h"
+#include "lumina/lumina_stories_off.h"
 #include "main/main_session.h"
 #include "ui/text/text_utilities.h"
 #include "ui/widgets/buttons.h"
@@ -300,7 +301,11 @@ object_ptr<Ui::SlideWrap<Ui::RpWidget>> SetupSharedMediaClassic(
 	const auto addStoriesButton = [&](
 			not_null<PeerData*> peer,
 			const style::icon &icon) {
-		if (peer->isChat()) {
+		// LuminaGram: no stories block on a profile while stories are off. This
+		// is Android's SharedMediaLayout.includeStories() returning false; like
+		// there, the dedicated stories section itself keeps working, so a link
+		// that already points at it is not broken - it just is not offered here.
+		if (peer->isChat() || Lumina::StoriesFullyOff()) {
 			return;
 		}
 		auto result = AddStoriesButton(

@@ -563,6 +563,13 @@ struct Registration {
 		{ u"LuminaSecurityFakeCrashNoCodeInfo"_q, u"No code is set yet, so nothing will happen on the lock screen."_q },
 		{ u"LuminaSecurityFakeCrashNoPasscodeInfo"_q, u"LuminaGram has no passcode lock, so the lock screen never appears and this code is never asked for. Turn on the passcode lock in Privacy and Security first."_q },
 		{ u"LuminaSecurityFakeCrashCodeClashInfo"_q, u"This code is now the same as your passcode lock, so it will never fire - the passcode unlocks the app instead. Choose a different code."_q },
+
+		// Stories, fully off. Key names and texts are Android's, verbatim.
+		{ u"LuminaStoriesHeader"_q, u"Stories"_q },
+		{ u"LuminaStoriesFullyOff"_q, u"Turn stories off completely"_q },
+		{ u"LuminaStoriesFullyOffInfo"_q, u"Removes stories from the whole app: the row above the chat list and the one in Archive, the colored rings on avatars everywhere, the stories block and Stories tab on profiles, and story notifications. Nothing is changed on Telegram's servers — your stories and everyone else's stay exactly as they are, they are simply never shown here."_q },
+		{ u"LuminaStoriesHidePostEntry"_q, u"Also hide the post button"_q },
+		{ u"LuminaStoriesHidePostEntryInfo"_q, u"Hides the camera button used to post your own story, on the chat list and on profiles."_q },
 	};
 	return result;
 }

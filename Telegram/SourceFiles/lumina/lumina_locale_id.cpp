@@ -793,6 +793,20 @@ namespace {
 		{ u"LuminaSecurityFakeCrashCodeClashInfo"_q, u"Kode ini kini sama dengan kode "
 			u"sandi kunci Anda, jadi tidak akan pernah berfungsi — kode "
 			u"sandi yang membuka aplikasi. Pilih kode lain."_q },
+
+		// Stories, fully off.
+		{ u"LuminaStoriesHeader"_q, u"Cerita"_q },
+		{ u"LuminaStoriesFullyOff"_q, u"Matikan cerita sepenuhnya"_q },
+		{ u"LuminaStoriesFullyOffInfo"_q, u"Menghapus cerita dari seluruh "
+			u"aplikasi: baris di atas daftar obrolan dan baris di Arsip, cincin "
+			u"berwarna pada semua foto profil, blok cerita dan tab Cerita di "
+			u"halaman profil, serta notifikasi cerita. Tidak ada yang diubah di "
+			u"server Telegram — cerita Anda dan cerita orang lain tetap ada, "
+			u"hanya saja tidak lagi ditampilkan di sini."_q },
+		{ u"LuminaStoriesHidePostEntry"_q, u"Sembunyikan juga tombol posting"_q },
+		{ u"LuminaStoriesHidePostEntryInfo"_q, u"Menyembunyikan tombol kamera "
+			u"untuk memposting cerita Anda sendiri, di daftar obrolan dan di "
+			u"halaman profil."_q },
 	};
 }
 

@@ -1935,6 +1935,10 @@ PRIVATE
     lumina/lumina_sticker_scale.h
     lumina/lumina_sticker_scale_settings.cpp
     lumina/lumina_sticker_scale_settings.h
+    lumina/lumina_stories_off.cpp
+    lumina/lumina_stories_off.h
+    lumina/lumina_stories_off_settings.cpp
+    lumina/lumina_stories_off_settings.h
     lumina/lumina_text_replace.cpp
     lumina/lumina_text_replace.h
     lumina/lumina_text_replace_settings.cpp

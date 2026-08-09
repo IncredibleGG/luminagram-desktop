@@ -59,6 +59,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "main/main_session_settings.h"
 #include "lumina/lumina_dialogs_style.h"
 #include "lumina/lumina_dialogs_visibility.h"
+#include "lumina/lumina_stories_off.h"
 #include "api/api_authorizations.h"
 #include "api/api_chat_filters.h"
 #include "apiwrap.h"
@@ -687,6 +688,21 @@ Widget::Widget(
 
 	setupMainMenuToggle();
 	setupShortcuts();
+
+	// LuminaGram: flipping "stories, fully off" changes what EVERY row in the
+	// list draws, because UserData::hasActiveStories() starts answering
+	// differently for every peer at once - and nothing about the chats
+	// themselves changed, so nothing else is going to invalidate them. Repaint
+	// once here rather than leaving rings on screen until the next unrelated
+	// update. Null-guarded because _inner is a plain pointer that a closing
+	// window clears.
+	Lumina::StoriesFullyOffChanges() | rpl::on_next([=] {
+		if (_inner) {
+			_inner->update();
+		}
+		update();
+	}, lifetime());
+
 	if (_stories) {
 		setupStories();
 	}
@@ -1140,7 +1156,9 @@ void Widget::chosenRow(const ChosenRow &row) {
 			hideChildList();
 		}
 	} else if (const auto folder = row.key.folder()) {
-		if (row.userpicClick) {
+		// LuminaGram: with stories off the Archive row carries no ring, so its
+		// userpic must not stay a shortcut into the story viewer either.
+		if (row.userpicClick && !Lumina::StoriesFullyOff()) {
 			const auto list = Data::StorySourcesList::Hidden;
 			const auto &sources = session().data().stories().sources(list);
 			if (!sources.empty()) {
@@ -1811,7 +1829,7 @@ void Widget::setupStories() {
 		updateLockUnlockPosition();
 	}, lifetime());
 
-	Lumina::HideStoriesChanges() | rpl::on_next([=] {
+	Lumina::StoriesRowHiddenChanges() | rpl::on_next([=] {
 		updateStoriesVisibility();
 	}, _stories->lifetime());
 }
@@ -2781,7 +2799,7 @@ void Widget::updateStoriesVisibility() {
 		|| (widthAnimation && !suggestionsAnimation)
 		|| _childList
 		|| _stories->empty()
-		|| Lumina::HideStories()
+		|| Lumina::StoriesRowHidden()
 		|| (pulledDown && hiddenAnimated);
 	const auto hidden = hiddenInstant || hiddenAnimated;
 	const auto changed = (_stories->toggledHidden() != hidden);

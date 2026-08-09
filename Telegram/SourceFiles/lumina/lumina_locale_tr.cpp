@@ -510,6 +510,13 @@ namespace {
 		{ u"LuminaSecurityFakeCrashNoCodeInfo"_q, u"Henüz bir kod ayarlanmadı, bu yüzden kilit ekranında hiçbir şey olmaz."_q },
 		{ u"LuminaSecurityFakeCrashNoPasscodeInfo"_q, u"LuminaGram'da parola kilidi yok, bu yüzden kilit ekranı hiç görünmez ve bu kod hiç sorulmaz. Önce Gizlilik ve Güvenlik bölümünden parola kilidini açın."_q },
 		{ u"LuminaSecurityFakeCrashCodeClashInfo"_q, u"Bu kod artık parola kilidinizle aynı, bu yüzden hiçbir zaman çalışmaz — uygulamayı parola kilidi açar. Farklı bir kod seçin."_q },
+
+		// Stories, fully off.
+		{ u"LuminaStoriesHeader"_q, u"Hikâyeler"_q },
+		{ u"LuminaStoriesFullyOff"_q, u"Hikâyeleri tamamen kapat"_q },
+		{ u"LuminaStoriesFullyOffInfo"_q, u"Hikâyeleri uygulamanın tamamından kaldırır: sohbet listesinin üstündeki şerit ve arşivdeki şerit, profil fotoğraflarındaki renkli halkalar, profillerdeki hikâye bölümü ile Hikâyeler sekmesi ve hikâye bildirimleri. Telegram sunucularında hiçbir şey değişmez — sizin ve başkalarının hikâyeleri olduğu gibi kalır, yalnızca burada gösterilmez."_q },
+		{ u"LuminaStoriesHidePostEntry"_q, u"Paylaşma düğmesini de gizle"_q },
+		{ u"LuminaStoriesHidePostEntryInfo"_q, u"Sohbet listesinde ve profillerde kendi hikâyenizi paylaşmak için kullanılan kamera düğmesini gizler."_q },
 	};
 }
 

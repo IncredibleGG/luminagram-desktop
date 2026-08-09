@@ -150,8 +150,14 @@ private:
 
 				auto target = QFile(targetName);
 				if (target.exists() && !target.remove()) {
-					LOG(("Could not delete '%1' file to start new logging: %2").arg(targetName, target.errorString()));
-					return false;
+					// LuminaGram: a log file we cannot take over is not a reason to
+					// refuse to start. Something else is holding log.txt - an editor,
+					// a stuck previous process, an antivirus mid-scan. Logging already
+					// works, it is just still going to the log_startXX.txt we opened
+					// earlier, so keep writing there and let the app come up.
+					LOG(("Could not delete '%1' to start new logging: %2").arg(targetName, target.errorString()));
+					LOG(("Staying on '%1' for this run.").arg(files[type]->fileName()));
+					return true;
 				}
 
 				files[type]->close();
@@ -163,8 +169,13 @@ private:
 
 				auto source = QFile(startName);
 				if (!source.rename(targetName)) {
+					// LuminaGram: same reasoning as above - if the start log reopened
+					// we still have working logging, so carry on rather than refusing
+					// to launch. Only a start log we cannot reopen is fatal.
 					if (reopenStart(startName)) {
-						LOG(("Could not rename '%1' to '%2' to start new logging: %3").arg(startName, targetName, source.errorString()));
+						LOG(("Could not rename '%1' to '%2': %3").arg(startName, targetName, source.errorString()));
+						LOG(("Staying on '%1' for this run.").arg(startName));
+						return true;
 					}
 					return false;
 				}

@@ -842,6 +842,30 @@ namespace {
 			u"código de acceso, así que nunca se activará: el código de "
 			u"acceso desbloquea la aplicación en su lugar. Elige un "
 			u"código diferente."_q },
+		// login guard (D-32)
+		{ u"LuminaSessionGuardHeader"_q, u"Protección de inicio de sesión"_q },
+		{ u"LuminaSessionGuard"_q, u"Avisos de nuevos inicios de sesión"_q },
+		{ u"LuminaSessionGuardInfo"_q, u"Revisa tus dispositivos vinculados al abrir la app y te avisa de cualquier sesión que no hayas aprobado. Escanear un código QR de inicio de sesión entrega a esa persona una sesión activa que puede leer todos tus chats. La comprobación se hace como mucho cada 30 minutos, usa la API oficial de Telegram y nada sale de tu dispositivo."_q },
+		{ u"LuminaSessionGuardCheckNow"_q, u"Comprobar dispositivos vinculados ahora"_q },
+		{ u"LuminaSessionGuardNoNew"_q, u"No hay inicios de sesión nuevos. Ya habías aprobado todos los dispositivos vinculados."_q },
+		{ u"LuminaSessionGuardCheckFailed"_q, u"No se pudieron comprobar los dispositivos vinculados. Revisa tu conexión e inténtalo de nuevo."_q },
+		{ u"LuminaSessionAlertTitle"_q, u"Nuevo inicio de sesión detectado"_q },
+		{ u"LuminaSessionAlertIntro"_q, u"Un dispositivo que no has aprobado ha iniciado sesión en tu cuenta. Si no fuiste tú, ahora mismo puede leer todos tus chats."_q },
+		{ u"LuminaSessionAlertDevice"_q, u"Dispositivo"_q },
+		{ u"LuminaSessionAlertApp"_q, u"App"_q },
+		{ u"LuminaSessionAlertIp"_q, u"Dirección IP"_q },
+		{ u"LuminaSessionAlertLocation"_q, u"Ubicación"_q },
+		{ u"LuminaSessionAlertTime"_q, u"Inicio de sesión"_q },
+		{ u"LuminaSessionAlertNotMe"_q, u"No soy yo: cerrar la sesión ahora"_q },
+		{ u"LuminaSessionAlertItsMe"_q, u"Fui yo"_q },
+		{ u"LuminaSessionTerminated"_q, u"Sesión cerrada"_q },
+		{ u"LuminaSessionTerminateFailed"_q, u"No se pudo cerrar esa sesión. Abre Ajustes → Dispositivos y elimínala allí."_q },
+		{ u"LuminaSession2FAMessage"_q, u"Ese dispositivo ha sido desconectado. Activa la verificación en dos pasos para que nadie pueda entrar solo con un código."_q },
+		{ u"LuminaSession2FAButton"_q, u"Configurar ahora"_q },
+		{ u"LuminaSessionLater"_q, u"Más tarde"_q },
+		{ u"LuminaSessionQrConfirmTitle"_q, u"¿Autorizar un dispositivo nuevo?"_q },
+		{ u"LuminaSessionQrConfirmMessage"_q, u"Estás a punto de autorizar a un dispositivo nuevo a iniciar sesión en tu cuenta. A menos que estés tú mismo delante de ese ordenador, quien lo controle podrá leer todos tus mensajes. Nunca escanees un código QR de inicio de sesión que alguien te haya enviado."_q },
+		{ u"LuminaSessionQrConfirmContinue"_q, u"Estoy en ese dispositivo: continuar"_q },
 	};
 }
 

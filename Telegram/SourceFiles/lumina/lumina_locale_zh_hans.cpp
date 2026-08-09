@@ -671,6 +671,30 @@ namespace {
 		{ u"LuminaSecurityFakeCrashCodeClashInfo"_q, u"这个密码现在与你的密码"
 			u"锁相同，因此永远不会触发——密码锁会先解锁应用。"
 			u"请换一个密码。"_q },
+		// login guard (D-32)
+		{ u"LuminaSessionGuardHeader"_q, u"登录守卫"_q },
+		{ u"LuminaSessionGuard"_q, u"新登录提醒"_q },
+		{ u"LuminaSessionGuardInfo"_q, u"应用启动时检查你的已连接设备，发现你没确认过的登录就立刻提醒。扫描登录二维码等于把一个活跃会话交给对方，对方能看到你全部的聊天记录。检查最多每 30 分钟一次，走 Telegram 官方接口，数据不会离开你的设备。"_q },
+		{ u"LuminaSessionGuardCheckNow"_q, u"立即检查登录设备"_q },
+		{ u"LuminaSessionGuardNoNew"_q, u"没有新登录，所有已连接设备都是你确认过的。"_q },
+		{ u"LuminaSessionGuardCheckFailed"_q, u"无法检查已连接设备，请检查网络后重试。"_q },
+		{ u"LuminaSessionAlertTitle"_q, u"发现新登录"_q },
+		{ u"LuminaSessionAlertIntro"_q, u"有一台你没确认过的设备已登录你的账号。如果不是你本人操作，对方现在就能看到你全部的聊天记录。"_q },
+		{ u"LuminaSessionAlertDevice"_q, u"设备"_q },
+		{ u"LuminaSessionAlertApp"_q, u"应用"_q },
+		{ u"LuminaSessionAlertIp"_q, u"IP 地址"_q },
+		{ u"LuminaSessionAlertLocation"_q, u"位置"_q },
+		{ u"LuminaSessionAlertTime"_q, u"登录时间"_q },
+		{ u"LuminaSessionAlertNotMe"_q, u"不是我 — 立即终止此登录"_q },
+		{ u"LuminaSessionAlertItsMe"_q, u"是我"_q },
+		{ u"LuminaSessionTerminated"_q, u"已终止该登录"_q },
+		{ u"LuminaSessionTerminateFailed"_q, u"无法终止该登录。请到「设置 → 设备」手动移除。"_q },
+		{ u"LuminaSession2FAMessage"_q, u"该设备已被登出。建议开启两步验证，这样别人光有验证码也登不进来。"_q },
+		{ u"LuminaSession2FAButton"_q, u"立即设置"_q },
+		{ u"LuminaSessionLater"_q, u"以后再说"_q },
+		{ u"LuminaSessionQrConfirmTitle"_q, u"要授权新设备登录吗？"_q },
+		{ u"LuminaSessionQrConfirmMessage"_q, u"你正在授权一台新设备登录你的账号。除非你人就在那台电脑前面，否则对方会看到你全部的消息。不要扫别人发给你的登录二维码。"_q },
+		{ u"LuminaSessionQrConfirmContinue"_q, u"我就在那台设备前，继续"_q },
 	};
 }
 

@@ -95,6 +95,7 @@ auto Settings::Defaults()
 		{ u"otpGuardEnabled"_q, QJsonValue(true) },
 		{ u"showBookmarks"_q, QJsonValue(true) },
 		{ u"stripPhotoMetadata"_q, QJsonValue(true) },
+		{ u"sessionGuardEnabled"_q, QJsonValue(true) },
 		{ u"stickerScale"_q, QJsonValue(100) },
 	};
 	return result;

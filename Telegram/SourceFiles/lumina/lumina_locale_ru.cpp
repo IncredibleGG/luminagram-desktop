@@ -870,6 +870,30 @@ namespace {
 		{ u"LuminaSecurityFakeCrashCodeClashInfo"_q, u"Теперь этот код совпадает с вашим "
 			u"код-паролем, поэтому он никогда не сработает — приложение "
 			u"разблокирует код-пароль. Выберите другой код."_q },
+		// login guard (D-32)
+		{ u"LuminaSessionGuardHeader"_q, u"Защита входа"_q },
+		{ u"LuminaSessionGuard"_q, u"Оповещения о новых входах"_q },
+		{ u"LuminaSessionGuardInfo"_q, u"Проверяет список подключённых устройств при запуске приложения и предупреждает о любом сеансе, который вы не подтверждали. Сканируя QR-код для входа, вы отдаёте другому человеку активный сеанс, из которого видна вся ваша переписка. Проверка выполняется не чаще раза в 30 минут через официальный API Telegram, данные не покидают устройство."_q },
+		{ u"LuminaSessionGuardCheckNow"_q, u"Проверить устройства сейчас"_q },
+		{ u"LuminaSessionGuardNoNew"_q, u"Новых входов нет. Все подключённые устройства вы уже подтвердили."_q },
+		{ u"LuminaSessionGuardCheckFailed"_q, u"Не удалось проверить подключённые устройства. Проверьте соединение и повторите попытку."_q },
+		{ u"LuminaSessionAlertTitle"_q, u"Обнаружен новый вход"_q },
+		{ u"LuminaSessionAlertIntro"_q, u"В ваш аккаунт вошло устройство, которое вы не подтверждали. Если это были не вы, оно прямо сейчас видит всю вашу переписку."_q },
+		{ u"LuminaSessionAlertDevice"_q, u"Устройство"_q },
+		{ u"LuminaSessionAlertApp"_q, u"Приложение"_q },
+		{ u"LuminaSessionAlertIp"_q, u"IP-адрес"_q },
+		{ u"LuminaSessionAlertLocation"_q, u"Местоположение"_q },
+		{ u"LuminaSessionAlertTime"_q, u"Время входа"_q },
+		{ u"LuminaSessionAlertNotMe"_q, u"Это не я — завершить сеанс"_q },
+		{ u"LuminaSessionAlertItsMe"_q, u"Это я"_q },
+		{ u"LuminaSessionTerminated"_q, u"Сеанс завершён"_q },
+		{ u"LuminaSessionTerminateFailed"_q, u"Не удалось завершить этот сеанс. Откройте «Настройки → Устройства» и удалите его там."_q },
+		{ u"LuminaSession2FAMessage"_q, u"Это устройство отключено. Включите двухэтапную аутентификацию, чтобы войти было нельзя по одному коду."_q },
+		{ u"LuminaSession2FAButton"_q, u"Настроить сейчас"_q },
+		{ u"LuminaSessionLater"_q, u"Позже"_q },
+		{ u"LuminaSessionQrConfirmTitle"_q, u"Авторизовать новое устройство?"_q },
+		{ u"LuminaSessionQrConfirmMessage"_q, u"Вы собираетесь разрешить новому устройству войти в ваш аккаунт. Если вы не сидите за этим компьютером сами, тот, кто им управляет, сможет прочитать все ваши сообщения. Никогда не сканируйте QR-код для входа, который вам кто-то прислал."_q },
+		{ u"LuminaSessionQrConfirmContinue"_q, u"Я за этим устройством — продолжить"_q },
 	};
 }
 

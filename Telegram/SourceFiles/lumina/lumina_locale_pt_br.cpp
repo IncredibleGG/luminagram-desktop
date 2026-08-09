@@ -801,6 +801,30 @@ namespace {
 			u"senha de bloqueio, então ele nunca vai funcionar — a senha "
 			u"desbloqueia o app no lugar dele. Escolha um código "
 			u"diferente."_q },
+		// login guard (D-32)
+		{ u"LuminaSessionGuardHeader"_q, u"Proteção de login"_q },
+		{ u"LuminaSessionGuard"_q, u"Alertas de novos logins"_q },
+		{ u"LuminaSessionGuardInfo"_q, u"Verifica seus dispositivos conectados ao abrir o app e avisa sobre qualquer sessão que você não aprovou. Escanear um QR code de login entrega à outra pessoa uma sessão ativa que lê todas as suas conversas. A verificação acontece no máximo a cada 30 minutos, usa a API oficial do Telegram e nada sai do seu aparelho."_q },
+		{ u"LuminaSessionGuardCheckNow"_q, u"Verificar dispositivos conectados agora"_q },
+		{ u"LuminaSessionGuardNoNew"_q, u"Nenhum login novo. Todos os dispositivos conectados já foram aprovados por você."_q },
+		{ u"LuminaSessionGuardCheckFailed"_q, u"Não foi possível verificar os dispositivos conectados. Confira sua conexão e tente de novo."_q },
+		{ u"LuminaSessionAlertTitle"_q, u"Novo login detectado"_q },
+		{ u"LuminaSessionAlertIntro"_q, u"Um dispositivo que você não aprovou entrou na sua conta. Se não foi você, ele pode ler todas as suas conversas agora mesmo."_q },
+		{ u"LuminaSessionAlertDevice"_q, u"Dispositivo"_q },
+		{ u"LuminaSessionAlertApp"_q, u"App"_q },
+		{ u"LuminaSessionAlertIp"_q, u"Endereço IP"_q },
+		{ u"LuminaSessionAlertLocation"_q, u"Local"_q },
+		{ u"LuminaSessionAlertTime"_q, u"Entrou em"_q },
+		{ u"LuminaSessionAlertNotMe"_q, u"Não fui eu — encerrar agora"_q },
+		{ u"LuminaSessionAlertItsMe"_q, u"Fui eu"_q },
+		{ u"LuminaSessionTerminated"_q, u"Sessão encerrada"_q },
+		{ u"LuminaSessionTerminateFailed"_q, u"Não foi possível encerrar essa sessão. Abra Configurações → Dispositivos e remova por lá."_q },
+		{ u"LuminaSession2FAMessage"_q, u"Esse dispositivo foi desconectado. Ative a verificação em duas etapas para que ninguém entre só com um código."_q },
+		{ u"LuminaSession2FAButton"_q, u"Configurar agora"_q },
+		{ u"LuminaSessionLater"_q, u"Depois"_q },
+		{ u"LuminaSessionQrConfirmTitle"_q, u"Autorizar um novo dispositivo?"_q },
+		{ u"LuminaSessionQrConfirmMessage"_q, u"Você está prestes a autorizar um novo dispositivo a entrar na sua conta. A não ser que você mesmo esteja na frente daquele computador, quem o controla vai conseguir ler todas as suas mensagens. Nunca escaneie um QR code de login que alguém enviou para você."_q },
+		{ u"LuminaSessionQrConfirmContinue"_q, u"Estou nesse dispositivo — continuar"_q },
 	};
 }
 

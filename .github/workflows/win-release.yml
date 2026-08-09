@@ -95,6 +95,109 @@ jobs:
           sdk: ${{ env.SDK }}
           toolset: '14.44'
 
+      - name: ATL for breakpad.
+        shell: pwsh
+        # Only the Release half of the Libraries step trips over this, which is
+        # why the Debug loop in win.yml never has: prepare.py keeps breakpad's
+        # dump_syms.exe behind "release:", and dump_syms is the one thing in the
+        # whole tree that includes <atlbase.h> and <atlcomcli.h>. Neither
+        # LuminaGram itself nor the three breakpad client libraries CMake links
+        # against touches ATL anywhere.
+        #
+        # The image does ship ATL, but only for its default toolset. This build
+        # pins 14.44 - lzma's vcxproj hard-codes v143 - and the image installs
+        # that compiler as VC.14.44.17.14.x86.x64 without the matching
+        # VC.14.44.17.14.ATL. vcvarsall puts atlmfc\include on INCLUDE only when
+        # it exists for the selected toolset, so nothing points at any ATL and
+        # the compile dies forty minutes into the step.
+        #
+        # First choice is the component that matches the toolset, the same one a
+        # developer machine would have, and it is worth its five to ten minutes
+        # on a build measured in hours. Adding components on a hosted runner is
+        # known to fail now and then (actions/runner-images#12880, and #9873 is
+        # where the advice to just try it twice comes from), so an installer
+        # that will not cooperate falls back to the ATL the image already has
+        # rather than losing the run. That pairing is unsupported - it hands the
+        # 14.44 linker an atls.lib built by a newer one - but the only binary it
+        # can reach is dump_syms.exe, which this workflow never runs, never
+        # links into LuminaGram and never ships.
+        #
+        # The paths are exported by hand either way: vcvarsall ran in the step
+        # above and does not run again.
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $component = 'Microsoft.VisualStudio.Component.VC.14.44.17.14.ATL'
+
+          # Both come from vcvarsall and both end in a backslash. A quoted path
+          # ending in one reads as an escaped quote to the C runtime, so it has
+          # to come off before setup.exe ever sees it.
+          $vs = "$env:VSINSTALLDIR".TrimEnd('\')
+          $tools = "$env:VCToolsInstallDir".TrimEnd('\')
+          if (-not $vs -or -not $tools) {
+            throw 'VSINSTALLDIR / VCToolsInstallDir are unset - the Native Tools step did not run.'
+          }
+          Write-Host "Visual Studio: $vs"
+          Write-Host "Toolset: $tools"
+
+          # x64 only, matching the arch pinned on the step above.
+          function Test-Atl([string]$dir) {
+            return (Test-Path (Join-Path $dir 'atlmfc\include\atlbase.h')) -and
+              (Test-Path (Join-Path $dir 'atlmfc\lib\x64'))
+          }
+
+          if (Test-Atl $tools) {
+            Write-Host 'This toolset already carries its own ATL.'
+          } else {
+            $setup = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\setup.exe'
+            if (-not (Test-Path $setup)) {
+              Write-Warning "No Visual Studio Installer at $setup."
+            } else {
+              foreach ($attempt in 1..2) {
+                Write-Host "Adding $component, attempt $attempt."
+                # --wait is a bootstrapper switch that setup.exe rejects, so the
+                # waiting happens here. The install path is quoted inside a
+                # single argument string: handed over as an array element it
+                # would be truncated at the first space.
+                $line = 'modify --installPath "{0}" --add {1} --quiet --norestart --nocache' -f $vs, $component
+                $p = Start-Process -FilePath $setup -ArgumentList $line -NoNewWindow -PassThru
+                if (-not $p.WaitForExit(20 * 60 * 1000)) {
+                  # Compiling against a Visual Studio still being rewritten
+                  # underneath us is worse than stopping here.
+                  throw 'The installer is still running after twenty minutes.'
+                }
+                # Whether it worked is a question about the disk, not about the
+                # exit code - 0, 3010 and 1641 are all successes, and an
+                # installer can report one without having installed anything.
+                Write-Host "Installer exit code: $($p.ExitCode)."
+                if (Test-Atl $tools) { break }
+                Write-Warning 'ATL is still not there.'
+              }
+            }
+          }
+
+          $atl = $null
+          if (Test-Atl $tools) {
+            $atl = $tools
+          } else {
+            $atl = Get-ChildItem -Path (Join-Path $vs 'VC\Tools\MSVC') -Directory -ErrorAction SilentlyContinue |
+              Sort-Object Name -Descending |
+              Where-Object { Test-Atl $_.FullName } |
+              Select-Object -First 1 -ExpandProperty FullName
+            if ($atl) {
+              Write-Warning "No ATL for this toolset, falling back to the one in $atl."
+            }
+          }
+          if (-not $atl) {
+            throw "There is no ATL under $vs at all, so dump_syms cannot compile. Either $component has to install, or the build has to move to a toolset that ships ATL."
+          }
+
+          $include = Join-Path $atl 'atlmfc\include'
+          $lib = Join-Path $atl 'atlmfc\lib\x64'
+          Write-Host "INCLUDE gains $include"
+          Write-Host "LIB gains $lib"
+          Add-Content -Path $env:GITHUB_ENV -Value "INCLUDE=$include;$env:INCLUDE"
+          Add-Content -Path $env:GITHUB_ENV -Value "LIB=$lib;$env:LIB"
+
       - name: NuGet sources.
         run: |
           nuget sources Disable -Name "Microsoft Visual Studio Offline Packages"

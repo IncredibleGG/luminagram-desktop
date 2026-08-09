@@ -30,6 +30,22 @@ enum class Store {
 	Bookmarks, // tdata/luminagram_bookmarks.json
 };
 
+// Grey features (ToS-risky) are parked project-wide until the final batch.
+// Every grey read point must go through this, so editing luminagram.json
+// by hand cannot enable them. Flip this one constant to unpark, nothing else.
+//
+// Deliberately NOT a preference and deliberately not read from any file: the
+// whole point is that nothing on disk - a hand-edited luminagram.json, a
+// restored backup, a profile copied in from a build that still had the rows -
+// can switch the cluster on. The feature code and its preference reads stay in
+// the tree untouched, because the final batch needs them; they are simply
+// unreachable while this returns false.
+//
+// Currently gated: `allowSaveRestricted` (history/history_item.cpp),
+// `stealthOnline` (api/api_updates.cpp), `stealthTyping`
+// (api/api_send_progress.cpp). `stealthReadReceipts` has no reader at all.
+[[nodiscard]] bool GreyFeaturesUnlocked();
+
 // A small, self-contained key/value store for LuminaGram-specific options.
 //
 // It intentionally does NOT touch Core::Settings' serialization blob (which is

@@ -65,6 +65,15 @@ constexpr auto kSaveDelay = crl::time(500);
 
 } // namespace
 
+// See the header. Hard-coded false, never a preference lookup: a preference
+// could be flipped by hand-editing tdata/luminagram.json or by restoring a
+// crafted backup, and this gate exists precisely to make that impossible.
+// Unparking the grey cluster in the final batch is a source change - this one
+// return, plus restoring the settings rows - and never a config change.
+bool GreyFeaturesUnlocked() {
+	return false;
+}
+
 Settings &Settings::Instance() {
 	static auto result = Settings();
 	return result;

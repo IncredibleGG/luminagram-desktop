@@ -996,7 +996,13 @@ void Updates::updateOnline(crl::time lastNonIdleTime, bool gotOtherOffline) {
 
 	const auto &config = _session->serverConfig();
 	bool isOnline = Core::App().hasActiveWindow(&session());
-	if (Lumina::Settings::Instance().stealthOnline()) {
+	// PARKED: `stealthOnline` is grey (ToS-risky) and held back project-wide
+	// until the final batch. The master gate short-circuits before the
+	// preference is read, so no hand-edited luminagram.json can enable it. The
+	// read is kept verbatim for the final batch; to unpark, flip
+	// Lumina::GreyFeaturesUnlocked() and change nothing here.
+	if (Lumina::GreyFeaturesUnlocked()
+		&& Lumina::Settings::Instance().stealthOnline()) {
 		isOnline = false; // LuminaGram: always report offline.
 	}
 	int updateIn = config.onlineUpdatePeriod;

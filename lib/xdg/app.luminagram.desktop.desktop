@@ -1,0 +1,25 @@
+[Desktop Entry]
+Name=LuminaGram
+Comment=New era of messaging
+TryExec=LuminaGram
+Exec=LuminaGram -- %U
+Icon=app.luminagram.desktop
+Terminal=false
+# Matches QApplication::setApplicationName() in core/launcher.cpp, which stays
+# TelegramDesktop because it also keys the data directory and the single
+# instance socket. Change both together or window grouping breaks.
+StartupWMClass=TelegramDesktop
+Type=Application
+Categories=Chat;Network;InstantMessaging;Qt;
+MimeType=x-scheme-handler/tg;x-scheme-handler/tonsite;
+Keywords=tg;chat;im;messaging;messenger;sms;luminagram;tdesktop;
+Actions=quit;
+DBusActivatable=true
+SingleMainWindow=true
+X-GNOME-UsesNotifications=true
+X-GNOME-SingleWindow=true
+
+[Desktop Action quit]
+Exec=LuminaGram -quit
+Name=Quit LuminaGram
+Icon=application-exit

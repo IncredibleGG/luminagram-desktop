@@ -1,3 +1,31 @@
+7.0.14 (12.08.26)
+
+- Stop calling ourselves the official Telegram app. The intro screen, the About
+  window and the main menu footer all said Telegram Desktop, and the About text
+  read "official free messaging app" - a claim this fork has no right to make
+  and one that contradicts the trademark notice in its own repository. They now
+  say what this is: an independent fork, built on the Telegram API, not
+  affiliated with or endorsed by Telegram.
+- Announce an app id of our own to the desktop shell. The taskbar and tray kept
+  drawing Telegram's paper plane no matter which icons were installed, because
+  the shell looks the announced id up in the current icon theme first and every
+  common theme ships an icon for org.telegram.desktop. The 7.0.12 entry above
+  claimed this was fixed; it was fixed for Windows only.
+- The launcher entry itself said Name=Telegram. Only its Exec line had ever
+  been rewritten at runtime.
+- Clean up the launcher, D-Bus and icon files left behind under the old id, and
+  carry an existing autostart entry across rather than dropping it - deleting it
+  outright would have switched off start-on-login without saying so.
+- The security check for new logins no longer answers "no new logins" while it
+  is still checking, and shows that it is running instead of sitting silent for
+  the thirty seconds a failed request takes to time out.
+- Settings rows that depend on a switch that is off are now greyed out instead
+  of staying live, the duplicated Media heading is gone, and the version row no
+  longer looks like a link that does nothing when clicked.
+- The translation self-test translates into a language that is not the source
+  one, so a translator that returns its input unchanged now fails it. It used
+  to translate English into English and pass no matter what.
+
 7.0.13 (09.08.26)
 
 - Desktop builds can be updated in place again. The update feed had been left

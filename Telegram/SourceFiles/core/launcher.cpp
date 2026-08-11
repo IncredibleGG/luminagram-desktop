@@ -336,6 +336,27 @@ void Launcher::init() {
 	prepareSettings();
 	initQtMessageLogging();
 
+	// Deliberately not renamed. This string is not a brand, it is a storage
+	// key and a lock name, and nothing shows it to the user -- the visible
+	// identity (launcher entry, taskbar grouping, tray and notification
+	// icons, D-Bus name) all comes from QGuiApplication::desktopFileName(),
+	// which Platform::start() sets to our own app id.
+	//
+	// On Linux it feeds two things that must not move under an existing
+	// installation:
+	//   * QStandardPaths::AppLocalDataLocation, i.e. psAppDataPath(), i.e.
+	//     the default working directory. Renaming it points the app at an
+	//     empty ~/.local/share/<new name>/ and every account, key and cached
+	//     message is orphaned in the old folder -- the app comes up looking
+	//     freshly installed.
+	//   * the single instance abstract socket name (see
+	//     Platform::SingleInstanceLocalServerName). Renaming it means that
+	//     during an upgrade a still running old build listens on the old
+	//     name while the new build finds nothing, concludes it is alone and
+	//     starts anyway -- two processes writing the same tdata, which the
+	//     local database is not built for.
+	// Moving it therefore needs a data migration and a legacy socket probe,
+	// neither of which belongs in an icon and app id change.
 	QApplication::setApplicationName(u"TelegramDesktop"_q);
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)

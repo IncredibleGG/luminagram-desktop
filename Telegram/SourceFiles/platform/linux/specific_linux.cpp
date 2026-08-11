@@ -52,6 +52,28 @@ using namespace gi::repository;
 namespace GObject = gi::repository::GObject;
 using namespace Platform;
 
+// The freedesktop application id. Every piece of shell-visible identity is
+// derived from it: the name of the .desktop file we drop in
+// ~/.local/share/applications, the D-Bus activation name, the icon name we
+// hand to the tray and to notifications, and the xdg-shell app_id / WM_CLASS
+// Qt reports for our windows.
+//
+// Why this had to move off org.telegram.desktop: icon theme lookup searches
+// the *current* theme (Yaru, Papirus, Breeze, ...) before falling back to
+// hicolor. Those themes all ship an org.telegram.desktop icon, so as long as
+// we announced that id the shell drew Telegram's paper plane no matter what
+// we wrote into ~/.local/share/icons/hicolor. Under an id no theme knows,
+// lookup falls through to hicolor, where InstallLauncher() puts our own logo.
+constexpr auto kAppId = "app.luminagram.desktop"_cs;
+
+// The id every build up to and including 7.0.13 announced. It is never
+// written again; it exists so we can delete the desktop integration files
+// those builds left behind. Only the *hashed* forms are removed, because the
+// hash is derived from our own executable path and therefore proves the file
+// is ours -- a bare org.telegram.desktop.desktop in the user's home may well
+// belong to a real Telegram install and must not be touched.
+constexpr auto kLegacyAppId = "org.telegram.desktop"_cs;
+
 void PortalAutostart(bool enabled, Fn<void(bool)> done) {
 	const auto executable = ExecutablePathForShortcuts();
 	if (executable.isEmpty()) {
@@ -232,7 +254,7 @@ bool GenerateDesktopFile(
 	DEBUG_LOG(("App Info: placing .desktop file to %1").arg(targetPath));
 	if (!QDir(targetPath).exists()) QDir().mkpath(targetPath);
 
-	const auto sourceFile = u":/misc/org.telegram.desktop.desktop"_q;
+	const auto sourceFile = u":/misc/%1.desktop"_q.arg(kAppId.utf16());
 	const auto targetFile = targetPath
 		+ QGuiApplication::desktopFileName()
 		+ u".desktop"_q;
@@ -371,8 +393,9 @@ bool GenerateDesktopFile(
 		hashMd5Hex(d.constData(), d.size(), md5Hash);
 
 		if (!Core::Launcher::Instance().customWorkingDir()) {
-			QFile::remove(u"%1org.telegram.desktop._%2.desktop"_q.arg(
+			QFile::remove(u"%1%2._%3.desktop"_q.arg(
 				targetPath,
+				kLegacyAppId.utf16(),
 				md5Hash));
 
 			const auto exePath = QFile::encodeName(
@@ -380,8 +403,9 @@ bool GenerateDesktopFile(
 			hashMd5Hex(exePath.constData(), exePath.size(), md5Hash);
 		}
 
-		QFile::remove(u"%1org.telegram.desktop.%2.desktop"_q.arg(
+		QFile::remove(u"%1%2.%3.desktop"_q.arg(
 			targetPath,
+			kLegacyAppId.utf16(),
 			md5Hash));
 	}
 
@@ -439,8 +463,9 @@ bool GenerateServiceFile(bool silent = false) {
 		const auto d = QFile::encodeName(QDir(cWorkingDir()).absolutePath());
 		hashMd5Hex(d.constData(), d.size(), md5Hash);
 
-		QFile::remove(u"%1org.telegram.desktop._%2.service"_q.arg(
+		QFile::remove(u"%1%2._%3.service"_q.arg(
 			targetPath,
+			kLegacyAppId.utf16(),
 			md5Hash));
 	}
 
@@ -463,6 +488,65 @@ bool GenerateServiceFile(bool silent = false) {
 	return true;
 }
 
+// Deletes the desktop integration that a pre-rename build of this same
+// installation wrote. Without it the user keeps a second launcher entry --
+// pointing at the very same executable, but carrying Telegram's name and
+// icon -- plus a stale D-Bus activation file and, worst of all, an autostart
+// entry that AutostartToggle() can no longer see and therefore can no longer
+// switch off.
+//
+// Only the hashed file names are removed. The hash comes from our own
+// executable path (or working directory), so a match proves the file was
+// written by this installation; the unhashed org.telegram.desktop.desktop
+// may belong to a real Telegram install and is deliberately left alone.
+void RemoveLegacyDesktopIntegration() {
+	const auto legacyId = u"%1._%2"_q.arg(
+		kLegacyAppId.utf16(),
+		QString::fromLatin1(Core::Launcher::Instance().instanceHash()));
+
+	const auto applicationsPath = QStandardPaths::writableLocation(
+		QStandardPaths::ApplicationsLocation) + '/';
+	QFile::remove(applicationsPath + legacyId + u".desktop"_q);
+
+	const auto servicesPath = QStandardPaths::writableLocation(
+		QStandardPaths::GenericDataLocation) + u"/dbus-1/services/"_q;
+	QFile::remove(servicesPath + legacyId + u".service"_q);
+
+	// The autostart entry is migrated, not just dropped: AutostartToggle()
+	// only ever looks at the current app id, so deleting the old file while
+	// autostart is on would silently stop the app from starting with the
+	// session, and keeping it would make the toggle unable to turn it off.
+	const auto autostartPath = QStandardPaths::writableLocation(
+		QStandardPaths::GenericConfigLocation) + u"/autostart/"_q;
+	const auto legacyAutostart = autostartPath + legacyId + u".desktop"_q;
+	if (QFile::exists(legacyAutostart)) {
+		if (cAutoStart()) {
+			GenerateDesktopFile(autostartPath, { u"-autostart"_q }, true, true);
+		}
+		QFile::remove(legacyAutostart);
+	}
+
+	// Icons are keyed by the unhashed id, so these are the same names a real
+	// Telegram install uses. Removing them is still safe and self-healing:
+	// every tdesktop-family app rewrites its icons from InstallLauncher() on
+	// each start, which is exactly why upstream already removes the far more
+	// generic icons/telegram.png a few lines below.
+	const auto icons = QStandardPaths::writableLocation(
+		QStandardPaths::GenericDataLocation) + u"/icons/"_q;
+	QFile::remove(icons
+		+ u"hicolor/256x256/apps/"_q
+		+ kLegacyAppId.utf16()
+		+ u".png"_q);
+	const auto monochrome = { QString(), u"-attention"_q, u"-mute"_q };
+	for (const auto &suffix : monochrome) {
+		QFile::remove(icons
+			+ u"hicolor/symbolic/apps/"_q
+			+ kLegacyAppId.utf16()
+			+ suffix
+			+ u"-symbolic.svg"_q);
+	}
+}
+
 void InstallLauncher() {
 	static const auto DisabledByEnv = !qEnvironmentVariableIsEmpty(
 		"DESKTOPINTEGRATION");
@@ -474,6 +558,8 @@ void InstallLauncher() {
 			|| DisabledByEnv) {
 		return;
 	}
+
+	RemoveLegacyDesktopIntegration();
 
 	const auto applicationsPath = QStandardPaths::writableLocation(
 		QStandardPaths::ApplicationsLocation) + '/';
@@ -737,11 +823,13 @@ void start() {
 		}
 
 		if (!Core::UpdaterDisabled()) {
-			return u"org.telegram.desktop._%1"_q.arg(
-				Core::Launcher::Instance().instanceHash().constData());
+			return u"%1._%2"_q.arg(
+				kAppId.utf16(),
+				QString::fromLatin1(
+					Core::Launcher::Instance().instanceHash()));
 		}
 
-		return u"org.telegram.desktop"_q;
+		return kAppId.utf16();
 	}());
 
 	LOG(("App ID: %1").arg(QGuiApplication::desktopFileName()));

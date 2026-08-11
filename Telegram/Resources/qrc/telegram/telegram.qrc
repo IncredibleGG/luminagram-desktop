@@ -67,6 +67,6 @@
   </qresource>
   <qresource prefix="/misc">
     <file alias="default_shortcuts-custom.json">../../default_shortcuts-custom.json</file>
-    <file alias="org.telegram.desktop.desktop">../../../../lib/xdg/org.telegram.desktop.desktop</file>
+    <file alias="app.luminagram.desktop.desktop">../../../../lib/xdg/app.luminagram.desktop.desktop</file>
   </qresource>
 </RCC>

@@ -17,10 +17,16 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 namespace Lumina {
 
+// The title also covers AddExactNumbersRows(), which follows this block on the
+// appearance page and carries no title of its own. Without one here, both rows
+// hung under whatever block happened to precede them.
 void AddTimeFormatRows(
 		not_null<Ui::VerticalLayout*> container,
 		not_null<Window::SessionController*>) {
 	Ui::AddSkip(container);
+	Ui::AddSubsectionTitle(
+		container,
+		TrValue(u"LuminaMessageDisplayHeader"_q));
 	const auto button = container->add(object_ptr<Ui::SettingsButton>(
 		container,
 		TrValue(u"LuminaTimeWithSeconds"_q),

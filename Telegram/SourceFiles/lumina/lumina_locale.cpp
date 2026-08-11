@@ -142,6 +142,7 @@ struct Registration {
 		{ u"LuminaTranslateTestNetwork"_q, u"The service could not be "
 			"reached. Check your internet connection and any proxy, then try "
 			"again."_q },
+		{ u"LuminaTranslateTestNoChange"_q, u"The service returned the sample unchanged, so nothing was translated. Check the key, the model and the system prompt."_q },
 		{ u"LuminaTranslateTestQuota"_q, u"The service refused the request - "
 			"too many requests, or this key's quota is used up. Try again "
 			"later."_q },
@@ -447,10 +448,10 @@ struct Registration {
 		{ u"LuminaLinkSafetyWarnShortener"_q, u"This is a link shortener — the real destination stays hidden until you open it."_q },
 		{ u"LuminaMediaAutoPauseBgVideo"_q, u"Pause video when app goes to background"_q },
 		{ u"LuminaMediaAutoPauseBgVideoInfo"_q, u"Automatically pause the playing video when you leave LuminaGram. Minimising the viewer pauses it too. A video you deliberately put in a window of its own, or in picture-in-picture, keeps playing, and music and voice messages keep playing while you are away."_q },
-		{ u"LuminaMediaSaving"_q, u"Media"_q },
 		{ u"LuminaMediaTitle"_q, u"Media"_q },
 		{ u"LuminaMessageActionsInfo"_q, u"These entries only appear in a message's context menu. Each one uses Telegram's own forwarding, so a chat that restricts forwarding stays restricted. \"Forward without author and captions\" is named for what actually goes out: Telegram cannot drop captions while keeping the sender, so choosing it drops both. \"Details\" reads only what this device has already synced - nothing is requested and nothing is stored."_q },
 		{ u"LuminaMessageDetails"_q, u"Details"_q },
+		{ u"LuminaMessageDisplayHeader"_q, u"Message display"_q },
 		{ u"LuminaOnboardingDualName"_q, u"Both languages at once"_q },
 		{ u"LuminaOnboardingDualText"_q, u"Keep the original text on screen next to its translation, for messages you receive and for the ones you send."_q },
 		{ u"LuminaOnboardingFooter"_q, u"Open a section on the LuminaGram settings page to set any of this up. You can read this card again from Tools."_q },
@@ -525,6 +526,7 @@ struct Registration {
 		{ u"LuminaSelectFromAuthorAbout"_q, u"Adds a message menu entry in groups that selects every message from the sender you clicked. It only reaches messages this window has already loaded — scroll further back and repeat it to include older ones. Messages attributed to the chat itself, such as channel posts and posts by anonymous admins, do not get the entry."_q },
 		{ u"LuminaSelectFromAuthorLimit"_q, u"Only {1} messages can be selected at once."_q },
 		{ u"LuminaSelectFromAuthorTitle"_q, u"Select all from author"_q },
+		{ u"LuminaSelectionHeader"_q, u"Selection"_q },
 		{ u"LuminaSendOriginalCaption"_q, u"Send original caption"_q },
 		{ u"LuminaShowBookmarks"_q, u"Show bookmark menu item"_q },
 		{ u"LuminaShowMessageDetails"_q, u"Message details"_q },
@@ -534,6 +536,7 @@ struct Registration {
 		{ u"LuminaStickerSizeChoice"_q, u"{1}%"_q },
 		{ u"LuminaStickerSizeChoiceDefault"_q, u"{1}% (default)"_q },
 		{ u"LuminaStickerSizeInfo"_q, u"How large stickers are drawn in chats — the ones you send and the ones you receive. Animated emoji, dice and gift stickers keep their own sizes. Telegram Desktop measures a sticker once and remembers it, so a new size takes effect the next time the app starts."_q },
+		{ u"LuminaStickersHeader"_q, u"Stickers and GIFs"_q },
 		{ u"LuminaTimeWithSeconds"_q, u"Show seconds in message time"_q },
 		{ u"LuminaTimeWithSecondsAbout"_q, u"The time under a message, the time in copied text and the time a screen reader announces all include seconds."_q },
 		{ u"LuminaUndoSendBulletin"_q, u"Sending message…"_q },
@@ -563,6 +566,7 @@ struct Registration {
 			"are. To attach a preview to one message anyway, give \"Toggle "
 			"link preview\" a key in Settings > Keyboard shortcuts and press "
 			"it while composing."_q },
+		{ u"LuminaLinkPreviewHeader"_q, u"Link previews"_q },
 		{ u"LuminaVoiceConfirmTitle"_q, u"Voice and video messages"_q },
 		{ u"LuminaVoiceConfirmRow"_q, u"Confirm before sending"_q },
 		{ u"LuminaVoiceConfirmInfo"_q, u"Ask before a recorded voice or round "
@@ -627,6 +631,8 @@ struct Registration {
 		{ u"LuminaSessionGuardCheckNow"_q, u"Check linked devices now"_q },
 		{ u"LuminaSessionGuardNoNew"_q, u"No new logins. Every linked device is one you already approved."_q },
 		{ u"LuminaSessionGuardCheckFailed"_q, u"Could not check your linked devices. Check your connection and try again."_q },
+		{ u"LuminaSessionGuardChecking"_q, u"Checking..."_q },
+		{ u"LuminaSessionGuardBusy"_q, u"A check is already running. Its result will appear in a moment."_q },
 		{ u"LuminaSessionAlertTitle"_q, u"New login detected"_q },
 		{ u"LuminaSessionAlertIntro"_q, u"A device you have not approved is signed in to your account. If this was not you, it can read all of your chats right now."_q },
 		{ u"LuminaSessionAlertDevice"_q, u"Device"_q },
@@ -662,6 +668,7 @@ struct Registration {
 		{ u"LuminaSttKey"_q, u"API key"_q },
 		{ u"LuminaSttBaseUrl"_q, u"Base URL"_q },
 		{ u"LuminaSttModel"_q, u"Model"_q },
+		{ u"LuminaSttNotReady"_q, u"Voice to text is on, but the engine selected below has no API key yet, so it cannot run. Save a key under Engine, or turn this off."_q },
 		{ u"LuminaSttInfoDesktop"_q, u"Transcription runs on your own API key and your own quota "
 			u"- LuminaGram never provides a key. The voice message is "
 			u"uploaded to the service you pick below, so only turn this "

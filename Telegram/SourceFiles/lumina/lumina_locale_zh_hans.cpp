@@ -101,6 +101,7 @@ namespace {
 			u"网络连接。"_q },
 		{ u"LuminaTranslateTestNetwork"_q, u"无法连接到这个服务。请检查你的"
 			u"网络连接与代理设置，然后再试一次。"_q },
+		{ u"LuminaTranslateTestNoChange"_q, u"服务把原文原封不动地退了回来，等于没有翻译。请检查密钥、模型与系统提示词。"_q },
 		{ u"LuminaTranslateTestQuota"_q, u"服务拒绝了这次请求：请求太过"
 			u"频繁，或这个密钥的额度已经用完。请稍后再试。"_q },
 		{ u"LuminaTranslateTestQuotaKeyed"_q, u"服务拒绝了这次请求：服务"
@@ -403,7 +404,6 @@ namespace {
 			u"自动暂停正在播放的视频。最小化播放器同样会暂停。你特意放到"
 			u"独立窗口或画中画里的视频会继续播放，音乐和语音消息在你离开时"
 			u"也会继续播放。"_q },
-		{ u"LuminaMediaSaving"_q, u"媒体"_q },
 		{ u"LuminaMediaTitle"_q, u"媒体"_q },
 		{ u"LuminaMessageActionsInfo"_q, u"这些条目只出现在消息的右键菜单里。"
 			u"每一项都使用 Telegram 自己的转发功能，所以限制转发的聊天仍然"
@@ -412,6 +412,7 @@ namespace {
 			u"都去掉。“详情”只读取这台设备已经同步的内容——不会发出任何"
 			u"请求，也不会保存任何内容。"_q },
 		{ u"LuminaMessageDetails"_q, u"详情"_q },
+		{ u"LuminaMessageDisplayHeader"_q, u"消息显示"_q },
 		{ u"LuminaOnboardingDualName"_q, u"两种语言同时显示"_q },
 		{ u"LuminaOnboardingDualText"_q, u"让原文和译文一起留在屏幕上，收到的"
 			u"消息和你发送的消息都可以。"_q },
@@ -537,6 +538,7 @@ namespace {
 		{ u"LuminaSelectFromAuthorLimit"_q,
 			u"一次最多只能选择 {1} 条消息。"_q },
 		{ u"LuminaSelectFromAuthorTitle"_q, u"选择该作者的全部消息"_q },
+		{ u"LuminaSelectionHeader"_q, u"选择"_q },
 		{ u"LuminaSendOriginalCaption"_q, u"发送原始说明文字"_q },
 		{ u"LuminaShowBookmarks"_q, u"显示书签菜单项"_q },
 		{ u"LuminaShowMessageDetails"_q, u"消息详情菜单"_q },
@@ -550,6 +552,7 @@ namespace {
 			u"你收到的都包括在内。动画表情、骰子和礼物贴纸保持各自原有的"
 			u"大小。Telegram Desktop 只会测量一次贴纸并把结果记下来，所以"
 			u"新的大小要到下次启动应用时才生效。"_q },
+		{ u"LuminaStickersHeader"_q, u"贴纸与 GIF"_q },
 		{ u"LuminaTimeWithSeconds"_q, u"在消息时间中显示秒"_q },
 		{ u"LuminaTimeWithSecondsAbout"_q, u"消息下方的时间、复制文本中的"
 			u"时间，以及屏幕阅读器朗读的时间都会包含秒。"_q },
@@ -594,6 +597,7 @@ namespace {
 			u"的预览，以及你编辑的消息，都保持原样。若想单独给某条消息附上预览，"
 			u"可以在设置 > 键盘快捷键中给“切换链接预览”指定一个按键，撰写"
 			u"时按下即可。"_q },
+		{ u"LuminaLinkPreviewHeader"_q, u"链接预览"_q },
 		{ u"LuminaVoiceConfirmTitle"_q, u"语音和视频消息"_q },
 		{ u"LuminaVoiceConfirmRow"_q, u"发送前确认"_q },
 		{ u"LuminaVoiceConfirmInfo"_q, u"在录好的语音或圆形视频消息发出前先询"
@@ -705,6 +709,8 @@ namespace {
 		{ u"LuminaSessionGuardCheckNow"_q, u"立即检查登录设备"_q },
 		{ u"LuminaSessionGuardNoNew"_q, u"没有新登录，所有已连接设备都是你确认过的。"_q },
 		{ u"LuminaSessionGuardCheckFailed"_q, u"无法检查已连接设备，请检查网络后重试。"_q },
+		{ u"LuminaSessionGuardChecking"_q, u"检查中…"_q },
+		{ u"LuminaSessionGuardBusy"_q, u"已经有一次检查正在进行，结果稍后就会出现。"_q },
 		{ u"LuminaSessionAlertTitle"_q, u"发现新登录"_q },
 		{ u"LuminaSessionAlertIntro"_q, u"有一台你没确认过的设备已登录你的账号。如果不是你本人操作，对方现在就能看到你全部的聊天记录。"_q },
 		{ u"LuminaSessionAlertDevice"_q, u"设备"_q },
@@ -747,6 +753,7 @@ namespace {
 		{ u"LuminaSttKey"_q, u"API 密钥"_q },
 		{ u"LuminaSttBaseUrl"_q, u"接口地址"_q },
 		{ u"LuminaSttModel"_q, u"模型"_q },
+		{ u"LuminaSttNotReady"_q, u"语音转文字已开启，但下方选择的引擎还没有 API 密钥，因此无法运行。请到“引擎”保存密钥，或关闭这个开关。"_q },
 		{ u"LuminaSttInfoDesktop"_q, u"转录用的是你自己的 API key、花你自己的额度，"
 			u"LuminaGram 不提供 key。语音文件会上传"
 			u"到你选的服务，因此只有在你愿意把消息交给该服务时才开"

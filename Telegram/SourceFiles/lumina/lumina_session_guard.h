@@ -91,6 +91,7 @@ void SetupSessionGuard(not_null<Window::SessionController*> controller);
 enum class SessionGuardOutcome {
 	NewLogins, // At least one unknown session; its alert is already queued.
 	NoNew,     // Checked, everything present was already approved.
+	Busy,      // A check was already running; this call started nothing.
 	Failed,    // The request could not be completed at all.
 };
 
@@ -100,6 +101,23 @@ enum class SessionGuardOutcome {
 void SessionGuardCheckNow(
 	not_null<Window::SessionController*> controller,
 	Fn<void(SessionGuardOutcome)> done);
+
+// True from the moment a check starts until its outcome is delivered.
+//
+// It exists because the row alone cannot tell that story. A check reports
+// itself only when it finishes, the answer arrives over the network, and a
+// request that is never answered takes the full 30-second timeout to fail -
+// so a press was followed by nothing at all for up to half a minute, which is
+// exactly what a broken button looks like. The row watches this instead and
+// says so while the check runs, whoever started it: the foreground watcher
+// runs the same checks with no callback of its own, and a manual press landing
+// on top of one of those gets SessionGuardOutcome::Busy rather than a "no new
+// logins" it did not earn.
+//
+// Never throws. Emits its current value on subscription, and completes if the
+// account goes away.
+[[nodiscard]] rpl::producer<bool> SessionGuardRunningValue(
+	not_null<Window::SessionController*> controller);
 
 // The rows on the LuminaGram security sub-page: the toggle, the manual check,
 // and the explanation.

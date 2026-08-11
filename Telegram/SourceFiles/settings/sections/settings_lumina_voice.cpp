@@ -18,6 +18,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/vertical_list.h"
 #include "ui/widgets/buttons.h"
 #include "ui/widgets/fields/input_field.h"
+#include "ui/widgets/labels.h"
 #include "ui/wrap/slide_wrap.h"
 #include "ui/wrap/vertical_layout.h"
 #include "window/window_session_controller.h"
@@ -62,6 +63,121 @@ constexpr auto kApiKeyDotsShown = 6;
 	});
 }
 
+// The master switch, as a stream. Every other row on the page is gated on it,
+// and so is the readiness note under it.
+[[nodiscard]] rpl::producer<bool> MasterEnabledValue() {
+	return rpl::single(
+		rpl::empty
+	) | rpl::then(
+		Lumina::VoiceToTextEnabledChanges()
+	) | rpl::map([] {
+		return Lumina::VoiceToTextEnabled();
+	});
+}
+
+// What sits under the master switch. It grows a second paragraph while the
+// switch is on and the selected engine has no key, because on desktop those
+// two facts together mean the feature cannot run at all.
+//
+// The switch defaults ON, which is Android's default for the same preference
+// key - and there that default is honest, because Android's default engine is
+// Vosk: offline, free, nothing to configure. There is no offline engine here
+// (lumina/lumina_transcribers.h says why), so "on" does not imply "ready", and
+// the row was claiming a feature that could only apologise when used.
+//
+// Turning the default off was the alternative, and it costs more than it buys:
+// it would put the desktop preference out of step with Android's for a key
+// both platforms store and a backup carries between them, and it would hide
+// the feature from exactly the people it exists for - the ones with no Premium
+// transcription - behind a switch they have no reason to look for. Saying
+// which of the two states the page is in, immediately under the switch that
+// claims it is on, ends the misreport without either cost.
+[[nodiscard]] rpl::producer<QString> MasterInfoValue() {
+	return rpl::single(
+		rpl::empty
+	) | rpl::then(rpl::merge(
+		Lumina::TranscriberChanges(),
+		Lumina::VoiceToTextEnabledChanges(),
+		Lumina::LangChanges())
+	) | rpl::map([] {
+		const auto about = Lumina::Tr(u"LuminaSttInfoDesktop"_q);
+		const auto ready = Lumina::TranscriberConfigured(
+			Lumina::CurrentTranscriberId());
+		return (Lumina::VoiceToTextEnabled() && !ready)
+			? (about + u"\n\n"_q + Lumina::Tr(u"LuminaSttNotReady"_q))
+			: about;
+	});
+}
+
+// Greys a dependent row out and stops it taking presses while the master
+// switch is off.
+//
+// The rows stay where they are rather than disappearing, because this page is
+// also where somebody finds out what the switch would give them - but a row
+// that still looks live invites them to pick an engine, save a key and set a
+// model that nothing will read.
+//
+// Qt::WA_TransparentForMouseEvents is what actually blocks the press:
+// Ui::AbstractButton::setDisabled() gates the accessibility action and nothing
+// else in this lib_ui, so a row "disabled" that way still toggles under the
+// mouse. clearState() drops a hover the row may be holding, which would
+// otherwise leave it painted as if the cursor were still on it.
+void GateRow(not_null<Ui::SettingsButton*> button, Ui::FlatLabel *label) {
+	MasterEnabledValue(
+	) | rpl::on_next([=](bool enabled) {
+		if (!enabled) {
+			// Before setDisabled(), which clearState() would undo.
+			button->clearState();
+		}
+		// For screen readers; the attribute below is what stops the mouse.
+		button->setDisabled(!enabled);
+		button->setAttribute(Qt::WA_TransparentForMouseEvents, !enabled);
+		button->setPointerCursor(enabled);
+		const auto fg = enabled
+			? std::optional<QColor>()
+			: std::optional<QColor>(st::windowSubTextFg->c);
+		button->setColorOverride(fg);
+		if (label) {
+			label->setTextColorOverride(fg);
+		}
+	}, button->lifetime());
+}
+
+// AddButtonWithLabel() keeps no handle on the value it draws on the right, and
+// a gated row has to grey that value out along with the rest of itself - a
+// value left in the accent colour is a control that looks pressable and is
+// not. So the label is built here, with the geometry CreateRightLabel() gives
+// it, and kept. (The same note is on the identical helper in
+// lumina/lumina_translate_settings.cpp.)
+not_null<Ui::FlatLabel*> AddRightLabel(
+		not_null<Ui::SettingsButton*> button,
+		rpl::producer<QString> name,
+		rpl::producer<QString> value) {
+	const auto &st = st::settingsButtonNoIcon;
+	const auto label = Ui::CreateChild<Ui::FlatLabel>(
+		button.get(),
+		st.rightLabel);
+	label->show();
+	rpl::combine(
+		button->widthValue(),
+		std::move(name),
+		std::move(value)
+	) | rpl::on_next([=, &st](
+			int width,
+			const QString &rowText,
+			const QString &text) {
+		const auto available = width
+			- st.padding.left()
+			- st.padding.right()
+			- st.style.font->width(rowText)
+			- st::settingsButtonRightSkip;
+		label->setText(text);
+		label->resizeToNaturalWidth(available);
+		label->moveToRight(st::settingsButtonRightSkip, st.padding.top());
+	}, label->lifetime());
+	return label;
+}
+
 [[nodiscard]] QString MaskedApiKey(const QString &key) {
 	if (key.isEmpty()) {
 		return Lumina::Tr(u"LuminaTranslateApiKeyNotSet"_q);
@@ -72,7 +188,11 @@ constexpr auto kApiKeyDotsShown = 6;
 		+ key.right(kApiKeyTailShown);
 }
 
-void AddToggleRow(
+// Both row builders below make DEPENDENT rows: everything they add is gated on
+// the master switch. The master switch itself is built inline in
+// setupContent() and must never go through them, or it would grey itself out
+// and could not be switched back on.
+not_null<Ui::SettingsButton*> AddToggleRow(
 		not_null<Ui::VerticalLayout*> container,
 		rpl::producer<QString> label,
 		Fn<bool()> checked,
@@ -86,19 +206,26 @@ void AddToggleRow(
 	) | rpl::on_next([save = std::move(save)](bool value) {
 		save(value);
 	}, button->lifetime());
+	GateRow(button, nullptr);
+	return button;
 }
 
-void AddValueRow(
+not_null<Ui::SettingsButton*> AddValueRow(
 		not_null<Ui::VerticalLayout*> container,
 		rpl::producer<QString> label,
 		Fn<QString()> value,
 		Fn<void()> activate) {
-	AddButtonWithLabel(
+	auto rowText = rpl::duplicate(label);
+	const auto button = AddButtonWithIcon(
 		container,
 		std::move(label),
-		LabelValue(std::move(value)),
-		st::settingsButtonNoIcon
-	)->setClickedCallback(std::move(activate));
+		st::settingsButtonNoIcon);
+	button->setClickedCallback(std::move(activate));
+	GateRow(button, AddRightLabel(
+		button,
+		std::move(rowText),
+		LabelValue(std::move(value))));
+	return button;
 }
 
 // A block that only exists for engines that need it. Built once and toggled
@@ -307,16 +434,21 @@ rpl::producer<QString> LuminaVoice::title() {
 }
 
 void LuminaVoice::setupContent(not_null<Ui::VerticalLayout*> container) {
+	// The master switch. Built here rather than through AddToggleRow(), which
+	// gates every row it makes on this switch: a master row that greyed itself
+	// out could never be switched back on.
 	Ui::AddSkip(container);
-	AddToggleRow(
+	const auto master = container->add(object_ptr<Ui::SettingsButton>(
 		container,
 		Lumina::TrValue(u"LuminaSttEnable"_q),
-		[] { return Lumina::VoiceToTextEnabled(); },
-		[](bool value) { Lumina::SetVoiceToTextEnabled(value); });
+		st::settingsButtonNoIcon
+	))->toggleOn(MasterEnabledValue());
+	master->toggledChanges(
+	) | rpl::on_next([](bool value) {
+		Lumina::SetVoiceToTextEnabled(value);
+	}, master->lifetime());
 	Ui::AddSkip(container);
-	Ui::AddDividerText(
-		container,
-		Lumina::TrValue(u"LuminaSttInfoDesktop"_q));
+	Ui::AddDividerText(container, MasterInfoValue());
 
 	AddEngineRows(container, controller());
 

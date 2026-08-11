@@ -107,6 +107,7 @@ namespace {
 		{ u"LuminaTranslateTestNetwork"_q, u"Hizmete ulaşılamadı. İnternet "
 			u"bağlantınızı ve varsa vekil sunucu ayarlarınızı denetleyip "
 			u"yeniden deneyin."_q },
+		{ u"LuminaTranslateTestNoChange"_q, u"Servis örnek metni değiştirmeden geri gönderdi, yani hiçbir şey çevrilmedi. Anahtarı, modeli ve sistem istemini kontrol edin."_q },
 		{ u"LuminaTranslateTestQuota"_q, u"Hizmet isteği geri çevirdi: çok "
 			u"fazla istek gönderildi ya da bu anahtarın kotası doldu. Daha "
 			u"sonra yeniden deneyin."_q },
@@ -393,10 +394,10 @@ namespace {
 		{ u"LuminaLinkSafetyWarnShortener"_q, u"Bu bir bağlantı kısaltıcı — gerçek hedef, siz açana kadar gizli kalır."_q },
 		{ u"LuminaMediaAutoPauseBgVideo"_q, u"Uygulama arka plana geçtiğinde videoyu duraklat"_q },
 		{ u"LuminaMediaAutoPauseBgVideoInfo"_q, u"LuminaGram'dan ayrıldığınızda oynatılan videoyu otomatik olarak duraklatır. İzleyiciyi küçültmek de videoyu duraklatır. Bilerek kendi penceresine ya da pencere içinde pencereye aldığınız bir video oynamayı sürdürür; siz yokken müzik ve sesli mesajlar da çalmayı sürdürür."_q },
-		{ u"LuminaMediaSaving"_q, u"Medya"_q },
 		{ u"LuminaMediaTitle"_q, u"Medya"_q },
 		{ u"LuminaMessageActionsInfo"_q, u"Bu öğeler yalnızca bir mesajın sağ tık menüsünde görünür. Her biri Telegram'ın kendi iletme işlevini kullanır, bu yüzden iletmeyi kısıtlayan bir sohbet kısıtlı kalır. «Yazarı ve açıklamaları olmadan ilet», gerçekte ne gönderildiğine göre adlandırılmıştır: Telegram, göndereni koruyup açıklamaları atamaz, bu yüzden bu seçenek ikisini birden atar. «Ayrıntılar» yalnızca bu cihazın hâlihazırda eşitlediklerini okur — hiçbir şey istenmez ve hiçbir şey saklanmaz."_q },
 		{ u"LuminaMessageDetails"_q, u"Ayrıntılar"_q },
+		{ u"LuminaMessageDisplayHeader"_q, u"Mesaj görünümü"_q },
 		{ u"LuminaOnboardingDualName"_q, u"İki dil bir arada"_q },
 		{ u"LuminaOnboardingDualText"_q, u"Aldığınız ve gönderdiğiniz mesajlarda orijinal metni çevirisinin yanında ekranda tutun."_q },
 		{ u"LuminaOnboardingFooter"_q, u"Bunlardan herhangi birini ayarlamak için LuminaGram ayarlar sayfasındaki bir bölümü açın. Bu kartı Araçlar bölümünden yeniden okuyabilirsiniz."_q },
@@ -471,6 +472,7 @@ namespace {
 		{ u"LuminaSelectFromAuthorAbout"_q, u"Gruplarda, tıkladığınız gönderenin tüm mesajlarını seçen bir mesaj menüsü öğesi ekler. Yalnızca bu pencerenin hâlihazırda yüklediği mesajlara ulaşır — daha eskilerini de katmak için geriye kaydırıp yeniden uygulayın. Kanal gönderileri ve anonim yöneticilerin gönderileri gibi sohbetin kendisine atfedilen mesajlarda bu öğe görünmez."_q },
 		{ u"LuminaSelectFromAuthorLimit"_q, u"Aynı anda yalnızca {1} mesaj seçilebilir."_q },
 		{ u"LuminaSelectFromAuthorTitle"_q, u"Yazarın tüm mesajlarını seç"_q },
+		{ u"LuminaSelectionHeader"_q, u"Seçim"_q },
 		{ u"LuminaSendOriginalCaption"_q, u"Orijinal açıklamayı gönder"_q },
 		{ u"LuminaShowBookmarks"_q, u"Yer imi menü öğesini göster"_q },
 		{ u"LuminaShowMessageDetails"_q, u"Mesaj ayrıntıları menüsü"_q },
@@ -480,6 +482,7 @@ namespace {
 		{ u"LuminaStickerSizeChoice"_q, u"%{1}"_q },
 		{ u"LuminaStickerSizeChoiceDefault"_q, u"%{1} (varsayılan)"_q },
 		{ u"LuminaStickerSizeInfo"_q, u"Çıkartmaların sohbetlerde ne kadar büyük çizileceğini belirler — gönderdikleriniz ve aldıklarınız. Hareketli emojiler, zar ve hediye çıkartmaları kendi boyutlarını korur. Telegram Desktop bir çıkartmayı bir kez ölçüp hatırlar, bu yüzden yeni boyut uygulamanın bir sonraki açılışında geçerli olur."_q },
+		{ u"LuminaStickersHeader"_q, u"Çıkartmalar ve GIF’ler"_q },
 		{ u"LuminaTimeWithSeconds"_q, u"Mesaj saatinde saniyeleri göster"_q },
 		{ u"LuminaTimeWithSecondsAbout"_q, u"Mesajın altındaki saat, kopyalanan metindeki saat ve ekran okuyucunun seslendirdiği saat saniyeleri de içerir."_q },
 		{ u"LuminaUndoSendBulletin"_q, u"Mesaj gönderiliyor…"_q },
@@ -502,6 +505,7 @@ namespace {
 		// link preview + voice confirm
 		{ u"LuminaPrivacyDisableLinkPreview"_q, u"Bağlantı önizlemesini varsayılan olarak kapat"_q },
 		{ u"LuminaLinkPreviewInfo"_q, u"Sıfırdan yazdığınız mesajlar bağlantı önizlemesi olmadan gönderilir ve yazma alanı, siz yazarken yapıştırdığınız bir bağlantıyı çözmesini Telegram'dan hiç istemez. Zaten eklenmiş bir önizleme ile düzenlediğiniz bir mesaj olduğu gibi bırakılır. Yine de tek bir mesaja önizleme eklemek için Ayarlar > Klavye kısayolları bölümünde «Bağlantı önizlemesini aç/kapat» işlevine bir tuş atayın ve yazarken bu tuşa basın."_q },
+		{ u"LuminaLinkPreviewHeader"_q, u"Bağlantı önizlemeleri"_q },
 		{ u"LuminaVoiceConfirmTitle"_q, u"Sesli ve görüntülü mesajlar"_q },
 		{ u"LuminaVoiceConfirmRow"_q, u"Göndermeden önce onayla"_q },
 		{ u"LuminaVoiceConfirmInfo"_q, u"Kaydedilmiş bir sesli mesaj ya da yuvarlak video mesajı gönderilmeden önce sorar. Bu sorudan vazgeçmek kaydı siler; yalnızca dinleme önizlemesinde kayıt olduğu gibi kalır. Zamanlanmış gönderimler için hiçbir zaman sorulmaz."_q },
@@ -562,6 +566,8 @@ namespace {
 		{ u"LuminaSessionGuardCheckNow"_q, u"Bağlı cihazları şimdi kontrol et"_q },
 		{ u"LuminaSessionGuardNoNew"_q, u"Yeni giriş yok. Bağlı tüm cihazları daha önce onaylamıştın."_q },
 		{ u"LuminaSessionGuardCheckFailed"_q, u"Bağlı cihazlar kontrol edilemedi. Bağlantını kontrol edip tekrar dene."_q },
+		{ u"LuminaSessionGuardChecking"_q, u"Kontrol ediliyor…"_q },
+		{ u"LuminaSessionGuardBusy"_q, u"Zaten bir kontrol sürüyor; sonucu birazdan görünecek."_q },
 		{ u"LuminaSessionAlertTitle"_q, u"Yeni giriş algılandı"_q },
 		{ u"LuminaSessionAlertIntro"_q, u"Onaylamadığın bir cihaz hesabına giriş yapmış. Bu sen değilsen, şu anda tüm sohbetlerini okuyabilir."_q },
 		{ u"LuminaSessionAlertDevice"_q, u"Cihaz"_q },
@@ -597,6 +603,7 @@ namespace {
 		{ u"LuminaSttKey"_q, u"API anahtarı"_q },
 		{ u"LuminaSttBaseUrl"_q, u"Temel URL"_q },
 		{ u"LuminaSttModel"_q, u"Model"_q },
+		{ u"LuminaSttNotReady"_q, u"Sesi yazıya çevirme açık, ancak aşağıda seçili motorun henüz API anahtarı yok, bu yüzden çalışamaz. Motor bölümünde bir anahtar kaydedin ya da bunu kapatın."_q },
 		{ u"LuminaSttInfoDesktop"_q, u"Dönüştürme kendi API anahtarını ve kendi kotanı kullanır; "
 			u"LuminaGram anahtar sağlamaz. Sesli mesaj aşağıda seçtiğin "
 			u"servise yüklenir, bu yüzden bunu yalnızca mesajlarını "

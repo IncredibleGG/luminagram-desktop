@@ -116,7 +116,11 @@ void FillSelectFromAuthorRow(
 void AddSelectAuthorRows(
 		not_null<Ui::VerticalLayout*> container,
 		not_null<Window::SessionController*>) {
+	// As with the link-preview block above it: the chats page titles every
+	// block, so an untitled one reads as a stray row belonging to the block
+	// before it rather than as a setting of its own.
 	Ui::AddSkip(container);
+	Ui::AddSubsectionTitle(container, TrValue(u"LuminaSelectionHeader"_q));
 	const auto button = container->add(object_ptr<Ui::SettingsButton>(
 		container,
 		TrValue(u"LuminaSelectFromAuthorTitle"_q),

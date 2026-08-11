@@ -7,7 +7,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 using "ui/basic.style";
 using "ui/chat/chat.style";
+using "ui/widgets/widgets.style";
 using "info/info.style";
+using "settings/settings.style";
 
 // Dual-language display: what the user wrote is the main text at the normal
 // message size, and the translation sits beneath it a size smaller. The size
@@ -42,3 +44,15 @@ luminaTopBarTranslate: IconButton(topBarSearch) {
 // The same glyph in the accent colour, shown while this chat is being
 // translated - the treatment topBarInfoActive already gives the info button.
 luminaTopBarTranslateActive: icon {{ "menu/translate", windowActiveTextFg }};
+
+// A settings row that states a fact and cannot be pressed. Stock's right-hand
+// label is windowActiveTextFg, the same accent every PRESSABLE value row on
+// the LuminaGram pages uses - provider, API key, both languages - so a fact
+// drawn with it reads as a control that ignores clicks, which is worse than
+// something that plainly is not one. This spells the value out as ordinary
+// secondary text instead.
+luminaSettingsFactRow: SettingsButton(settingsButtonNoIcon) {
+	rightLabel: FlatLabel(defaultSettingsRightLabel) {
+		textFg: windowSubTextFg;
+	}
+}

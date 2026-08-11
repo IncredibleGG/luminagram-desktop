@@ -106,6 +106,7 @@ namespace {
 			u"terlebih dahulu, lalu URL dasar dan koneksi Anda."_q },
 		{ u"LuminaTranslateTestNetwork"_q, u"Layanan tidak dapat dihubungi. "
 			u"Periksa koneksi internet dan proksi Anda, lalu coba lagi."_q },
+		{ u"LuminaTranslateTestNoChange"_q, u"Layanan mengembalikan teks contoh tanpa perubahan, jadi tidak ada yang diterjemahkan. Periksa kunci, model, dan prompt sistem."_q },
 		{ u"LuminaTranslateTestQuota"_q, u"Layanan menolak permintaan ini: "
 			u"terlalu banyak permintaan, atau kuota kunci ini sudah habis. "
 			u"Coba lagi nanti."_q },
@@ -465,7 +466,6 @@ namespace {
 			u"jendela tersendiri, atau ke gambar-dalam-gambar, tetap diputar, "
 			u"dan musik serta pesan suara juga tetap diputar selama Anda "
 			u"pergi."_q },
-		{ u"LuminaMediaSaving"_q, u"Media"_q },
 		{ u"LuminaMediaTitle"_q, u"Media"_q },
 		{ u"LuminaMessageActionsInfo"_q, u"Entri ini hanya muncul di menu "
 			u"konteks sebuah pesan. Masing-masing memakai penerusan milik "
@@ -477,6 +477,7 @@ namespace {
 			u"sudah disinkronkan perangkat ini — tidak ada yang diminta dan "
 			u"tidak ada yang disimpan."_q },
 		{ u"LuminaMessageDetails"_q, u"Detail"_q },
+		{ u"LuminaMessageDisplayHeader"_q, u"Tampilan pesan"_q },
 		{ u"LuminaOnboardingDualName"_q, u"Dua bahasa sekaligus"_q },
 		{ u"LuminaOnboardingDualText"_q, u"Menyimpan teks asli di layar "
 			u"berdampingan dengan terjemahannya, baik untuk pesan yang Anda "
@@ -639,6 +640,7 @@ namespace {
 		{ u"LuminaSelectFromAuthorLimit"_q,
 			u"Hanya {1} pesan yang bisa dipilih sekaligus."_q },
 		{ u"LuminaSelectFromAuthorTitle"_q, u"Pilih semua dari penulis"_q },
+		{ u"LuminaSelectionHeader"_q, u"Pemilihan"_q },
 		{ u"LuminaSendOriginalCaption"_q, u"Kirim keterangan asli"_q },
 		{ u"LuminaShowBookmarks"_q, u"Tampilkan item menu penanda"_q },
 		{ u"LuminaShowMessageDetails"_q, u"Detail pesan"_q },
@@ -656,6 +658,7 @@ namespace {
 			u"sendiri. Telegram Desktop mengukur sebuah stiker sekali lalu "
 			u"mengingatnya, jadi ukuran baru berlaku saat aplikasi berikutnya "
 			u"dijalankan."_q },
+		{ u"LuminaStickersHeader"_q, u"Stiker dan GIF"_q },
 		{ u"LuminaTimeWithSeconds"_q, u"Tampilkan detik pada waktu pesan"_q },
 		{ u"LuminaTimeWithSecondsAbout"_q, u"Waktu di bawah pesan, waktu pada "
 			u"teks yang disalin, dan waktu yang dibacakan pembaca layar "
@@ -716,6 +719,7 @@ namespace {
 			u"sunting, dibiarkan apa adanya. Untuk tetap melampirkan pratinjau "
 			u"pada satu pesan, beri tombol untuk «Alihkan pratinjau tautan» di "
 			u"Pengaturan > Pintasan papan ketik, lalu tekan saat menulis."_q },
+		{ u"LuminaLinkPreviewHeader"_q, u"Pratinjau tautan"_q },
 		{ u"LuminaVoiceConfirmTitle"_q, u"Pesan suara dan video"_q },
 		{ u"LuminaVoiceConfirmRow"_q, u"Konfirmasi sebelum kirim"_q },
 		{ u"LuminaVoiceConfirmInfo"_q, u"Bertanya sebelum pesan suara atau "
@@ -845,6 +849,8 @@ namespace {
 		{ u"LuminaSessionGuardCheckNow"_q, u"Periksa perangkat tertaut sekarang"_q },
 		{ u"LuminaSessionGuardNoNew"_q, u"Tidak ada login baru. Semua perangkat tertaut sudah Anda setujui."_q },
 		{ u"LuminaSessionGuardCheckFailed"_q, u"Tidak dapat memeriksa perangkat tertaut. Periksa koneksi Anda dan coba lagi."_q },
+		{ u"LuminaSessionGuardChecking"_q, u"Memeriksa…"_q },
+		{ u"LuminaSessionGuardBusy"_q, u"Pemeriksaan sedang berjalan; hasilnya akan muncul sebentar lagi."_q },
 		{ u"LuminaSessionAlertTitle"_q, u"Login baru terdeteksi"_q },
 		{ u"LuminaSessionAlertIntro"_q, u"Sebuah perangkat yang belum Anda setujui masuk ke akun Anda. Jika itu bukan Anda, perangkat itu bisa membaca semua obrolan Anda sekarang."_q },
 		{ u"LuminaSessionAlertDevice"_q, u"Perangkat"_q },
@@ -887,6 +893,7 @@ namespace {
 		{ u"LuminaSttKey"_q, u"Kunci API"_q },
 		{ u"LuminaSttBaseUrl"_q, u"URL dasar"_q },
 		{ u"LuminaSttModel"_q, u"Model"_q },
+		{ u"LuminaSttNotReady"_q, u"Suara ke teks aktif, tetapi mesin yang dipilih di bawah belum punya kunci API, jadi tidak bisa berjalan. Simpan kunci di bagian Mesin, atau matikan opsi ini."_q },
 		{ u"LuminaSttInfoDesktop"_q, u"Transkripsi memakai kunci API dan kuota Anda sendiri; "
 			u"LuminaGram tidak pernah menyediakan kunci. Pesan suara "
 			u"diunggah ke layanan yang Anda pilih di bawah, jadi "

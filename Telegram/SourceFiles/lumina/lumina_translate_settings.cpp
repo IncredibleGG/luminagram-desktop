@@ -21,6 +21,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/vertical_list.h"
 #include "ui/widgets/buttons.h"
 #include "ui/widgets/fields/input_field.h"
+#include "ui/widgets/labels.h"
 #include "ui/wrap/slide_wrap.h"
 #include "ui/wrap/vertical_layout.h"
 #include "window/window_session_controller.h"
@@ -222,6 +223,80 @@ struct LanguageEntry {
 	});
 }
 
+// The master switch at the top of the page, as a stream. Every row below it
+// depends on it, and none of them is worth setting while it is off.
+[[nodiscard]] rpl::producer<bool> FeatureEnabledValue() {
+	return TranslationFeatureEnabledValue();
+}
+
+// Greys a dependent row out and stops it taking presses while the master
+// switch is off.
+//
+// The rows stay where they are rather than disappearing, because this page is
+// also where somebody finds out what the switch would give them - but a row
+// that still looks live invites them to pick a provider, save a key and
+// choose two languages that nothing will read.
+//
+// Qt::WA_TransparentForMouseEvents is what actually blocks the press:
+// Ui::AbstractButton::setDisabled() gates the accessibility action and
+// nothing else in this lib_ui, so a row "disabled" that way still toggles
+// under the mouse. clearState() drops a hover the row may be holding, which
+// would otherwise leave it painted as if the cursor were still on it.
+void GateRow(not_null<Ui::SettingsButton*> button, Ui::FlatLabel *label) {
+	FeatureEnabledValue(
+	) | rpl::on_next([=](bool enabled) {
+		if (!enabled) {
+			// Before setDisabled(), which clearState() would undo.
+			button->clearState();
+		}
+		// For screen readers; the attribute below is what stops the mouse.
+		button->setDisabled(!enabled);
+		button->setAttribute(Qt::WA_TransparentForMouseEvents, !enabled);
+		button->setPointerCursor(enabled);
+		const auto fg = enabled
+			? std::optional<QColor>()
+			: std::optional<QColor>(st::windowSubTextFg->c);
+		button->setColorOverride(fg);
+		if (label) {
+			label->setTextColorOverride(fg);
+		}
+	}, button->lifetime());
+}
+
+// ::Settings::AddButtonWithLabel() keeps no handle on the value it draws on
+// the right, and a gated row has to grey that value out along with the rest of
+// itself - a value left in the accent colour is exactly the "looks pressable,
+// is not" state this page is removing. So the label is built here, with the
+// geometry ::Settings::CreateRightLabel() gives it, and kept.
+not_null<Ui::FlatLabel*> AddRightLabel(
+		not_null<Ui::SettingsButton*> button,
+		rpl::producer<QString> name,
+		rpl::producer<QString> value) {
+	const auto &st = st::settingsButtonNoIcon;
+	const auto label = Ui::CreateChild<Ui::FlatLabel>(
+		button.get(),
+		st.rightLabel);
+	label->show();
+	rpl::combine(
+		button->widthValue(),
+		std::move(name),
+		std::move(value)
+	) | rpl::on_next([=, &st](
+			int width,
+			const QString &rowText,
+			const QString &text) {
+		const auto available = width
+			- st.padding.left()
+			- st.padding.right()
+			- st.style.font->width(rowText)
+			- st::settingsButtonRightSkip;
+		label->setText(text);
+		label->resizeToNaturalWidth(available);
+		label->moveToRight(st::settingsButtonRightSkip, st.padding.top());
+	}, label->lifetime());
+	return label;
+}
+
 [[nodiscard]] QString MaskedApiKey(const QString &key) {
 	if (key.isEmpty()) {
 		return Tr(u"LuminaTranslateApiKeyNotSet"_q);
@@ -246,12 +321,58 @@ struct LanguageEntry {
 	return u"Hello, world!"_q;
 }
 
+// The language that sample is written in. The test must never ask for it.
+[[nodiscard]] QString TestSampleLanguage() {
+	return u"en"_q;
+}
+
+// The target used when the language the read side would ask for is the
+// sample's own. Spanish because every service in TranslateProviders() can
+// reach it, including the narrowest of them, and because the answer is
+// unmistakably not English to anyone reading the toast.
+[[nodiscard]] QString TestFallbackLanguage() {
+	return u"es"_q;
+}
+
 // The language the test asks for is the one the read side would ask for, so a
 // test that comes back sane is evidence about the setup the user actually has
 // - including whether the service honours their dialect.
+//
+// With one exception, and it is the whole reason this is not one line: the
+// sample is English, so an English target makes this test pass for a working
+// service and for a dead one alike - "Hello, world!" comes back as "Hello,
+// world!" either way. That was the run a default profile got, since the read
+// language starts unset and the interface language is usually English, and a
+// test that cannot fail is not a test. An English target is therefore replaced
+// by one the sample has to visibly change under.
 [[nodiscard]] QString TestTargetLanguage() {
 	const auto stored = NormalizeLanguageCode(TranslateReadLanguage());
-	return stored.isEmpty() ? InterfaceLanguageCode() : stored;
+	const auto wanted = stored.isEmpty() ? InterfaceLanguageCode() : stored;
+	return (wanted.isEmpty()
+		|| (BaseLanguageCode(wanted) == TestSampleLanguage()))
+		? TestFallbackLanguage()
+		: wanted;
+}
+
+// The other half of the same problem: a service that hands the sample straight
+// back has not translated it, whatever status it said so with. An engine that
+// echoes its input, an LLM that answered "Hello, world!" because the prompt
+// was lost, and a proxy that returns the request body all land here rather
+// than being reported as a pass. Case and run-length of whitespace are
+// ignored, because neither of those is a translation either.
+[[nodiscard]] bool LooksUntranslated(
+		const QString &sample,
+		const QString &translated) {
+	const auto flatten = [](const QString &text) {
+		return text.simplified().toCaseFolded();
+	};
+	return (flatten(sample) == flatten(translated));
+}
+
+// The "Test failed: <reason>" shape, shared by the two paths that report one:
+// the engine's own error, and a reply that came back unchanged.
+[[nodiscard]] QString TestFailedWith(const QString &reason) {
+	return Tr(u"LuminaTranslateTestFailed"_q) + u": "_q + reason;
 }
 
 // `keyed` is true when the request went out carrying an API key, and `status`
@@ -309,21 +430,27 @@ struct LanguageEntry {
 		}
 		return Tr(u"LuminaTranslateTestUnavailable"_q);
 	}();
-	return Tr(u"LuminaTranslateTestFailed"_q) + u": "_q + reason;
+	return TestFailedWith(reason);
 }
 
 [[nodiscard]] QString TestSuccessText(
 		const QString &sample,
-		const QString &translated) {
+		const QString &translated,
+		const QString &targetName) {
 	auto shown = translated.trimmed();
 	if (shown.size() > kTestResultMaxLength) {
 		shown = shown.left(kTestResultMaxLength) + QChar(0x2026);
 	}
+	// The target is named, because the result is only evidence to somebody
+	// who can see which language was asked for.
 	return Tr(u"LuminaTranslateTestSuccess"_q)
 		+ u"\n"_q
 		+ sample
 		+ u" → "_q
-		+ shown;
+		+ shown
+		+ u" ("_q
+		+ targetName
+		+ u")"_q;
 }
 
 void ShowTestToast(
@@ -335,7 +462,11 @@ void ShowTestToast(
 	});
 }
 
-void AddToggleRow(
+// Both row builders below make DEPENDENT rows: everything they add is gated on
+// the master switch. The master switch itself is built inline in
+// AddTranslateRows() and must never go through them, or it would grey itself
+// out and could not be switched back on.
+not_null<Ui::SettingsButton*> AddToggleRow(
 		not_null<Ui::VerticalLayout*> container,
 		rpl::producer<QString> label,
 		Fn<bool()> checked,
@@ -349,21 +480,28 @@ void AddToggleRow(
 	) | rpl::on_next([save = std::move(save)](bool value) {
 		save(value);
 	}, button->lifetime());
+	GateRow(button, nullptr);
+	return button;
 }
 
 // `Settings` names Lumina::Settings inside this namespace, so the settings
 // section helpers have to be reached through the global namespace.
-void AddValueRow(
+not_null<Ui::SettingsButton*> AddValueRow(
 		not_null<Ui::VerticalLayout*> container,
 		rpl::producer<QString> label,
 		Fn<QString()> value,
 		Fn<void()> activate) {
-	::Settings::AddButtonWithLabel(
+	auto rowText = rpl::duplicate(label);
+	const auto button = ::Settings::AddButtonWithIcon(
 		container,
 		std::move(label),
-		LabelValue(std::move(value)),
-		st::settingsButtonNoIcon
-	)->setClickedCallback(std::move(activate));
+		st::settingsButtonNoIcon);
+	button->setClickedCallback(std::move(activate));
+	GateRow(button, AddRightLabel(
+		button,
+		std::move(rowText),
+		LabelValue(std::move(value))));
+	return button;
 }
 
 // A block of rows that only exists for providers that need them. It is built
@@ -595,11 +733,14 @@ void AddTestRow(
 		not_null<Ui::VerticalLayout*> container,
 		not_null<Window::SessionController*> controller) {
 	const auto state = container->lifetime().make_state<TestState>();
-	const auto button = ::Settings::AddButtonWithLabel(
+	const auto button = ::Settings::AddButtonWithIcon(
 		container,
 		TrValue(u"LuminaTranslateTest"_q),
-		rpl::single(QString()) | rpl::then(state->label.events()),
 		st::settingsButtonNoIcon);
+	GateRow(button, AddRightLabel(
+		button,
+		TrValue(u"LuminaTranslateTest"_q),
+		rpl::single(QString()) | rpl::then(state->label.events())));
 	button->setClickedCallback([=] {
 		if (state->running) {
 			return;
@@ -654,14 +795,20 @@ void AddTestRow(
 		state->watchdog.callOnce(kTestTimeoutMs);
 
 		const auto sample = TestSampleText();
-		state->engine->translate(sample, TestTargetLanguage(), [=](
+		const auto target = TestTargetLanguage();
+		state->engine->translate(sample, target, [=](
 				TranslateResult result) {
 			state->watchdog.cancel();
 			state->running = false;
 			state->label.fire(QString());
 			ShowTestToast(controller, result.failed()
 				? TestFailureText(result.error, keyed, result.httpStatus)
-				: TestSuccessText(sample, result.text));
+				: LooksUntranslated(sample, result.text)
+				? TestFailedWith(Tr(u"LuminaTranslateTestNoChange"_q))
+				: TestSuccessText(
+					sample,
+					result.text,
+					TranslateLanguageName(target)));
 
 			// This runs inside the engine's own network reply, so the engine
 			// cannot be dropped from here - that would delete the reply, and
@@ -948,14 +1095,20 @@ void AddTranslateRows(
 	// provider needs no key, so without this a fresh profile would silently
 	// gain a translate bar and an unlocked "Translate chats" switch that stock
 	// does not show. See Lumina::TranslationFeatureEnabled().
+	//
+	// Built here rather than through AddToggleRow(), which gates every row it
+	// makes on this switch: a master row that greyed itself out could never be
+	// switched back on.
 	Ui::AddSkip(container);
-	AddToggleRow(
+	const auto master = container->add(object_ptr<Ui::SettingsButton>(
 		container,
 		TrValue(u"LuminaTranslateEnable"_q),
-		[] { return TranslationFeatureEnabled(); },
-		[](bool value) {
-			Settings::Instance().set(kKeyFeatureEnabled, value);
-		});
+		st::settingsButtonNoIcon
+	))->toggleOn(FlagValue([] { return TranslationFeatureEnabled(); }));
+	master->toggledChanges(
+	) | rpl::on_next([](bool value) {
+		Settings::Instance().set(kKeyFeatureEnabled, value);
+	}, master->lifetime());
 	Ui::AddSkip(container);
 	Ui::AddDividerText(container, TrValue(u"LuminaTranslateEnableInfo"_q));
 	AddSendRows(container, controller);

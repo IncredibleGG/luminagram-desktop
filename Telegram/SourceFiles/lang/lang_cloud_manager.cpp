@@ -10,6 +10,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "lang/lang_instance.h"
 #include "lang/lang_file_parser.h"
 #include "lang/lang_text_entity.h"
+#include "lumina/lumina_brand.h"
 #include "mtproto/mtp_instance.h"
 #include "storage/localstorage.h"
 #include "core/application.h"
@@ -495,9 +496,11 @@ void CloudManager::switchToLanguage(const Language &data) {
 			const auto values = Instance::ParseStrings(result);
 			const auto getValue = [&](ushort key) {
 				auto it = values.find(key);
-				return (it == values.cend())
-					? GetOriginalValue(key)
-					: it->second;
+				return Lumina::BrandedLangValue(
+					key,
+					(it == values.cend())
+						? GetOriginalValue(key)
+						: it->second);
 			};
 			const auto text = tr::lng_sure_save_language(tr::now)
 				+ "\n\n"
@@ -539,9 +542,11 @@ void CloudManager::performSwitchToCustom() {
 				const auto values = loader.found();
 				const auto getValue = [&](ushort key) {
 					const auto it = values.find(key);
-					return (it == values.cend())
-						? GetOriginalValue(key)
-						: it.value();
+					return Lumina::BrandedLangValue(
+						key,
+						(it == values.cend())
+							? GetOriginalValue(key)
+							: it.value());
 				};
 				const auto text = tr::lng_sure_save_language(tr::now)
 					+ "\n\n"

@@ -13,6 +13,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "core/update_checker.h"
 #include "core/version.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_brand.h"
 #include "ui/boxes/confirm_box.h"
 #include "ui/painter.h"
 #include "ui/rect.h"
@@ -35,10 +36,11 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 namespace {
 
 rpl::producer<TextWithEntities> Text1() {
-	return tr::lng_about_text1(
-		lt_api_link,
-		tr::lng_about_text1_api(tr::url(u"https://core.telegram.org/api"_q)),
-		tr::marked);
+	return tr::lng_about_text1_api(
+		tr::url(u"https://core.telegram.org/api"_q)
+	) | rpl::map([](TextWithEntities apiLink) {
+		return Lumina::BrandAboutSummary(std::move(apiLink));
+	});
 }
 
 rpl::producer<TextWithEntities> Text2() {
@@ -64,7 +66,7 @@ rpl::producer<TextWithEntities> Text3() {
 } // namespace
 
 void AboutBox(not_null<Ui::GenericBox*> box) {
-	box->setTitle(u"Telegram Desktop"_q);
+	box->setTitle(AppName.utf16());
 
 	auto layout = box->verticalLayout();
 
@@ -105,9 +107,9 @@ void AboutBox(not_null<Ui::GenericBox*> box) {
 
 			box->getDelegate()->show(
 				Ui::MakeInformBox(
-					"The link to the current private alpha "
-					"version of Telegram Desktop was copied "
-					"to the clipboard."));
+					u"The link to the current private alpha version of "_q
+					+ AppName.utf16()
+					+ u" was copied to the clipboard."_q));
 		} else {
 			File::OpenUrl(Core::App().changelogLink());
 		}

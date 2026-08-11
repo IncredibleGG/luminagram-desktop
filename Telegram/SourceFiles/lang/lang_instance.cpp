@@ -15,6 +15,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "lang/lang_tag.h" // kTextCommandLangTag.
 #include "base/platform/base_platform_info.h"
 #include "base/qthelp_regex.h"
+#include "lumina/lumina_brand.h"
 
 #include "lang_auto_counts.h" // kKeysCount, kTagsCount.
 
@@ -805,7 +806,7 @@ QString GetNonDefaultValue(const QByteArray &key) {
 namespace details {
 
 QString Current(ushort key) {
-	return GetInstance().getValue(key);
+	return Lumina::BrandedLangValue(key, GetInstance().getValue(key));
 }
 
 rpl::producer<QString> Value(ushort key) {

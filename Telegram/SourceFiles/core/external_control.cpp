@@ -9,6 +9,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include "core/application.h"
 #include "core/core_settings.h"
+#include "core/version.h"
 #include "window/window_controller.h"
 #include "ui/layers/generic_box.h"
 #include "ui/widgets/buttons.h"
@@ -109,8 +110,9 @@ void RequestEnableAutomation() {
 		current = box.get();
 		FillAutomationConfirmBox(
 			box,
-			u"An external program is trying to control "
-			u"Telegram Desktop over the local socket — read open "
+			u"An external program is trying to control "_q
+			+ AppName.utf16()
+			+ u" over the local socket — read open "
 			u"windows and activate them.\n\nEnable local "
 			u"automation? While it is on, anything running under your "
 			u"user account can control the app."_q,

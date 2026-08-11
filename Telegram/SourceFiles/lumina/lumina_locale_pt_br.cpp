@@ -107,6 +107,7 @@ namespace {
 		{ u"LuminaTranslateTestNetwork"_q, u"Não foi possível alcançar o "
 			u"serviço. Verifique sua conexão com a internet e o proxy, se "
 			u"houver, e tente de novo."_q },
+		{ u"LuminaTranslateTestNoChange"_q, u"O serviço devolveu o texto de exemplo sem alteração, ou seja, nada foi traduzido. Verifique a chave, o modelo e o prompt do sistema."_q },
 		{ u"LuminaTranslateTestQuota"_q, u"O serviço recusou a requisição: "
 			u"requisições demais, ou a cota desta chave acabou. Tente mais "
 			u"tarde."_q },
@@ -467,7 +468,6 @@ namespace {
 			u"propósito em uma janela própria, ou em picture-in-picture, "
 			u"continua tocando, e as músicas e as mensagens de voz continuam "
 			u"tocando enquanto você está fora."_q },
-		{ u"LuminaMediaSaving"_q, u"Mídia"_q },
 		{ u"LuminaMediaTitle"_q, u"Mídia"_q },
 		{ u"LuminaMessageActionsInfo"_q, u"Estas entradas aparecem somente no "
 			u"menu de contexto de uma mensagem. Cada uma usa o encaminhamento "
@@ -479,6 +479,7 @@ namespace {
 			u"este dispositivo já sincronizou — nada é solicitado e nada é "
 			u"guardado."_q },
 		{ u"LuminaMessageDetails"_q, u"Detalhes"_q },
+		{ u"LuminaMessageDisplayHeader"_q, u"Exibição de mensagens"_q },
 		{ u"LuminaOnboardingDualName"_q, u"Os dois idiomas ao mesmo tempo"_q },
 		{ u"LuminaOnboardingDualText"_q, u"Mantenha o texto original na tela "
 			u"ao lado da tradução, nas mensagens que você recebe e nas que "
@@ -642,6 +643,7 @@ namespace {
 		{ u"LuminaSelectFromAuthorLimit"_q,
 			u"Só é possível selecionar {1} mensagens de uma vez."_q },
 		{ u"LuminaSelectFromAuthorTitle"_q, u"Selecionar tudo do autor"_q },
+		{ u"LuminaSelectionHeader"_q, u"Seleção"_q },
 		{ u"LuminaSendOriginalCaption"_q, u"Enviar legenda original"_q },
 		{ u"LuminaShowBookmarks"_q, u"Mostrar item de marcador no menu"_q },
 		{ u"LuminaShowMessageDetails"_q, u"Menu de detalhes da mensagem"_q },
@@ -659,6 +661,7 @@ namespace {
 			u"os próprios tamanhos. O Telegram Desktop mede uma figurinha uma "
 			u"vez e guarda essa medida, então um tamanho novo passa a valer "
 			u"na próxima vez que o app iniciar."_q },
+		{ u"LuminaStickersHeader"_q, u"Stickers e GIFs"_q },
 		{ u"LuminaTimeWithSeconds"_q,
 			u"Mostrar segundos na hora da mensagem"_q },
 		{ u"LuminaTimeWithSecondsAbout"_q, u"A hora abaixo de uma mensagem, a "
@@ -718,6 +721,7 @@ namespace {
 			u"mensagem específica, atribua uma tecla a «Alternar prévia do "
 			u"link» em Configurações > Atalhos de teclado e pressione-a "
 			u"enquanto escreve."_q },
+		{ u"LuminaLinkPreviewHeader"_q, u"Prévias de links"_q },
 		{ u"LuminaVoiceConfirmTitle"_q, u"Mensagens de voz e vídeo"_q },
 		{ u"LuminaVoiceConfirmRow"_q, u"Confirmar antes de enviar"_q },
 		{ u"LuminaVoiceConfirmInfo"_q, u"Perguntar antes de enviar uma "
@@ -846,6 +850,8 @@ namespace {
 		{ u"LuminaSessionGuardCheckNow"_q, u"Verificar dispositivos conectados agora"_q },
 		{ u"LuminaSessionGuardNoNew"_q, u"Nenhum login novo. Todos os dispositivos conectados já foram aprovados por você."_q },
 		{ u"LuminaSessionGuardCheckFailed"_q, u"Não foi possível verificar os dispositivos conectados. Confira sua conexão e tente de novo."_q },
+		{ u"LuminaSessionGuardChecking"_q, u"Verificando…"_q },
+		{ u"LuminaSessionGuardBusy"_q, u"Já há uma verificação em andamento; o resultado aparece em instantes."_q },
 		{ u"LuminaSessionAlertTitle"_q, u"Novo login detectado"_q },
 		{ u"LuminaSessionAlertIntro"_q, u"Um dispositivo que você não aprovou entrou na sua conta. Se não foi você, ele pode ler todas as suas conversas agora mesmo."_q },
 		{ u"LuminaSessionAlertDevice"_q, u"Dispositivo"_q },
@@ -888,6 +894,7 @@ namespace {
 		{ u"LuminaSttKey"_q, u"Chave de API"_q },
 		{ u"LuminaSttBaseUrl"_q, u"URL base"_q },
 		{ u"LuminaSttModel"_q, u"Modelo"_q },
+		{ u"LuminaSttNotReady"_q, u"A transcrição de voz está ligada, mas o mecanismo escolhido abaixo ainda não tem chave de API, então não funciona. Salve uma chave em Mecanismo, ou desligue esta opção."_q },
 		{ u"LuminaSttInfoDesktop"_q, u"A transcrição usa sua própria chave de API e sua própria "
 			u"cota; o LuminaGram nunca fornece uma chave. A mensagem de "
 			u"voz é enviada ao serviço escolhido abaixo, então ative "

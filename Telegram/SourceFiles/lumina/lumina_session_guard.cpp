@@ -20,6 +20,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "lumina/lumina_settings.h"
 #include "main/main_session.h"
 #include "settings/cloud_password/settings_cloud_password_start.h"
+#include "settings/settings_common.h"
 #include "ui/boxes/confirm_box.h"
 #include "ui/layers/generic_box.h"
 #include "ui/vertical_list.h"
@@ -189,6 +190,10 @@ public:
 
 	void check(bool manual, Fn<void(SessionGuardOutcome)> done);
 
+	[[nodiscard]] rpl::producer<bool> runningValue() const {
+		return _running.value();
+	}
+
 private:
 	void onForeground();
 	void onTimeout();
@@ -220,7 +225,10 @@ private:
 	crl::time _receivedBefore = 0;
 	int _index = 0;
 	int _retriesLeft = kMaxShowRetries;
-	bool _running = false;
+
+	// A variable rather than a bool so the settings row can follow it. Every
+	// read below is _running.current(); the assignments are unchanged.
+	rpl::variable<bool> _running = false;
 
 };
 
@@ -249,7 +257,7 @@ Guard::Guard(not_null<Main::Session*> session)
 void Guard::onForeground() {
 	try {
 		if (!SessionGuardEnabled()
-			|| _running
+			|| _running.current()
 			|| _foregroundTimer.isActive()
 			|| !ThrottleAllows(_account)) {
 			return;
@@ -264,10 +272,17 @@ void Guard::check(bool manual, Fn<void(SessionGuardOutcome)> done) {
 		// A manual run deliberately ignores the preference AND the throttle:
 		// the user just asked for it. An automatic one re-tests the
 		// preference, which may have been turned off while the delay ran.
-		if (_running || (!manual && !SessionGuardEnabled())) {
-			// Android reports "nothing new" rather than an error for this.
+		if (_running.current() || (!manual && !SessionGuardEnabled())) {
+			// A run that is already in flight is its own answer: reporting
+			// "nothing new" for it, as this used to, told the user their
+			// devices had been checked when nothing had been checked yet -
+			// and the real answer was seconds away and about to contradict
+			// it. The preference being off still reports "nothing new",
+			// which is what Android does rather than call it an error.
 			if (done) {
-				done(SessionGuardOutcome::NoNew);
+				done(_running.current()
+					? SessionGuardOutcome::Busy
+					: SessionGuardOutcome::NoNew);
 			}
 			return;
 		}
@@ -615,15 +630,17 @@ void Guard::twoStepTip() {
 	return (j != guards.end()) ? j->second.get() : nullptr;
 }
 
-void AddActionRow(
-		not_null<Ui::VerticalLayout*> container,
-		rpl::producer<QString> label,
-		Fn<void()> activate) {
-	container->add(object_ptr<Ui::SettingsButton>(
-		container,
-		std::move(label),
-		st::settingsButtonNoIcon
-	))->setClickedCallback(std::move(activate));
+// What the manual row shows on its right while a check is running. Empty the
+// rest of the time, so the row reads as a plain action again once it has
+// answered.
+[[nodiscard]] rpl::producer<QString> CheckStatusValue(
+		not_null<Window::SessionController*> controller) {
+	return rpl::combine(
+		SessionGuardRunningValue(controller),
+		TrValue(u"LuminaSessionGuardChecking"_q)
+	) | rpl::map([](bool running, const QString &text) {
+		return running ? text : QString();
+	});
 }
 
 } // namespace
@@ -664,6 +681,17 @@ void SetupSessionGuard(not_null<Window::SessionController*> controller) {
 	}
 }
 
+rpl::producer<bool> SessionGuardRunningValue(
+		not_null<Window::SessionController*> controller) {
+	try {
+		if (const auto guard = GuardFor(&controller->session())) {
+			return guard->runningValue();
+		}
+	} catch (...) {
+	}
+	return rpl::single(false);
+}
+
 void SessionGuardCheckNow(
 		not_null<Window::SessionController*> controller,
 		Fn<void(SessionGuardOutcome)> done) {
@@ -701,28 +729,46 @@ void AddSessionGuardRows(
 		SetSessionGuardEnabled(value);
 	}, toggle->lifetime());
 
+	// The row says "Checking..." from the moment it is pressed, because the
+	// answer is a network round trip away and a request nothing answers takes
+	// the full kRequestTimeout to give up. Without it, the press produced no
+	// visible change whatsoever for up to 30 seconds, which is the same thing
+	// a dead row produces. The text is driven by the guard's own state rather
+	// than by this callback, so a check the foreground watcher started is
+	// reported here too - and so a press that lands on one of those cannot
+	// leave the row stuck saying "Checking..." after it ends.
 	const auto weak = base::make_weak(controller);
-	AddActionRow(
+	const auto check = ::Settings::AddButtonWithLabel(
 		container,
 		TrValue(u"LuminaSessionGuardCheckNow"_q),
-		[=] {
-			const auto strong = weak.get();
-			if (!strong) {
+		CheckStatusValue(controller),
+		st::settingsButtonNoIcon);
+	check->setClickedCallback([=] {
+		const auto strong = weak.get();
+		if (!strong) {
+			return;
+		}
+		SessionGuardCheckNow(strong, [=](SessionGuardOutcome outcome) {
+			const auto again = weak.get();
+			if (!again) {
 				return;
 			}
-			SessionGuardCheckNow(strong, [=](SessionGuardOutcome outcome) {
-				const auto again = weak.get();
-				if (!again) {
-					return;
-				} else if (outcome == SessionGuardOutcome::Failed) {
-					again->showToast(
-						Tr(u"LuminaSessionGuardCheckFailed"_q));
-				} else if (outcome == SessionGuardOutcome::NoNew) {
-					again->showToast(Tr(u"LuminaSessionGuardNoNew"_q));
-				}
-				// NewLogins says nothing: the alerts are already on screen.
-			});
+			switch (outcome) {
+			case SessionGuardOutcome::Failed:
+				again->showToast(Tr(u"LuminaSessionGuardCheckFailed"_q));
+				break;
+			case SessionGuardOutcome::NoNew:
+				again->showToast(Tr(u"LuminaSessionGuardNoNew"_q));
+				break;
+			case SessionGuardOutcome::Busy:
+				again->showToast(Tr(u"LuminaSessionGuardBusy"_q));
+				break;
+			case SessionGuardOutcome::NewLogins:
+				// Says nothing: the alerts are already on screen.
+				break;
+			}
 		});
+	});
 
 	Ui::AddSkip(container);
 	Ui::AddDividerText(container, TrValue(u"LuminaSessionGuardInfo"_q));

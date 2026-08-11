@@ -95,6 +95,7 @@ namespace {
 			u"網路連線。"_q },
 		{ u"LuminaTranslateTestNetwork"_q, u"無法連線到這個服務。請檢查你的"
 			u"網路連線與代理伺服器設定，然後再試一次。"_q },
+		{ u"LuminaTranslateTestNoChange"_q, u"服務把原文原封不動地退了回來，等於沒有翻譯。請檢查金鑰、模型與系統提示詞。"_q },
 		{ u"LuminaTranslateTestQuota"_q, u"服務拒絕了這次請求：請求太過"
 			u"頻繁，或這組金鑰的額度已經用完。請稍後再試。"_q },
 		{ u"LuminaTranslateTestQuotaKeyed"_q, u"服務拒絕了這次請求：服務"
@@ -398,7 +399,6 @@ namespace {
 			u"自動暫停正在播放的影片。把檢視器縮到最小也會暫停。你刻意放到"
 			u"獨立視窗或子母畫面的影片會繼續播放，音樂與語音訊息在你離開時"
 			u"也會繼續播放。"_q },
-		{ u"LuminaMediaSaving"_q, u"媒體"_q },
 		{ u"LuminaMediaTitle"_q, u"媒體"_q },
 		{ u"LuminaMessageActionsInfo"_q, u"這些項目只會出現在訊息的右鍵選單"
 			u"裡。每一項都使用 Telegram 自己的轉發功能，所以限制轉發的聊天"
@@ -407,6 +407,7 @@ namespace {
 			u"它會兩者一起移除。「詳細資訊」只會讀取這台裝置已經同步下來的"
 			u"內容——不會發出任何請求，也不會儲存任何東西。"_q },
 		{ u"LuminaMessageDetails"_q, u"詳細資訊"_q },
+		{ u"LuminaMessageDisplayHeader"_q, u"訊息顯示"_q },
 		{ u"LuminaOnboardingDualName"_q, u"兩種語言同時顯示"_q },
 		{ u"LuminaOnboardingDualText"_q, u"讓原文和譯文一起留在畫面上，"
 			u"你收到的訊息和你傳送的訊息都適用。"_q },
@@ -533,6 +534,7 @@ namespace {
 		{ u"LuminaSelectFromAuthorLimit"_q,
 			u"一次最多只能選取 {1} 則訊息。"_q },
 		{ u"LuminaSelectFromAuthorTitle"_q, u"選擇該作者的所有訊息"_q },
+		{ u"LuminaSelectionHeader"_q, u"選取"_q },
 		{ u"LuminaSendOriginalCaption"_q, u"傳送原始說明文字"_q },
 		{ u"LuminaShowBookmarks"_q, u"顯示書籤選單項目"_q },
 		{ u"LuminaShowMessageDetails"_q, u"訊息詳細資訊"_q },
@@ -546,6 +548,7 @@ namespace {
 			u"你收到的都適用。動態表情符號、骰子與禮物貼圖維持它們自己的"
 			u"大小。Telegram Desktop 只會測量貼圖一次並記住結果，所以新的"
 			u"大小要到下次啟動應用程式時才會生效。"_q },
+		{ u"LuminaStickersHeader"_q, u"貼圖與 GIF"_q },
 		{ u"LuminaTimeWithSeconds"_q, u"在訊息時間中顯示秒"_q },
 		{ u"LuminaTimeWithSecondsAbout"_q, u"訊息下方的時間、複製文字中的"
 			u"時間，以及螢幕閱讀器唸出的時間都會包含秒數。"_q },
@@ -591,6 +594,7 @@ namespace {
 			u"上的預覽，以及你編輯的訊息，都會保持原樣。若想單獨為某則訊息附上"
 			u"預覽，可以在設定 > 鍵盤快速鍵中為「切換連結預覽」指定一個按鍵，"
 			u"撰寫時按下即可。"_q },
+		{ u"LuminaLinkPreviewHeader"_q, u"連結預覽"_q },
 		{ u"LuminaVoiceConfirmTitle"_q, u"語音與影片訊息"_q },
 		{ u"LuminaVoiceConfirmRow"_q, u"傳送前確認"_q },
 		{ u"LuminaVoiceConfirmInfo"_q, u"在錄好的語音或圓形影片訊息送出前先詢"
@@ -702,6 +706,8 @@ namespace {
 		{ u"LuminaSessionGuardCheckNow"_q, u"立即檢查登入裝置"_q },
 		{ u"LuminaSessionGuardNoNew"_q, u"沒有新的登入，所有已連結裝置都是你確認過的。"_q },
 		{ u"LuminaSessionGuardCheckFailed"_q, u"無法檢查已連結裝置，請確認網路後再試一次。"_q },
+		{ u"LuminaSessionGuardChecking"_q, u"檢查中…"_q },
+		{ u"LuminaSessionGuardBusy"_q, u"已經有一次檢查正在進行，結果稍後就會出現。"_q },
 		{ u"LuminaSessionAlertTitle"_q, u"偵測到新登入"_q },
 		{ u"LuminaSessionAlertIntro"_q, u"有一台你沒確認過的裝置登入了你的帳號。如果不是你本人，對方現在就看得到你全部的聊天紀錄。"_q },
 		{ u"LuminaSessionAlertDevice"_q, u"裝置"_q },
@@ -745,6 +751,7 @@ namespace {
 		{ u"LuminaSttKey"_q, u"API 金鑰"_q },
 		{ u"LuminaSttBaseUrl"_q, u"介面位址"_q },
 		{ u"LuminaSttModel"_q, u"模型"_q },
+		{ u"LuminaSttNotReady"_q, u"語音轉文字已開啟，但下方選擇的引擎還沒有 API 金鑰，因此無法運作。請到「引擎」儲存金鑰，或關閉這個開關。"_q },
 		{ u"LuminaSttInfoDesktop"_q, u"轉錄用的是你自己的 API key、花你自己的額度，"
 			u"LuminaGram 不提供 key。語音檔會上傳到"
 			u"你選的服務，因此只有在你願意把訊息交給該服務時才開啟"

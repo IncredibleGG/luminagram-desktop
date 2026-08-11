@@ -20,6 +20,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/wrap/slide_wrap.h"
 #include "ui/wrap/vertical_layout.h"
 
+#include "styles/style_lumina.h"
 #include "styles/style_settings.h"
 
 namespace Lumina {
@@ -54,13 +55,22 @@ namespace {
 void AddUpdateRows(not_null<Ui::VerticalLayout*> container) {
 	Ui::AddSkip(container);
 
+	// A fact, not a control. The row has always been inert - the attribute
+	// below predates this - but while it was painted like its neighbours, with
+	// the channel in the accent colour every pressable value row on these
+	// pages uses, it read as a switch that ignores clicks. Giving it a real
+	// action was the alternative and it would have been a lie: as
+	// UpdateChannelName() above says, this fork publishes "stable" and nothing
+	// else, so every entry in a channel picker would install the same
+	// packages. st::luminaSettingsFactRow states the channel in ordinary
+	// secondary text instead.
 	const auto version = ::Settings::AddButtonWithLabel(
 		container,
 		tr::lng_settings_current_version(
 			lt_version,
 			rpl::single(currentVersionText())),
 		rpl::single(UpdateChannelName()),
-		st::settingsButtonNoIcon);
+		st::luminaSettingsFactRow);
 	version->setAttribute(Qt::WA_TransparentForMouseEvents);
 
 	if (Core::UpdaterDisabled()) {

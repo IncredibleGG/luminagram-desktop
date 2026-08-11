@@ -107,6 +107,7 @@ namespace {
 		{ u"LuminaTranslateTestNetwork"_q, u"Не удалось связаться с "
 			u"сервисом. Проверьте подключение к интернету и настройки прокси, "
 			u"затем попробуйте снова."_q },
+		{ u"LuminaTranslateTestNoChange"_q, u"Сервис вернул исходный текст без изменений — перевода не было. Проверьте ключ, модель и системный промпт."_q },
 		{ u"LuminaTranslateTestQuota"_q, u"Сервис отклонил запрос: слишком "
 			u"много обращений или квота этого ключа исчерпана. Попробуйте "
 			u"позже."_q },
@@ -326,6 +327,7 @@ namespace {
 			u"сохраняют свои собственные размеры. Telegram Desktop "
 			u"измеряет стикер один раз и запоминает результат, поэтому "
 			u"новый размер применяется при следующем запуске приложения."_q },
+		{ u"LuminaStickersHeader"_q, u"Стикеры и GIF"_q },
 
 		// Encrypted local backup.
 		{ u"LuminaBackupTitle"_q, u"Зашифрованная резервная копия"_q },
@@ -498,6 +500,7 @@ namespace {
 		{ u"LuminaSaveToCloudTitle"_q, u"Сохранить в «Избранное»"_q },
 		{ u"LuminaShowMessageDetails"_q, u"Подробности сообщения"_q },
 		{ u"LuminaMessageDetails"_q, u"Подробности"_q },
+		{ u"LuminaMessageDisplayHeader"_q, u"Отображение сообщений"_q },
 		{ u"LuminaDetailsFrom"_q, u"От"_q },
 		{ u"LuminaDetailsDate"_q, u"Дата"_q },
 		{ u"LuminaDetailsMessageId"_q, u"ID сообщения"_q },
@@ -506,6 +509,7 @@ namespace {
 		{ u"LuminaSelectFromAuthor"_q, u"Выбрать все сообщения автора"_q },
 		{ u"LuminaSelectFromAuthorTitle"_q,
 			u"Выбрать все сообщения автора"_q },
+		{ u"LuminaSelectionHeader"_q, u"Выделение"_q },
 		{ u"LuminaSelectFromAuthorAbout"_q, u"Добавляет в меню сообщения "
 			u"в группах пункт, который выделяет все сообщения нажатого "
 			u"отправителя. Он охватывает только сообщения, уже "
@@ -561,7 +565,6 @@ namespace {
 			u"окно или в режим «картинка в картинке», продолжает играть, "
 			u"и музыка с голосовыми сообщениями тоже продолжает играть, "
 			u"пока вас нет."_q },
-		{ u"LuminaMediaSaving"_q, u"Медиа"_q },
 		{ u"LuminaSaveStickers"_q, u"Сохранять стикеры"_q },
 		{ u"LuminaSaveStickersInfo"_q, u"Добавляет пункт «Сохранить "
 			u"стикер» в контекстное меню панели стикеров. Стикеры "
@@ -786,6 +789,7 @@ namespace {
 			u"сообщению, назначьте клавишу для «Переключить предпросмотр "
 			u"ссылки» в разделе Настройки > Сочетания клавиш и нажмите её при "
 			u"наборе."_q },
+		{ u"LuminaLinkPreviewHeader"_q, u"Предпросмотр ссылок"_q },
 		{ u"LuminaVoiceConfirmTitle"_q, u"Голосовые и видеосообщения"_q },
 		{ u"LuminaVoiceConfirmRow"_q, u"Подтверждать перед отправкой"_q },
 		{ u"LuminaVoiceConfirmInfo"_q, u"Спрашивать перед отправкой "
@@ -914,6 +918,8 @@ namespace {
 		{ u"LuminaSessionGuardCheckNow"_q, u"Проверить устройства сейчас"_q },
 		{ u"LuminaSessionGuardNoNew"_q, u"Новых входов нет. Все подключённые устройства вы уже подтвердили."_q },
 		{ u"LuminaSessionGuardCheckFailed"_q, u"Не удалось проверить подключённые устройства. Проверьте соединение и повторите попытку."_q },
+		{ u"LuminaSessionGuardChecking"_q, u"Проверка…"_q },
+		{ u"LuminaSessionGuardBusy"_q, u"Проверка уже выполняется, результат появится через мгновение."_q },
 		{ u"LuminaSessionAlertTitle"_q, u"Обнаружен новый вход"_q },
 		{ u"LuminaSessionAlertIntro"_q, u"В ваш аккаунт вошло устройство, которое вы не подтверждали. Если это были не вы, оно прямо сейчас видит всю вашу переписку."_q },
 		{ u"LuminaSessionAlertDevice"_q, u"Устройство"_q },
@@ -958,6 +964,7 @@ namespace {
 		{ u"LuminaSttKey"_q, u"Ключ API"_q },
 		{ u"LuminaSttBaseUrl"_q, u"Базовый URL"_q },
 		{ u"LuminaSttModel"_q, u"Модель"_q },
+		{ u"LuminaSttNotReady"_q, u"Распознавание речи включено, но у выбранного ниже движка ещё нет ключа API, поэтому оно не работает. Сохраните ключ в разделе «Движок» или выключите этот переключатель."_q },
 		{ u"LuminaSttInfoDesktop"_q, u"Расшифровка работает на вашем собственном ключе API и "
 			u"вашей квоте - LuminaGram не предоставляет ключ. Голосовое "
 			u"сообщение загружается в выбранный сервис, поэтому "

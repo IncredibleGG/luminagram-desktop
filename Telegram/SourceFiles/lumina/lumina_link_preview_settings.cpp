@@ -20,7 +20,13 @@ namespace Lumina {
 void AddLinkPreviewRows(
 		not_null<Ui::VerticalLayout*> container,
 		not_null<Window::SessionController*> controller) {
+	// Every other block on the chats page carries a title, so a block without
+	// one does not read as a block: the row above the divider looked like the
+	// last row of whatever came before it.
 	Ui::AddSkip(container);
+	Ui::AddSubsectionTitle(
+		container,
+		TrValue(u"LuminaLinkPreviewHeader"_q));
 	const auto button = container->add(object_ptr<Ui::SettingsButton>(
 		container,
 		TrValue(u"LuminaPrivacyDisableLinkPreview"_q),

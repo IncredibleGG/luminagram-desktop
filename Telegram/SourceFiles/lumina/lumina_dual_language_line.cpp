@@ -47,7 +47,13 @@ TextParseOptions kSubLineOptions = {
 };
 
 struct Line {
-	Ui::Text::String text;
+	// Built with a real minResize width, not the default kQFixedMax. countHeight()
+	// measures at std::max(width, _minResizeWidth) (text.cpp enumerateLines), so a
+	// default-constructed String reports a single line at ANY width - the reserved
+	// sub-line height was always one line while draw() wrapped to many, and the
+	// translation spilled past the bubble onto the chat behind it. st::msgMinWidth
+	// matches how the main message text is constructed (history_view_element.cpp).
+	Ui::Text::String text = Ui::Text::String(st::msgMinWidth);
 	QString source;
 	QString original; // Only filled on the outgoing branch, for `changed`.
 	int width = 0;

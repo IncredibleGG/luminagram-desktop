@@ -8,6 +8,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "lumina/lumina_dual_language_line.h"
 
 #include "base/flat_map.h"
+#include "base/debug_log.h" // DUALDIAG temporary
 #include "base/flat_set.h"
 #include "data/data_session.h"
 #include "history/history.h"
@@ -510,6 +511,10 @@ int DualLanguageResizeToWidth(
 		line.height = st::mediaInBubbleSkip
 			+ line.text.countHeight(width)
 			+ (reserveBottomInfoRow ? st::msgDateFont->height : 0);
+		LOG(("DUALDIAG line: width=%1 reserveRow=%2 countHeight=%3 textMaxWidth=%4 "
+			"textMinHeight=%5 height=%6").arg(width).arg(reserveBottomInfoRow ? 1 : 0)
+			.arg(line.text.countHeight(width)).arg(line.text.maxWidth())
+			.arg(line.text.minHeight()).arg(line.height));
 	}
 	return line.height;
 }
@@ -541,6 +546,8 @@ void PaintDualLanguage(
 		return;
 	}
 	const auto stm = context.messageStyle();
+	LOG(("DUALDIAG paint: w=%1 lineWidth=%2 lineHeight=%3 countHeightAtW=%4")
+		.arg(w).arg(line.width).arg(line.height).arg(line.text.countHeight(w)));
 	p.setPen(stm->msgDateFg);
 	line.text.draw(p, {
 		.position = { x, y + st::mediaInBubbleSkip },

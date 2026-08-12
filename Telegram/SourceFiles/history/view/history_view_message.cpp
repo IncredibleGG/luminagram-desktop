@@ -10,6 +10,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "api/api_suggest_post.h"
 #include "api/api_transcribes.h"
 #include "base/options.h"
+#include "base/debug_log.h" // DUALDIAG temporary
 #include "base/qt/qt_key_modifiers.h"
 #include "base/unixtime.h"
 #include "core/application.h"
@@ -6642,6 +6643,14 @@ int Message::resizeContentGetHeight(int newWidth) {
 			this,
 			dualContentWidth - st::msgPadding.left() - st::msgPadding.right(),
 			needInfoDisplay() && !reactionsInBubble);
+		if (Lumina::DualLanguageShown(this)) {
+			LOG(("DUALDIAG resize id=%1 newWidth=%2 contentWidth=%3 dualContentWidth=%4 "
+				"textRealWidth=%5 nonTextMax=%6 maxWidth=%7 appearing=%8 dualHeight=%9")
+				.arg(data()->id.bare).arg(newWidth).arg(contentWidth).arg(dualContentWidth)
+				.arg(textRealWidth()).arg(int(_nonTextMaxWidth)).arg(maxWidth())
+				.arg(Get<TextAppearing>() ? 1 : 0)
+				.arg(Lumina::DualLanguageHeight(this)));
+		}
 		if (needInfoDisplay()) {
 			newHeight += (bottomInfoHeight - st::msgDateFont->height);
 		}

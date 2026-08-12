@@ -6617,9 +6617,30 @@ int Message::resizeContentGetHeight(int newWidth) {
 				- st::msgPadding.left()
 				- st::msgPadding.right());
 		}
+		// Reserve the sub-line at the same inner width PaintDualLanguage() lays
+		// it out at. countGeometry() (the paint path) always shrinks the bubble
+		// to the shown text width, including mid appear-animation where it uses
+		// TextAppearing::shownWidth; resizeContentGetHeight() skips that shrink
+		// while the text is appearing, because the main text height then comes
+		// from shownHeight and does not need it. The sub-line height IS measured
+		// from this width, so leaving it unshrunk here wraps the translation to
+		// too few lines and its tail spills below the bubble under the timestamp.
+		// Mirror countGeometry()'s shrink for the sub-line width.
+		auto dualContentWidth = contentWidth;
+		if (!mediaDisplayed && bubble && hasVisibleText()) {
+			const auto appearing = Get<TextAppearing>();
+			const auto use = (appearing && appearing->use)
+				? appearing->shownWidth
+				: textRealWidth();
+			if (use > 0) {
+				accumulate_min(dualContentWidth, std::max(
+					use + st::msgPadding.left() + st::msgPadding.right(),
+					int(_nonTextMaxWidth)));
+			}
+		}
 		newHeight += Lumina::DualLanguageResizeToWidth(
 			this,
-			contentWidth - st::msgPadding.left() - st::msgPadding.right(),
+			dualContentWidth - st::msgPadding.left() - st::msgPadding.right(),
 			needInfoDisplay() && !reactionsInBubble);
 		if (needInfoDisplay()) {
 			newHeight += (bottomInfoHeight - st::msgDateFont->height);

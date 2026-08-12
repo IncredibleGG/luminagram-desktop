@@ -62,11 +62,13 @@ namespace {
 		{ u"LuminaTranslateSendLang"_q, u"送出語言"_q },
 		{ u"LuminaTranslateSendLangAuto"_q, u"對方的語言"_q },
 		{ u"LuminaTranslateBeforeSendConfirm"_q, u"傳送前確認"_q },
-		{ u"LuminaTranslateSendInfo"_q, u"你傳出的訊息會翻譯成上面選擇的"
-			u"語言，原文也會與譯文一起保留。選擇「對方的語言」時，LuminaGram "
-			u"會在每個聊天第一次詢問要用哪個語言，之後就記住。開啟「傳送前"
-			u"確認」時，會先把譯文與原文並排顯示，讓你選擇要傳送哪一個；"
-			u"關閉時譯文會直接傳送出去。"_q },
+		{ u"LuminaTranslateSendInfo"_q, u"這個開關只是讓這項功能可用，本身"
+			u"不會翻譯任何訊息；必須在各個聊天分別開啟後，該聊天送出的訊息"
+			u"才會翻譯。方法是在聊天中長按傳送鍵，開啟「傳送前翻譯」。你傳出"
+			u"的訊息會翻譯成上面選擇的語言，原文也會與譯文一起保留。選擇"
+			u"「對方的語言」時，LuminaGram 會在每個聊天第一次詢問要用哪個"
+			u"語言，之後就記住。開啟「傳送前確認」時，會先把譯文與原文並排"
+			u"顯示，讓你選擇要傳送哪一個；關閉時譯文會直接傳送出去。"_q },
 		{ u"LuminaTranslateReceiveHeader"_q, u"接收"_q },
 		{ u"LuminaDualLanguageDisplay"_q, u"同時顯示原文與譯文"_q },
 		{ u"LuminaTranslateReadLang"_q, u"閱讀語言"_q },

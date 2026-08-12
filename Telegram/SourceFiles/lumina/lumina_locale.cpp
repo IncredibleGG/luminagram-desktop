@@ -94,13 +94,16 @@ struct Registration {
 		{ u"LuminaTranslateSendLang"_q, u"Send in"_q },
 		{ u"LuminaTranslateSendLangAuto"_q, u"Recipient's language"_q },
 		{ u"LuminaTranslateBeforeSendConfirm"_q, u"Confirm before sending"_q },
-		{ u"LuminaTranslateSendInfo"_q, u"Outgoing messages are translated "
-			"into the language above, and the original is kept alongside the "
-			"translation. With \"Recipient's language\" LuminaGram asks once "
-			"per chat which language to use there, then remembers it. "
-			"\"Confirm before sending\" shows the translation next to the "
-			"original first, so you can send either one; with it off the "
-			"translation goes out straight away."_q },
+		{ u"LuminaTranslateSendInfo"_q, u"This switch only makes the feature "
+			"available. Nothing is translated until you turn it on for a chat: "
+			"hold its send button and switch on \"Translate before sending\" "
+			"there. Outgoing messages are then translated into the language "
+			"above, and the original is kept alongside the translation. With "
+			"\"Recipient's language\" LuminaGram asks once per chat which "
+			"language to use there, then remembers it. \"Confirm before "
+			"sending\" shows the translation next to the original first, so you "
+			"can send either one; with it off the translation goes out straight "
+			"away."_q },
 		{ u"LuminaTranslateReceiveHeader"_q, u"Receiving"_q },
 		{ u"LuminaDualLanguageDisplay"_q,
 			u"Show original and translation together"_q },

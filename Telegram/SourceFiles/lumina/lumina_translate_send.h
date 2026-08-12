@@ -55,8 +55,14 @@ namespace Lumina {
 // in groups too - see the note at the top of
 // lumina/lumina_translate_settings.h.
 //
-// The one key it owns is `trSendLangDialog`, the per-dialog send-language
-// lock, described at DialogSendLanguage() below.
+// The two keys it owns are `trSendLangDialog`, the per-dialog send-language
+// lock described at DialogSendLanguage() below, and `trSendChatOn`, the
+// per-dialog switch that decides whether a chat translates its outgoing
+// messages at all. `translateBeforeSend` above is now only a capability gate:
+// it makes the feature available, and translates nothing until a chat is
+// switched on. Both per-dialog keys default to "off"/absent, so a fresh
+// profile with the global switch on still translates no chat until one is
+// turned on from inside the conversation (AddSendMenuTranslateRow below).
 //
 // While Lumina::ContinuousTranslationAvailable() is false - and it is until
 // `translateEnabled` is turned on, which is the default - the interceptor
@@ -195,10 +201,11 @@ void SetupTranslateSendPipeline();
 void FlushTranslateSends();
 void FlushTranslateSendsAndCaptions();
 
-// Whether the next send in this chat would be translated, without consuming
-// anything: the master opt-in, the effective toggle (which the send-menu quick
-// toggle below can override for one send) and the scope, in that order. This
-// is the predicate W2-D's live preview panel should show itself on.
+// Whether the next send in this chat would be translated: the continuous-tier
+// opt-in, the global capability switch and this chat's own persistent switch,
+// all three. The global switch no longer decides this on its own - a chat is
+// translated only once it has been switched on from inside the conversation.
+// This is the predicate W2-D's live preview panel should show itself on.
 [[nodiscard]] bool TranslateBeforeSendActive(not_null<History*> history);
 
 // The per-dialog send-language lock, key `trSendLangDialog`, an object of
@@ -286,46 +293,31 @@ using SendOriginalHook = Fn<void(
 	const QString &originalText)>;
 void SetSendOriginalHook(SendOriginalHook hook);
 
-// The send-menu quick toggle, the one row this item adds to
-// menu/menu_send.cpp's FillSendMenu(). It flips translate-before-send for the
-// NEXT send in that chat only and never writes the stored preference, so it is
-// the "just this once" escape hatch in both directions - translate a message
-// in a chat where the feature is off, or send one as typed in a chat where it
-// is on.
-//
-// The override is dropped when it is used and when it is five minutes old, so
-// a menu opened and forgotten cannot change the behaviour of a message typed
-// much later. A send in another chat neither uses nor clears it, and neither
-// does a send this pipeline could not have translated anyway.
-//
-// Adds nothing at all unless translation is switched on and the menu belongs
-// to a plain text composer.
-void AddSendMenuTranslateRow(
-	not_null<Ui::PopupMenu*> menu,
-	const SendMenu::Details &details);
-
-// !! CALL THIS ONE INSTEAD, from menu/menu_send.cpp's FillSendMenu(), passing
-// the `maybeShow` it already has:
+// The send-menu rows this item adds to menu/menu_send.cpp's FillSendMenu(),
+// and the place a chat's send translation is turned on and off from inside the
+// conversation. Call it with the `maybeShow` FillSendMenu() already has:
 //
 //     Lumina::AddSendMenuTranslateRow(menu, maybeShow, details);
 //
-// It adds the quick-toggle row above and, behind it, the only way a user has to
-// change this chat's send language once it has been answered. Without the
-// `show` the row cannot exist at all: SendMenu::Details carries a bare peer id
-// and no session, and guessing the session from the peer id is exactly the
-// cross-account mistake DialogKey() exists to prevent. `show` names the session
-// outright.
+// The first row is a checkbox for this chat's own persistent switch: checking
+// it makes this chat's outgoing text translate, unchecking it sends as typed
+// again. The second, behind it and only while the send language is per chat, is
+// the only way to change that language once the one-time confirm has locked it.
 //
-// Why it matters: trSendLang defaults to "auto", so the send language of a chat
-// is decided by the one-time confirm the pipeline shows on the first translated
-// send there, and SetDialogSendLanguage() then locks it. BeginRequest() finds a
-// non-empty target from that point on and never asks again. With no row that
-// reaches ShowDialogSendLanguagePicker(), a language accepted by mistake is
-// permanent for that chat - the only escape is setting a non-auto send language
-// globally in settings, which turns the per-chat lock off everywhere.
+// The `show` is not optional: the per-chat switch and the language lock are both
+// keyed on (session, peer) - see DialogKey() - and SendMenu::Details carries a
+// bare peer id with no session. Guessing the session from the peer id is exactly
+// the cross-account mistake that key exists to prevent, so with a null `show`
+// there is nothing safe to add and the call adds nothing.
 //
-// The overload is separate so that the existing two-argument call site keeps
-// compiling; passing a null `show` gives exactly the old behaviour.
+// Adds nothing at all unless the feature is available, the global capability
+// switch is on, and the menu belongs to a plain text composer.
+//
+// Why the language row matters: trSendLang defaults to "auto", so a chat's send
+// language is decided by the one-time confirm the pipeline shows on its first
+// translated send, and SetDialogSendLanguage() then locks it. With no row that
+// reaches ShowDialogSendLanguagePicker(), a language accepted by mistake would
+// be permanent for that chat.
 void AddSendMenuTranslateRow(
 	not_null<Ui::PopupMenu*> menu,
 	const std::shared_ptr<ChatHelpers::Show> &show,

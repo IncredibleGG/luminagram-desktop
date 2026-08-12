@@ -68,14 +68,17 @@ namespace {
 		{ u"LuminaTranslateSendLangAuto"_q, u"Bahasa lawan bicara"_q },
 		{ u"LuminaTranslateBeforeSendConfirm"_q,
 			u"Konfirmasi sebelum kirim"_q },
-		{ u"LuminaTranslateSendInfo"_q, u"Pesan keluar diterjemahkan ke "
-			u"bahasa di atas, dan teks aslinya tetap disimpan bersama "
-			u"terjemahannya. Dengan «Bahasa lawan bicara», LuminaGram "
-			u"menanyakan sekali di tiap obrolan bahasa apa yang dipakai di "
-			u"sana, lalu mengingatnya. «Konfirmasi sebelum kirim» menampilkan "
-			u"terjemahan di samping teks asli lebih dulu, sehingga Anda bisa "
-			u"mengirim salah satunya; jika dimatikan, terjemahan langsung "
-			u"dikirim."_q },
+		{ u"LuminaTranslateSendInfo"_q, u"Sakelar ini hanya membuat fitur "
+			u"tersedia. Tidak ada yang diterjemahkan sampai Anda "
+			u"mengaktifkannya untuk sebuah obrolan: tekan lama tombol kirim di "
+			u"obrolan itu lalu aktifkan «Terjemahkan sebelum kirim» di sana. "
+			u"Pesan keluar diterjemahkan ke bahasa di atas, dan teks aslinya "
+			u"tetap disimpan bersama terjemahannya. Dengan «Bahasa lawan "
+			u"bicara», LuminaGram menanyakan sekali di tiap obrolan bahasa apa "
+			u"yang dipakai di sana, lalu mengingatnya. «Konfirmasi sebelum "
+			u"kirim» menampilkan terjemahan di samping teks asli lebih dulu, "
+			u"sehingga Anda bisa mengirim salah satunya; jika dimatikan, "
+			u"terjemahan langsung dikirim."_q },
 		{ u"LuminaTranslateReceiveHeader"_q, u"Penerimaan"_q },
 		{ u"LuminaDualLanguageDisplay"_q,
 			u"Tampilkan teks asli dan terjemahan bersamaan"_q },

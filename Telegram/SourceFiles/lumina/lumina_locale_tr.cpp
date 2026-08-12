@@ -68,13 +68,16 @@ namespace {
 		{ u"LuminaTranslateSendLangAuto"_q, u"Karşı tarafın dili"_q },
 		{ u"LuminaTranslateBeforeSendConfirm"_q,
 			u"Göndermeden önce onayla"_q },
-		{ u"LuminaTranslateSendInfo"_q, u"Giden mesajlar yukarıdaki dile "
-			u"çevrilir ve orijinali çevirinin yanında saklanır. «Karşı "
-			u"tarafın dili» seçiliyken LuminaGram her sohbet için hangi dilin "
-			u"kullanılacağını bir kez sorar, sonra bunu hatırlar. "
-			u"«Göndermeden önce onayla» çeviriyi önce orijinalin yanında "
-			u"gösterir, böylece ikisinden birini gönderebilirsiniz; kapalıyken "
-			u"çeviri doğrudan gönderilir."_q },
+		{ u"LuminaTranslateSendInfo"_q, u"Bu anahtar yalnızca özelliği "
+			u"kullanılabilir yapar. Bir sohbette açmadıkça hiçbir şey "
+			u"çevrilmez: o sohbette gönder düğmesini basılı tutun ve oradaki "
+			u"«Göndermeden önce çevir» seçeneğini açın. Giden mesajlar "
+			u"yukarıdaki dile çevrilir ve orijinali çevirinin yanında "
+			u"saklanır. «Karşı tarafın dili» seçiliyken LuminaGram her sohbet "
+			u"için hangi dilin kullanılacağını bir kez sorar, sonra bunu "
+			u"hatırlar. «Göndermeden önce onayla» çeviriyi önce orijinalin "
+			u"yanında gösterir, böylece ikisinden birini gönderebilirsiniz; "
+			u"kapalıyken çeviri doğrudan gönderilir."_q },
 		{ u"LuminaTranslateReceiveHeader"_q, u"Alma"_q },
 		{ u"LuminaDualLanguageDisplay"_q,
 			u"Orijinali ve çeviriyi birlikte göster"_q },

@@ -76,7 +76,10 @@ namespace {
 		{ u"LuminaTranslateSendLangAuto"_q, u"Idioma del destinatario"_q },
 		{ u"LuminaTranslateBeforeSendConfirm"_q,
 			u"Confirmar antes de enviar"_q },
-		{ u"LuminaTranslateSendInfo"_q, u"Los mensajes que envías se traducen "
+		{ u"LuminaTranslateSendInfo"_q, u"Este interruptor solo activa la "
+			u"función. No se traduce nada hasta que la actives en un chat "
+			u"concreto: mantén pulsado su botón de enviar y activa allí "
+			u"«Traducir antes de enviar». Los mensajes que envías se traducen "
 			u"al idioma de arriba y el original se conserva junto a la "
 			u"traducción. Con «Idioma del destinatario», LuminaGram pregunta "
 			u"una vez en cada chat qué idioma usar allí y luego lo recuerda. "

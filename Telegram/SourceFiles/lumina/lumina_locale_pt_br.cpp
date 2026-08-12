@@ -68,7 +68,10 @@ namespace {
 		{ u"LuminaTranslateSendLangAuto"_q, u"Idioma do destinatário"_q },
 		{ u"LuminaTranslateBeforeSendConfirm"_q,
 			u"Confirmar antes de enviar"_q },
-		{ u"LuminaTranslateSendInfo"_q, u"As mensagens enviadas são "
+		{ u"LuminaTranslateSendInfo"_q, u"Este botão apenas disponibiliza o "
+			u"recurso. Nada é traduzido até você ativá-lo em uma conversa: "
+			u"mantenha pressionado o botão de enviar dessa conversa e ative "
+			u"ali «Traduzir antes de enviar». As mensagens enviadas são "
 			u"traduzidas para o idioma acima, e o original é guardado junto "
 			u"com a tradução. Com «Idioma do destinatário», o LuminaGram "
 			u"pergunta uma vez por conversa qual idioma usar ali e depois "

@@ -50,11 +50,6 @@ namespace {
 // then swallowed every later send in that chat for the rest of the session.
 constexpr auto kWatchdogTimeout = crl::time(20000);
 
-// How long a send-menu quick toggle stays armed. It means "this next message",
-// so a menu the user opened and walked away from must not quietly change how a
-// message typed much later is sent.
-constexpr auto kQuickToggleLifetime = crl::time(5 * 60 * 1000);
-
 // How many sends may wait behind a held one in the same chat. The queue is only
 // ever this long when the user sent several DIFFERENT messages inside a single
 // hold - a repeat of a message already held or queued is dropped rather than
@@ -98,6 +93,14 @@ constexpr auto kCaptionBoxTimeout = crl::time(3 * 60 * 1000);
 	return u"trSendLangDialog"_q;
 }
 
+// Whether a chat translates its outgoing messages at all, stored per chat as
+// { "<sessionUniqueId>_<peerId>": true }. A missing entry is off, which is the
+// default for every chat: the global switch only makes the feature available,
+// and a chat translates on send only once it has been switched on here too.
+[[nodiscard]] QString DialogSendActiveKey() {
+	return u"trSendChatOn"_q;
+}
+
 // The session id is in the key so that two logged-in accounts cannot share a
 // per-chat lock. Peer ids are very nearly unique on their own, which is
 // exactly the kind of "nearly" that turns into a cross-account bug later.
@@ -105,6 +108,38 @@ constexpr auto kCaptionBoxTimeout = crl::time(3 * 60 * 1000);
 	return QString::number(history->session().uniqueId())
 		+ QChar('_')
 		+ QString::number(history->peer->id.value);
+}
+
+// This chat's own persistent send-translate switch, keyed exactly like the
+// send-language lock above. Default false: a chat that was never switched on
+// sends as typed no matter what the global switch is.
+[[nodiscard]] bool DialogSendTranslateOn(not_null<History*> history) {
+	return Settings::Instance().getObject(
+		DialogSendActiveKey()
+	).value(DialogKey(history)).toBool();
+}
+
+// The one writer of trSendChatOn, and it names Store::Private for the reason
+// SetDialogSendLanguage() does: which chats you translate outgoing messages for
+// is the same class of thing as the per-chat language lock, and Settings::set()
+// defaults to Store::Prefs, so a bare set() would relocate the whole map into
+// the plaintext pref file.
+void SetDialogSendTranslateOn(not_null<History*> history, bool on) {
+	const auto key = DialogKey(history);
+	auto object = Settings::Instance().getObject(DialogSendActiveKey());
+	if (on) {
+		object.insert(key, true);
+	} else {
+		object.remove(key);
+	}
+	if (object.isEmpty()) {
+		Settings::Instance().remove(DialogSendActiveKey());
+	} else {
+		Settings::Instance().set(
+			DialogSendActiveKey(),
+			object,
+			Store::Private);
+	}
 }
 
 // Which language this chat's outgoing messages are translated into, once it is
@@ -126,48 +161,6 @@ constexpr auto kCaptionBoxTimeout = crl::time(3 * 60 * 1000);
 	return TranslateSendLanguageIsAuto()
 		? QString()
 		: TranslateSendLanguage();
-}
-
-struct QuickToggle {
-	uint64 peerId = 0;
-	crl::time when = 0;
-	bool value = false;
-};
-
-[[nodiscard]] QuickToggle &CurrentQuickToggle() {
-	static auto result = QuickToggle();
-	return result;
-}
-
-[[nodiscard]] std::optional<bool> PeekQuickToggle(uint64 peerId) {
-	auto &toggle = CurrentQuickToggle();
-	if (!toggle.peerId) {
-		return std::nullopt;
-	} else if (crl::now() - toggle.when > kQuickToggleLifetime) {
-		toggle = QuickToggle();
-		return std::nullopt;
-	} else if (toggle.peerId != peerId) {
-		return std::nullopt;
-	}
-	return toggle.value;
-}
-
-// Only the send that actually acted on the override clears it. A send this
-// pipeline could not have translated anyway - one that arrived while another
-// send in the same chat was still held - leaves it armed for the next one.
-void ConsumeQuickToggle(uint64 peerId) {
-	auto &toggle = CurrentQuickToggle();
-	if (toggle.peerId == peerId) {
-		toggle = QuickToggle();
-	}
-}
-
-void SetQuickToggle(uint64 peerId, bool value) {
-	CurrentQuickToggle() = QuickToggle{
-		.peerId = peerId,
-		.when = crl::now(),
-		.value = value,
-	};
 }
 
 struct PreviewCache {
@@ -528,9 +521,10 @@ void ShowLanguagePicker(
 		const QString &current,
 		const QString &pending,
 		uint64 generation,
-		// Whether choosing a language should also switch translate-before-send
-		// on. False for the pickers the send pipeline opens: those are already
-		// running inside a send that is being translated, and the switch is on.
+		// Whether choosing a language should also switch this chat's send
+		// translation on. False for the pickers the send pipeline opens: those
+		// are already running inside a send that is being translated, so the
+		// chat is on by definition.
 		bool enableOnChoice = false) {
 	const auto &languages = TranslateLanguages();
 	auto options = std::vector<QString>();
@@ -582,8 +576,8 @@ void ShowLanguagePicker(
 				const auto code = codes[index];
 				if (const auto history = weak.get()) {
 					SetDialogSendLanguage(history, code);
-					if (enableOnChoice && !TranslateBeforeSend()) {
-						SetTranslateBeforeSend(true);
+					if (enableOnChoice) {
+						SetDialogSendTranslateOn(history, true);
 					}
 				}
 				if (!pending.isEmpty()) {
@@ -887,7 +881,6 @@ bool Intercept(
 	if (!ContinuousTranslationAvailable()) {
 		return true;
 	}
-	const auto peer = history->peer;
 	const auto original = text.text.trimmed();
 
 	// A tagged message carries bold / mention / custom-emoji ranges as
@@ -895,9 +888,7 @@ bool Intercept(
 	// leave every one of them pointing at the wrong characters, or past the
 	// end, and it fails silently rather than loudly. Dropping the user's
 	// formatting instead is no better, so a formatted message is sent as
-	// typed. This is checked before the quick toggle is consumed, so a
-	// "translate just this one" armed on a message that cannot be translated
-	// at all is still there for the next one.
+	// typed.
 	if (original.isEmpty() || !text.tags.isEmpty()) {
 		return true;
 	}
@@ -909,9 +900,12 @@ bool Intercept(
 	if (AlreadyHeld(key, original)) {
 		return false;
 	}
-	const auto quick = PeekQuickToggle(peer->id.value);
-	if (!quick.value_or(TranslateBeforeSend())) {
-		ConsumeQuickToggle(peer->id.value);
+
+	// The capability gate and this chat's own persistent switch, together. A
+	// chat that was never switched on sends as typed whatever the global switch
+	// is: the global switch only makes the feature available to turn on per
+	// chat, and no longer translates anything on its own.
+	if (!TranslateBeforeSendActive(history)) {
 		return true;
 	}
 
@@ -935,12 +929,6 @@ bool Intercept(
 	} else if (!BeginRequest(key, history, text, original, proceed)) {
 		return true;
 	}
-
-	// The override is consumed by the send that read it, whether that send was
-	// started or queued, and never later: a queued send that consumed it when
-	// it finally ran would clear an override the user armed for a message they
-	// are still typing.
-	ConsumeQuickToggle(peer->id.value);
 	return false;
 }
 
@@ -1014,11 +1002,13 @@ void SetupTranslateSendPipeline() {
 }
 
 bool TranslateBeforeSendActive(not_null<History*> history) {
-	if (!ContinuousTranslationAvailable()) {
-		return false;
-	}
-	const auto peer = history->peer;
-	return PeekQuickToggle(peer->id.value).value_or(TranslateBeforeSend());
+	// Three gates, in cost order: the continuous-tier opt-in, the global
+	// capability switch, and this chat's own persistent switch. The global
+	// switch no longer translates anything by itself - with it on but a chat
+	// never switched on, this is false and that chat sends as typed.
+	return ContinuousTranslationAvailable()
+		&& TranslateBeforeSend()
+		&& DialogSendTranslateOn(history);
 }
 
 QString DialogSendLanguage(not_null<History*> history) {
@@ -1064,14 +1054,12 @@ void ShowDialogSendLanguagePicker(not_null<History*> history) {
 			DialogSendLanguage(history),
 			QString(),
 			0,
-			// Naming the language a chat's own messages go out in is the act
-			// of asking for them to be translated; this is the only picker
-			// reached from the chat, and leaving the switch alone here would
-			// store an answer that changes nothing until the user finds an
-			// unrelated settings page. Turning it on rather than holding a
-			// per-chat exception keeps one switch in charge of whether
-			// anything is translated on the way out, so turning that switch
-			// off still turns every chat off.
+			// Naming the language a chat's own messages go out in is the act of
+			// asking for them to be translated, so choosing one here also
+			// switches this chat's send translation on. In practice the row that
+			// opens this picker is only offered for a chat already switched on,
+			// so it is usually a no-op - but it keeps "chose a language" and "is
+			// on" from ever disagreeing.
 			true);
 	}
 }
@@ -1094,19 +1082,30 @@ void SetSendOriginalHook(SendOriginalHook hook) {
 
 void AddSendMenuTranslateRow(
 		not_null<Ui::PopupMenu*> menu,
+		const std::shared_ptr<ChatHelpers::Show> &show,
 		const SendMenu::Details &details) {
 	// Everything below the send-behaviour group of the menu is media state:
 	// an album, a caption or a paid post never routes through the text send
-	// path this row talks about, so any of it being set rules the row out.
+	// path these rows talk about, so any of it being set rules them out. So
+	// does the global capability switch being off - the per-chat switch would
+	// change a value nothing reads until that one is on.
 	//
-	// The reverse is NOT true, and SendMenu::Details cannot express it. The
-	// sticker, GIF, inline-result and field-autocomplete panels all build
-	// their menu from the composer's own sendMenuDetails(), which leaves every
-	// field here unset, so the row is offered there too. It stays correct -
-	// the override is per chat and is consumed by that chat's next text send -
-	// but it is offered in more places than it reads well in. Narrowing it
+	// The `show` is not optional: the per-chat switch and the language lock are
+	// both keyed on (session, peer) - see DialogKey() - and SendMenu::Details
+	// carries only a bare peer id. Guessing the session from the peer id is
+	// exactly the cross-account mistake that key exists to prevent, so without a
+	// `show` there is nothing safe to add.
+	//
+	// The reverse of the media check is NOT true, and SendMenu::Details cannot
+	// express it. The sticker, GIF, inline-result and field-autocomplete panels
+	// all build their menu from the composer's own sendMenuDetails(), which
+	// leaves every field here unset, so the rows are offered there too. They
+	// stay correct - the switch is per chat and read by that chat's next text
+	// send - but appear in more places than they read well in. Narrowing that
 	// needs a flag on SendMenu::Details, which is not this item's file.
-	if (!ContinuousTranslationAvailable()
+	if (!show
+		|| !ContinuousTranslationAvailable()
+		|| !TranslateBeforeSend()
 		|| !details.barePeerId
 		|| (details.spoiler != SendMenu::SpoilerState::None)
 		|| (details.caption != SendMenu::CaptionState::None)
@@ -1114,50 +1113,33 @@ void AddSendMenuTranslateRow(
 		|| details.price.has_value()) {
 		return;
 	}
-	const auto peerId = details.barePeerId;
-	const auto checked = PeekQuickToggle(peerId).value_or(
-		TranslateBeforeSend());
+	const auto history = show->session().data().history(
+		PeerId(details.barePeerId));
+
+	// The one persistent switch for this chat, turned on and off from inside the
+	// conversation. Checking it makes this chat's next text send translate;
+	// unchecking it sends as typed again. The language lock is left untouched
+	// either way, so a chat switched off and back on still remembers what to
+	// translate into.
+	const auto on = DialogSendTranslateOn(history);
 	Menu::AddCheckedAction(
 		menu,
 		Tr(u"LuminaTranslateBeforeSend"_q),
-		[=] { SetQuickToggle(peerId, !checked); },
+		[=] { SetDialogSendTranslateOn(history, !on); },
 		&st::menuIconTranslate,
-		checked);
-}
+		on);
 
-void AddSendMenuTranslateRow(
-		not_null<Ui::PopupMenu*> menu,
-		const std::shared_ptr<ChatHelpers::Show> &show,
-		const SendMenu::Details &details) {
-	AddSendMenuTranslateRow(menu, details);
-	if (!show
-		|| !ContinuousTranslationAvailable()
-		|| !details.barePeerId
-		|| (details.spoiler != SendMenu::SpoilerState::None)
-		|| (details.caption != SendMenu::CaptionState::None)
-		|| (details.photoQuality != SendMenu::PhotoQualityState::None)
-		|| details.price.has_value()) {
-		return;
+	// The language row sits behind the switch, and only while the language is
+	// actually per chat: with a non-auto send language set globally,
+	// DialogSendLanguage() is never consulted and a row that edits it would
+	// change nothing. It is the only way to change a chat's send language once
+	// the one-time confirm has locked it.
+	if (on && TranslateSendLanguageIsAuto()) {
+		menu->addAction(
+			Tr(u"LuminaTrSendPickerTitle"_q),
+			[=] { ShowDialogSendLanguagePicker(history); },
+			&st::menuIconTranslate);
 	}
-
-	// Only while the language is actually per chat. With a non-auto send
-	// language set globally, DialogSendLanguage() is never consulted and a row
-	// that edits it would be a row that changes nothing.
-	if (!TranslateSendLanguageIsAuto()) {
-		return;
-	}
-
-	// The session comes from the show rather than from the peer id, which is
-	// the whole reason this overload exists - see the header.
-	const auto history = show->session().data().history(
-		PeerId(details.barePeerId));
-	if (!TranslateBeforeSendActive(history)) {
-		return;
-	}
-	menu->addAction(
-		Tr(u"LuminaTrSendPickerTitle"_q),
-		[=] { ShowDialogSendLanguagePicker(history); },
-		&st::menuIconTranslate);
 }
 
 namespace {

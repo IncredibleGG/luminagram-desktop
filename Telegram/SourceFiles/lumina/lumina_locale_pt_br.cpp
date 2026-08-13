@@ -82,6 +82,11 @@ namespace {
 		{ u"LuminaTranslateReceiveHeader"_q, u"Recebimento"_q },
 		{ u"LuminaDualLanguageDisplay"_q,
 			u"Mostrar o original e a tradução juntos"_q },
+		{ u"LuminaFoldOriginalLongMessages"_q,
+			u"Recolher o original em mensagens longas"_q },
+		{ u"LuminaFoldOriginalLongMessagesInfo"_q,
+			u"Em mensagens bilíngues longas, o original é recolhido em uma linha para não lotar a conversa. Toque para expandir. A tradução é sempre mostrada por completo."_q },
+		{ u"LuminaExpandOriginal"_q, u"Mostrar original"_q },
 		{ u"LuminaTranslateReadLang"_q, u"Idioma de leitura"_q },
 		{ u"LuminaTranslateReadLangFollow"_q, u"Seguir idioma do app"_q },
 		{ u"LuminaTranslateReceiveInfo"_q, u"As mensagens recebidas mantêm o "

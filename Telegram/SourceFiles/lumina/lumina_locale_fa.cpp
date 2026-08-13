@@ -72,6 +72,11 @@ namespace {
 		{ u"LuminaTranslateReceiveHeader"_q, u"دریافت"_q },
 		{ u"LuminaDualLanguageDisplay"_q,
 			u"نمایش هم‌زمان متن اصلی و ترجمه"_q },
+		{ u"LuminaFoldOriginalLongMessages"_q,
+			u"جمع‌کردن متن اصلی در پیام‌های بلند"_q },
+		{ u"LuminaFoldOriginalLongMessagesInfo"_q,
+			u"در پیام‌های بلندِ دوزبانه، متن اصلی به یک خط جمع می‌شود تا گفتگو را شلوغ نکند. برای باز کردن روی آن ضربه بزنید. ترجمه همیشه به‌طور کامل نمایش داده می‌شود."_q },
+		{ u"LuminaExpandOriginal"_q, u"نمایش متن اصلی"_q },
 		{ u"LuminaTranslateReadLang"_q, u"زبان خواندن"_q },
 		{ u"LuminaTranslateReadLangFollow"_q, u"زبان برنامه"_q },
 		{ u"LuminaTranslateReceiveInfo"_q, u"پیام‌های دریافتی متن اصلی خود "

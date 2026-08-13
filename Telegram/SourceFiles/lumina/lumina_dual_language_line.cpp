@@ -15,11 +15,15 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "history/history_item_components.h"
 #include "history/view/history_view_element.h"
 #include "history/view/media/history_view_media.h"
+#include "lumina/lumina_locale.h"
 #include "lumina/lumina_translate_gating.h"
 #include "lumina/lumina_translate_settings.h"
+#include "base/weak_ptr.h"
 #include "ui/chat/chat_style.h"
+#include "ui/click_handler.h"
 #include "ui/painter.h"
 #include "ui/text/text.h"
+#include "styles/style_basic.h"
 #include "styles/style_chat.h"
 #include "styles/style_lumina.h"
 #include "styles/style_chat_helpers.h"
@@ -28,6 +32,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <rpl/producer.h>
 
 #include <algorithm>
+#include <memory>
 
 namespace Lumina {
 namespace {
@@ -60,7 +65,20 @@ struct Line {
 	int height = 0;
 	bool infoRow = false;
 	bool external = false;
+
+	// Fold-original state (transient, see the header). `expanded` is the only
+	// piece the user drives; the rest is recomputed every layout by
+	// ResolveOriginalFold() and read back by paint/state.
+	bool expanded = false;
+	bool folded = false;
+	int foldLineHeight = 0; // Height of the single shown original line.
+	std::shared_ptr<ClickHandler> foldExpandLink;
 };
+
+// Fold the original only when it wraps to MORE than this many lines, matching
+// Android's FOLD_ORIGINAL_THRESHOLD_LINES. A message at or under it reads as
+// "short" and is shown in full, byte-for-byte as before the feature existed.
+constexpr auto kFoldOriginalThresholdLines = 4;
 
 // Views that currently show a sub-line. Deliberately NOT a
 // RuntimeComponent<..., Element>: the runtime composer hands out component ids
@@ -372,6 +390,17 @@ void EnsureSubscribed() {
 		LastActive() = now;
 		RefreshLoadedBubbles();
 	}, lifetime);
+
+	// Toggling "fold long originals" does not move FeatureActive(), so the
+	// comparison above would swallow it. It changes only the reserved height of
+	// bubbles that already have a sub-line, so a text-refresh (which relays out)
+	// is enough and only matters while the feature is on.
+	auto foldChanges = FoldOriginalLongMessagesChanges();
+	std::move(foldChanges) | rpl::on_next([] {
+		if (FeatureActive()) {
+			RefreshLoadedBubbles();
+		}
+	}, lifetime);
 }
 
 } // namespace
@@ -446,6 +475,11 @@ DualLanguageUpdate ValidateDualLanguage(
 		line.width = 0;
 		line.height = 0;
 		line.text.setText(st::luminaTranslationTextStyle, source.sub, kSubLineOptions);
+		// The message this view shows is now a different pair of texts (a
+		// retranslation, an edit). Drop any user expansion, so the reworked
+		// original starts folded again - the reload semantics Android's
+		// luminaOriginalExpanded has.
+		line.expanded = false;
 		changed = true;
 	}
 	// The main text of an outgoing bubble comes from outside the item, so
@@ -565,6 +599,145 @@ void PaintDualLanguage(
 		.palette = &stm->textPalette,
 		.now = context.now,
 	});
+}
+
+int OriginalFoldAffordanceHeight() {
+	// A top skip separating the affordance from the single folded line, plus
+	// one line for the chevron and the label. The same value is reserved (in
+	// ResolveOriginalFold), drawn (PaintOriginalFoldAffordance) and hit-tested
+	// (Message::getStateText), so it lives in exactly this one place.
+	return st::mediaInBubbleSkip + st::semiboldFont->height;
+}
+
+int ResolveOriginalFold(
+		not_null<Element*> view,
+		int width,
+		int mainTextHeight,
+		int lineHeight,
+		int lineCount) {
+	if (Lines().empty()) {
+		return 0;
+	}
+	const auto i = Lines().find(view.get());
+	if (i == Lines().end()) {
+		return 0;
+	}
+	auto &line = i->second;
+	const auto clear = [&] {
+		line.folded = false;
+		line.foldLineHeight = 0;
+		return 0;
+	};
+	if (!FoldOriginalLongMessages()
+		|| line.expanded
+		|| lineCount <= kFoldOriginalThresholdLines
+		|| lineHeight <= 0
+		|| width < 1) {
+		return clear();
+	}
+	const auto collapsed = lineHeight + OriginalFoldAffordanceHeight();
+	if (mainTextHeight <= collapsed) {
+		// Nothing to save - the "many lines" all fit in one line's worth of
+		// height (e.g. a degenerate line-height). Leave it unfolded.
+		return clear();
+	}
+	line.folded = true;
+	line.foldLineHeight = lineHeight;
+	if (!line.foldExpandLink) {
+		line.foldExpandLink = std::make_shared<LambdaClickHandler>(
+			[weak = base::make_weak(view)](ClickContext) {
+				const auto strong = weak.get();
+				if (!strong) {
+					return;
+				}
+				auto &lines = Lines();
+				const auto i = lines.find(strong);
+				if (i == lines.end()) {
+					return;
+				}
+				i->second.expanded = true;
+				strong->history()->owner().requestViewResize(strong);
+			});
+	}
+	return mainTextHeight - collapsed;
+}
+
+void ClearOriginalFold(not_null<const Element*> view) {
+	if (Lines().empty()) {
+		return;
+	}
+	const auto i = Lines().find(view.get());
+	if (i != Lines().end()) {
+		i->second.folded = false;
+		i->second.foldLineHeight = 0;
+	}
+}
+
+bool OriginalFolded(not_null<const Element*> view) {
+	if (Lines().empty()) {
+		return false;
+	}
+	const auto i = Lines().find(view.get());
+	return (i != Lines().end()) && i->second.folded;
+}
+
+int OriginalFoldedLineHeight(not_null<const Element*> view) {
+	if (Lines().empty()) {
+		return 0;
+	}
+	const auto i = Lines().find(view.get());
+	return (i != Lines().end() && i->second.folded)
+		? i->second.foldLineHeight
+		: 0;
+}
+
+std::shared_ptr<ClickHandler> OriginalFoldExpandHandler(
+		not_null<const Element*> view) {
+	if (Lines().empty()) {
+		return nullptr;
+	}
+	const auto i = Lines().find(view.get());
+	return (i != Lines().end() && i->second.folded)
+		? i->second.foldExpandLink
+		: nullptr;
+}
+
+void PaintOriginalFoldAffordance(
+		Painter &p,
+		not_null<const Element*> view,
+		const Ui::ChatPaintContext &context,
+		int x,
+		int y,
+		int w) {
+	if (!OriginalFolded(view) || w < 1) {
+		return;
+	}
+	const auto stm = context.messageStyle();
+	const auto color = stm->textPalette.linkFg->c;
+	const auto font = st::semiboldFont;
+	const auto lineTop = y + st::mediaInBubbleSkip;
+	const auto centerY = lineTop + font->height / 2;
+
+	// A small downward chevron, sized off the font so it tracks a font change.
+	// Geometry mirrors Android's drawFoldAffordance().
+	const auto triW = font->ascent * 2 / 3;
+	auto path = QPainterPath();
+	path.moveTo(x, centerY - triW / 3.);
+	path.lineTo(x + triW, centerY - triW / 3.);
+	path.lineTo(x + triW / 2., centerY + triW / 2.);
+	path.closeSubpath();
+	{
+		auto hq = PainterHighQualityEnabler(p);
+		p.fillPath(path, color);
+	}
+
+	const auto gap = font->spacew;
+	const auto textLeft = x + triW + gap;
+	const auto available = std::max(w - triW - gap, 0);
+	const auto label = font->elided(Tr(u"LuminaExpandOriginal"_q), available);
+	p.setFont(font);
+	p.setPen(color);
+	p.drawText(textLeft, lineTop + font->ascent, label);
 }
 
 } // namespace Lumina

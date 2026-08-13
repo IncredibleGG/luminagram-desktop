@@ -89,6 +89,11 @@ namespace {
 		{ u"LuminaTranslateReceiveHeader"_q, u"Recepción"_q },
 		{ u"LuminaDualLanguageDisplay"_q,
 			u"Mostrar el original y la traducción juntos"_q },
+		{ u"LuminaFoldOriginalLongMessages"_q,
+			u"Plegar el original en mensajes largos"_q },
+		{ u"LuminaFoldOriginalLongMessagesInfo"_q,
+			u"En los mensajes bilingües largos, el original se pliega en una línea para no saturar el chat. Tócalo para expandirlo. La traducción siempre se muestra completa."_q },
+		{ u"LuminaExpandOriginal"_q, u"Mostrar original"_q },
 		{ u"LuminaTranslateReadLang"_q, u"Idioma de lectura"_q },
 		{ u"LuminaTranslateReadLangFollow"_q, u"Idioma de la interfaz"_q },
 		{ u"LuminaTranslateReceiveInfo"_q, u"Los mensajes entrantes conservan "

@@ -107,6 +107,13 @@ struct Registration {
 		{ u"LuminaTranslateReceiveHeader"_q, u"Receiving"_q },
 		{ u"LuminaDualLanguageDisplay"_q,
 			u"Show original and translation together"_q },
+		{ u"LuminaFoldOriginalLongMessages"_q,
+			u"Fold original in long messages"_q },
+		{ u"LuminaFoldOriginalLongMessagesInfo"_q,
+			u"In a long bilingual message the original folds down to a "
+			"single line so it does not flood the chat; tap it to expand. "
+			"The translation is always shown in full."_q },
+		{ u"LuminaExpandOriginal"_q, u"Show original"_q },
 		{ u"LuminaTranslateReadLang"_q, u"Read in"_q },
 		{ u"LuminaTranslateReadLangFollow"_q, u"Interface language"_q },
 		{ u"LuminaTranslateReceiveInfo"_q, u"With both languages shown, an "

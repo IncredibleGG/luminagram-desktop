@@ -10,8 +10,11 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "base/basic_types.h"
 #include "ui/text/text_entity.h"
 
+#include <memory>
+
 class HistoryItem;
 class Painter;
+class ClickHandler;
 
 namespace Ui {
 struct ChatPaintContext;
@@ -133,6 +136,68 @@ int DualLanguageResizeToWidth(
 // Paints the sub-line. (x, y) is the top-left of the reserved block, so the
 // top skip is applied here and not by the caller.
 void PaintDualLanguage(
+	Painter &p,
+	not_null<const HistoryView::Element*> view,
+	const Ui::ChatPaintContext &context,
+	int x,
+	int y,
+	int w);
+
+// ---------------------------------------------------------------------------
+// Fold original (long bilingual messages).
+//
+// The ORIGINAL is the bubble's MAIN text in both directions (incoming: the
+// item's own text; outgoing: the stored original installed as the main text
+// through overrideMainText), so folding it means folding Element::_text. Only
+// the height changes: the bubble width, the sub-line and the timestamp row are
+// untouched. Everything here is transient per view - stored in the same table
+// the sub-line uses, cleared by ForgetDualLanguage() - so a fold that the user
+// expanded reverts on reload or restart, exactly like Android's
+// luminaOriginalExpanded and tdesktop's own collapsible quotes.
+//
+// Every entry point is a no-op for a view that has no sub-line, so nothing here
+// touches an ordinary (non dual-language) bubble.
+
+// Height reserved by the "show original" affordance row that sits between the
+// single folded line and the sub-line. Constant.
+[[nodiscard]] int OriginalFoldAffordanceHeight();
+
+// Called from resizeContentGetHeight() once the main text is laid out and the
+// bubble is NOT mid appear-animation. `mainTextHeight` is the full laid-out
+// height of the main text at `width`, `lineHeight` its per-line height and
+// `lineCount` the number of laid-out lines. Decides whether the original folds
+// (setting on, not already expanded, more than the line threshold), stores the
+// decision and geometry, and returns the number of pixels to REMOVE from the
+// bubble height (full height minus the one-line-plus-affordance height); zero
+// when it does not fold.
+[[nodiscard]] int ResolveOriginalFold(
+	not_null<HistoryView::Element*> view,
+	int width,
+	int mainTextHeight,
+	int lineHeight,
+	int lineCount);
+
+// Forget any fold decision for this view (used while its text is appearing, so
+// a stale "folded" flag never outlives the animation).
+void ClearOriginalFold(not_null<const HistoryView::Element*> view);
+
+// True while this view's original is folded to a single line.
+[[nodiscard]] bool OriginalFolded(not_null<const HistoryView::Element*> view);
+
+// Height of the single shown original line while folded (0 otherwise). The
+// affordance row sits directly beneath it.
+[[nodiscard]] int OriginalFoldedLineHeight(
+	not_null<const HistoryView::Element*> view);
+
+// The click handler that expands a folded original, null unless folded. It sets
+// the transient expanded flag and requests a resize; the next layout unfolds.
+[[nodiscard]] std::shared_ptr<ClickHandler> OriginalFoldExpandHandler(
+	not_null<const HistoryView::Element*> view);
+
+// Paint the "show original" affordance (a chevron and a localised label in the
+// message's link colour). (x, y) is its top-left; it is
+// OriginalFoldAffordanceHeight() tall and `w` wide.
+void PaintOriginalFoldAffordance(
 	Painter &p,
 	not_null<const HistoryView::Element*> view,
 	const Ui::ChatPaintContext &context,

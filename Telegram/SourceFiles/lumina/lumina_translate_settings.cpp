@@ -41,6 +41,7 @@ const auto kKeyBeforeSendConfirm = u"translateBeforeSendConfirm"_q;
 const auto kKeySendLang = u"trSendLang"_q;
 const auto kKeyReadLang = u"trReadLang"_q;
 const auto kKeyDualLanguage = u"dualLanguageDisplay"_q;
+const auto kKeyFoldOriginal = u"foldOriginalLongMessages"_q;
 
 const auto kSendLangAuto = u"auto"_q;
 
@@ -80,7 +81,8 @@ constexpr auto kTestTimeoutMs = crl::time(25000);
 		|| (key == kKeyBeforeSendConfirm)
 		|| (key == kKeySendLang)
 		|| (key == kKeyReadLang)
-		|| (key == kKeyDualLanguage);
+		|| (key == kKeyDualLanguage)
+		|| (key == kKeyFoldOriginal);
 }
 
 struct LanguageEntry {
@@ -668,6 +670,11 @@ void AddReceiveRows(
 		TrValue(u"LuminaDualLanguageDisplay"_q),
 		[] { return DualLanguageDisplay(); },
 		[](bool value) { SetDualLanguageDisplay(value); });
+	AddToggleRow(
+		container,
+		TrValue(u"LuminaFoldOriginalLongMessages"_q),
+		[] { return FoldOriginalLongMessages(); },
+		[](bool value) { SetFoldOriginalLongMessages(value); });
 	AddValueRow(
 		container,
 		TrValue(u"LuminaTranslateReadLang"_q),
@@ -1028,6 +1035,18 @@ bool DualLanguageDisplay() {
 
 void SetDualLanguageDisplay(bool value) {
 	Settings::Instance().set(kKeyDualLanguage, value);
+}
+
+bool FoldOriginalLongMessages() {
+	return Settings::Instance().getBool(kKeyFoldOriginal, true);
+}
+
+void SetFoldOriginalLongMessages(bool value) {
+	Settings::Instance().set(kKeyFoldOriginal, value);
+}
+
+rpl::producer<> FoldOriginalLongMessagesChanges() {
+	return Settings::Instance().changesFor(kKeyFoldOriginal);
 }
 
 QString TranslateReadLanguage() {

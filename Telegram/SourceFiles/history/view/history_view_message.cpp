@@ -3059,6 +3059,11 @@ void Message::paintText(
 		.highlight = needRippleMask
 			? &rippleRequest
 			: (highlightRequest ? &*highlightRequest : nullptr),
+		// Folded bilingual original: draw only its first line here, elided; the
+		// tappable "show original" row is painted straight after. Zero (no
+		// elision) for every other message. Height was reserved to match in
+		// resizeContentGetHeight().
+		.elisionLines = Lumina::OriginalFolded(this) ? 1 : 0,
 		.useFullWidth = true,
 		.linePostprocess = linePostprocess ? &*linePostprocess : nullptr,
 	});
@@ -3074,6 +3079,15 @@ void Message::paintText(
 	}
 	if (appearingClip) {
 		p.restore();
+	}
+	if (Lumina::OriginalFolded(this)) {
+		Lumina::PaintOriginalFoldAffordance(
+			p,
+			this,
+			context,
+			trect.x(),
+			trect.y() + Lumina::OriginalFoldedLineHeight(this),
+			trect.width());
 	}
 }
 
@@ -4642,6 +4656,14 @@ bool Message::getStateText(
 		trect.setY(trect.y() + botTop->height);
 	}
 	if (base::in_range(point.y(), trect.y(), trect.y() + trect.height())) {
+		if (const auto expand = Lumina::OriginalFoldExpandHandler(this)) {
+			// The whole collapsed block (the one shown line plus the affordance)
+			// expands the original. Link and spoiler hit-testing must not reach
+			// the text hidden below the fold, so consume the point here.
+			*outResult = TextState(item);
+			outResult->link = expand;
+			return true;
+		}
 		*outResult = TextState(item, text().getState(
 			point - trect.topLeft(),
 			std::max(textRealWidth(), trect.width()),
@@ -6642,6 +6664,33 @@ int Message::resizeContentGetHeight(int newWidth) {
 			this,
 			dualContentWidth - st::msgPadding.left() - st::msgPadding.right(),
 			needInfoDisplay() && !reactionsInBubble);
+		// Fold the ORIGINAL (main text) of a long bilingual message to one line.
+		// The full main-text height is already in newHeight - through minHeight()
+		// on the contentWidth == maxWidth() path, through the explicit
+		// textHeightFor() add on the other - so a single subtraction of
+		// (full height - collapsed height) folds it correctly on BOTH paths
+		// without either book having to know about the other. Never while the
+		// text is appearing: the appear animation drives the height from
+		// shownHeight, and a fold mid-animation would fight it.
+		if (Lumina::DualLanguageShown(this)) {
+			if (appearing) {
+				Lumina::ClearOriginalFold(this);
+			} else {
+				const auto lineHeight = text().lineHeight();
+				const auto fullMainHeight = textHeightFor(textWidth);
+				// Wrapped message text advances one lineHeight per line, so this
+				// is the exact line count without a second layout pass.
+				const auto lineCount = (lineHeight > 0)
+					? (fullMainHeight / lineHeight)
+					: 0;
+				newHeight -= Lumina::ResolveOriginalFold(
+					this,
+					textWidth,
+					fullMainHeight,
+					lineHeight,
+					lineCount);
+			}
+		}
 		if (needInfoDisplay()) {
 			newHeight += (bottomInfoHeight - st::msgDateFont->height);
 		}

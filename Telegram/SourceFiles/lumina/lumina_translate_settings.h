@@ -108,6 +108,16 @@ void SetTranslateSendLanguage(const QString &code);
 [[nodiscard]] bool DualLanguageDisplay();
 void SetDualLanguageDisplay(bool value);
 
+// Fold the ORIGINAL of a long bilingual message down to one tappable line, so a
+// wall of untranslated text does not push the chat around. Default ON, and only
+// ever consulted while a message already shows both languages, so with dual
+// display off it changes nothing. Its own change stream is exposed because
+// flipping it does not move TranslationFeatureEnabled() or DualLanguageDisplay()
+// and so is invisible to TranslateSettingsChanges()'s active-tier watchers.
+[[nodiscard]] bool FoldOriginalLongMessages();
+void SetFoldOriginalLongMessages(bool value);
+[[nodiscard]] rpl::producer<> FoldOriginalLongMessagesChanges();
+
 // The read-side target language, empty for "follow the interface language".
 // Stored as a code for the same dialect reason as the send language; the
 // LanguageId-shaped projection tdesktop's own read path needs lives in

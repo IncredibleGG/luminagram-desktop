@@ -81,6 +81,11 @@ namespace {
 		{ u"LuminaTranslateReceiveHeader"_q, u"Alma"_q },
 		{ u"LuminaDualLanguageDisplay"_q,
 			u"Orijinali ve çeviriyi birlikte göster"_q },
+		{ u"LuminaFoldOriginalLongMessages"_q,
+			u"Uzun mesajlarda orijinali katla"_q },
+		{ u"LuminaFoldOriginalLongMessagesInfo"_q,
+			u"Uzun iki dilli mesajlarda orijinal metin, sohbeti doldurmaması için tek satıra katlanır. Genişletmek için dokunun. Çeviri her zaman tam gösterilir."_q },
+		{ u"LuminaExpandOriginal"_q, u"Orijinali göster"_q },
 		{ u"LuminaTranslateReadLang"_q, u"Okuma dili"_q },
 		{ u"LuminaTranslateReadLangFollow"_q, u"Arayüz dili"_q },
 		{ u"LuminaTranslateReceiveInfo"_q, u"Gelen mesajlar orijinal metnini "

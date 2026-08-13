@@ -83,6 +83,11 @@ namespace {
 		{ u"LuminaTranslateReceiveHeader"_q, u"Получение"_q },
 		{ u"LuminaDualLanguageDisplay"_q,
 			u"Показывать оригинал и перевод вместе"_q },
+		{ u"LuminaFoldOriginalLongMessages"_q,
+			u"Сворачивать оригинал в длинных сообщениях"_q },
+		{ u"LuminaFoldOriginalLongMessagesInfo"_q,
+			u"В длинных двуязычных сообщениях оригинал сворачивается в одну строку, чтобы не засорять чат. Нажмите, чтобы развернуть. Перевод всегда показывается полностью."_q },
+		{ u"LuminaExpandOriginal"_q, u"Показать оригинал"_q },
 		{ u"LuminaTranslateReadLang"_q, u"Язык чтения"_q },
 		{ u"LuminaTranslateReadLangFollow"_q, u"Как язык приложения"_q },
 		{ u"LuminaTranslateReceiveInfo"_q, u"Входящие сообщения сохраняют "

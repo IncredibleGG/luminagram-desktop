@@ -71,6 +71,11 @@ namespace {
 			u"顯示，讓你選擇要傳送哪一個；關閉時譯文會直接傳送出去。"_q },
 		{ u"LuminaTranslateReceiveHeader"_q, u"接收"_q },
 		{ u"LuminaDualLanguageDisplay"_q, u"同時顯示原文與譯文"_q },
+		{ u"LuminaFoldOriginalLongMessages"_q,
+			u"長訊息自動摺疊原文"_q },
+		{ u"LuminaFoldOriginalLongMessagesInfo"_q,
+			u"在雙語長訊息中，原文會摺疊成一行，以免洗版。點一下即可展開。譯文一律完整顯示。"_q },
+		{ u"LuminaExpandOriginal"_q, u"展開原文"_q },
 		{ u"LuminaTranslateReadLang"_q, u"閱讀語言"_q },
 		{ u"LuminaTranslateReadLangFollow"_q, u"介面語言"_q },
 		{ u"LuminaTranslateReceiveInfo"_q, u"收到的訊息會以原本的大小保留"

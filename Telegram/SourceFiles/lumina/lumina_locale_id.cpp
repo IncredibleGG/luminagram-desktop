@@ -82,6 +82,11 @@ namespace {
 		{ u"LuminaTranslateReceiveHeader"_q, u"Penerimaan"_q },
 		{ u"LuminaDualLanguageDisplay"_q,
 			u"Tampilkan teks asli dan terjemahan bersamaan"_q },
+		{ u"LuminaFoldOriginalLongMessages"_q,
+			u"Lipat teks asli di pesan panjang"_q },
+		{ u"LuminaFoldOriginalLongMessagesInfo"_q,
+			u"Pada pesan dwibahasa yang panjang, teks asli dilipat menjadi satu baris agar tidak memenuhi obrolan. Ketuk untuk membentangkan. Terjemahan selalu ditampilkan penuh."_q },
+		{ u"LuminaExpandOriginal"_q, u"Tampilkan asli"_q },
 		{ u"LuminaTranslateReadLang"_q, u"Bahasa baca"_q },
 		{ u"LuminaTranslateReadLangFollow"_q, u"Bahasa antarmuka"_q },
 		{ u"LuminaTranslateReceiveInfo"_q, u"Pesan masuk tetap menampilkan "

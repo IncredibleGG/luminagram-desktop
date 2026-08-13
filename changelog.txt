@@ -1,3 +1,21 @@
+7.0.15 (13.08.26)
+
+- A long translated message no longer spills the tail of its translation out of
+  the bubble and under the timestamp. The sub-line's height was measured as a
+  single line no matter how long it was, because its text object was built with
+  no resize width; it is now measured at the width it is actually drawn at.
+- Translate-before-send is now decided per chat, not globally. The switch in
+  Translation settings only enables the feature; each chat is turned on from its
+  send button's menu, and stays off until you do. Turning the global switch on no
+  longer starts translating every chat you write in.
+- Long bilingual messages fold the original to one line with a "show original"
+  link; the translation stays in full. Off for short messages, and the whole
+  thing can be turned off in Translation settings. Applies to messages you
+  receive and ones you send.
+- In Saved Messages your own translated messages now keep the original beside the
+  translation, the same as in any other chat. Self-chat messages are not flagged
+  outgoing internally, which had hidden the original there.
+
 7.0.14 (12.08.26)
 
 - Stop calling ourselves the official Telegram app. The intro screen, the About

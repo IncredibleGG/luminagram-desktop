@@ -234,6 +234,13 @@ void FlushTranslateSendsAndCaptions();
 [[nodiscard]] QString DialogSendLanguage(not_null<History*> history);
 void SetDialogSendLanguage(not_null<History*> history, const QString &code);
 
+// The per-chat send-translate switch, the peer of the language lock above:
+// default false, so a chat never switched on sends as typed no matter what the
+// global switch is. Public so the chat language menu can drive the same
+// per-chat switch the send-button menu does.
+[[nodiscard]] bool DialogSendTranslateOn(not_null<History*> history);
+void SetDialogSendTranslateOn(not_null<History*> history, bool on);
+
 // The language an outgoing message in this chat would be translated into, or
 // an empty string when there is nothing to translate into yet: the feature is
 // off, the chat is out of scope, or trSendLang is "auto" and this chat has no

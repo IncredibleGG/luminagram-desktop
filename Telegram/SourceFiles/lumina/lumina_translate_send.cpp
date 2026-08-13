@@ -110,37 +110,10 @@ constexpr auto kCaptionBoxTimeout = crl::time(3 * 60 * 1000);
 		+ QString::number(history->peer->id.value);
 }
 
-// This chat's own persistent send-translate switch, keyed exactly like the
-// send-language lock above. Default false: a chat that was never switched on
-// sends as typed no matter what the global switch is.
-[[nodiscard]] bool DialogSendTranslateOn(not_null<History*> history) {
-	return Settings::Instance().getObject(
-		DialogSendActiveKey()
-	).value(DialogKey(history)).toBool();
-}
-
-// The one writer of trSendChatOn, and it names Store::Private for the reason
-// SetDialogSendLanguage() does: which chats you translate outgoing messages for
-// is the same class of thing as the per-chat language lock, and Settings::set()
-// defaults to Store::Prefs, so a bare set() would relocate the whole map into
-// the plaintext pref file.
-void SetDialogSendTranslateOn(not_null<History*> history, bool on) {
-	const auto key = DialogKey(history);
-	auto object = Settings::Instance().getObject(DialogSendActiveKey());
-	if (on) {
-		object.insert(key, true);
-	} else {
-		object.remove(key);
-	}
-	if (object.isEmpty()) {
-		Settings::Instance().remove(DialogSendActiveKey());
-	} else {
-		Settings::Instance().set(
-			DialogSendActiveKey(),
-			object,
-			Store::Private);
-	}
-}
+// DialogSendTranslateOn()/SetDialogSendTranslateOn() are defined with the rest
+// of the public per-chat API below (still keyed through DialogKey() and
+// DialogSendActiveKey() above), so the chat language menu can drive the same
+// switch the send-button menu in this file does.
 
 // Which language this chat's outgoing messages are translated into, once it is
 // settled that they are translated at all.
@@ -1009,6 +982,30 @@ bool TranslateBeforeSendActive(not_null<History*> history) {
 	return ContinuousTranslationAvailable()
 		&& TranslateBeforeSend()
 		&& DialogSendTranslateOn(history);
+}
+
+bool DialogSendTranslateOn(not_null<History*> history) {
+	return Settings::Instance().getObject(
+		DialogSendActiveKey()
+	).value(DialogKey(history)).toBool();
+}
+
+void SetDialogSendTranslateOn(not_null<History*> history, bool on) {
+	const auto key = DialogKey(history);
+	auto object = Settings::Instance().getObject(DialogSendActiveKey());
+	if (on) {
+		object.insert(key, true);
+	} else {
+		object.remove(key);
+	}
+	if (object.isEmpty()) {
+		Settings::Instance().remove(DialogSendActiveKey());
+	} else {
+		Settings::Instance().set(
+			DialogSendActiveKey(),
+			object,
+			Store::Private);
+	}
 }
 
 QString DialogSendLanguage(not_null<History*> history) {

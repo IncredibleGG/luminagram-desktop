@@ -12,6 +12,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "lang/lang_keys.h"
 #include "lumina/lumina_locale.h"
 #include "lumina/lumina_register.h"
+#include "lumina/lumina_translate_send.h"
 #include "lumina/lumina_translate_settings.h"
 #include "lumina/lumina_translate_toggle.h"
 #include "ui/boxes/choose_language_box.h"
@@ -98,13 +99,23 @@ void AddAbout(not_null<Ui::PopupMenu*> menu, const QString &text) {
 // The same for the outgoing half. "Recipient's language" is an answer rather
 // than a missing one - it means the send pipeline asks each chat once - so the
 // row names it instead of naming whichever language was last used.
-[[nodiscard]] QString OutgoingRow() {
-	if (!TranslateBeforeSend()) {
+[[nodiscard]] QString OutgoingRow(not_null<History*> history) {
+	// Off unless the global capability is on AND this chat is switched on (the
+	// per-chat switch, default off). The global switch alone no longer
+	// translates anything - the send-button menu and Android read it the same.
+	if (!TranslateBeforeSend() || !DialogSendTranslateOn(history)) {
 		return Tr(u"LuminaChatLangMeOff"_q);
 	}
-	return Tr(u"LuminaChatLangMe"_q, TranslateSendLanguageIsAuto()
+	// The language this chat outgoing messages actually go out in, resolved the
+	// way the send path does: the chat lock wins, then the global language;
+	// empty means neither is settled and the send flow asks once.
+	const auto chat = DialogSendLanguage(history);
+	const auto code = !chat.isEmpty()
+		? chat
+		: (TranslateSendLanguageIsAuto() ? QString() : TranslateSendLanguage());
+	return Tr(u"LuminaChatLangMe"_q, code.isEmpty()
 		? Tr(u"LuminaTranslateSendLangAuto"_q)
-		: TranslateLanguageName(TranslateSendLanguage()));
+		: TranslateLanguageName(code));
 }
 
 void FillIncoming(
@@ -159,27 +170,48 @@ void FillIncoming(
 
 void FillOutgoing(
 		not_null<Ui::PopupMenu*> menu,
-		not_null<Window::SessionController*> controller) {
+		not_null<Window::SessionController*> controller,
+		not_null<History*> history) {
+	const auto weak = base::make_weak(history);
 	AddRow(
 		menu,
-		OutgoingRow(),
+		OutgoingRow(history),
 		&st::menuIconSend,
 		[=] {
+			// Read through the weak pointer, as the incoming row does: the
+			// row outlives the menu it was built in.
+			const auto opened = weak.get();
+			if (!opened) {
+				return;
+			}
 			ShowLanguagePicker(
 				controller,
 				Tr(u"LuminaChatLangMeTitle"_q),
 				Tr(u"LuminaChatLangNone"_q),
 				OffCode(),
-				(TranslateBeforeSend()
-					? TranslateSendLanguage()
+				((TranslateBeforeSend() && DialogSendTranslateOn(opened))
+					? DialogSendLanguage(opened)
 					: OffCode()),
-				[](QString code) {
-					if (code == OffCode()) {
-						SetTranslateBeforeSend(false);
+				[=](QString code) {
+					const auto strong = weak.get();
+					if (!strong) {
+						return;
+					} else if (code == OffCode()) {
+						// This chat only; the global capability and every
+						// other chat are left untouched.
+						SetDialogSendTranslateOn(strong, false);
 						return;
 					}
-					SetTranslateSendLanguage(code);
-					SetTranslateBeforeSend(true);
+					// The per-chat send language, which the send path prefers
+					// over the global one, so it governs this chat alone and
+					// touches no other.
+					SetDialogSendLanguage(strong, code);
+					SetDialogSendTranslateOn(strong, true);
+					// Turn the global capability on if it was off, so the
+					// per-chat switch it gates takes effect.
+					if (!TranslateBeforeSend()) {
+						SetTranslateBeforeSend(true);
+					}
 				});
 		});
 }
@@ -422,7 +454,7 @@ void FillChatLanguageMenu(
 		return;
 	}
 	FillIncoming(menu, controller, history);
-	FillOutgoing(menu, controller);
+	FillOutgoing(menu, controller, history);
 	FillRegister(menu, controller, history);
 }
 

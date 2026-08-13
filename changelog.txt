@@ -1,3 +1,11 @@
+7.0.16 (14.08.26)
+
+- Setting a chat outgoing translation from its translate menu now changes only
+  that chat. The menu "me" row still wrote the global translate-before-send
+  switch and language, so it turned translation on or off for every chat at
+  once; it now drives the same per-chat switch the send button menu does, the
+  way Android already did.
+
 7.0.15 (13.08.26)
 
 - A long translated message no longer spills the tail of its translation out of

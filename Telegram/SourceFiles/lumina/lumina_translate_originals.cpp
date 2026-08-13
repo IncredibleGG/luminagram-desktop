@@ -506,7 +506,12 @@ void NoteOutgoingText(
 }
 
 QString SentOriginalText(not_null<const HistoryItem*> item) {
-	return item->out()
+	// out() alone would miss Saved Messages: NewMessageFlags() withholds
+	// MessageFlag::Outgoing for a self-chat send, so an own message there is not
+	// out(). The store is keyed on fullId(), which a self-chat item resolves the
+	// same way it was bound (its history peer is self), so widening the gate to
+	// self-chat cannot return anything but this message's own stored original.
+	return (item->out() || item->history()->peer->isSelf())
 		? SentOriginalText(&item->history()->session(), item->fullId())
 		: QString();
 }

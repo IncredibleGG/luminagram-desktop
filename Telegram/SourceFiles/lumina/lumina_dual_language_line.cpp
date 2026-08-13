@@ -200,7 +200,17 @@ struct Source {
 [[nodiscard]] Source ComputeSource(HistoryItem *item) {
 	if (!item) {
 		return {};
-	} else if (item->out()) {
+	} else if (item->out() || item->history()->peer->isSelf()) {
+		// Saved Messages is the reason for the isSelf() term. NewMessageFlags()
+		// (history_item_helpers.cpp) deliberately withholds MessageFlag::Outgoing
+		// for a self-chat send, so out() is false there even though the message
+		// is ours - which is exactly how Message::hasOutLayout() still lays a
+		// typed self-message out as outgoing. The bind side armed and stored the
+		// original all the same (Arm() does not gate on out()), so the only thing
+		// that kept translate-before-send bubbles translation-only in Saved
+		// Messages was this gate refusing to look. The lookup below is keyed on
+		// the message id, so a self-chat message that carries no stored original
+		// falls straight through to the incoming branch unchanged.
 		if (auto outgoing = ComputeOutgoingSource(item)) {
 			return outgoing;
 		}

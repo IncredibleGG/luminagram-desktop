@@ -549,6 +549,7 @@ namespace {
 		{ u"LuminaProfileCardTitle"_q, u"Kartu profil"_q },
 		{ u"LuminaProfileChatCreated"_q, u"Dibuat"_q },
 		{ u"LuminaProfileDcId"_q, u"Pusat data"_q },
+		{ u"LuminaProfileUserId"_q, u"ID pengguna"_q },
 		{ u"LuminaProfileDcIdValue"_q, u"DC{1}"_q },
 		{ u"LuminaProfileInfoHeader"_q, u"Profil"_q },
 		{ u"LuminaProfileInfoInfo"_q, u"Baris tambahan di halaman profil, "

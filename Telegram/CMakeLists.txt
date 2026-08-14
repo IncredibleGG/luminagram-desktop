@@ -1911,6 +1911,8 @@ PRIVATE
     lumina/lumina_profile_extra_settings.h
     lumina/lumina_profile_rows.cpp
     lumina/lumina_profile_rows.h
+    lumina/lumina_profile_user_id.cpp
+    lumina/lumina_profile_user_id.h
     lumina/lumina_quick_replies.cpp
     lumina/lumina_quick_replies.h
     lumina/lumina_quick_replies_section.cpp

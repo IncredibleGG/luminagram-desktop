@@ -464,6 +464,7 @@ namespace {
 		{ u"LuminaProfileCardTitle"_q, u"個人名片"_q },
 		{ u"LuminaProfileChatCreated"_q, u"建立於"_q },
 		{ u"LuminaProfileDcId"_q, u"資料中心"_q },
+		{ u"LuminaProfileUserId"_q, u"用戶 ID"_q },
 		{ u"LuminaProfileDcIdValue"_q, u"DC{1}"_q },
 		{ u"LuminaProfileInfoHeader"_q, u"個人檔案"_q },
 		{ u"LuminaProfileInfoInfo"_q, u"個人檔案頁面上額外的幾行資訊，全部都"

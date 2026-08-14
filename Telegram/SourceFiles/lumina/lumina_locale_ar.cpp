@@ -438,6 +438,7 @@ namespace {
 		{ u"LuminaProfileCardTitle"_q, u"بطاقة التعريف"_q },
 		{ u"LuminaProfileChatCreated"_q, u"أُنشئت في"_q },
 		{ u"LuminaProfileDcId"_q, u"مركز البيانات"_q },
+		{ u"LuminaProfileUserId"_q, u"معرّف المستخدم"_q },
 		{ u"LuminaProfileDcIdValue"_q, u"DC{1}"_q },
 		{ u"LuminaProfileInfoHeader"_q, u"الملف الشخصي"_q },
 		{ u"LuminaProfileInfoInfo"_q, u"سطور إضافية في صفحات الملفات الشخصية، تُحسب كلها على هذا الجهاز — فلا يُطلب شيء من Telegram. ويوفّر Telegram نفسه تاريخ التسجيل لبعض الحسابات؛ أما البقية فيُقدَّر من رقم الحساب ويُعرض مع علامة «~». ومركز البيانات هو المركز الذي يخزّن صورة الملف الشخصي. أما تاريخ الإنشاء فهو تاريخ إنشاء المجموعة أو القناة."_q },

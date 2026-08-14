@@ -417,6 +417,7 @@ namespace {
 		{ u"LuminaProfileCardTitle"_q, u"کارت معرفی"_q },
 		{ u"LuminaProfileChatCreated"_q, u"ساخته‌شده در"_q },
 		{ u"LuminaProfileDcId"_q, u"مرکز داده"_q },
+		{ u"LuminaProfileUserId"_q, u"شناسه کاربر"_q },
 		{ u"LuminaProfileDcIdValue"_q, u"DC{1}"_q },
 		{ u"LuminaProfileInfoHeader"_q, u"نمایه"_q },
 		{ u"LuminaProfileInfoInfo"_q, u"خط‌های اضافی در صفحه‌های نمایه که همه روی همین دستگاه به دست می‌آیند — چیزی از Telegram پرسیده نمی‌شود. تاریخ ثبت‌نام برخی حساب‌ها را خودِ Telegram می‌دهد؛ برای بقیه از روی شمارهٔ حساب تخمین زده می‌شود و با «~» نشان داده می‌شود. مرکز داده همان مرکزی است که عکس نمایه را ذخیره می‌کند. تاریخ ساخت، زمان ساخته‌شدن یک گروه یا کانال است."_q },

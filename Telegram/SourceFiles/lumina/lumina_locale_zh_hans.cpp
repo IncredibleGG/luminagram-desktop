@@ -468,6 +468,7 @@ namespace {
 		{ u"LuminaProfileCardTitle"_q, u"个人名片"_q },
 		{ u"LuminaProfileChatCreated"_q, u"创建于"_q },
 		{ u"LuminaProfileDcId"_q, u"数据中心"_q },
+		{ u"LuminaProfileUserId"_q, u"用户 ID"_q },
 		{ u"LuminaProfileDcIdValue"_q, u"DC{1}"_q },
 		{ u"LuminaProfileInfoHeader"_q, u"个人资料"_q },
 		{ u"LuminaProfileInfoInfo"_q, u"在资料页上增加几行信息，全部在这台"

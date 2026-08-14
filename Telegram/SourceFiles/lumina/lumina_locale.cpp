@@ -496,6 +496,7 @@ struct Registration {
 		{ u"LuminaProfileCardTitle"_q, u"Profile card"_q },
 		{ u"LuminaProfileChatCreated"_q, u"Created"_q },
 		{ u"LuminaProfileDcId"_q, u"Datacenter"_q },
+		{ u"LuminaProfileUserId"_q, u"User ID"_q },
 		{ u"LuminaProfileDcIdValue"_q, u"DC{1}"_q },
 		{ u"LuminaProfileInfoHeader"_q, u"Profile"_q },
 		{ u"LuminaProfileInfoInfo"_q, u"Extra lines on profile pages, all worked out on this device — nothing is asked of Telegram. Telegram itself supplies the registration date for some accounts; for the rest it is estimated from the account number and shown with a \"~\". The datacenter is the one storing the profile photo. The creation date is when a group or channel was made."_q },

@@ -549,6 +549,7 @@ namespace {
 		{ u"LuminaProfileCardTitle"_q, u"Cartão de perfil"_q },
 		{ u"LuminaProfileChatCreated"_q, u"Criado"_q },
 		{ u"LuminaProfileDcId"_q, u"Datacenter"_q },
+		{ u"LuminaProfileUserId"_q, u"ID do usuário"_q },
 		{ u"LuminaProfileDcIdValue"_q, u"DC{1}"_q },
 		{ u"LuminaProfileInfoHeader"_q, u"Perfil"_q },
 		{ u"LuminaProfileInfoInfo"_q, u"Linhas extras nas páginas de perfil, "

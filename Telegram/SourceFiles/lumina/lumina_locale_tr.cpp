@@ -440,6 +440,7 @@ namespace {
 		{ u"LuminaProfileCardTitle"_q, u"Profil kartı"_q },
 		{ u"LuminaProfileChatCreated"_q, u"Oluşturuldu"_q },
 		{ u"LuminaProfileDcId"_q, u"Veri merkezi"_q },
+		{ u"LuminaProfileUserId"_q, u"Kullanıcı kimliği"_q },
 		{ u"LuminaProfileDcIdValue"_q, u"DC{1}"_q },
 		{ u"LuminaProfileInfoHeader"_q, u"Profil"_q },
 		{ u"LuminaProfileInfoInfo"_q, u"Profil sayfalarındaki ek satırlar; hepsi bu cihazda hesaplanır — Telegram'dan hiçbir şey istenmez. Bazı hesaplar için kayıt tarihini Telegram'ın kendisi verir; geri kalanlar için tarih hesap numarasından tahmin edilir ve başında «~» ile gösterilir. Veri merkezi, profil fotoğrafını saklayan merkezdir. Oluşturma tarihi, bir grubun ya da kanalın kurulduğu tarihtir."_q },

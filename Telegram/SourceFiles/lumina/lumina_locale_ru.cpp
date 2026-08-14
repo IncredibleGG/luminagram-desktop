@@ -684,6 +684,7 @@ namespace {
 		{ u"LuminaProfileRegistrationApprox"_q, u"~ {1}"_q },
 		{ u"LuminaProfileShowDcId"_q, u"Показывать дата-центр"_q },
 		{ u"LuminaProfileDcId"_q, u"Дата-центр"_q },
+		{ u"LuminaProfileUserId"_q, u"ID пользователя"_q },
 		{ u"LuminaProfileDcIdValue"_q, u"DC{1}"_q },
 		{ u"LuminaProfileShowChatDate"_q, u"Показывать дату создания"_q },
 		{ u"LuminaProfileChatCreated"_q, u"Создан"_q },

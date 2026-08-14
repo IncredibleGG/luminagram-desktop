@@ -1852,6 +1852,8 @@ PRIVATE
     lumina/lumina_fake_crash_settings.h
     lumina/lumina_forward_actions.cpp
     lumina/lumina_forward_actions.h
+    lumina/lumina_glossary.cpp
+    lumina/lumina_glossary.h
     lumina/lumina_link_preview.cpp
     lumina/lumina_link_preview.h
     lumina/lumina_link_preview_settings.cpp

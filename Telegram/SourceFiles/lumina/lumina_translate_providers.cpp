@@ -13,6 +13,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "lang/lang_text_entity.h"
 #include "lang/translate_mtproto_provider.h"
 #include "lang/translate_provider.h"
+#include "lumina/lumina_glossary.h"
 #include "lumina/lumina_locale.h"
 #include "lumina/lumina_register.h"
 #include "lumina/lumina_settings.h"
@@ -707,6 +708,55 @@ private:
 
 };
 
+// The do-not-translate list, applied as a decorator around whatever engine the
+// user picked. Before the request it masks every glossary term, @mention and
+// http(s) URL with a private-use placeholder (Glossary::Protect); after the
+// reply it puts them back verbatim (Glossary::Restore), so a brand name, a
+// username or a link comes back exactly as written no matter what the engine
+// did with the rest of the sentence.
+//
+// It wraps the FallbackEngine rather than sitting inside it, so a single
+// protect/restore covers both tiers: the placeholders are what travels, and
+// whichever engine answers, its reply is un-masked once here.
+class GlossaryEngine final : public TranslateEngine {
+public:
+	explicit GlossaryEngine(std::unique_ptr<TranslateEngine> inner)
+	: _inner(std::move(inner)) {
+	}
+
+	[[nodiscard]] QString id() const override {
+		return _inner->id();
+	}
+
+	void setRegisterDialog(RegisterDialog dialog) override {
+		TranslateEngine::setRegisterDialog(dialog);
+		_inner->setRegisterDialog(dialog);
+	}
+
+	void translate(
+			const QString &text,
+			const QString &toCode,
+			Fn<void(TranslateResult)> done) override {
+		auto prepared = Glossary::Protect(text);
+		if (prepared.restore.empty()) {
+			// Nothing to mask: stay byte-for-byte on the untouched path.
+			_inner->translate(text, toCode, std::move(done));
+			return;
+		}
+		const auto restore = std::move(prepared.restore);
+		_inner->translate(prepared.text, toCode, [=](TranslateResult result) {
+			if (!result.text.isEmpty()) {
+				result.text = Glossary::Restore(result.text, restore);
+			}
+			done(std::move(result));
+		});
+	}
+
+private:
+	const std::unique_ptr<TranslateEngine> _inner;
+
+};
+
 // The adapter onto tdesktop's own interface. supportsMessageId() is false and
 // must stay false - see the note on CreateTranslateProvider() in the header.
 class EngineProvider final : public Ui::TranslateProvider {
@@ -1102,20 +1152,31 @@ std::unique_ptr<TranslateEngine> MakeTranslateEngine(
 std::unique_ptr<TranslateEngine> MakeCurrentTranslateEngine(
 		Main::Session *session) {
 	const auto id = CurrentProviderId();
-	auto primary = MakeTranslateEngine(id, session);
-	if (!primary
-		|| !session
-		|| (id == TelegramProviderId())
-		|| !TranslateFallbackToTelegram()) {
-		return primary;
+	auto engine = MakeTranslateEngine(id, session);
+	if (engine
+		&& session
+		&& (id != TelegramProviderId())
+		&& TranslateFallbackToTelegram()) {
+		if (auto secondary = MakeTranslateEngine(
+				TelegramProviderId(),
+				session)) {
+			engine = std::make_unique<FallbackEngine>(
+				std::move(engine),
+				std::move(secondary));
+		}
 	}
-	auto secondary = MakeTranslateEngine(TelegramProviderId(), session);
-	if (!secondary) {
-		return primary;
+	if (!engine) {
+		return nullptr;
 	}
-	return std::make_unique<FallbackEngine>(
-		std::move(primary),
-		std::move(secondary));
+	// The single shared seam for the do-not-translate list. Every LuminaGram
+	// translation path - the send pipeline and voice-to-text via
+	// TranslateText(), the composer preview, the selection translator, and
+	// tdesktop's own bar / box / per-chat translation via
+	// CreateTranslateProvider() - builds its engine here, so wrapping the whole
+	// engine (fallback included) once covers all of them and nothing else has
+	// to change. The settings test-key row deliberately calls
+	// MakeTranslateEngine() instead, so it is not masked.
+	return std::make_unique<GlossaryEngine>(std::move(engine));
 }
 
 void TranslateText(

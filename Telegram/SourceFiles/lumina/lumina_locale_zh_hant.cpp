@@ -466,6 +466,8 @@ namespace {
 		{ u"LuminaProfileDcId"_q, u"資料中心"_q },
 		{ u"LuminaProfileUserId"_q, u"用戶 ID"_q },
 		{ u"LuminaProfileDcIdValue"_q, u"DC{1}"_q },
+		{ u"LuminaProfileNameWarning"_q, u"可能冒充他人"_q },
+		{ u"LuminaProfileNameWarningLabel"_q, u"名稱含視覺近似字元"_q },
 		{ u"LuminaProfileInfoHeader"_q, u"個人檔案"_q },
 		{ u"LuminaProfileInfoInfo"_q, u"個人檔案頁面上額外的幾行資訊，全部都"
 			u"在這台裝置上算出來——不會向 Telegram 詢問任何東西。部分帳號的"

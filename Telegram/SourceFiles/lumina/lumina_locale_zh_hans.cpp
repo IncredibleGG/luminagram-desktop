@@ -470,6 +470,8 @@ namespace {
 		{ u"LuminaProfileDcId"_q, u"数据中心"_q },
 		{ u"LuminaProfileUserId"_q, u"用户 ID"_q },
 		{ u"LuminaProfileDcIdValue"_q, u"DC{1}"_q },
+		{ u"LuminaProfileNameWarning"_q, u"可能冒充他人"_q },
+		{ u"LuminaProfileNameWarningLabel"_q, u"名称含视觉近似字符"_q },
 		{ u"LuminaProfileInfoHeader"_q, u"个人资料"_q },
 		{ u"LuminaProfileInfoInfo"_q, u"在资料页上增加几行信息，全部在这台"
 			u"设备上算出——不会向 Telegram 索取任何内容。部分账号的注册日期"

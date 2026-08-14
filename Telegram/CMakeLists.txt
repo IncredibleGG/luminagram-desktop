@@ -1856,6 +1856,8 @@ PRIVATE
     lumina/lumina_forward_actions.h
     lumina/lumina_glossary.cpp
     lumina/lumina_glossary.h
+    lumina/lumina_homoglyph.cpp
+    lumina/lumina_homoglyph.h
     lumina/lumina_link_preview.cpp
     lumina/lumina_link_preview.h
     lumina/lumina_link_preview_settings.cpp
@@ -1913,6 +1915,8 @@ PRIVATE
     lumina/lumina_profile_dc_id.h
     lumina/lumina_profile_extra_settings.cpp
     lumina/lumina_profile_extra_settings.h
+    lumina/lumina_profile_name_warning.cpp
+    lumina/lumina_profile_name_warning.h
     lumina/lumina_profile_rows.cpp
     lumina/lumina_profile_rows.h
     lumina/lumina_profile_user_id.cpp

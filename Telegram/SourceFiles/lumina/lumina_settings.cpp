@@ -92,6 +92,7 @@ auto Settings::Defaults()
 -> const base::flat_map<QString, QJsonValue> & {
 	static const auto result = base::flat_map<QString, QJsonValue>{
 		{ u"chatListOnlineDot"_q, QJsonValue(true) },
+		{ u"homoglyphWarn"_q, QJsonValue(true) },
 		{ u"otpGuardEnabled"_q, QJsonValue(true) },
 		{ u"showBookmarks"_q, QJsonValue(true) },
 		{ u"stripPhotoMetadata"_q, QJsonValue(true) },

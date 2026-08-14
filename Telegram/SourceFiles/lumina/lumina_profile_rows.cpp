@@ -15,6 +15,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "lumina/lumina_contact_notes.h"
 #include "lumina/lumina_profile_chat_date.h"
 #include "lumina/lumina_profile_dc_id.h"
+#include "lumina/lumina_profile_name_warning.h"
 #include "lumina/lumina_profile_user_id.h"
 #include "lumina/lumina_registration_date.h"
 
@@ -23,6 +24,7 @@ namespace Lumina {
 void AddUserInfoRows(
 		const ProfileRowsContext &context,
 		not_null<UserData*> user) {
+	AddNameWarningRow(context, user);
 	AddRegistrationDateRow(context, user);
 	AddProfileDcIdRow(context, user);
 	AddUserIdRow(context, user);

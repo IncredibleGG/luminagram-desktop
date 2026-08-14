@@ -169,6 +169,16 @@ namespace Lumina {
 // language - so the detector and the thing that acts on it cannot disagree
 // about what "the read language" is.
 //
+// GROUPS AND CHANNELS. On a multi-user peer (peer->isChat() || isChannel()),
+// and only while the `groupSkipMyLanguages` toggle is on - Store::Prefs,
+// default true - the languages the user already reads are added to this list as
+// well: the interface language (Lang::Id()) and the trReadLang override. A
+// group message written in one of them is then left as its original instead of
+// being offered, so only what the user cannot read is offered - the desktop
+// port of Android's "groups only translate languages I don't read". A
+// one-to-one chat keeps the read-language-only list above unchanged, and with
+// the toggle off every peer does.
+//
 // MIGRATION. This is where a profile carrying the removed trMode = "all" lands.
 // Nothing reads that key any more, so nothing translates itself: such a profile
 // opens on a launch where no chat is translating and every chat waits to be

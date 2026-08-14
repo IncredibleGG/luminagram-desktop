@@ -12,6 +12,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "data/data_peer.h"
 #include "data/data_peer_values.h" // Data::AmPremiumValue.
 #include "history/history.h"
+#include "lang/lang_keys.h" // Lang::Id.
 #include "lumina/lumina_settings.h"
 #include "lumina/lumina_translate_providers.h" // UsingOwnProvider.
 #include "lumina/lumina_translate_readlang.h" // ReadLanguageOr.
@@ -43,6 +44,21 @@ namespace {
 // user turns the feature on.
 [[nodiscard]] QString FeatureEnabledKey() {
 	return u"translateEnabled"_q;
+}
+
+// LuminaGram: on a group or channel the relaxed offer below normally covers
+// every language except the read one, so a message written in a language the
+// user already reads is offered for translation exactly like a foreign one.
+// This toggle (default ON, multi-user peers only) adds "the languages I read" -
+// the interface language and the trReadLang override - back to the skip list
+// for those peers, leaving such messages as their original and offering only
+// what the user cannot read. A one-to-one chat is never touched.
+[[nodiscard]] QString GroupSkipMyLanguagesKey() {
+	return u"groupSkipMyLanguages"_q;
+}
+
+[[nodiscard]] bool GroupSkipMyLanguages() {
+	return Settings::Instance().getBool(GroupSkipMyLanguagesKey(), true);
 }
 
 } // namespace
@@ -98,8 +114,15 @@ std::optional<std::vector<LanguageId>> TranslateOfferSkip(
 	}
 	const auto to = ReadLanguageOr(Core::App().settings().translateTo());
 	auto result = std::vector<LanguageId>();
-	if (to) {
-		result.push_back(to);
+	const auto add = [&](LanguageId id) {
+		if (id && !ranges::contains(result, id)) {
+			result.push_back(id);
+		}
+	};
+	add(to);
+	if ((peer->isChat() || peer->isChannel()) && GroupSkipMyLanguages()) {
+		add(LanguageId::FromName(Lang::Id()));
+		add(ReadLanguage());
 	}
 	return result;
 }
@@ -109,6 +132,7 @@ rpl::producer<> TranslateOfferPolicyChanges() {
 		ContinuousTranslationAvailableValue() | rpl::to_empty,
 		TranslateProviderChanges(),
 		ReadLanguageCodeValue() | rpl::skip(1) | rpl::to_empty,
+		Settings::Instance().changesFor(GroupSkipMyLanguagesKey()),
 		// The read language is an OVERRIDE: with none set, and that is the
 		// default, TranslateOfferSkip() resolves the target through
 		// Core::Settings::translateTo(). Ui::ChooseTranslateToBox() writes

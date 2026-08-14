@@ -689,6 +689,13 @@ struct Registration {
 			u"yet: it needs a native library and a voice model packaged "
 			u"separately for Windows, macOS and Linux. Until then, "
 			u"transcription on desktop is cloud-only."_q },
+		{ u"LuminaExplainMenuItem"_q, u"Explain"_q },
+		{ u"LuminaExplainTitle"_q, u"Explain this message"_q },
+		{ u"LuminaExplainWorking"_q, u"Explaining..."_q },
+		{ u"LuminaExplainError"_q, u"Could not explain this message. Check your "
+			u"LLM key and connection, then try again."_q },
+		{ u"LuminaExplainNoKey"_q, u"No LLM API key set. Add one in Settings, "
+			u"LuminaGram, Translation, then try again."_q },
 		{ u"LuminaSttUiMenuItem"_q, u"Transcribe"_q },
 		{ u"LuminaSttUiPickTitle"_q, u"Voice to text"_q },
 		{ u"LuminaSttUiFetching"_q, u"Downloading the voice message..."_q },

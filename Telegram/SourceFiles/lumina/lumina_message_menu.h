@@ -120,5 +120,8 @@ void AddSelectFromAuthorRow(
 void AddVoiceToTextRow(
 	not_null<Ui::PopupMenu*> menu,
 	const MessageMenuContext &context);
+void AddExplainRow(
+	not_null<Ui::PopupMenu*> menu,
+	const MessageMenuContext &context);
 
 } // namespace Lumina

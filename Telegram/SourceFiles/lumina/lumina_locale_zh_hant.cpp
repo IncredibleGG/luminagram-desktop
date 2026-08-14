@@ -767,6 +767,13 @@ namespace {
 		{ u"LuminaSttVoskUnsupported"_q, u"離線引擎（Vosk）桌面版尚未支援：它需要在 Windows"
 			u"、macOS、Linux 各自打包原生庫與語音模型。"
 			u"在那之前，桌面版的轉錄只有雲端引擎。"_q },
+		{ u"LuminaExplainMenuItem"_q, u"解釋一下"_q },
+		{ u"LuminaExplainTitle"_q, u"解釋這則訊息"_q },
+		{ u"LuminaExplainWorking"_q, u"解讀中…"_q },
+		{ u"LuminaExplainError"_q, u"無法解釋這則訊息。請確認 LLM 金鑰與網路連線"
+			u"後再試一次。"_q },
+		{ u"LuminaExplainNoKey"_q, u"尚未設定 LLM 金鑰。請先到「設定、LuminaGram"
+			u"、翻譯」填入 LLM 金鑰。"_q },
 		{ u"LuminaSttUiMenuItem"_q, u"轉文字"_q },
 		{ u"LuminaSttUiPickTitle"_q, u"語音轉文字"_q },
 		{ u"LuminaSttUiFetching"_q, u"正在下載語音訊息…"_q },

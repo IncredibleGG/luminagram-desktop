@@ -1846,6 +1846,8 @@ PRIVATE
     lumina/lumina_exif_strip.h
     lumina/lumina_exif_strip_settings.cpp
     lumina/lumina_exif_strip_settings.h
+    lumina/lumina_explain.cpp
+    lumina/lumina_explain.h
     lumina/lumina_fake_crash.cpp
     lumina/lumina_fake_crash.h
     lumina/lumina_fake_crash_settings.cpp

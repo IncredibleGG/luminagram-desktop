@@ -13,6 +13,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "lumina/lumina_forward_actions.h"
 #include "lumina/lumina_bookmarks.h"
 #include "lumina/lumina_voice_to_text.h"
+#include "lumina/lumina_explain.h"
 #include "history/history_inner_widget.h"
 #include "history/history_item.h"
 #include "history/view/history_view_context_menu.h"
@@ -43,6 +44,7 @@ void FillRows(
 	AddBookmarkRow(menu, context);
 	AddSelectFromAuthorRow(menu, context);
 	AddVoiceToTextRow(menu, context);
+	AddExplainRow(menu, context);
 }
 
 } // namespace
@@ -128,6 +130,12 @@ void AddVoiceToTextRow(
 		not_null<Ui::PopupMenu*> menu,
 		const MessageMenuContext &context) {
 	AddVoiceToTextMenuRow(menu, context);
+}
+
+void AddExplainRow(
+		not_null<Ui::PopupMenu*> menu,
+		const MessageMenuContext &context) {
+	AddExplainMenuRow(menu, context);
 }
 
 } // namespace Lumina

@@ -1,3 +1,9 @@
+7.0.17 (15.08.26)
+
+- Your numeric user ID now shows on profiles and can be copied.
+- Up to 10 accounts, no longer limited without Premium.
+- In group chats, messages already in a language you read are left untranslated.
+
 7.0.16 (14.08.26)
 
 - Setting a chat outgoing translation from its translate menu now changes only

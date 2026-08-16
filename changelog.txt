@@ -1,3 +1,9 @@
+7.0.18 (16.08.26)
+
+- Do-not-translate list: brand names, @usernames and links are kept as-is when translating.
+- Explain a message: right-click a message for tone, slang and how to reply, using your own AI key.
+- Warns when a contact or sender name uses look-alike characters.
+
 7.0.17 (15.08.26)
 
 - Your numeric user ID now shows on profiles and can be copied.

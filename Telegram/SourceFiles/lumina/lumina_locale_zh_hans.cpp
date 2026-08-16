@@ -79,6 +79,8 @@ namespace {
 			u"长消息自动折叠原文"_q },
 		{ u"LuminaFoldOriginalLongMessagesInfo"_q,
 			u"在双语长消息中，原文会折叠成一行，以免刷屏。点一下即可展开。译文始终完整显示。"_q },
+		{ u"LuminaTranslateGroupSkipMyLanguages"_q,
+			u"群组中跳过我看得懂的语言"_q },
 		{ u"LuminaExpandOriginal"_q, u"展开原文"_q },
 		{ u"LuminaTranslateReadLang"_q, u"阅读语言"_q },
 		{ u"LuminaTranslateReadLangFollow"_q, u"界面语言"_q },
@@ -121,6 +123,20 @@ namespace {
 		{ u"LuminaTranslateProviderSecurityInfo"_q, u"密钥只保存在这台设备"
 			u"上，存放在与其他设置分开的文件里，绝不会发送给 Telegram。你"
 			u"翻译的所有内容都会发送到这里选择的服务，请挑一个你信任的。"_q },
+
+		// “更多”：解释一下与不翻译词清单。
+		{ u"LuminaTranslateMoreHeader"_q, u"更多"_q },
+		{ u"LuminaGlossaryManage"_q, u"不翻译词清单"_q },
+		{ u"LuminaGlossaryNone"_q, u"无"_q },
+		{ u"LuminaTranslateMoreInfo"_q, u"“解释一下”会在右键菜单里加入一项，把一条消息交给你自己的 LLM，说明它到底是什么意思——语气、俚语，以及你可以怎么回复。不翻译词清单里的词，在翻译消息时会原样保留。"_q },
+		// 不翻译词清单的编辑框。
+		{ u"LuminaGlossaryTitle"_q, u"不翻译词清单"_q },
+		{ u"LuminaGlossaryHeader"_q, u"词条"_q },
+		{ u"LuminaGlossaryAdd"_q, u"添加词条"_q },
+		{ u"LuminaGlossaryEdit"_q, u"编辑词条"_q },
+		{ u"LuminaGlossaryTermPlaceholder"_q, u"词条"_q },
+		{ u"LuminaGlossaryEmpty"_q, u"清单里的词在翻译消息时会原样保留——人名、品牌、@用户名、代码。链接和 @提及无论是否在清单里，都会始终保留。"_q },
+		{ u"LuminaGlossaryListInfo"_q, u"匹配不区分大小写。链接和 @提及无论是否在清单里，都会始终保留。"_q },
 
 		// Telegram's own AI editor in the composer, whose Translate tab does
 		// what LuminaGram translation already does. The two product names
@@ -600,6 +616,8 @@ namespace {
 		{ u"LuminaOtpGuardSendAnyway"_q, u"我知道风险，仍要发送"_q },
 		{ u"LuminaOtpGuard"_q, u"登录码泄露防护"_q },
 		{ u"LuminaOtpGuardInfo"_q, u"当 Telegram 刚给你发过登录码、而你正要发出含有验证码的消息时，先弹出警告。整个判断都在你的设备上完成，不会上传任何内容，也不会改动你的消息。"_q },
+		{ u"LuminaPrivacyHomoglyphWarning"_q, u"冒名混淆警告"_q },
+		{ u"LuminaPrivacyHomoglyphWarningInfo"_q, u"当一个名字混用了来自不同字母表的形近字符时发出警告——例如拉丁词里夹着西里尔字母“а”、全角字母，或用 0 冒充 O——这正是冒名者伪装成熟悉名字的手法。不会拦截或改动任何内容；判断都在你的设备上完成，不会上传任何名字。"_q },
 		// link preview + voice confirm
 		{ u"LuminaPrivacyDisableLinkPreview"_q, u"默认禁用链接预览"_q },
 		{ u"LuminaLinkPreviewInfo"_q, u"你新写的消息会不带链接预览发送，输入框"
@@ -778,6 +796,7 @@ namespace {
 			u"后再试一次。"_q },
 		{ u"LuminaExplainNoKey"_q, u"尚未设置 LLM 密钥。请先到“设置、LuminaGram"
 			u"、翻译”填入 LLM 密钥。"_q },
+		{ u"LuminaExplainEnable"_q, u"“解释一下”菜单项"_q },
 		{ u"LuminaSttUiMenuItem"_q, u"转文字"_q },
 		{ u"LuminaSttUiPickTitle"_q, u"语音转文字"_q },
 		{ u"LuminaSttUiFetching"_q, u"正在下载语音消息…"_q },

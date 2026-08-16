@@ -9,6 +9,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include "base/timer.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_explain.h"
+#include "lumina/lumina_glossary.h"
 #include "lumina/lumina_locale.h"
 #include "lumina/lumina_settings.h"
 #include "lumina/lumina_translate_gating.h"
@@ -17,7 +19,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "settings/settings_common.h"
 #include "ui/boxes/single_choice_box.h"
 #include "ui/layers/generic_box.h"
+#include "ui/layers/show.h"
 #include "ui/toast/toast.h"
+#include "ui/ui_utility.h"
 #include "ui/vertical_list.h"
 #include "ui/widgets/buttons.h"
 #include "ui/widgets/fields/input_field.h"
@@ -27,6 +31,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "window/window_session_controller.h"
 
 #include "styles/style_layers.h"
+#include "styles/style_menu_icons.h"
 #include "styles/style_settings.h"
 #include "styles/style_widgets.h"
 
@@ -43,12 +48,27 @@ const auto kKeyReadLang = u"trReadLang"_q;
 const auto kKeyDualLanguage = u"dualLanguageDisplay"_q;
 const auto kKeyFoldOriginal = u"foldOriginalLongMessages"_q;
 
+// LuminaGram: these three keys are owned by other headers - the group-skip
+// preference by lumina_translate_gating (its accessor is private there, so the
+// key name is spelled out here as the header's own comment documents it),
+// "explain this message" by lumina_explain, and the do-not-translate list by
+// lumina_glossary. They are listed in IsOwnedKey() below so that a row this page
+// adds for each of them refreshes the moment the value changes, exactly like
+// every key this file owns outright.
+const auto kKeyGroupSkip = u"groupSkipMyLanguages"_q;
+const auto kKeyExplain = u"explainMessage"_q;
+const auto kKeyGlossary = u"glossaryTerms"_q;
+
 const auto kSendLangAuto = u"auto"_q;
 
 constexpr auto kApiKeyMaxLength = 512;
 constexpr auto kBaseUrlMaxLength = 512;
 constexpr auto kModelMaxLength = 128;
 constexpr auto kPromptMaxLength = 4096;
+
+// The do-not-translate list caps each term at this length in lumina_glossary;
+// the editor field matches it so a term cannot be typed longer than it stores.
+constexpr auto kGlossaryTermMaxLength = 128;
 
 // How much of an API key a row shows. Enough to tell two keys apart, not
 // enough to be worth a screenshot.
@@ -82,7 +102,10 @@ constexpr auto kTestTimeoutMs = crl::time(25000);
 		|| (key == kKeySendLang)
 		|| (key == kKeyReadLang)
 		|| (key == kKeyDualLanguage)
-		|| (key == kKeyFoldOriginal);
+		|| (key == kKeyFoldOriginal)
+		|| (key == kKeyGroupSkip)
+		|| (key == kKeyExplain)
+		|| (key == kKeyGlossary);
 }
 
 struct LanguageEntry {
@@ -675,6 +698,15 @@ void AddReceiveRows(
 		TrValue(u"LuminaFoldOriginalLongMessages"_q),
 		[] { return FoldOriginalLongMessages(); },
 		[](bool value) { SetFoldOriginalLongMessages(value); });
+	// LuminaGram: "in groups, leave messages in a language I already read as
+	// their original". The accessor lives in lumina_translate_gating (private
+	// there), so the key is read and written directly, exactly as the header
+	// documents it - Store::Prefs, default true, multi-user peers only.
+	AddToggleRow(
+		container,
+		TrValue(u"LuminaTranslateGroupSkipMyLanguages"_q),
+		[] { return Settings::Instance().getBool(kKeyGroupSkip, true); },
+		[](bool value) { Settings::Instance().set(kKeyGroupSkip, value); });
 	AddValueRow(
 		container,
 		TrValue(u"LuminaTranslateReadLang"_q),
@@ -938,6 +970,154 @@ void AddProviderRows(
 		TrValue(u"LuminaTranslateProviderSecurityInfo"_q));
 }
 
+// The do-not-translate list editor, modelled on lumina_text_replace_settings'
+// rule box: it writes through Glossary::SetGlossaryTerms() and nothing else,
+// and the list below rebuilds from Glossary::GlossaryChanges(), so this box
+// never needs a pointer back into the list that opened it. A term is identified
+// by its own text, which SetGlossaryTerms() keeps unique (case-insensitively),
+// so editing or deleting one finds it by value.
+void EditGlossaryTermBox(not_null<Ui::GenericBox*> box, QString original) {
+	const auto adding = original.isEmpty();
+	box->setTitle(TrValue(adding
+		? u"LuminaGlossaryAdd"_q
+		: u"LuminaGlossaryEdit"_q));
+
+	const auto field = box->addRow(object_ptr<Ui::InputField>(
+		box,
+		st::defaultInputField,
+		Ui::InputField::Mode::SingleLine,
+		TrValue(u"LuminaGlossaryTermPlaceholder"_q),
+		original));
+	field->setMaxLength(kGlossaryTermMaxLength);
+
+	box->setFocusCallback([=] {
+		field->setFocusFast();
+	});
+
+	const auto save = [=] {
+		const auto text = field->getLastText().trimmed();
+		if (text.isEmpty()) {
+			field->showError();
+			return;
+		}
+		auto terms = Glossary::GlossaryTerms();
+		const auto index = adding ? -1 : int(terms.indexOf(original));
+		if (index >= 0) {
+			terms[index] = text;
+		} else {
+			terms.append(text);
+		}
+		Glossary::SetGlossaryTerms(terms);
+		box->closeBox();
+	};
+	field->submits() | rpl::on_next(save, field->lifetime());
+
+	box->addButton(tr::lng_settings_save(), save);
+	box->addButton(tr::lng_cancel(), [=] {
+		box->closeBox();
+	});
+	if (!adding) {
+		box->addLeftButton(tr::lng_box_delete(), [=] {
+			auto terms = Glossary::GlossaryTerms();
+			const auto index = int(terms.indexOf(original));
+			if (index >= 0) {
+				terms.removeAt(index);
+				Glossary::SetGlossaryTerms(terms);
+			}
+			box->closeBox();
+		}, st::attentionBoxButton);
+	}
+}
+
+void GlossaryBox(not_null<Ui::GenericBox*> box) {
+	box->setStyle(st::layerBox);
+	box->setWidth(st::boxWideWidth);
+	box->setTitle(TrValue(u"LuminaGlossaryTitle"_q));
+
+	// The list is rebuilt wholesale, so it gets a layout of its own rather than
+	// clearing the box's - GenericBox owns its content layout during prepare().
+	const auto content = box->verticalLayout()->add(
+		object_ptr<Ui::VerticalLayout>(box));
+
+	const auto rebuild = std::make_shared<Fn<void()>>();
+	*rebuild = [=] {
+		const auto width = content->width();
+		content->clear();
+
+		const auto terms = Glossary::GlossaryTerms();
+
+		Ui::AddSkip(content);
+		Ui::AddSubsectionTitle(content, TrValue(u"LuminaGlossaryHeader"_q));
+		const auto add = ::Settings::AddButtonWithIcon(
+			content,
+			TrValue(u"LuminaGlossaryAdd"_q),
+			st::settingsButtonActive,
+			{ &st::menuIconAdd });
+		add->setClickedCallback([=] {
+			box->uiShow()->show(Box(EditGlossaryTermBox, QString()));
+		});
+		for (const auto &term : terms) {
+			const auto button = ::Settings::AddButtonWithIcon(
+				content,
+				rpl::single(term),
+				st::settingsButtonNoIcon);
+			button->setClickedCallback([=] {
+				box->uiShow()->show(Box(EditGlossaryTermBox, term));
+			});
+		}
+		Ui::AddSkip(content);
+		Ui::AddDividerText(content, TrValue(terms.isEmpty()
+			? u"LuminaGlossaryEmpty"_q
+			: u"LuminaGlossaryListInfo"_q));
+		content->resizeToWidth(width);
+	};
+	(*rebuild)();
+
+	// Driven by the store, not by the boxes that write to it, and always
+	// deferred: Ui::VerticalLayout::clear() deletes its children immediately,
+	// and the click that caused the write may still be on the stack inside one
+	// of the rows about to go. The subscription lives on `content`.
+	Glossary::GlossaryChanges(
+	) | rpl::on_next([=] {
+		Ui::PostponeCall(content, [=] {
+			(*rebuild)();
+		});
+	}, content->lifetime());
+
+	box->addButton(tr::lng_close(), [=] {
+		box->closeBox();
+	});
+}
+
+// "More": the two rows that use the translation LLM but are not the chat
+// translator itself - "Explain this message" (lumina_explain) and the
+// do-not-translate list (lumina_glossary). Gated on the master switch like
+// every other dependent row on this page, because both lean on the provider
+// and key configured in the section above.
+void AddMoreRows(
+		not_null<Ui::VerticalLayout*> container,
+		not_null<Window::SessionController*> controller) {
+	Ui::AddSkip(container);
+	Ui::AddSubsectionTitle(container, TrValue(u"LuminaTranslateMoreHeader"_q));
+	AddToggleRow(
+		container,
+		TrValue(u"LuminaExplainEnable"_q),
+		[] { return ExplainMessageEnabled(); },
+		[](bool value) { SetExplainMessageEnabled(value); });
+	AddValueRow(
+		container,
+		TrValue(u"LuminaGlossaryManage"_q),
+		[] {
+			const auto count = int(Glossary::GlossaryTerms().size());
+			return count
+				? QString::number(count)
+				: Tr(u"LuminaGlossaryNone"_q);
+		},
+		[=] { controller->show(Box(GlossaryBox)); });
+	Ui::AddSkip(container);
+	Ui::AddDividerText(container, TrValue(u"LuminaTranslateMoreInfo"_q));
+}
+
 } // namespace
 
 // `firstOption` is the special entry at the top of the list - "Recipient's
@@ -1133,6 +1313,7 @@ void AddTranslateRows(
 	AddSendRows(container, controller);
 	AddReceiveRows(container, controller);
 	AddProviderRows(container, controller);
+	AddMoreRows(container, controller);
 }
 
 } // namespace Lumina

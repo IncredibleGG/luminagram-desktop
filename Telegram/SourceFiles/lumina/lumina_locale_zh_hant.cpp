@@ -75,6 +75,8 @@ namespace {
 			u"長訊息自動摺疊原文"_q },
 		{ u"LuminaFoldOriginalLongMessagesInfo"_q,
 			u"在雙語長訊息中，原文會摺疊成一行，以免洗版。點一下即可展開。譯文一律完整顯示。"_q },
+		{ u"LuminaTranslateGroupSkipMyLanguages"_q,
+			u"群組中略過我看得懂的語言"_q },
 		{ u"LuminaExpandOriginal"_q, u"展開原文"_q },
 		{ u"LuminaTranslateReadLang"_q, u"閱讀語言"_q },
 		{ u"LuminaTranslateReadLangFollow"_q, u"介面語言"_q },
@@ -115,6 +117,20 @@ namespace {
 		{ u"LuminaTranslateProviderSecurityInfo"_q, u"金鑰只會保存在這台裝置"
 			u"上，存放在與其他設定分開的檔案裡，絕不會傳送給 Telegram。你"
 			u"翻譯的所有內容都會送到這裡選擇的服務，請挑一個你信任的。"_q },
+
+		// 「更多」：解釋一下與不翻譯詞清單。
+		{ u"LuminaTranslateMoreHeader"_q, u"更多"_q },
+		{ u"LuminaGlossaryManage"_q, u"不翻譯詞清單"_q },
+		{ u"LuminaGlossaryNone"_q, u"無"_q },
+		{ u"LuminaTranslateMoreInfo"_q, u"「解釋一下」會在右鍵選單裡加入一項，把一則訊息交給你自己的 LLM，說明它到底是什麼意思——語氣、俚語，以及你可以怎麼回覆。不翻譯詞清單裡的詞，在翻譯訊息時會原樣保留。"_q },
+		// 不翻譯詞清單的編輯框。
+		{ u"LuminaGlossaryTitle"_q, u"不翻譯詞清單"_q },
+		{ u"LuminaGlossaryHeader"_q, u"詞條"_q },
+		{ u"LuminaGlossaryAdd"_q, u"新增詞條"_q },
+		{ u"LuminaGlossaryEdit"_q, u"編輯詞條"_q },
+		{ u"LuminaGlossaryTermPlaceholder"_q, u"詞條"_q },
+		{ u"LuminaGlossaryEmpty"_q, u"清單裡的詞在翻譯訊息時會原樣保留——人名、品牌、@使用者名稱、程式碼。連結和 @提及無論是否在清單裡，都會一律保留。"_q },
+		{ u"LuminaGlossaryListInfo"_q, u"比對不分大小寫。連結和 @提及無論是否在清單裡，都會一律保留。"_q },
 
 		// Translate before sending: the boxes and the send menu.
 		{ u"LuminaTranslateOriginalLabel"_q, u"原文"_q },
@@ -597,6 +613,8 @@ namespace {
 		{ u"LuminaOtpGuardSendAnyway"_q, u"我知道風險，仍要傳送"_q },
 		{ u"LuminaOtpGuard"_q, u"登入碼外洩防護"_q },
 		{ u"LuminaOtpGuardInfo"_q, u"當 Telegram 剛寄給你登入碼、而你正要送出含有驗證碼的訊息時，先跳出警告。整個判斷都在你的裝置上完成，不會上傳任何內容，也不會更動你的訊息。"_q },
+		{ u"LuminaPrivacyHomoglyphWarning"_q, u"冒名混淆警告"_q },
+		{ u"LuminaPrivacyHomoglyphWarningInfo"_q, u"當一個名字混用了來自不同字母表的形近字元時發出警告——例如拉丁詞裡夾著西里爾字母「а」、全形字母，或用 0 冒充 O——這正是冒名者偽裝成熟悉名字的手法。不會攔截或更動任何內容；判斷都在你的裝置上完成，不會上傳任何名字。"_q },
 		// link preview + voice confirm
 		{ u"LuminaPrivacyDisableLinkPreview"_q, u"預設停用連結預覽"_q },
 		{ u"LuminaLinkPreviewInfo"_q, u"你新寫的訊息會不帶連結預覽傳送，輸入框"
@@ -776,6 +794,7 @@ namespace {
 			u"後再試一次。"_q },
 		{ u"LuminaExplainNoKey"_q, u"尚未設定 LLM 金鑰。請先到「設定、LuminaGram"
 			u"、翻譯」填入 LLM 金鑰。"_q },
+		{ u"LuminaExplainEnable"_q, u"「解釋一下」選單項目"_q },
 		{ u"LuminaSttUiMenuItem"_q, u"轉文字"_q },
 		{ u"LuminaSttUiPickTitle"_q, u"語音轉文字"_q },
 		{ u"LuminaSttUiFetching"_q, u"正在下載語音訊息…"_q },

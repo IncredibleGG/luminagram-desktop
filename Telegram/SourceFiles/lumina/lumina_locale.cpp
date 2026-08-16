@@ -113,6 +113,8 @@ struct Registration {
 			u"In a long bilingual message the original folds down to a "
 			"single line so it does not flood the chat; tap it to expand. "
 			"The translation is always shown in full."_q },
+		{ u"LuminaTranslateGroupSkipMyLanguages"_q,
+			u"In groups, skip languages I read"_q },
 		{ u"LuminaExpandOriginal"_q, u"Show original"_q },
 		{ u"LuminaTranslateReadLang"_q, u"Read in"_q },
 		{ u"LuminaTranslateReadLangFollow"_q, u"Interface language"_q },
@@ -170,6 +172,20 @@ struct Registration {
 			"device only, in a separate file from the rest of the settings, "
 			"and are never sent to Telegram. Everything you translate is sent "
 			"to the service selected here, so pick one you trust."_q },
+
+		// "More": explain-this-message and the do-not-translate list.
+		{ u"LuminaTranslateMoreHeader"_q, u"More"_q },
+		{ u"LuminaGlossaryManage"_q, u"Do-not-translate list"_q },
+		{ u"LuminaGlossaryNone"_q, u"None"_q },
+		{ u"LuminaTranslateMoreInfo"_q, u"“Explain this message” adds a right-click option that asks your own LLM what a message really means - its tone, slang and how you might reply. The do-not-translate list keeps the words on it unchanged when a message is translated."_q },
+		// The do-not-translate list editor box.
+		{ u"LuminaGlossaryTitle"_q, u"Do-not-translate list"_q },
+		{ u"LuminaGlossaryHeader"_q, u"Terms"_q },
+		{ u"LuminaGlossaryAdd"_q, u"Add term"_q },
+		{ u"LuminaGlossaryEdit"_q, u"Edit term"_q },
+		{ u"LuminaGlossaryTermPlaceholder"_q, u"Term"_q },
+		{ u"LuminaGlossaryEmpty"_q, u"Words on this list are left unchanged when a message is translated - names, brands, @handles, code. Links and @mentions are always kept, whether or not they are listed."_q },
+		{ u"LuminaGlossaryListInfo"_q, u"Matching is case-insensitive. Links and @mentions are always kept, whether or not they are on the list."_q },
 
 		// Translate before sending: the boxes and the send menu.
 		{ u"LuminaTranslateOriginalLabel"_q, u"Original"_q },
@@ -569,6 +585,8 @@ struct Registration {
 		{ u"LuminaOtpGuardSendAnyway"_q, u"I understand the risk, send anyway"_q },
 		{ u"LuminaOtpGuard"_q, u"Login code protection"_q },
 		{ u"LuminaOtpGuardInfo"_q, u"Warn you before sending a message that contains a login code, if Telegram has just sent you one. The check runs entirely on your device — nothing is uploaded, and your message is never changed."_q },
+		{ u"LuminaPrivacyHomoglyphWarning"_q, u"Impersonation name warning"_q },
+		{ u"LuminaPrivacyHomoglyphWarningInfo"_q, u"Warn when a name mixes look-alike letters from different alphabets - a Cyrillic “а” inside a Latin word, full-width letters, or a 0 standing in for O - the way an impersonator disguises a familiar name. Nothing is blocked; the check runs on your device and no name is uploaded."_q },
 		// link preview + voice confirm
 		{ u"LuminaPrivacyDisableLinkPreview"_q, u"Disable link preview by "
 			"default"_q },
@@ -698,6 +716,7 @@ struct Registration {
 			u"LLM key and connection, then try again."_q },
 		{ u"LuminaExplainNoKey"_q, u"No LLM API key set. Add one in Settings, "
 			u"LuminaGram, Translation, then try again."_q },
+		{ u"LuminaExplainEnable"_q, u"“Explain this message” menu item"_q },
 		{ u"LuminaSttUiMenuItem"_q, u"Transcribe"_q },
 		{ u"LuminaSttUiPickTitle"_q, u"Voice to text"_q },
 		{ u"LuminaSttUiFetching"_q, u"Downloading the voice message..."_q },

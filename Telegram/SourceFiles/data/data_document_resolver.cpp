@@ -23,6 +23,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "history/history_item.h"
 #include "iv/iv_instance.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_file_guard.h"
 #include "media/player/media_player_instance.h"
 #include "platform/platform_file_utilities.h"
 #include "ui/boxes/confirm_box.h"
@@ -296,7 +297,15 @@ void ResolveDocument(
 				context = QVariant::fromValue(clickHandlerContext);
 			}
 			if (!Core::App().iv().showMarkdown(path, context)) {
-				LaunchWithWarning(path, item);
+				const auto proceed = [=] {
+					LaunchWithWarning(path, item);
+				};
+				if (!Lumina::FileGuardIntercept(
+						controller,
+						document,
+						proceed)) {
+					proceed();
+				}
 			}
 		} else if (document->status == FileReady
 			|| document->status == FileDownloadFailed) {

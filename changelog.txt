@@ -1,3 +1,9 @@
+7.0.19 (16.08.26)
+
+- Lock any chat behind a private-folder code; it stays hidden from the list until you type the code in the search box, then hides again.
+- Warns before opening a file whose name is disguised (text-direction trick, double extension, or type that disagrees with its extension). Reads only the name — nothing is scanned or uploaded.
+- Security checkup: one page to review your cloud password, active sessions and key privacy settings, with a shortcut into each.
+
 7.0.18 (16.08.26)
 
 - Do-not-translate list: brand names, @usernames and links are kept as-is when translating.

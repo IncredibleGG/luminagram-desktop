@@ -65,6 +65,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "base/options.h"
 #include "lang/lang_keys.h"
 #include "lottie/lottie_icon.h"
+#include "lumina/lumina_chat_lock.h"
 #include "lumina/lumina_dialogs_style.h"
 #include "settings/settings_common.h"
 #include "storage/storage_account.h"
@@ -355,6 +356,20 @@ InnerWidget::InnerWidget(
 			filteredTop += result.row->height();
 		}
 		refresh(false);
+		update();
+	}, lifetime());
+
+	Lumina::ChatLock::Changes(
+	) | rpl::on_next([=] {
+		// Locking, unlocking or revealing changes which rows collapse to zero
+		// layout height. Recompute the list geometry (and any open filter
+		// results) and repaint. Display only: never touches unread, read
+		// state, typing or online.
+		_shownList->updateHeights(_narrowRatio);
+		if (_state == WidgetState::Filtered && !_filter.isEmpty()) {
+			refreshFilterResults();
+		}
+		refreshWithCollapsedRows();
 		update();
 	}, lifetime());
 
@@ -1350,12 +1365,19 @@ void InnerWidget::paintEvent(QPaintEvent *e) {
 					}
 
 					// Skip currently dragged chat to paint it above others after.
-					if (row->index() != promoted + _aboveIndex || _aboveIndex < 0) {
+					// A private-folder-locked row has layoutHeight() 0 while
+					// hidden: painting it would draw a full row over the next one,
+					// and it advances nothing, so the list closes up over it just
+					// as its collapsed top already implies.
+					const auto rowHeight = row->layoutHeight();
+					if (rowHeight
+						&& (row->index() != promoted + _aboveIndex
+							|| _aboveIndex < 0)) {
 						paintDialog(row);
 					}
 
-					p.translate(0, row->height());
-					top += row->height();
+					p.translate(0, rowHeight);
+					top += rowHeight;
 				}
 
 				// Paint the dragged chat above all others.
@@ -4326,14 +4348,17 @@ void InnerWidget::refreshFilterResults() {
 	const auto append = [&](not_null<IndexedList*> list) {
 		const auto results = list->filtered(words);
 		auto top = filteredHeight();
-		auto i = _filterResults.insert(
-			end(_filterResults),
-			begin(results),
-			end(results));
-		for (const auto e = end(_filterResults); i != e; ++i) {
-			i->top = top;
-			i->row->recountHeight(_narrowRatio, _filterId);
-			top += i->row->height();
+		for (const auto &row : results) {
+			// A private-folder-locked chat must not surface in the local
+			// name filter either.
+			if (Lumina::ChatLock::Hidden(row->key().peer())) {
+				continue;
+			}
+			_filterResults.emplace_back(row.get());
+			auto &added = _filterResults.back();
+			added.top = top;
+			added.row->recountHeight(_narrowRatio, _filterId);
+			top += added.row->height();
 		}
 	};
 	if (_searchState.filterChatsList() && !words.isEmpty()) {
@@ -4362,6 +4387,9 @@ void InnerWidget::refreshFilterResults() {
 }
 
 void InnerWidget::appendToFiltered(Key key) {
+	if (Lumina::ChatLock::Hidden(key.peer())) {
+		return;
+	}
 	for (const auto &row : _filterResults) {
 		if (row.key() == key) {
 			return;
@@ -4705,6 +4733,7 @@ void InnerWidget::searchReceived(
 		? _searchState.inChat
 		: Key(_openedForum->history());
 	if (inject
+		&& !Lumina::ChatLock::Hidden(inject->history())
 		&& (globalSearch
 			|| !_searchState.inChat
 			|| inject->history() == _searchState.inChat.history())) {
@@ -4722,6 +4751,10 @@ void InnerWidget::searchReceived(
 	auto &results = toPreview ? _previewResults : _searchResults;
 	for (const auto &item : messages) {
 		const auto history = item->history();
+		// A private-folder-locked chat must not surface in message search.
+		if (Lumina::ChatLock::Hidden(history)) {
+			continue;
+		}
 		if (toPreview || !uniquePeers || !hasHistoryInResults(history)) {
 			const auto index = int(results.size());
 			const auto repaint = toPreview
@@ -4770,7 +4803,9 @@ void InnerWidget::peerSearchReceived(Api::PeerSearchResult result) {
 	auto added = base::flat_set<not_null<PeerData*>>();
 	for (const auto &sponsored : result.sponsored) {
 		const auto peer = sponsored.peer;
-		if (inlist(peer) || _sponsoredRemoved.contains(peer)) {
+		if (inlist(peer)
+			|| _sponsoredRemoved.contains(peer)
+			|| Lumina::ChatLock::Hidden(peer)) {
 			continue;
 		}
 		_peerSearchResults.push_back(
@@ -4782,7 +4817,9 @@ void InnerWidget::peerSearchReceived(Api::PeerSearchResult result) {
 		added.emplace(peer);
 	}
 	for (const auto &peer : result.peers) {
-		if (added.contains(peer) || inlist(peer)) {
+		if (added.contains(peer)
+			|| inlist(peer)
+			|| Lumina::ChatLock::Hidden(peer)) {
 			continue;
 		}
 		_peerSearchResults.push_back(
@@ -5725,6 +5762,12 @@ ChosenRow InnerWidget::computeChosenRow() const {
 				.message = Data::UnreadMessagePosition,
 			};
 		} else if (_selected) {
+			// A hidden (private-folder-locked) row is unreachable by mouse, but
+			// keyboard index navigation can still land on it; refuse to open it
+			// so nothing surfaces a locked chat without the code.
+			if (Lumina::ChatLock::Hidden(_selected->key().peer())) {
+				return ChosenRow();
+			}
 			return {
 				.key = _selected->key(),
 				.message = Data::UnreadMessagePosition,
@@ -6344,6 +6387,7 @@ RowDescriptor InnerWidget::computeJump(
 			|| (skip == JumpSkip::NextOrOriginal);
 		const auto needSkip = [&] {
 			return (result.key.folder() != nullptr)
+				|| Lumina::ChatLock::Hidden(result.key.peer())
 				|| (session().supportMode()
 					&& !result.key.entry()->chatListBadgesState().unread);
 		};
@@ -6440,7 +6484,7 @@ int64 InnerWidget::calcSwipeKey(int top) {
 	for (auto it = _shownList->begin(); it != _shownList->end(); ++it) {
 		const auto row = it->get();
 		const auto from = row->top();
-		const auto to = from + row->height();
+		const auto to = from + row->layoutHeight();
 		if (top >= from && top < to) {
 			if (const auto peer = row->key().peer()) {
 				return peer->id.value;

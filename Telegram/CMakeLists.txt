@@ -1796,6 +1796,8 @@ PRIVATE
     settings/sections/settings_lumina_privacy.h
     settings/sections/settings_lumina_security.cpp
     settings/sections/settings_lumina_security.h
+    settings/sections/settings_lumina_security_checkup.cpp
+    settings/sections/settings_lumina_security_checkup.h
     settings/sections/settings_lumina_tools.cpp
     settings/sections/settings_lumina_tools.h
     settings/sections/settings_lumina_translate.cpp
@@ -1818,6 +1820,8 @@ PRIVATE
     lumina/lumina_brand.h
     lumina/lumina_chat_language_menu.cpp
     lumina/lumina_chat_language_menu.h
+    lumina/lumina_chat_lock.cpp
+    lumina/lumina_chat_lock.h
     lumina/lumina_clipboard_guard.cpp
     lumina/lumina_clipboard_guard.h
     lumina/lumina_clipboard_guard_settings.cpp
@@ -1852,6 +1856,10 @@ PRIVATE
     lumina/lumina_fake_crash.h
     lumina/lumina_fake_crash_settings.cpp
     lumina/lumina_fake_crash_settings.h
+    lumina/lumina_file_guard.cpp
+    lumina/lumina_file_guard.h
+    lumina/lumina_file_guard_settings.cpp
+    lumina/lumina_file_guard_settings.h
     lumina/lumina_forward_actions.cpp
     lumina/lumina_forward_actions.h
     lumina/lumina_glossary.cpp
@@ -1943,6 +1951,8 @@ PRIVATE
     lumina/lumina_scam_watch.h
     lumina/lumina_scam_watch_settings.cpp
     lumina/lumina_scam_watch_settings.h
+    lumina/lumina_security_checkup.cpp
+    lumina/lumina_security_checkup.h
     lumina/lumina_select_author.cpp
     lumina/lumina_select_author.h
     lumina/lumina_send_pipeline.cpp

@@ -61,6 +61,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/vertical_list.h"
 #include "ui/controls/feature_list.h"
 #include "ui/ui_utility.h"
+#include "lumina/lumina_chat_lock.h"
+#include "lumina/lumina_locale.h"
 #include "lumina/lumina_stories_off.h"
 #include "lumina/lumina_translate_gating.h"
 #include "lumina/lumina_translate_toggle.h"
@@ -1922,6 +1924,30 @@ void Filler::fillContextMenuActions() {
 	addHidePromotion();
 	addToggleArchive();
 	addTogglePin();
+	// LuminaGram: single-chat lock / private folder. Adding a chat takes it
+	// out of the list and every search surface until the secret code is typed
+	// into the search field; removing it (only reachable while revealed) puts
+	// it back. Display only - never changes read state, typing or online.
+	if (_peer && !_topic && !_sublist && _request.key.history()) {
+		const auto peer = _peer;
+		if (Lumina::ChatLock::IsLocked(peer)) {
+			_addAction(Lumina::Tr(u"ChatLockRemove"_q), [=] {
+				Lumina::ChatLock::Unlock(peer);
+			}, &st::menuIconShowInChat);
+		} else {
+			const auto controller = _controller;
+			_addAction(Lumina::Tr(u"ChatLockAdd"_q), [=] {
+				if (Lumina::ChatLock::HasSecretCode()) {
+					Lumina::ChatLock::Lock(peer);
+				} else {
+					// No code set yet: locking now would hide the chat with no way
+					// to bring it back. Send the user to set a code first.
+					controller->show(Ui::MakeInformBox(
+						Lumina::Tr(u"ChatLockNeedCode"_q)));
+				}
+			}, &st::menuIconLock);
+		}
+	}
 	if (ViewProfileInChatsListContextMenu.value()) {
 		addInfo();
 	}

@@ -15,6 +15,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "settings/sections/settings_lumina_chat_list.h"
 #include "settings/sections/settings_lumina_privacy.h"
 #include "settings/sections/settings_lumina_security.h"
+#include "settings/sections/settings_lumina_security_checkup.h"
 #include "settings/sections/settings_lumina_tools.h"
 #include "settings/sections/settings_lumina_translate.h"
 #include "settings/sections/settings_lumina_voice.h"
@@ -88,6 +89,11 @@ void LuminaGram::setupContent() {
 		Lumina::TrValue(u"LuminaSecurityTitle"_q),
 		st::menuIconLock,
 		[=] { showOther(LuminaSecurityId()); });
+	AddSectionRow(
+		content,
+		Lumina::TrValue(u"LuminaCheckupTitle"_q),
+		st::menuIconPermissions,
+		[=] { showOther(LuminaSecurityCheckupId()); });
 	AddSectionRow(
 		content,
 		Lumina::TrValue(u"LuminaChatSettings"_q),

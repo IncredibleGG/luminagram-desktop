@@ -38,7 +38,7 @@ public:
 	[[nodiscard]] int height() const {
 		return _rows.empty()
 			? 0
-			: (_rows.back()->top() + _rows.back()->height());
+			: (_rows.back()->top() + _rows.back()->layoutHeight());
 	}
 	[[nodiscard]] bool contains(Key key) const {
 		return _rowByKey.find(key) != _rowByKey.end();

@@ -34,6 +34,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "history/history.h"
 #include "history/history_item.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_chat_lock.h"
 #include "lumina/lumina_dialogs_badges.h"
 #include "lumina/lumina_dialogs_style.h"
 #include "base/unixtime.h"
@@ -360,6 +361,15 @@ void Row::recountHeight(float64 narrowRatio, FilterId filterId) {
 	_height = ((&stock == &st::defaultDialogRow) || !_id.history())
 		? base.height
 		: anim::interpolate(st.height, base.height, narrowRatio);
+}
+
+int Row::layoutHeight() const {
+	// A conversation hidden behind the private-folder lock takes no vertical
+	// space in the list: the cumulative tops in dialogs_list.cpp close up over
+	// it and the paint loop skips it. Its real height() is left untouched (and
+	// stays non-zero), so unread counters and everything drawn for a visible
+	// row are unaffected. Fail-open: Hidden() shows the row on any doubt.
+	return Lumina::ChatLock::Hidden(_id.peer()) ? 0 : height();
 }
 
 uint64 Row::sortKey(FilterId filterId) const {

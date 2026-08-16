@@ -157,7 +157,7 @@ void List::sortByDate() {
 		const auto row = _rows[i];
 		row->_index = i;
 		row->_top = top;
-		top += row->height();
+		top += row->layoutHeight();
 	}
 }
 
@@ -176,7 +176,7 @@ bool List::updateHeight(Key key, float64 narrowRatio) {
 	}
 	for (auto i = _rows.begin() + index, e = _rows.end(); i != e; ++i) {
 		(*i)->_top = top;
-		top += (*i)->height();
+		top += (*i)->layoutHeight();
 	}
 	return true;
 }
@@ -188,7 +188,7 @@ bool List::updateHeights(float64 narrowRatio) {
 	for (const auto &row : _rows) {
 		row->_top = top;
 		row->recountHeight(narrowRatio, _filterId);
-		top += row->height();
+		top += row->layoutHeight();
 	}
 	return (height() != was);
 }
@@ -217,7 +217,7 @@ void List::rotate(
 		const auto row = *first++;
 		row->_index = index++;
 		row->_top = top;
-		top += row->height();
+		top += row->layoutHeight();
 	}
 }
 
@@ -238,7 +238,7 @@ bool List::remove(Key key, Row *replacedBy) {
 		const auto row = _rows[i];
 		row->_index = i;
 		row->_top = top;
-		top += row->height();
+		top += row->layoutHeight();
 	}
 	_rowByKey.erase(i);
 	return true;
@@ -251,13 +251,13 @@ Row *List::rowAtY(int y) const {
 	}
 	const auto row = *i;
 	const auto top = row->top();
-	const auto bottom = top + row->height();
+	const auto bottom = top + row->layoutHeight();
 	return (top <= y && bottom > y) ? row.get() : nullptr;
 }
 
 List::iterator List::findByY(int y) const {
 	return ranges::lower_bound(_rows, y, ranges::less(), [](const Row *row) {
-		return row->top() + row->height() - 1;
+		return row->top() + row->layoutHeight() - 1;
 	});
 }
 

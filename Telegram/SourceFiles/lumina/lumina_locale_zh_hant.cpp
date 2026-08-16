@@ -27,10 +27,38 @@ namespace {
 		{ u"LuminaSecurityTitle"_q, u"安全"_q },
 		{ u"LuminaChatSettings"_q, u"聊天"_q },
 		{ u"LuminaGramChatList"_q, u"聊天列表"_q },
+		{ u"ChatLockAdd"_q, u"加入私密資料夾"_q },
+		{ u"ChatLockRemove"_q, u"移出私密資料夾"_q },
+		{ u"ChatLockNeedCode"_q, u"使用私密資料夾前，要先設一組密碼：到 LuminaGram →「安全」→ 偽裝保險箱 設定。沒有密碼的話，鎖起來的對話會無法再顯示。"_q },
 		{ u"LuminaAppearanceTitle"_q, u"外觀"_q },
 		{ u"LuminaToolsTitle"_q, u"工具"_q },
 		{ u"LuminaGramStoredLocallyInfo"_q, u"LuminaGram 的選項只會儲存在這台"
 			u"裝置上，不會同步到 Telegram。"_q },
+
+		// Account security checkup.
+		{ u"LuminaCheckupTitle"_q, u"安全體檢"_q },
+		{ u"LuminaCheckupSummaryChecking"_q, u"正在檢查你的帳號……"_q },
+		{ u"LuminaCheckupSummaryOn"_q, u"兩步驟驗證已開啟，你的帳號多了一層保護。請繼續查看下方的其他項目。"_q },
+		{ u"LuminaCheckupSummaryOff"_q, u"兩步驟驗證尚未開啟。開啟它是你現在能為這個帳號做的最重要的事。"_q },
+		{ u"LuminaCheckupTapToView"_q, u"點擊查看"_q },
+		{ u"LuminaCheckupOn"_q, u"已開啟"_q },
+		{ u"LuminaCheckupOff"_q, u"未開啟"_q },
+		{ u"LuminaCheckupUnconfirmed"_q, u"待確認"_q },
+		{ u"LuminaCheckupTwoStepHeader"_q, u"兩步驟驗證"_q },
+		{ u"LuminaCheckupTwoStep"_q, u"兩步驟驗證"_q },
+		{ u"LuminaCheckupRecoveryEmail"_q, u"救援信箱"_q },
+		{ u"LuminaCheckupRecoveryNoPassword"_q, u"請先設定兩步驟驗證"_q },
+		{ u"LuminaCheckupPrivacyHeader"_q, u"誰可以聯絡你"_q },
+		{ u"LuminaCheckupInvites"_q, u"誰可以把我加入群組"_q },
+		{ u"LuminaCheckupCalls"_q, u"誰可以打電話給我"_q },
+		{ u"LuminaCheckupPhone"_q, u"誰可以看到我的電話號碼"_q },
+		{ u"LuminaCheckupEveryone"_q, u"所有人"_q },
+		{ u"LuminaCheckupContacts"_q, u"我的聯絡人"_q },
+		{ u"LuminaCheckupCloseFriends"_q, u"密友"_q },
+		{ u"LuminaCheckupNobody"_q, u"沒有人"_q },
+		{ u"LuminaCheckupDevicesHeader"_q, u"已登入的裝置"_q },
+		{ u"LuminaCheckupSessions"_q, u"使用中的裝置"_q },
+		{ u"LuminaCheckupFooter"_q, u"LuminaGram 只會顯示這些設定，不會代為修改。點擊任何一列即可開啟對應的官方頁面。"_q },
 
 		// Sub-pages that have no rows yet.
 		{ u"LuminaAppearancePlaceholder"_q, u"訊息、貼圖與數字格式的選項將會"
@@ -411,6 +439,14 @@ namespace {
 			u"所有檢查都不會連線——你開啟的任何網址都不會離開這台裝置。"_q },
 		{ u"LuminaLinkSafetyRow"_q, u"連結安全檢查"_q },
 		{ u"LuminaLinkSafetyTitle"_q, u"開啟外部連結？"_q },
+		{ u"LuminaFileGuardTitle"_q, u"要開啟這個檔案嗎？"_q },
+		{ u"LuminaFileGuardName"_q, u"檔案名稱"_q },
+		{ u"LuminaFileGuardOpen"_q, u"仍要開啟"_q },
+		{ u"LuminaFileGuardWarnBidi"_q, u"這個檔名使用了文字方向控制字元——這種手法會隱藏真正的副檔名，實際的結尾可能和顯示的完全不同。"_q },
+		{ u"LuminaFileGuardWarnDouble"_q, u"這個檔案用雙重副檔名偽裝成文件或影音檔，但它真正的最後一個副檔名其實是可執行程式。"_q },
+		{ u"LuminaFileGuardWarnMismatch"_q, u"這個檔案的副檔名與它宣告的類型不符，可能是偽裝成相片、影片或文件的程式。"_q },
+		{ u"LuminaFileGuardRow"_q, u"警告偽裝的檔案"_q },
+		{ u"LuminaFileGuardInfo"_q, u"在開啟名稱刻意偽裝、隱藏真實用途的檔案前先詢問。這會攔下用文字方向控制字元掩蓋副檔名的名稱、像 invoice.pdf.exe 這樣的雙重副檔名，以及副檔名與宣告類型在「程式／影音」界線上不一致的檔案。檢查只會讀取名稱與宣告的類型——不會掃描內容，也不會有任何檔案離開這台裝置。Telegram Desktop 仍會在執行可執行檔前自行提出警告。"_q },
 		{ u"LuminaLinkSafetyWarnMismatch"_q, u"此連結透過「@」符號前的文字"
 			u"隱藏了真實目標位址。"_q },
 		{ u"LuminaLinkSafetyWarnPunycode"_q, u"此網址使用了編碼（punycode）"

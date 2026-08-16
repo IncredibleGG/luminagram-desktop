@@ -57,6 +57,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "main/main_domain.h"
 #include "main/main_session.h"
 #include "main/main_session_settings.h"
+#include "lumina/lumina_chat_lock.h"
 #include "lumina/lumina_dialogs_style.h"
 #include "lumina/lumina_dialogs_visibility.h"
 #include "lumina/lumina_stories_off.h"
@@ -3845,6 +3846,14 @@ QString Widget::validateSearchQuery() {
 }
 
 void Widget::applySearchUpdate() {
+	// The private-folder secret code is entered through the ordinary search
+	// field: if it matches while chats are hidden, reveal and swallow it so
+	// the code is never run as a search. Clearing the field re-enters here
+	// with empty text and falls through to the normal path.
+	if (Lumina::ChatLock::MaybeRevealFromQuery(currentSearchQuery())) {
+		clearSearchField();
+		return;
+	}
 	auto copy = _searchState;
 	copy.query = validateSearchQuery();
 	if (Ui::ScreenReaderModeActive() && !copy.query.isEmpty()) {

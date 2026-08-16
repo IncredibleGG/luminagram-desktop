@@ -100,6 +100,7 @@ public:
 
 		return _height;
 	}
+	[[nodiscard]] int layoutHeight() const;
 	void recountHeight(float64 narrowRatio, FilterId filterId);
 
 	void updateCornerBadgeShown(

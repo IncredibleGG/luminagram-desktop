@@ -1806,6 +1806,9 @@ PRIVATE
     settings/sections/settings_lumina_voice.h
     lumina/lumina_ai_editor.cpp
     lumina/lumina_ai_editor.h
+    # LuminaGram: shared 16k mono PCM decoder used by the on-device STT engine.
+    lumina/lumina_audio_decode.cpp
+    lumina/lumina_audio_decode.h
     lumina/lumina_backup.cpp
     lumina/lumina_backup.h
     lumina/lumina_backup_settings.cpp
@@ -2326,6 +2329,11 @@ if (APPLE)
         tray_accounts_menu.cpp
         media/view/media_view_metal_texture.mm
         media/streaming/media_streaming_native_frame_mac.mm
+        # LuminaGram: Apple's on-device Speech engine is Objective-C++, so it
+        # only compiles on mac. Its header is Apple-only too (the plain C++
+        # factory is declared there and defined in the .mm).
+        lumina/lumina_transcriber_apple.mm
+        lumina/lumina_transcriber_apple.h
     )
 else()
     nice_target_sources(Telegram ${src_loc}
@@ -2405,6 +2413,8 @@ elseif (APPLE)
     endif()
 
     target_link_frameworks(Telegram PRIVATE CoreBluetooth)
+    # LuminaGram: on-device speech-to-text (macOS 10.15+), weak-linked; runtime @available-guarded.
+    target_link_frameworks_weak(Telegram PRIVATE Speech)
     target_link_frameworks_weak(Telegram PRIVATE UserNotifications)
 
     set(icons_path ${CMAKE_CURRENT_SOURCE_DIR}/Telegram/Images.xcassets)

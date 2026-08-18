@@ -64,7 +64,7 @@ namespace {
 } // namespace
 
 bool TranslationFeatureEnabled() {
-	return Settings::Instance().getBool(FeatureEnabledKey(), false);
+	return Settings::Instance().getBool(FeatureEnabledKey(), true);
 }
 
 rpl::producer<bool> TranslationFeatureEnabledValue() {

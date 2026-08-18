@@ -1056,6 +1056,13 @@ void Document::draw(
 	}
 
 	auto statusText = voiceStatusOverride.isEmpty() ? _statusText : voiceStatusOverride;
+	// LuminaGram: voice-to-text discoverability. Append a small "譯" marker to the voice
+	// message duration so users know the note can be transcribed to text (via the message
+	// context menu / Lumina voice-to-text), even when the native transcribe button is hidden.
+	// Pure text: the existing drawTextLeft + unread-dot width logic below lay it out.
+	if (_data->isVoiceMessage()) {
+		statusText += u"  譯"_q;
+	}
 	p.setFont(st::normalFont);
 	p.setPen(stm->mediaFg);
 	p.drawTextLeft(nameleft, statustop, width, statusText);

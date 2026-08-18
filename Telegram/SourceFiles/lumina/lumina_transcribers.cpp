@@ -9,6 +9,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include "base/random.h"
 #include "lumina/lumina_settings.h"
+#ifdef Q_OS_MAC
+#include "lumina/lumina_transcriber_apple.h" // LuminaGram: on-device Apple engine.
+#endif // Q_OS_MAC
 
 #include <QtCore/QJsonArray>
 #include <QtCore/QJsonDocument>
@@ -419,12 +422,34 @@ QString VoskTranscriberId() {
 	return u"vosk"_q;
 }
 
+// LuminaGram: Apple's on-device Speech framework - macOS-only, free, no key.
+QString AppleTranscriberId() {
+	return u"apple"_q;
+}
+
 QString DefaultTranscriberId() {
+#ifdef Q_OS_MAC
+	// LuminaGram: mac ships the free on-device engine, so it is the
+	// default there; every other platform keeps Whisper.
+	return AppleTranscriberId();
+#else // Q_OS_MAC
 	return WhisperTranscriberId();
+#endif // Q_OS_MAC
 }
 
 const std::vector<TranscriberInfo> &Transcribers() {
 	static const auto result = std::vector<TranscriberInfo>{
+#ifdef Q_OS_MAC
+		// LuminaGram: Apple's on-device engine - macOS-only, free, no API
+		// key and no model to download. Listed first so the free default
+		// leads the picker, the way Vosk does on Android.
+		{
+			.id = AppleTranscriberId(),
+			.name = u"Apple Speech"_q,
+			.needsKey = false,
+			.needsModel = false,
+		},
+#endif // Q_OS_MAC
 		{
 			.id = WhisperTranscriberId(),
 			.name = u"OpenAI Whisper"_q,
@@ -554,6 +579,13 @@ std::unique_ptr<TranscribeEngine> MakeTranscribeEngine(const QString &id) {
 	} else if (id == GoogleTranscriberId()) {
 		return std::make_unique<GoogleEngine>();
 	}
+#ifdef Q_OS_MAC
+	// LuminaGram: the Apple engine is Objective-C++ (implemented in
+	// lumina_transcriber_apple.mm) so it is only wired up on mac.
+	if (id == AppleTranscriberId()) {
+		return MakeAppleSpeechEngine();
+	}
+#endif // Q_OS_MAC
 	return nullptr;
 }
 

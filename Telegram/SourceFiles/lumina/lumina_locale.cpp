@@ -732,10 +732,21 @@ struct Registration {
 		{ u"LuminaSttEngine"_q, u"Engine"_q },
 		{ u"LuminaSttEngineWhisper"_q, u"OpenAI Whisper (your own key)"_q },
 		{ u"LuminaSttEngineGoogle"_q, u"Google (your own key)"_q },
+		// LuminaGram: macOS-only on-device engine. New key LuminaSttEngineApple;
+		// zh_hans / zh_hant and the other locale files can be filled in later.
+		{ u"LuminaSttEngineApple"_q, u"Apple (on-device, free)"_q },
 		{ u"LuminaSttKey"_q, u"API key"_q },
 		{ u"LuminaSttBaseUrl"_q, u"Base URL"_q },
 		{ u"LuminaSttModel"_q, u"Model"_q },
 		{ u"LuminaSttNotReady"_q, u"Voice to text is on, but the engine selected below has no API key yet, so it cannot run. Save a key under Engine, or turn this off."_q },
+		{ u"LuminaSttSetupTitle"_q, u"Finish setup"_q },
+		{ u"LuminaSttSetupInfo"_q, u"Voice to text is on, but the engine "
+			u"selected below is not ready yet: a cloud engine needs an API key, "
+			u"and an offline engine needs its model downloaded. Follow the guide "
+			u"to set one up, or open the LuminaGram bot and it will walk you "
+			u"through it."_q },
+		{ u"LuminaSttGuide"_q, u"Read the setup guide"_q },
+		{ u"LuminaSttGetViaBot"_q, u"Open the LuminaGram bot"_q },
 		{ u"LuminaSttInfoDesktop"_q, u"Transcription runs on your own API key and your own quota "
 			u"- LuminaGram never provides a key. The voice message is "
 			u"uploaded to the service you pick below, so only turn this "

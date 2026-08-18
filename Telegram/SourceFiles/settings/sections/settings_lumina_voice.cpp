@@ -12,6 +12,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "lumina/lumina_transcribers.h"
 #include "lumina/lumina_voice_to_text.h"
 #include "settings/settings_common.h"
+#include "ui/basic_click_handlers.h"
 #include "ui/boxes/single_choice_box.h"
 #include "ui/layers/generic_box.h"
 #include "ui/rp_widget.h"
@@ -38,6 +39,15 @@ constexpr auto kModelMaxLength = 128;
 // enough to be worth a screenshot. Same rule as the translation page.
 constexpr auto kApiKeyTailShown = 4;
 constexpr auto kApiKeyDotsShown = 6;
+
+// PLACEHOLDER destinations for the onboarding funnel below. Both stand in for
+// the real LuminaGram bot and its setup guide, which do not exist yet; they are
+// grouped and tagged here so one grep for "PLACEHOLDER" finds every URL to swap
+// when they do. The "?start=" tail is a bot deep link, so the guide can be a
+// flow inside the same bot.
+const auto kBotUrlPlaceholder = u"https://t.me/LuminaGramBot"_q; // PLACEHOLDER
+const auto kGuideUrlPlaceholder
+	= u"https://t.me/LuminaGramBot?start=setup"_q; // PLACEHOLDER
 
 // Every row on this page reads a value that some other row can change, so
 // they all recompute on the same two streams: the engine settings, and the
@@ -75,37 +85,32 @@ constexpr auto kApiKeyDotsShown = 6;
 	});
 }
 
-// What sits under the master switch. It grows a second paragraph while the
-// switch is on and the selected engine has no key, because on desktop those
-// two facts together mean the feature cannot run at all.
+// True while voice to text is switched on but the engine selected below cannot
+// actually run yet - which on desktop means a cloud engine with no API key, and
+// (once an offline engine exists) a model that has not been downloaded. Both
+// are exactly what TranscriberConfigured() already answers, so readiness never
+// grows a second rule here.
 //
 // The switch defaults ON, which is Android's default for the same preference
 // key - and there that default is honest, because Android's default engine is
 // Vosk: offline, free, nothing to configure. There is no offline engine here
-// (lumina/lumina_transcribers.h says why), so "on" does not imply "ready", and
-// the row was claiming a feature that could only apologise when used.
+// yet (lumina/lumina_transcribers.h says why), so "on" does not imply "ready".
+// Rather than turn the default off - which would put the desktop preference out
+// of step with Android's for a key both platforms store and a backup carries
+// between them - the page owns the gap, with the onboarding funnel this drives.
 //
-// Turning the default off was the alternative, and it costs more than it buys:
-// it would put the desktop preference out of step with Android's for a key
-// both platforms store and a backup carries between them, and it would hide
-// the feature from exactly the people it exists for - the ones with no Premium
-// transcription - behind a switch they have no reason to look for. Saying
-// which of the two states the page is in, immediately under the switch that
-// claims it is on, ends the misreport without either cost.
-[[nodiscard]] rpl::producer<QString> MasterInfoValue() {
+// Recomputes on the two streams readiness depends on and no others: the engine
+// settings and the master switch. The funnel's own text tracks the in-app
+// language on its own through TrValue(), so LangChanges() is left out here.
+[[nodiscard]] rpl::producer<bool> NotReadyValue() {
 	return rpl::single(
 		rpl::empty
 	) | rpl::then(rpl::merge(
 		Lumina::TranscriberChanges(),
-		Lumina::VoiceToTextEnabledChanges(),
-		Lumina::LangChanges())
+		Lumina::VoiceToTextEnabledChanges())
 	) | rpl::map([] {
-		const auto about = Lumina::Tr(u"LuminaSttInfoDesktop"_q);
-		const auto ready = Lumina::TranscriberConfigured(
-			Lumina::CurrentTranscriberId());
-		return (Lumina::VoiceToTextEnabled() && !ready)
-			? (about + u"\n\n"_q + Lumina::Tr(u"LuminaSttNotReady"_q))
-			: about;
+		return Lumina::VoiceToTextEnabled()
+			&& !Lumina::TranscriberConfigured(Lumina::CurrentTranscriberId());
 	});
 }
 
@@ -308,9 +313,12 @@ void ShowEnginePicker(not_null<Window::SessionController*> controller) {
 		// why these come out of the locale table rather than out of
 		// TranscriberInfo::name.
 		options.push_back(Lumina::Tr(
-			(engines[i].id == Lumina::GoogleTranscriberId())
-				? u"LuminaSttEngineGoogle"_q
-				: u"LuminaSttEngineWhisper"_q));
+			// LuminaGram: Apple's on-device engine has its own name key.
+			(engines[i].id == Lumina::AppleTranscriberId())
+				? u"LuminaSttEngineApple"_q
+				: (engines[i].id == Lumina::GoogleTranscriberId())
+					? u"LuminaSttEngineGoogle"_q
+					: u"LuminaSttEngineWhisper"_q));
 		if (engines[i].id == current) {
 			selected = i;
 		}
@@ -340,10 +348,14 @@ void AddEngineRows(
 		Lumina::TrValue(u"LuminaSttEngine"_q),
 		[] {
 			return Lumina::Tr(
+				// LuminaGram: Apple's on-device engine has its own name key.
 				(Lumina::CurrentTranscriberId()
-					== Lumina::GoogleTranscriberId())
-					? u"LuminaSttEngineGoogle"_q
-					: u"LuminaSttEngineWhisper"_q);
+					== Lumina::AppleTranscriberId())
+					? u"LuminaSttEngineApple"_q
+					: (Lumina::CurrentTranscriberId()
+						== Lumina::GoogleTranscriberId())
+						? u"LuminaSttEngineGoogle"_q
+						: u"LuminaSttEngineWhisper"_q);
 		},
 		[=] { ShowEnginePicker(controller); });
 
@@ -412,6 +424,47 @@ void AddEngineRows(
 		Lumina::TrValue(u"LuminaSttVoskUnsupported"_q));
 }
 
+// The onboarding funnel that replaces the old one-line "engine has no key" note.
+// Built once, slide-wrapped, and shown only while NotReadyValue() is true, so a
+// ready engine never sees it, and saving a key or picking a configured engine
+// folds it away without rebuilding the page. Every user-visible string is a
+// TrValue(), so it re-reads when the in-app language changes too.
+//
+// It turns a dead end into a path: a short "why", a link to the guide, and a
+// call to action that opens our own bot. Both destinations are PLACEHOLDER URLs
+// (see the top of this file) opened through the app's own URL handler - the
+// same way the link-safety box opens a link - so a t.me/... link resolves to
+// the bot in-app rather than bouncing out through a browser first.
+void AddOnboardingFunnel(not_null<Ui::VerticalLayout*> container) {
+	const auto block = container->add(
+		object_ptr<Ui::SlideWrap<Ui::VerticalLayout>>(
+			container,
+			object_ptr<Ui::VerticalLayout>(container))
+	)->toggleOn(NotReadyValue())->finishAnimating()->entity();
+
+	Ui::AddSkip(block);
+	Ui::AddSubsectionTitle(block, Lumina::TrValue(u"LuminaSttSetupTitle"_q));
+
+	// Ordinary settings rows, wired exactly like AddValueRow's activate
+	// callback. TrValue(key) is evaluated now (the row keeps the producer); the
+	// press handler keeps only the url.
+	const auto addLinkRow = [&](const QString &key, const QString &url) {
+		const auto row = AddButtonWithIcon(
+			block,
+			Lumina::TrValue(key),
+			st::settingsButtonNoIcon);
+		row->setClickedCallback([=] {
+			UrlClickHandler::Open(url);
+		});
+		return row;
+	};
+	addLinkRow(u"LuminaSttGuide"_q, kGuideUrlPlaceholder);
+	addLinkRow(u"LuminaSttGetViaBot"_q, kBotUrlPlaceholder);
+
+	Ui::AddSkip(block);
+	Ui::AddDividerText(block, Lumina::TrValue(u"LuminaSttSetupInfo"_q));
+}
+
 } // namespace
 
 Type LuminaVoiceId() {
@@ -448,7 +501,12 @@ void LuminaVoice::setupContent(not_null<Ui::VerticalLayout*> container) {
 		Lumina::SetVoiceToTextEnabled(value);
 	}, master->lifetime());
 	Ui::AddSkip(container);
-	Ui::AddDividerText(container, MasterInfoValue());
+	Ui::AddDividerText(container, Lumina::TrValue(u"LuminaSttInfoDesktop"_q));
+
+	// The onboarding funnel sits between the master switch and the engine rows:
+	// it is the first thing a not-yet-ready profile sees, and it folds away the
+	// moment the selected engine can run.
+	AddOnboardingFunnel(container);
 
 	AddEngineRows(container, controller());
 

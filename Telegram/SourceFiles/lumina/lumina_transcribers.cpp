@@ -482,7 +482,20 @@ QString CurrentTranscriberId() {
 	// "vosk" lands here too, and on purpose: a profile restored from the
 	// phone carries it, and answering an id with no engine behind it would
 	// make every row on the settings page read blank.
-	return FindTranscriber(stored) ? stored : DefaultTranscriberId();
+	// LuminaGram: a profile carried from an older version can hold an engine that
+	// cannot run here (e.g. "whisper" with no API key). Rather than answer a dead
+	// id -- which leaves the transcribe row hidden and the button inert -- fall back
+	// to the platform default (mac = free on-device Apple Speech) whenever the stored
+	// engine is unknown, or is known but unconfigured while the default IS configured.
+	// An explicitly key-configured cloud engine is left untouched.
+	const auto def = DefaultTranscriberId();
+	if (!FindTranscriber(stored)) {
+		return def;
+	}
+	if (!TranscriberConfigured(stored) && TranscriberConfigured(def)) {
+		return def;
+	}
+	return stored;
 }
 
 const TranscriberInfo &CurrentTranscriber() {

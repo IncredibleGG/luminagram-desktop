@@ -79,7 +79,10 @@ private:
 		TranscribeResult result);
 
 	const std::shared_ptr<State> _state = std::make_shared<State>();
-	SFSpeechRecognitionTask *_task = nil;
+	// Held as a plain id rather than SFSpeechRecognitionTask* so this member does not
+	// name a macOS 10.15-only type in a class reachable from 10.13 code; every real
+	// Speech API call below sits inside an @available(macOS 10.15, *) guard.
+	id _task = nil;
 
 };
 
@@ -128,16 +131,20 @@ void AppleSpeechEngine::transcribe(
 	// answer, so a second voice note never re-prompts. The block runs on an
 	// arbitrary queue, so it hops back to the main thread - guarded by the
 	// engine's weak_ptr - before it touches the engine.
-	[SFSpeechRecognizer requestAuthorization:^(
-			SFSpeechRecognizerAuthorizationStatus status) {
-		if (status != SFSpeechRecognizerAuthorizationStatusAuthorized) {
-			Deliver(state, done, { .error = TranscribeError::Unavailable });
-			return;
-		}
-		crl::on_main(weak, [=] {
-			weak->start(pcm, langHint, done);
-		});
-	}];
+	if (@available(macOS 10.15, *)) {
+		[SFSpeechRecognizer requestAuthorization:^(
+				SFSpeechRecognizerAuthorizationStatus status) {
+			if (status != SFSpeechRecognizerAuthorizationStatusAuthorized) {
+				Deliver(state, done, { .error = TranscribeError::Unavailable });
+				return;
+			}
+			crl::on_main(weak, [=] {
+				weak->start(pcm, langHint, done);
+			});
+		}];
+	} else {
+		Deliver(state, std::move(done), { .error = TranscribeError::Unavailable });
+	}
 }
 
 void AppleSpeechEngine::start(
@@ -146,91 +153,98 @@ void AppleSpeechEngine::start(
 		Fn<void(TranscribeResult)> done) {
 	const auto state = _state;
 
-	// A non-empty hint pins the locale; anything unusable falls back to the
-	// system default recognizer rather than failing outright.
-	SFSpeechRecognizer *recognizer = nil;
-	if (!langHint.isEmpty()) {
-		NSLocale *locale = [NSLocale
-			localeWithLocaleIdentifier:Platform::Q2NSString(langHint)];
-		recognizer = [[[SFSpeechRecognizer alloc]
-			initWithLocale:locale] autorelease];
-	}
-	if (!recognizer) {
-		recognizer = [[[SFSpeechRecognizer alloc] init] autorelease];
-	}
-	if (!recognizer || !recognizer.isAvailable) {
+	if (@available(macOS 10.15, *)) {
+		// A non-empty hint pins the locale; anything unusable falls back to the
+		// system default recognizer rather than failing outright.
+		SFSpeechRecognizer *recognizer = nil;
+		if (!langHint.isEmpty()) {
+			NSLocale *locale = [NSLocale
+				localeWithLocaleIdentifier:Platform::Q2NSString(langHint)];
+			recognizer = [[[SFSpeechRecognizer alloc]
+				initWithLocale:locale] autorelease];
+		}
+		if (!recognizer) {
+			recognizer = [[[SFSpeechRecognizer alloc] init] autorelease];
+		}
+		if (!recognizer || !recognizer.isAvailable) {
+			Deliver(state, std::move(done), { .error = TranscribeError::Unavailable });
+			return;
+		}
+
+		// The decoder already handed us signed 16-bit little-endian mono at
+		// 16 kHz, which is exactly the buffer SFSpeechRecognizer wants; the format
+		// here just describes those bytes so no resampling happens.
+		AVAudioFormat *format = [[[AVAudioFormat alloc]
+			initWithCommonFormat:AVAudioPCMFormatInt16
+			sampleRate:16000.0
+			channels:1
+			interleaved:YES] autorelease];
+		const auto samples = int(pcm.size() / int(sizeof(int16_t)));
+		if (!format || samples <= 0) {
+			Deliver(state, std::move(done), { .error = TranscribeError::UnsupportedMedia });
+			return;
+		}
+		AVAudioPCMBuffer *buffer = [[[AVAudioPCMBuffer alloc]
+			initWithPCMFormat:format
+			frameCapacity:(AVAudioFrameCount)samples] autorelease];
+		if (!buffer || buffer.int16ChannelData == nullptr) {
+			Deliver(state, std::move(done), { .error = TranscribeError::UnsupportedMedia });
+			return;
+		}
+		buffer.frameLength = (AVAudioFrameCount)samples;
+		std::memcpy(
+			buffer.int16ChannelData[0],
+			pcm.constData(),
+			samples * sizeof(int16_t));
+
+		SFSpeechAudioBufferRecognitionRequest *request =
+			[[[SFSpeechAudioBufferRecognitionRequest alloc] init] autorelease];
+		// Stay on-device when the recognizer can - that is the whole reason this
+		// engine exists, a private voice note that never leaves the machine - but
+		// fall back to the server path rather than refuse when it cannot.
+		if (recognizer.supportsOnDeviceRecognition) {
+			request.requiresOnDeviceRecognition = YES;
+		}
+		request.shouldReportPartialResults = NO;
+		[request appendAudioPCMBuffer:buffer];
+		[request endAudio];
+
+		// start() only runs with the engine alive (guarded crl::on_main), so the
+		// destructor cannot have cancelled yet; the check is a cheap guard against
+		// a future caller that reaches here off the main thread.
+		if (state->cancelled.load()) {
+			return;
+		}
+		SFSpeechRecognitionTask *task = [recognizer
+			recognitionTaskWithRequest:request
+			resultHandler:^(SFSpeechRecognitionResult *result, NSError *error) {
+				if (result != nil && result.isFinal) {
+					const auto text = Platform::NS2QString(
+						result.bestTranscription.formattedString).trimmed();
+					Deliver(state, done, text.isEmpty()
+						? TranscribeResult{ .error = TranscribeError::NoSpeech }
+						: TranscribeResult{ .text = text });
+				} else if (error != nil) {
+					// It ran and produced nothing usable; the enum cannot tell a
+					// silent note from a recognizer that gave up, so both read as
+					// "nothing to hear".
+					Deliver(state, done, { .error = TranscribeError::NoSpeech });
+				}
+			}];
+		[_task release];
+		_task = [task retain];
+	} else {
 		Deliver(state, std::move(done), { .error = TranscribeError::Unavailable });
-		return;
 	}
-
-	// The decoder already handed us signed 16-bit little-endian mono at
-	// 16 kHz, which is exactly the buffer SFSpeechRecognizer wants; the format
-	// here just describes those bytes so no resampling happens.
-	AVAudioFormat *format = [[[AVAudioFormat alloc]
-		initWithCommonFormat:AVAudioPCMFormatInt16
-		sampleRate:16000.0
-		channels:1
-		interleaved:YES] autorelease];
-	const auto samples = int(pcm.size() / int(sizeof(int16_t)));
-	if (!format || samples <= 0) {
-		Deliver(state, std::move(done), { .error = TranscribeError::UnsupportedMedia });
-		return;
-	}
-	AVAudioPCMBuffer *buffer = [[[AVAudioPCMBuffer alloc]
-		initWithPCMFormat:format
-		frameCapacity:(AVAudioFrameCount)samples] autorelease];
-	if (!buffer || buffer.int16ChannelData == nullptr) {
-		Deliver(state, std::move(done), { .error = TranscribeError::UnsupportedMedia });
-		return;
-	}
-	buffer.frameLength = (AVAudioFrameCount)samples;
-	std::memcpy(
-		buffer.int16ChannelData[0],
-		pcm.constData(),
-		samples * sizeof(int16_t));
-
-	SFSpeechAudioBufferRecognitionRequest *request =
-		[[[SFSpeechAudioBufferRecognitionRequest alloc] init] autorelease];
-	// Stay on-device when the recognizer can - that is the whole reason this
-	// engine exists, a private voice note that never leaves the machine - but
-	// fall back to the server path rather than refuse when it cannot.
-	if (recognizer.supportsOnDeviceRecognition) {
-		request.requiresOnDeviceRecognition = YES;
-	}
-	request.shouldReportPartialResults = NO;
-	[request appendAudioPCMBuffer:buffer];
-	[request endAudio];
-
-	// start() only runs with the engine alive (guarded crl::on_main), so the
-	// destructor cannot have cancelled yet; the check is a cheap guard against
-	// a future caller that reaches here off the main thread.
-	if (state->cancelled.load()) {
-		return;
-	}
-	SFSpeechRecognitionTask *task = [recognizer
-		recognitionTaskWithRequest:request
-		resultHandler:^(SFSpeechRecognitionResult *result, NSError *error) {
-			if (result != nil && result.isFinal) {
-				const auto text = Platform::NS2QString(
-					result.bestTranscription.formattedString).trimmed();
-				Deliver(state, done, text.isEmpty()
-					? TranscribeResult{ .error = TranscribeError::NoSpeech }
-					: TranscribeResult{ .text = text });
-			} else if (error != nil) {
-				// It ran and produced nothing usable; the enum cannot tell a
-				// silent note from a recognizer that gave up, so both read as
-				// "nothing to hear".
-				Deliver(state, done, { .error = TranscribeError::NoSpeech });
-			}
-		}];
-	[_task release];
-	_task = [task retain];
 }
 
 } // namespace
 
 std::unique_ptr<TranscribeEngine> MakeAppleSpeechEngine() {
-	return std::make_unique<AppleSpeechEngine>();
+	if (@available(macOS 10.15, *)) {
+		return std::make_unique<AppleSpeechEngine>();
+	}
+	return nullptr;
 }
 
 } // namespace Lumina

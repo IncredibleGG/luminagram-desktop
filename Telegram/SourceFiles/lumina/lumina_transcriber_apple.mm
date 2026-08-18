@@ -82,7 +82,7 @@ private:
 	// Held as a plain id rather than SFSpeechRecognitionTask* so this member does not
 	// name a macOS 10.15-only type in a class reachable from 10.13 code; every real
 	// Speech API call below sits inside an @available(macOS 10.15, *) guard.
-	id _task = nil;
+	::id _task = nil;  // ::id -> the Objective-C type; bare 'id' would bind to the id() method above
 
 };
 

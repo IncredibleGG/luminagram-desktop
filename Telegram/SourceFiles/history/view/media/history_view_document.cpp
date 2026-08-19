@@ -20,6 +20,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "history/history.h"
 #include "core/click_handler_types.h" // kDocumentFilenameTooltipProperty.
 #include "lumina/lumina_voice_to_text.h"
+#include "lumina/lumina_transcribers.h"
 #include "window/window_session_controller.h"
 #include "ui/click_handler.h"
 #include "history/view/history_view_element.h"
@@ -502,13 +503,20 @@ QSize Document::countOptimalSize() {
 		const auto session = &history->session();
 		const auto transcribes = &session->api().transcribes();
 		const auto media = _parent->data()->media();
+		// LuminaGram: our own voice-to-text (Apple on mac, free) makes the
+		// transcribe button useful without Premium, so bypass the stock premium/
+		// trial gate whenever it is enabled and an engine is configured.
+		const auto luminaCanTranscribe = Lumina::VoiceToTextEnabled()
+			&& Lumina::TranscriberConfigured(Lumina::CurrentTranscriberId());
 		if ((media && media->ttlSeconds())
 			|| _realParent->isScheduled()
 			|| _realParent->isAdminLogEntry()
-			|| (!session->premium()
+			|| (!luminaCanTranscribe
+				&& !session->premium()
 				&& !transcribes->freeFor(_realParent)
 				&& !transcribes->trialsSupport())
-			|| (!session->premium()
+			|| (!luminaCanTranscribe
+				&& !session->premium()
 				&& _data->duration() > transcribes->trialsMaxLengthMs())) {
 			voice->transcribe = nullptr;
 			voice->transcribeText = {};
@@ -1059,13 +1067,6 @@ void Document::draw(
 	}
 
 	auto statusText = voiceStatusOverride.isEmpty() ? _statusText : voiceStatusOverride;
-	// LuminaGram: voice-to-text discoverability. Append a small "譯" marker to the voice
-	// message duration so users know the note can be transcribed to text (via the message
-	// context menu / Lumina voice-to-text), even when the native transcribe button is hidden.
-	// Pure text: the existing drawTextLeft + unread-dot width logic below lay it out.
-	if (_data->isVoiceMessage()) {
-		statusText += u"  譯"_q;
-	}
 	p.setFont(st::normalFont);
 	p.setPen(stm->mediaFg);
 	p.drawTextLeft(nameleft, statustop, width, statusText);
@@ -1385,34 +1386,23 @@ TextState Document::textState(
 			const auto x = nameleft + namewidth + st::historyTranscribeSkip;
 			const auto y = st.padding.top() - topMinus;
 			if (QRect(QPoint(x, y), size).contains(point)) {
-				result.link = voice->transcribe->link();
-				return result;
-			}
-		}
-		// LuminaGram: make the painted "譯" status marker a tap target that opens
-		// voice-to-text, so a click transcribes the note (Android-parity tap-to-
-		// transcribe) instead of only the right-click menu. Rect matches the paint
-		// above: status text + two spaces, then the marker.
-		if (Lumina::VoiceToTextEnabled() && _data->isVoiceMessage()) {
-			const auto statustop = st.statusTop - topMinus;
-			const auto markerLeft = nameleft
-				+ st::normalFont->width(_statusText + u"  "_q);
-			const auto markerRect = QRect(
-				markerLeft,
-				statustop,
-				st::normalFont->width(u"譯"_q),
-				st::normalFont->height);
-			if (markerRect.contains(point)) {
-				const auto id = _realParent->fullId();
-				result.link = std::make_shared<LambdaClickHandler>([=](
-						ClickContext context) {
-					const auto my = context.other.value<ClickHandlerContext>();
-					if (const auto controller = my.sessionWindow.get()) {
-						if (const auto item = controller->session().data().message(id)) {
-							Lumina::ShowVoiceToText(controller, item);
+				// LuminaGram: route the transcribe button to our free voice-to-text
+				// (Apple on mac) instead of the stock premium transcribe when enabled.
+				if (Lumina::VoiceToTextEnabled()
+					&& Lumina::TranscriberConfigured(Lumina::CurrentTranscriberId())) {
+					const auto id = _realParent->fullId();
+					result.link = std::make_shared<LambdaClickHandler>([=](
+							ClickContext context) {
+						const auto my = context.other.value<ClickHandlerContext>();
+						if (const auto controller = my.sessionWindow.get()) {
+							if (const auto item = controller->session().data().message(id)) {
+								Lumina::ShowVoiceToText(controller, item);
+							}
 						}
-					}
-				});
+					});
+				} else {
+					result.link = voice->transcribe->link();
+				}
 				return result;
 			}
 		}

@@ -364,6 +364,14 @@ void BuildSectionButtons(SectionBuilder &builder) {
 	const auto controller = builder.controller();
 	const auto showOther = builder.showOther();
 
+	// LuminaGram: our settings sit first, above My Account.
+	builder.addSectionButton({
+		.title = rpl::single(u"LuminaGram"_q),
+		.targetSection = LuminaGramId(),
+		.icon = { &st::menuIconEmojiObjects },
+		.keywords = { u"lumina"_q, u"luminagram"_q, u"stealth"_q, u"fork"_q },
+	});
+
 	if (!session->supportMode()) {
 		builder.addSectionButton({
 			.title = tr::lng_settings_my_account(),
@@ -435,12 +443,6 @@ void BuildSectionButtons(SectionBuilder &builder) {
 		.keywords = { u"performance"_q, u"proxy"_q, u"experimental"_q },
 	});
 
-	builder.addSectionButton({
-		.title = rpl::single(u"LuminaGram"_q),
-		.targetSection = LuminaGramId(),
-		.icon = { &st::menuIconEmojiObjects },
-		.keywords = { u"lumina"_q, u"luminagram"_q, u"stealth"_q, u"fork"_q },
-	});
 
 	builder.addSectionButton({
 		.title = tr::lng_settings_section_devices(),

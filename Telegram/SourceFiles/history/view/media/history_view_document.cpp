@@ -19,6 +19,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "history/history_item.h"
 #include "history/history.h"
 #include "core/click_handler_types.h" // kDocumentFilenameTooltipProperty.
+#include "lumina/lumina_voice_to_text.h"
+#include "window/window_session_controller.h"
+#include "ui/click_handler.h"
 #include "history/view/history_view_element.h"
 #include "history/view/history_view_message.h"
 #include "history/view/history_view_cursor_state.h"
@@ -1383,6 +1386,33 @@ TextState Document::textState(
 			const auto y = st.padding.top() - topMinus;
 			if (QRect(QPoint(x, y), size).contains(point)) {
 				result.link = voice->transcribe->link();
+				return result;
+			}
+		}
+		// LuminaGram: make the painted "譯" status marker a tap target that opens
+		// voice-to-text, so a click transcribes the note (Android-parity tap-to-
+		// transcribe) instead of only the right-click menu. Rect matches the paint
+		// above: status text + two spaces, then the marker.
+		if (Lumina::VoiceToTextEnabled() && _data->isVoiceMessage()) {
+			const auto statustop = st.statusTop - topMinus;
+			const auto markerLeft = nameleft
+				+ st::normalFont->width(_statusText + u"  "_q);
+			const auto markerRect = QRect(
+				markerLeft,
+				statustop,
+				st::normalFont->width(u"譯"_q),
+				st::normalFont->height);
+			if (markerRect.contains(point)) {
+				const auto id = _realParent->fullId();
+				result.link = std::make_shared<LambdaClickHandler>([=](
+						ClickContext context) {
+					const auto my = context.other.value<ClickHandlerContext>();
+					if (const auto controller = my.sessionWindow.get()) {
+						if (const auto item = controller->session().data().message(id)) {
+							Lumina::ShowVoiceToText(controller, item);
+						}
+					}
+				});
 				return result;
 			}
 		}

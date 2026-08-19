@@ -189,7 +189,12 @@ void StartTranscription(
 		.content = std::move(content),
 		.fileName = roundVideo ? u"round.mp4"_q : u"voice.ogg"_q,
 		.mimeType = roundVideo ? u"video/mp4"_q : u"audio/ogg"_q,
-		.langHint = InterfaceLanguageCode(),
+		// Transcription must be told the language SPOKEN in the audio, not the app's
+		// UI language. Use the user's read/translate language (the one they set when
+		// they translate a chat), which for own-language voice is exactly right; a
+		// dedicated transcription-language picker refines this further. NEVER the raw
+		// interface language -- that made a Chinese note transcribe as English.
+		.langHint = ReadingLanguage(),
 		.roundVideo = roundVideo,
 	}, crl::guard(box, [=](TranscribeResult result) {
 		if (result.failed()) {

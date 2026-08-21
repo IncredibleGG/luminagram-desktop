@@ -12,6 +12,10 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #ifdef Q_OS_MAC
 #include "lumina/lumina_transcriber_apple.h" // LuminaGram: on-device Apple engine.
 #endif // Q_OS_MAC
+#ifndef Q_OS_MAC
+#include "lumina/lumina_transcriber_whisper.h" // LuminaGram: offline whisper.cpp.
+#include "lumina/lumina_whisper_model.h"
+#endif // !Q_OS_MAC
 
 #include <QtCore/QJsonArray>
 #include <QtCore/QJsonDocument>
@@ -427,13 +431,20 @@ QString AppleTranscriberId() {
 	return u"apple"_q;
 }
 
+// LuminaGram: offline whisper.cpp engine - Windows + Linux, free, no key.
+QString WhisperCppTranscriberId() {
+	return u"whispercpp"_q;
+}
+
 QString DefaultTranscriberId() {
 #ifdef Q_OS_MAC
 	// LuminaGram: mac ships the free on-device engine, so it is the
 	// default there; every other platform keeps Whisper.
 	return AppleTranscriberId();
 #else // Q_OS_MAC
-	return WhisperTranscriberId();
+	// LuminaGram: every non-mac platform defaults to the free, offline
+	// whisper.cpp engine (it just needs its model downloaded once).
+	return WhisperCppTranscriberId();
 #endif // Q_OS_MAC
 }
 
@@ -450,6 +461,18 @@ const std::vector<TranscriberInfo> &Transcribers() {
 			.needsModel = false,
 		},
 #endif // Q_OS_MAC
+#ifndef Q_OS_MAC
+		// LuminaGram: offline whisper.cpp - listed first so the free, no-key
+		// default leads the picker, the way Apple Speech does on mac and Vosk
+		// does on Android. It needs a one-time model download, not a key.
+		{
+			.id = WhisperCppTranscriberId(),
+			.name = u"Whisper (offline)"_q,
+			.needsKey = false,
+			.needsBaseUrl = false,
+			.needsModel = false,
+		},
+#endif // !Q_OS_MAC
 		{
 			.id = WhisperTranscriberId(),
 			.name = u"OpenAI Whisper"_q,
@@ -572,6 +595,13 @@ void SetSttModel(const QString &value) {
 }
 
 bool TranscriberConfigured(const QString &id) {
+#ifndef Q_OS_MAC
+	// LuminaGram: the offline engine has no API key - it is "configured"
+	// exactly when its model has been downloaded.
+	if (id == WhisperCppTranscriberId()) {
+		return WhisperModelReady();
+	}
+#endif // !Q_OS_MAC
 	const auto info = FindTranscriber(id);
 	return info && (!info->needsKey || !TranscriberApiKey(id).isEmpty());
 }
@@ -592,6 +622,13 @@ std::unique_ptr<TranscribeEngine> MakeTranscribeEngine(const QString &id) {
 	} else if (id == GoogleTranscriberId()) {
 		return std::make_unique<GoogleEngine>();
 	}
+#ifndef Q_OS_MAC
+	// LuminaGram: offline whisper.cpp. Built on every non-Apple platform
+	// (mac uses the Objective-C++ Apple Speech engine below instead).
+	if (id == WhisperCppTranscriberId()) {
+		return MakeWhisperCppEngine();
+	}
+#endif // !Q_OS_MAC
 #ifdef Q_OS_MAC
 	// LuminaGram: the Apple engine is Objective-C++ (implemented in
 	// lumina_transcriber_apple.mm) so it is only wired up on mac.

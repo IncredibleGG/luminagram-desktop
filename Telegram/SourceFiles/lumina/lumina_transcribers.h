@@ -50,6 +50,10 @@ namespace Lumina {
 [[nodiscard]] QString VoskTranscriberId();    // "vosk", Android-only.
 // LuminaGram: Apple's on-device Speech framework - macOS-only, free, no key.
 [[nodiscard]] QString AppleTranscriberId();   // "apple", macOS-only.
+// LuminaGram: offline whisper.cpp on-device engine - Windows + Linux, free,
+// no key; needs a one-time ~59 MB model download. Not offered on mac (which
+// keeps AppleTranscriberId()), but the id is defined everywhere.
+[[nodiscard]] QString WhisperCppTranscriberId(); // "whispercpp", non-mac.
 
 // Whisper: it is the only one of the two that detects the spoken language on
 // its own, which is exactly what a cross-language chat needs.

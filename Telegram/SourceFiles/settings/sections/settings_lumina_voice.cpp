@@ -11,8 +11,10 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "lumina/lumina_locale.h"
 #include "lumina/lumina_transcribers.h"
 #include "lumina/lumina_voice_to_text.h"
+#include "lumina/lumina_whisper_model.h"
 #include "settings/settings_common.h"
 #include "ui/basic_click_handlers.h"
+#include "ui/boxes/confirm_box.h"
 #include "ui/boxes/single_choice_box.h"
 #include "ui/layers/generic_box.h"
 #include "ui/rp_widget.h"
@@ -180,6 +182,9 @@ not_null<Ui::FlatLabel*> AddRightLabel(
 		label->resizeToNaturalWidth(available);
 		label->moveToRight(st::settingsButtonRightSkip, st.padding.top());
 	}, label->lifetime());
+	// LuminaGram: let presses over the value on the right fall through to the row button, so the
+	// whole row (not just the value) opens the chooser. Matches upstream CreateRightLabel().
+	label->setAttribute(Qt::WA_TransparentForMouseEvents);
 	return label;
 }
 
@@ -302,6 +307,21 @@ void ShowTextEditor(
 		std::move(save)));
 }
 
+// LuminaGram: the engine names are the services own brands, but the label
+// shown on the settings page is a translated sentence, so it comes out of the
+// locale table rather than TranscriberInfo::name. One place maps an engine id
+// to its locale key, used by both the engine row and the picker.
+[[nodiscard]] QString EngineNameKey(const QString &id) {
+	if (id == Lumina::AppleTranscriberId()) {
+		return u"LuminaSttEngineApple"_q;
+	} else if (id == Lumina::WhisperCppTranscriberId()) {
+		return u"LuminaSttEngineWhisperCpp"_q;
+	} else if (id == Lumina::GoogleTranscriberId()) {
+		return u"LuminaSttEngineGoogle"_q;
+	}
+	return u"LuminaSttEngineWhisper"_q;
+}
+
 void ShowEnginePicker(not_null<Window::SessionController*> controller) {
 	const auto &engines = Lumina::Transcribers();
 	auto options = std::vector<QString>();
@@ -312,13 +332,7 @@ void ShowEnginePicker(not_null<Window::SessionController*> controller) {
 		// key)" half of the label is a sentence and is translated - which is
 		// why these come out of the locale table rather than out of
 		// TranscriberInfo::name.
-		options.push_back(Lumina::Tr(
-			// LuminaGram: Apple's on-device engine has its own name key.
-			(engines[i].id == Lumina::AppleTranscriberId())
-				? u"LuminaSttEngineApple"_q
-				: (engines[i].id == Lumina::GoogleTranscriberId())
-					? u"LuminaSttEngineGoogle"_q
-					: u"LuminaSttEngineWhisper"_q));
+		options.push_back(Lumina::Tr(EngineNameKey(engines[i].id)));
 		if (engines[i].id == current) {
 			selected = i;
 		}
@@ -338,6 +352,72 @@ void ShowEnginePicker(not_null<Window::SessionController*> controller) {
 	}));
 }
 
+#ifndef Q_OS_MAC
+// Right-label text for the offline model row: recomputes on the model state
+// (download start / progress / finish / delete) and the in-app language.
+[[nodiscard]] rpl::producer<QString> WhisperModelLabelValue() {
+	return rpl::single(
+		rpl::empty
+	) | rpl::then(rpl::merge(
+		Lumina::WhisperModelChanges(),
+		Lumina::LangChanges())
+	) | rpl::map([] {
+		const auto state = Lumina::CurrentWhisperModelState();
+		using Stage = Lumina::WhisperModelState::Stage;
+		switch (state.stage) {
+		case Stage::Downloading:
+			return Lumina::Tr(
+				u"LuminaSttModelDownloading"_q,
+				QString::number(state.progress));
+		case Stage::Ready:
+			return Lumina::Tr(u"LuminaSttModelReady"_q);
+		default:
+			return Lumina::Tr(u"LuminaSttModelAbsent"_q);
+		}
+	});
+}
+
+// The single offline-model row, shown only for the whisper.cpp engine. It
+// folds away for any cloud engine exactly like the key / base-url / model
+// blocks. Tap while absent downloads the model; tap while ready confirms and
+// deletes it. The label tracks progress reactively, so no separate progress
+// bulletin is needed beyond a one-shot toast on the initial tap.
+void AddWhisperModelRow(
+		not_null<Ui::VerticalLayout*> container,
+		not_null<Window::SessionController*> controller) {
+	const auto block = AddConditionalBlock(container, [] {
+		return Lumina::CurrentTranscriberId()
+			== Lumina::WhisperCppTranscriberId();
+	});
+	const auto button = AddButtonWithIcon(
+		block,
+		Lumina::TrValue(u"LuminaSttOfflineModel"_q),
+		st::settingsButtonNoIcon);
+	button->setClickedCallback([=] {
+		const auto state = Lumina::CurrentWhisperModelState();
+		using Stage = Lumina::WhisperModelState::Stage;
+		if (state.stage == Stage::Ready) {
+			controller->show(Ui::MakeConfirmBox({
+				.text = Lumina::Tr(u"LuminaSttModelDeleteConfirm"_q),
+				.confirmed = [](Fn<void()> close) {
+					Lumina::DeleteWhisperModel();
+					close();
+				},
+				.confirmText = Lumina::Tr(u"LuminaSttModelDelete"_q),
+			}));
+		} else if (state.stage == Stage::Absent) {
+			Lumina::DownloadWhisperModel();
+			controller->showToast(
+				Lumina::Tr(u"LuminaSttModelDownloadingStart"_q));
+		}
+	});
+	GateRow(button, AddRightLabel(
+		button,
+		Lumina::TrValue(u"LuminaSttOfflineModel"_q),
+		WhisperModelLabelValue()));
+}
+#endif // !Q_OS_MAC
+
 void AddEngineRows(
 		not_null<Ui::VerticalLayout*> container,
 		not_null<Window::SessionController*> controller) {
@@ -347,15 +427,7 @@ void AddEngineRows(
 		container,
 		Lumina::TrValue(u"LuminaSttEngine"_q),
 		[] {
-			return Lumina::Tr(
-				// LuminaGram: Apple's on-device engine has its own name key.
-				(Lumina::CurrentTranscriberId()
-					== Lumina::AppleTranscriberId())
-					? u"LuminaSttEngineApple"_q
-					: (Lumina::CurrentTranscriberId()
-						== Lumina::GoogleTranscriberId())
-						? u"LuminaSttEngineGoogle"_q
-						: u"LuminaSttEngineWhisper"_q);
+			return Lumina::Tr(EngineNameKey(Lumina::CurrentTranscriberId()));
 		},
 		[=] { ShowEnginePicker(controller); });
 
@@ -413,15 +485,21 @@ void AddEngineRows(
 				[](QString value) { Lumina::SetSttModel(value); });
 		});
 
+#ifndef Q_OS_MAC
+	// LuminaGram: the offline model download/status row. Non-mac only (mac uses
+	// the Apple Speech engine, which has no model to fetch).
+	AddWhisperModelRow(container, controller);
+#endif // !Q_OS_MAC
+
 	Ui::AddSkip(container);
 
-	// The promise this page must not break. Android's default engine is Vosk,
-	// offline and free; there is no offline engine on desktop, and saying so
-	// here is the whole reason this divider exists. See
-	// lumina/lumina_transcribers.h for what shipping one would take.
+	// LuminaGram: desktop transcription is no longer cloud-only - the whisper.cpp
+	// engine runs offline, on-device, after a one-time model download. The old
+	// "Vosk unsupported" note (LuminaSttVoskUnsupported, kept in the locale table)
+	// is retired in favour of this one.
 	Ui::AddDividerText(
 		container,
-		Lumina::TrValue(u"LuminaSttVoskUnsupported"_q));
+		Lumina::TrValue(u"LuminaSttOfflineInfo"_q));
 }
 
 // The onboarding funnel that replaces the old one-line "engine has no key" note.

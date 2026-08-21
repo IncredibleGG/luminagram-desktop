@@ -735,6 +735,22 @@ struct Registration {
 		// LuminaGram: macOS-only on-device engine. New key LuminaSttEngineApple;
 		// zh_hans / zh_hant and the other locale files can be filled in later.
 		{ u"LuminaSttEngineApple"_q, u"Apple (on-device, free)"_q },
+		// LuminaGram: offline whisper.cpp engine (Windows + Linux) and its
+		// one-time model-download row on the settings page.
+		{ u"LuminaSttEngineWhisperCpp"_q, u"Whisper (offline, on-device)"_q },
+		{ u"LuminaSttOfflineModel"_q, u"Offline model"_q },
+		{ u"LuminaSttModelAbsent"_q, u"Not downloaded"_q },
+		{ u"LuminaSttModelDownloading"_q, u"Downloading {1}%"_q },
+		{ u"LuminaSttModelReady"_q, u"Ready"_q },
+		{ u"LuminaSttModelDelete"_q, u"Delete"_q },
+		{ u"LuminaSttModelDeleteConfirm"_q, u"Delete the downloaded offline "
+			u"model? You can download it again later."_q },
+		{ u"LuminaSttModelDownloadingStart"_q, u"Downloading the offline "
+			u"model..."_q },
+		{ u"LuminaSttOfflineInfo"_q, u"Offline transcription runs entirely "
+			u"on this device. The first time you use it, a one-time language "
+			u"model (about 59 MB) is downloaded; after that no audio ever "
+			u"leaves your machine."_q },
 		{ u"LuminaSttKey"_q, u"API key"_q },
 		{ u"LuminaSttBaseUrl"_q, u"Base URL"_q },
 		{ u"LuminaSttModel"_q, u"Model"_q },

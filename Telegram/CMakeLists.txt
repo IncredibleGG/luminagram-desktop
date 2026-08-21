@@ -29,6 +29,7 @@ include(cmake/lib_ffmpeg.cmake)
 include(cmake/lib_stripe.cmake)
 include(cmake/lib_tgcalls.cmake)
 include(cmake/lib_prisma.cmake)
+include(cmake/lib_whisper.cmake) # LuminaGram: offline whisper.cpp STT (Win+Linux).
 include(cmake/lib_fido2.cmake)
 include(cmake/td_export.cmake)
 include(cmake/td_iv.cmake)
@@ -93,6 +94,13 @@ PRIVATE
     desktop-app::external_openal
     desktop-app::external_xxhash
 )
+
+if (NOT APPLE)
+    # LuminaGram: offline whisper.cpp STT engine. The `whisper` target only
+    # exists off Apple (mac keeps its Apple Speech engine), so this link is
+    # guarded rather than added to the block above.
+    target_link_libraries(Telegram PRIVATE whisper)
+endif()
 
 if (NOT DESKTOP_APP_DISABLE_SWIFT6)
     telegram_add_apple_swift_runtime(Telegram)
@@ -2342,6 +2350,20 @@ else()
     PRIVATE
         tray_accounts_menu_dummy.cpp
     )
+endif()
+
+if (NOT APPLE)
+    # LuminaGram: offline whisper.cpp STT engine and its model download
+    # helper. mac uses the Objective-C++ Apple Speech engine above; every
+    # other platform builds whisper.cpp (see cmake/lib_whisper.cmake).
+    nice_target_sources(Telegram ${src_loc}
+    PRIVATE
+        lumina/lumina_transcriber_whisper.cpp
+        lumina/lumina_transcriber_whisper.h
+        lumina/lumina_whisper_model.cpp
+        lumina/lumina_whisper_model.h
+    )
+    target_compile_definitions(Telegram PRIVATE LUMINA_HAVE_WHISPER)
 endif()
 
 if (NOT build_winstore)

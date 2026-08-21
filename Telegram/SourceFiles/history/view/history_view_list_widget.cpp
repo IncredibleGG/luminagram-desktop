@@ -73,6 +73,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/ui_utility.h"
 #include "lang/lang_keys.h"
 #include "lumina/lumina_select_author.h"
+#include "lumina/lumina_translate_sync.h"
 #include "boxes/peers/edit_participant_box.h"
 #include "boxes/delete_messages_box.h"
 #include "boxes/moderate_messages_box.h"
@@ -737,6 +738,9 @@ void ListWidget::refreshRows(const Data::MessagesSlice &old) {
 	auto nearestIndex = -1;
 	const auto pushItem = [&](const FullMsgId &fullId) {
 		if (const auto item = session().data().message(fullId)) {
+			if (Lumina::IsTranslateSyncCarrier(item)) {
+				return;
+			}
 			if (_slice.nearestToAround == fullId) {
 				nearestIndex = int(_items.size());
 			}

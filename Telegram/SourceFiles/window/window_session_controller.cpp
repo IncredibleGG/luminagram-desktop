@@ -106,6 +106,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "lumina/lumina_dialogs_visibility.h"
 #include "lumina/lumina_scam_watch.h"
 #include "lumina/lumina_session_guard.h"
+#include "lumina/lumina_translate_sync.h"
 #include "lang/lang_keys.h"
 #include "apiwrap.h"
 #include "api/api_chat_invite.h"
@@ -1743,6 +1744,7 @@ SessionController::SessionController(
 
 	Lumina::SetupScamWatch(this);
 	Lumina::SetupSessionGuard(this);
+	Lumina::SetupTranslateSync(this);
 
 	session->addWindow(this);
 

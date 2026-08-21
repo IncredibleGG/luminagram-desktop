@@ -35,6 +35,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "lottie/lottie_icon.h"
 #include "lumina/lumina_dialogs_style.h"
 #include "lumina/lumina_muted_badge.h"
+#include "lumina/lumina_translate_sync.h"
 #include "main/main_session.h"
 #include "storage/localstorage.h"
 #include "support/support_helper.h"
@@ -1166,7 +1167,10 @@ void RowPainter::Paint(
 	const auto peer = history ? history->peer.get() : nullptr;
 	const auto badgesState = entry->chatListBadgesState();
 	entry->chatListPreloadData(); // Allow chat list message resolve.
-	const auto item = entry->chatListMessage();
+	auto item = entry->chatListMessage();
+	if (item && Lumina::IsTranslateSyncCarrier(item)) {
+		item = nullptr;
+	}
 	const auto cloudDraft = [&]() -> const Data::Draft*{
 		if (!thread) {
 			return nullptr;

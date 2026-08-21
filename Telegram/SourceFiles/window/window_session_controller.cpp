@@ -1744,7 +1744,8 @@ SessionController::SessionController(
 
 	Lumina::SetupScamWatch(this);
 	Lumina::SetupSessionGuard(this);
-	Lumina::SetupTranslateSync(this);
+	// LuminaGram: translation-settings roaming SHELVED (per user) - auto-sync disabled. Re-enable by uncommenting.
+	//Lumina::SetupTranslateSync(this);
 
 	session->addWindow(this);
 

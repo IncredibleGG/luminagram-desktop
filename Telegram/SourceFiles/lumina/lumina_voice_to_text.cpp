@@ -24,7 +24,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "lumina/lumina_translate_providers.h"
 #include "lumina/lumina_translate_readlang.h"
 #include "main/main_session.h"
+#include "settings/sections/settings_lumina_voice.h"
 #include "spellcheck/platform/platform_language.h"
+#include "ui/boxes/confirm_box.h"
 #include "ui/layers/generic_box.h"
 #include "ui/text/text_entity.h"
 #include "ui/vertical_list.h"
@@ -433,12 +435,16 @@ void AddVoiceToTextMenuRow(
 		return;
 	}
 
-	// Desktop has no free engine (lumina/lumina_transcribers.h explains why),
-	// so an engine with no API key is an action that can only apologise.
-	// Offering it and then failing every time is worse than not offering it -
-	// the settings page is where a user turns this on, and it says what it
-	// needs.
-	if (!TranscriberConfigured(CurrentTranscriberId())) {
+	// Desktop's default engine is free and on-device (offline whisper.cpp /
+	// Apple Speech), so a fresh profile is ready with no key. Two engines are
+	// NOT ready, and they are handled differently:
+	//  - a cloud engine (OpenAI Whisper / Google) the user picked but gave no
+	//    key: we still offer the row, and on click say what is missing with a
+	//    one-tap jump to the page that fixes it, rather than failing silently;
+	//  - the offline engine with its model not yet downloaded: that funnel
+	//    lives on the settings page, so the row stays hidden as before.
+	if (!TranscriberConfigured(CurrentTranscriberId())
+		&& !CurrentTranscriber().needsKey) {
 		return;
 	}
 	const auto session = &item->history()->session();
@@ -449,9 +455,26 @@ void AddVoiceToTextMenuRow(
 	// the raw capture is safe; the message is resolved again on click because
 	// it can be deleted while the menu is open.
 	menu->addAction(Tr(u"LuminaSttUiMenuItem"_q), crl::guard(controller, [=] {
-		if (const auto item = session->data().message(itemId)) {
-			ShowVoiceToText(controller, item);
+		const auto item = session->data().message(itemId);
+		if (!item) {
+			return;
 		}
+		// Re-checked on click, not captured: the engine or its key can change
+		// while the menu is open. The row is only offered for a ready engine
+		// or a needs-key engine, so an unconfigured engine here always means
+		// "no API key" - hence LuminaSttUiNoKey is the right message.
+		if (!TranscriberConfigured(CurrentTranscriberId())) {
+			controller->show(Ui::MakeConfirmBox({
+				.text = Tr(u"LuminaSttUiNoKey"_q),
+				.confirmed = [=](Fn<void()> close) {
+					close();
+					controller->showSettings(::Settings::LuminaVoiceId());
+				},
+				.confirmText = Tr(u"LuminaVoiceToTextTitle"_q),
+			}));
+			return;
+		}
+		ShowVoiceToText(controller, item);
 	}), &st::menuIconTranslate);
 }
 

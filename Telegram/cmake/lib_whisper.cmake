@@ -45,6 +45,13 @@ if (NOT APPLE)
     set(WHISPER_BUILD_SERVER   OFF CACHE BOOL "" FORCE)
     set(WHISPER_SDL2           OFF CACHE BOOL "" FORCE)
 
+    # whisper.cpp v1.7.4 and its bundled ggml declare cmake_minimum_required(VERSION
+    # 3.5); CMake >= 3.31 on the CI runners rejects a floor below 3.10 as an error
+    # ("Compatibility with CMake < 3.10 will be removed"), failing configure. Raise
+    # the effective policy floor for the vendored tree (inherited by every nested
+    # cmake_minimum_required) so the pinned upstream builds unmodified.
+    set(CMAKE_POLICY_VERSION_MINIMUM 3.10)
+
     add_subdirectory(
         ${whisper_loc}
         ${CMAKE_BINARY_DIR}/whisper.cpp

@@ -1611,27 +1611,11 @@ TextState Gif::textState(QPoint point, StateRequest request) const {
 			}
 		}
 		if (_transcribe && _transcribe->contains(point)) {
-			// LuminaGram: route the round-video transcribe button to our free
-			// voice-to-text (Apple on mac / whisper.cpp on Win+Linux) instead of
-			// the stock premium transcribe, mirroring history_view_document.cpp.
-			// Same predicate as ensureTranscribeButton()'s un-gate, so a visible
-			// button always routes here (the click fetches the on-device model on
-			// demand); otherwise fall back to the stock paid path.
-			if (Lumina::VoiceToTextButtonAvailable()) {
-				const auto id = _realParent->fullId();
-				result.link = std::make_shared<LambdaClickHandler>([=](
-						ClickContext context) {
-					const auto my = context.other.value<ClickHandlerContext>();
-					if (const auto controller = my.sessionWindow.get()) {
-						if (const auto item
-								= controller->session().data().message(id)) {
-							Lumina::ShowVoiceToText(controller, item);
-						}
-					}
-				});
-			} else {
-				result.link = _transcribe->link();
-			}
+			// LuminaGram: the transcribe button's own (stable) link routes to our
+			// free voice-to-text when enabled - see TranscribeButton::link(). Use
+			// that stable handler so press==release identity holds and the click
+			// activates.
+			result.link = _transcribe->link();
 		}
 	}
 	return result;

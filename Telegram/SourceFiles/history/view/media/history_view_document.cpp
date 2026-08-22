@@ -1388,26 +1388,12 @@ TextState Document::textState(
 			const auto x = nameleft + namewidth + st::historyTranscribeSkip;
 			const auto y = st.padding.top() - topMinus;
 			if (QRect(QPoint(x, y), size).contains(point)) {
-				// LuminaGram: route the transcribe button to our free voice-to-text
-				// (Apple on mac / whisper.cpp on Win+Linux) instead of the stock
-				// premium transcribe. Same predicate as the visibility gate in
-				// countOptimalSize(), so a visible button always routes here - the
-				// click fetches the on-device model on demand - rather than falling
-				// through to the paid path.
-				if (Lumina::VoiceToTextButtonAvailable()) {
-					const auto id = _realParent->fullId();
-					result.link = std::make_shared<LambdaClickHandler>([=](
-							ClickContext context) {
-						const auto my = context.other.value<ClickHandlerContext>();
-						if (const auto controller = my.sessionWindow.get()) {
-							if (const auto item = controller->session().data().message(id)) {
-								Lumina::ShowVoiceToText(controller, item);
-							}
-						}
-					});
-				} else {
-					result.link = voice->transcribe->link();
-				}
+				// LuminaGram: the transcribe button's own (stable) link routes to
+				// our free voice-to-text when a free on-device engine is enabled -
+				// see TranscribeButton::link(). Return that stable handler (not a
+				// fresh per-call one) so press==release identity holds and the click
+				// actually activates.
+				result.link = voice->transcribe->link();
 				return result;
 			}
 		}

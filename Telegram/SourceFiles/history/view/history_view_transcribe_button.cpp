@@ -14,6 +14,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "history/history_item.h"
 #include "data/data_document.h"
 #include "data/data_session.h"
+#include "lumina/lumina_voice_to_text.h"
 #include "main/main_session.h"
 #include "lang/lang_keys.h"
 #include "settings/sections/settings_premium.h"
@@ -376,6 +377,18 @@ ClickHandlerPtr TranscribeButton::link() {
 	_link = std::make_shared<LambdaClickHandler>([=](ClickContext context) {
 		const auto item = session->data().message(id);
 		if (!item) {
+			return;
+		}
+		// LuminaGram: for a plain transcribe (not the AI summary), when our
+		// free on-device voice-to-text is enabled, open the free-engine box
+		// instead of the stock premium/trial path. This lives on the button's
+		// stable _link, so press==release identity holds and the click reliably
+		// activates (a fresh per-textState handler would be dropped).
+		if (!summarize && Lumina::VoiceToTextButtonAvailable()) {
+			const auto my = context.other.value<ClickHandlerContext>();
+			if (const auto controller = my.sessionWindow.get()) {
+				Lumina::ShowVoiceToText(controller, item);
+			}
 			return;
 		}
 		if (session->premium()) {

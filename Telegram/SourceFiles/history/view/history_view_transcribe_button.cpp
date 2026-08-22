@@ -380,14 +380,18 @@ ClickHandlerPtr TranscribeButton::link() {
 			return;
 		}
 		// LuminaGram: for a plain transcribe (not the AI summary), when our
-		// free on-device voice-to-text is enabled, open the free-engine box
-		// instead of the stock premium/trial path. This lives on the button's
-		// stable _link, so press==release identity holds and the click reliably
-		// activates (a fresh per-textState handler would be dropped).
+		// free on-device voice-to-text is enabled, TOGGLE the transcript INLINE
+		// under the bubble (like iOS/Android and stock premium inline
+		// transcription) instead of the stock premium/trial path. This lives on
+		// the button's stable _link, so press==release identity holds and the
+		// click reliably activates (a fresh per-textState handler would be
+		// dropped). One click shows, the next hides, a third re-shows the cached
+		// result without re-transcribing; the right-click menu still opens the
+		// box via ShowVoiceToText. No paid Telegram transcribe API is involved.
 		if (!summarize && Lumina::VoiceToTextButtonAvailable()) {
 			const auto my = context.other.value<ClickHandlerContext>();
 			if (const auto controller = my.sessionWindow.get()) {
-				Lumina::ShowVoiceToText(controller, item);
+				Lumina::ToggleVoiceToTextInline(controller, item);
 			}
 			return;
 		}

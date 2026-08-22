@@ -44,6 +44,18 @@ public:
 	void toggle(not_null<HistoryItem*> item);
 	[[nodiscard]] const Entry &entry(not_null<HistoryItem*> item) const;
 
+	// LuminaGram: free on-device voice-to-text (Apple Speech / whisper.cpp),
+	// never Telegram's paid transcribe API, writes its transcript into the
+	// SAME inline Entry the premium path renders. history_view_document.cpp
+	// (voice notes) and the Gif->Document switch in data_media_types.cpp
+	// (round videos) then show it under the bubble with no further changes.
+	// Each mirrors the resize / view-refresh that stock load()/toggle()/apply()
+	// perform. Driven from lumina/lumina_voice_to_text.cpp.
+	void luminaStartInline(not_null<HistoryItem*> item, bool roundview);
+	void luminaShowInline(not_null<HistoryItem*> item, const QString &text);
+	void luminaFailInline(not_null<HistoryItem*> item);
+	void luminaToggleInline(not_null<HistoryItem*> item);
+
 	void toggleSummary(not_null<HistoryItem*> item);
 	[[nodiscard]] const SummaryEntry &summary(
 		not_null<const HistoryItem*> item) const;

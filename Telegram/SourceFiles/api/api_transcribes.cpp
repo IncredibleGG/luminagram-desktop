@@ -23,6 +23,19 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "spellcheck/spellcheck_types.h"
 
 namespace Api {
+namespace {
+
+// LuminaGram: a non-zero requestId marks the inline Entry as "busy" for the
+// stock render path (history_view_document.cpp and history_view_gif.cpp both
+// gate on entry.requestId): while it is set the bubble shows the button's
+// loading spinner and no transcript, exactly as during a premium request. The
+// free on-device path issues no MTProto request, so it parks this sentinel in
+// the same field and clears it when the local result arrives. It is never
+// passed to MTP::Sender and never matched by apply() (which keys off _ids, left
+// empty by the free path), so it cannot collide with a real request id.
+constexpr auto kLuminaInlineRequestId = mtpRequestId(-1);
+
+} // namespace
 
 Transcribes::Transcribes(not_null<ApiWrap*> api)
 : _session(&api->session())
@@ -114,6 +127,74 @@ void Transcribes::toggle(not_null<HistoryItem*> item) {
 		}
 		_session->data().requestItemResize(item);
 	}
+}
+
+void Transcribes::luminaStartInline(
+		not_null<HistoryItem*> item,
+		bool roundview) {
+	const auto id = item->fullId();
+	auto &entry = _map[id];
+	entry.requestId = kLuminaInlineRequestId;
+	entry.shown = true;
+	entry.failed = false;
+	entry.toolong = false;
+	entry.pending = false;
+	entry.roundview = roundview;
+	// result is left untouched: empty on the first run, or the previous
+	// transcript on a re-run - either way only the spinner shows while
+	// requestId is set.
+	_session->data().requestItemResize(item);
+}
+
+void Transcribes::luminaShowInline(
+		not_null<HistoryItem*> item,
+		const QString &text) {
+	const auto id = item->fullId();
+	auto &entry = _map[id];
+	entry.requestId = 0;
+	entry.pending = false;
+	entry.failed = false;
+	entry.toolong = false;
+	entry.shown = true;
+	entry.result = text;
+	if (entry.roundview) {
+		// A round video renders its transcript by switching from the Gif view
+		// to the Document view (data_media_types.cpp MediaFile::createView),
+		// which only re-runs on a view refresh.
+		_session->data().requestItemViewRefresh(item);
+	}
+	_session->data().requestItemResize(item);
+}
+
+void Transcribes::luminaFailInline(not_null<HistoryItem*> item) {
+	const auto i = _map.find(item->fullId());
+	if (i == _map.end()) {
+		return;
+	}
+	// Revert to the idle button rather than showing an inline error (the
+	// caller surfaces the reason as a toast). Clearing shown keeps a round
+	// video on its Gif view - createView needs shown && roundview to switch.
+	i->second.requestId = 0;
+	i->second.pending = false;
+	i->second.shown = false;
+	if (i->second.roundview) {
+		_session->data().requestItemViewRefresh(item);
+	}
+	_session->data().requestItemResize(item);
+}
+
+void Transcribes::luminaToggleInline(not_null<HistoryItem*> item) {
+	const auto i = _map.find(item->fullId());
+	if (i == _map.end() || i->second.requestId) {
+		return;
+	}
+	// Show-cached / hide, mirroring the flip branch of toggle() but never
+	// reaching load() (which would hit the paid API).
+	i->second.shown = !i->second.shown;
+	if (i->second.roundview) {
+		_session->data().requestItemViewRefresh(item);
+	}
+	_session->data().requestItemResize(item);
 }
 
 void Transcribes::toggleSummary(not_null<HistoryItem*> item) {

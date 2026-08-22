@@ -7,6 +7,10 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "lumina/lumina_voice_to_text.h"
 
+#include "api/api_transcribes.h"
+#include "apiwrap.h"
+#include "base/flat_map.h"
+#include "base/weak_ptr.h"
 #include "chat_helpers/compose/compose_show.h"
 #include "core/file_location.h"
 #include "data/data_document.h"
@@ -362,6 +366,187 @@ void VoiceToTextBox(
 	Start(box, controller, state, itemId);
 }
 
+// LuminaGram inline transcription (the on-bubble button target). The
+// DURABLE result is written into Api::Transcribes (the stock inline slot the
+// premium path renders); the machinery below owns only the TRANSIENT engine,
+// media and download subscription for the duration of one run.
+
+struct InlineJob {
+	std::shared_ptr<Data::DocumentMedia> media;
+	std::unique_ptr<TranscribeEngine> engine;
+	rpl::lifetime downloading;
+	bool downloadRequested = false;
+};
+
+// Session-scoped registry of in-flight jobs: keyed by message so a re-click
+// cannot start a second run for the same bubble, and cleaned up with the
+// account, which tears down any engine still in flight (destroying a
+// TranscribeEngine cancels its request).
+[[nodiscard]] base::flat_map<FullMsgId, std::unique_ptr<InlineJob>> &InlineJobs(
+		not_null<Main::Session*> session) {
+	static auto sessions = base::flat_map<
+		Main::Session*,
+		base::flat_map<FullMsgId, std::unique_ptr<InlineJob>>>();
+	auto i = sessions.find(session.get());
+	if (i == sessions.end()) {
+		i = sessions.emplace(
+			session.get(),
+			base::flat_map<FullMsgId, std::unique_ptr<InlineJob>>()).first;
+		session->lifetime().add([raw = session.get()] {
+			sessions.remove(raw);
+		});
+	}
+	return i->second;
+}
+
+// Drop the job - and with it the engine - from a LATER main-thread turn. It is
+// called from inside the engine callback and the download subscription, both
+// owned by the job; freeing the job inline would delete the object whose
+// method is currently on the stack.
+void FinishInlineJob(not_null<Main::Session*> session, FullMsgId itemId) {
+	crl::on_main(session, [=] {
+		InlineJobs(session).remove(itemId);
+	});
+}
+
+void FailInline(
+		base::weak_ptr<Window::SessionController> weak,
+		not_null<Main::Session*> session,
+		FullMsgId itemId,
+		TranscribeError error) {
+	// Revert the button to idle and say why in a toast, rather than parking an
+	// error string under the bubble.
+	if (const auto item = session->data().message(itemId)) {
+		session->api().transcribes().luminaFailInline(item);
+	}
+	if (const auto controller = weak.get()) {
+		controller->uiShow()->showToast(ErrorText(error));
+	}
+	FinishInlineJob(session, itemId);
+}
+
+void InlineTranslate(
+		not_null<Main::Session*> session,
+		FullMsgId itemId,
+		const QString &transcript) {
+	if (!VoiceToTextAutoTranslate()) {
+		return;
+	}
+	const auto target = ReadingLanguage();
+	if (target.isEmpty()) {
+		return;
+	}
+	// Same quota saver as the box: a transcript already in the reading language
+	// has nothing to translate. See StartTranslation above.
+	const auto detected = Platform::Language::Recognize(transcript);
+	if (detected.known()
+		&& (BaseLanguageCode(detected.twoLetterCode())
+			== BaseLanguageCode(target))) {
+		return;
+	}
+	// TranslateText owns and releases its own engine; guard by the session so a
+	// late reply cannot touch a closed account. The transcript is already inline
+	// (luminaShowInline ran first), so any failure degrades to transcript-only.
+	TranslateText(session, transcript, target, crl::guard(session, [=](
+			TranslateResult result) {
+		if (result.failed()) {
+			return;
+		}
+		const auto text = result.text.trimmed();
+		if (text.isEmpty() || (text == transcript.trimmed())) {
+			return;
+		}
+		if (const auto item = session->data().message(itemId)) {
+			// The two-segment layout the box copy button and Android use.
+			session->api().transcribes().luminaShowInline(
+				item,
+				transcript + u"\n\n"_q + text);
+		}
+	}));
+}
+
+void InlineTranscribe(
+		base::weak_ptr<Window::SessionController> weak,
+		not_null<Main::Session*> session,
+		not_null<InlineJob*> job,
+		FullMsgId itemId,
+		not_null<DocumentData*> document) {
+	auto content = ReadContent(document, job->media);
+	if (content.isEmpty()) {
+		FailInline(weak, session, itemId, TranscribeError::Unavailable);
+		return;
+	}
+	job->engine = MakeCurrentTranscribeEngine();
+	if (!job->engine) {
+		FailInline(weak, session, itemId, TranscribeError::Unavailable);
+		return;
+	}
+	const auto roundVideo = document->isVideoMessage();
+	job->engine->transcribe({
+		.content = std::move(content),
+		.fileName = roundVideo ? u"round.mp4"_q : u"voice.ogg"_q,
+		.mimeType = roundVideo ? u"video/mp4"_q : u"audio/ogg"_q,
+		// The language SPOKEN in the audio, not the UI language - see the box.
+		.langHint = ReadingLanguage(),
+		.roundVideo = roundVideo,
+	}, crl::guard(session, [=](TranscribeResult result) {
+		if (result.failed()) {
+			FailInline(weak, session, itemId, result.error);
+			return;
+		}
+		const auto transcript = result.text.trimmed();
+		if (const auto item = session->data().message(itemId)) {
+			// Published first and unconditionally - a translation that never
+			// returns can only leave the plain transcript on screen.
+			session->api().transcribes().luminaShowInline(item, transcript);
+			InlineTranslate(session, itemId, transcript);
+		}
+		// Free the engine from a later main turn; this runs inside the reply.
+		FinishInlineJob(session, itemId);
+	}));
+}
+
+void StartInline(
+		base::weak_ptr<Window::SessionController> weak,
+		not_null<Main::Session*> session,
+		not_null<InlineJob*> job,
+		FullMsgId itemId,
+		not_null<DocumentData*> document) {
+	job->media = document->createMediaView();
+	if (job->media->loaded()) {
+		InlineTranscribe(weak, session, job, itemId, document);
+		return;
+	}
+	// Not on this device yet - stream it into the cache exactly as the box does
+	// (save() with an empty target never opens a file dialog), then transcribe.
+	job->downloadRequested = true;
+	document->save(Data::FileOrigin(itemId), QString());
+	if (!job->media->loaded() && !document->loading()) {
+		FailInline(weak, session, itemId, TranscribeError::Network);
+		return;
+	}
+	rpl::merge(
+		session->downloaderTaskFinished(),
+		session->data().documentLoadProgress() | rpl::to_empty
+	) | rpl::on_next(crl::guard(session, [=] {
+		if (!job->downloadRequested) {
+			return;
+		} else if (job->media->loaded()) {
+			job->downloadRequested = false;
+			const auto item = session->data().message(itemId);
+			const auto doc = VoiceToTextDocument(item);
+			if (!doc) {
+				FailInline(weak, session, itemId, TranscribeError::Unavailable);
+			} else {
+				InlineTranscribe(weak, session, job, itemId, doc);
+			}
+		} else if (!document->loading()) {
+			job->downloadRequested = false;
+			FailInline(weak, session, itemId, TranscribeError::Network);
+		}
+	}), job->downloading);
+}
+
 } // namespace
 
 bool VoiceToTextEnabled() {
@@ -434,6 +619,49 @@ void ShowVoiceToText(
 		not_null<HistoryItem*> item) {
 	controller->show(
 		Box(VoiceToTextBox, controller, item->fullId()));
+}
+
+void ToggleVoiceToTextInline(
+		not_null<Window::SessionController*> controller,
+		not_null<HistoryItem*> item) {
+	const auto session = &controller->session();
+	auto &transcribes = session->api().transcribes();
+	const auto &entry = transcribes.entry(item);
+
+	// Free-path spinner already up (requestId sentinel) - ignore extra clicks.
+	if (entry.requestId) {
+		return;
+	}
+	// Already have a transcript - just flip inline visibility, never re-run.
+	if (!entry.result.isEmpty()) {
+		transcribes.luminaToggleInline(item);
+		return;
+	}
+	// Nothing cached - run the free on-device engine.
+	const auto document = VoiceToTextDocument(item);
+	if (!document) {
+		controller->uiShow()->showToast(
+			ErrorText(TranscribeError::Unavailable));
+		return;
+	}
+	const auto itemId = item->fullId();
+	auto &jobs = InlineJobs(session);
+	if (jobs.contains(itemId)) {
+		// A previous run is still tearing down (deferred removal pending); the
+		// next click after it clears starts fresh.
+		return;
+	}
+	const auto roundview = document->isVideoMessage();
+	const auto job = jobs.emplace(
+		itemId,
+		std::make_unique<InlineJob>()).first->second.get();
+	transcribes.luminaStartInline(item, roundview);
+	StartInline(
+		base::make_weak(controller),
+		session,
+		job,
+		itemId,
+		document);
 }
 
 void AddVoiceToTextMenuRow(

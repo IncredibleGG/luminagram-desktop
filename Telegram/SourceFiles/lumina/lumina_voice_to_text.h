@@ -41,24 +41,24 @@ struct MessageMenuContext;
 //
 // THREE DELIBERATE DIFFERENCES FROM ANDROID, all forced by the platform:
 //
-//  * No offline engine. See lumina/lumina_transcribers.h - Vosk is a native
-//    library plus a 50 MB model on three platforms, and the settings page
-//    says out loud that it is not here rather than pretending otherwise.
+//  * The offline engine is whisper.cpp (Win/Linux) / Apple Speech (mac),
+//    both free, on-device and key-free. See lumina/lumina_transcribers.h.
+//    Cloud engines that need an API key are also selectable.
 //
-//  * The transcript is shown in a box, not inline under the bubble. Android
-//    writes into TLRPC.Message.voiceTranscription and reuses Telegram's own
-//    render path; desktop has no equivalent seam, because Api::Transcribes
-//    keeps its results in a private map reachable only through its own MTProto
-//    request, so we do NOT reuse that inline slot for the transcript itself.
-//    We DO reuse the stock on-bubble transcribe button: countOptimalSize() in
-//    history/view/media/history_view_document.cpp (voice notes) and
-//    ensureTranscribeButton() in history/view/media/history_view_gif.cpp
-//    (round videos) are edited to un-gate that button for on-device free
-//    engines - visible even before the model is downloaded, see
-//    VoiceToTextButtonAvailable() - and to reroute its click to
-//    ShowVoiceToText() below. One left-click on the bubble opens this box; no
-//    Premium, no trial, and no api/api_transcribes.{h,cpp} change. A box is
-//    the same shape tdesktop already uses for on-demand translation.
+//  * The transcript is shown INLINE under the bubble, like Android. We reuse
+//    the stock on-bubble transcribe button AND the stock inline render path:
+//    countOptimalSize() in history/view/media/history_view_document.cpp (voice
+//    notes) and ensureTranscribeButton() in history_view_gif.cpp (round
+//    videos) un-gate that button for on-device free engines - visible even
+//    before the model is downloaded, see VoiceToTextButtonAvailable(). Its
+//    click routes, through the button's STABLE cached link, to
+//    ToggleVoiceToTextInline() below, which drives Api::Transcribes' own Entry
+//    via added luminaStartInline/luminaShowInline/luminaFailInline/
+//    luminaToggleInline setters (api/api_transcribes.{h,cpp}): the free result
+//    is written into the same slot the stock inline render already paints,
+//    with a sentinel requestId that is never sent to MTProto. One left-click
+//    shows the transcript inline, click again hides it. The right-click menu
+//    still opens ShowVoiceToText()'s box. No Premium, no trial.
 //
 //  * The chat's own translation is never deferred to. Android skips its
 //    translation step when the dialog is already being translated, because
@@ -97,6 +97,17 @@ void SetVoiceToTextAutoTranslate(bool value);
 // one box. Safe to call for any item; it answers with an error box rather
 // than doing anything drastic.
 void ShowVoiceToText(
+	not_null<Window::SessionController*> controller,
+	not_null<HistoryItem*> item);
+
+// The on-bubble transcribe button's inline toggle - the click target wired
+// into HistoryView::TranscribeButton::link(). Click once to run the free
+// on-device engine and show the transcript (plus its translation when
+// auto-translate is on) UNDER the bubble via the stock inline slot; click
+// again to hide it; click a third time to re-show the cached result without
+// re-transcribing. Never touches Telegram's paid transcribe API. The
+// right-click menu keeps opening the box via ShowVoiceToText above.
+void ToggleVoiceToTextInline(
 	not_null<Window::SessionController*> controller,
 	not_null<HistoryItem*> item);
 

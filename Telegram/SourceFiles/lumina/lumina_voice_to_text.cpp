@@ -380,6 +380,21 @@ rpl::producer<> VoiceToTextEnabledChanges() {
 	return Settings::Instance().changesFor(kKeyEnabled);
 }
 
+bool VoiceToTextButtonAvailable() {
+	if (!VoiceToTextEnabled()) {
+		return false;
+	}
+	// On-device free engines (Apple on mac, whisper.cpp on Win/Linux) have
+	// needsKey == false and qualify regardless of whether their model has been
+	// downloaded - the click (ShowVoiceToText) fetches it on demand, so the
+	// button is discoverable without a prior right-click transcription. A
+	// needs-key cloud engine still requires its key. TranscriberConfigured()
+	// is intentionally NOT used for the on-device case, to avoid its
+	// WhisperModelReady() chicken-and-egg trap.
+	return !CurrentTranscriber().needsKey
+		|| TranscriberConfigured(CurrentTranscriberId());
+}
+
 bool VoiceToTextAutoTranslate() {
 	return Settings::Instance().getBool(kKeyAutoTranslate, true);
 }

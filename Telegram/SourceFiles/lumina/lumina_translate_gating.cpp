@@ -14,26 +14,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "history/history.h"
 #include "lang/lang_keys.h" // Lang::Id.
 #include "lumina/lumina_settings.h"
-#include "lumina/lumina_translate_providers.h" // UsingOwnProvider.
+#include "lumina/lumina_translate_providers.h" // TranslateProviderChanges.
 #include "lumina/lumina_translate_readlang.h" // ReadLanguageOr.
 #include "main/main_session.h"
 
 namespace Lumina {
 namespace {
-
-// TranslateProviderChanges() covers every key on the provider page, not just
-// the provider id, so this recomputes on an API key edit as well; the value
-// only actually changes when the selected provider does, which is what
-// distinct_until_changed() below leaves for the subscriber.
-[[nodiscard]] rpl::producer<bool> OwnProviderValue() {
-	return rpl::single(
-		rpl::empty
-	) | rpl::then(
-		TranslateProviderChanges()
-	) | rpl::map([] {
-		return UsingOwnProvider();
-	}) | rpl::distinct_until_changed();
-}
 
 // The master opt-in. The default provider is the keyless google_web engine, so
 // without this a fresh profile would already satisfy UsingOwnProvider() and a
@@ -88,18 +74,32 @@ rpl::producer<bool> ContinuousTranslationAvailableValue() {
 }
 
 bool ChatTranslationUnlocked(not_null<Main::Session*> session) {
-	return session->premium()
-		|| (TranslationFeatureEnabled() && UsingOwnProvider());
+	// LuminaGram is free-first: whole-chat translation is unlocked for every
+	// account whenever the translation feature is on, because a free keyless
+	// provider (Google web) is always available to serve it. Premium remains a
+	// sufficient condition on its own.
+	//
+	// ToS SAFETY: unlocking this for a NON-Premium account is only safe because
+	// the continuous-translation provider resolution guarantees such an
+	// account's whole-chat stream is served by the free Google web engine and
+	// never Telegram's paid API - see ContinuousProviderId() /
+	// MakeContinuousTranslateEngine() and CreateTranslateProvider() in
+	// lumina_translate_providers.cpp. Without that guarantee this would be a
+	// Premium/ToS bypass.
+	return session->premium() || TranslationFeatureEnabled();
 }
 
 rpl::producer<bool> ChatTranslationUnlockedValue(
 		not_null<Main::Session*> session) {
 	using namespace rpl::mappers;
+	// Mirrors ChatTranslationUnlocked() above: unlocked whenever Premium OR the
+	// translation feature is on. The provider selection is no longer a term - a
+	// free Google engine always serves a non-Premium whole-chat stream - so the
+	// toggle no longer appears and disappears with the Service row.
 	return rpl::combine(
 		Data::AmPremiumValue(session),
 		TranslationFeatureEnabledValue(),
-		OwnProviderValue(),
-		_1 || (_2 && _3));
+		_1 || _2);
 }
 
 std::optional<std::vector<LanguageId>> TranslateOfferSkip(

@@ -886,7 +886,10 @@ QString CurrentProviderId() {
 	const auto stored = Settings::Instance().getString(
 		ProviderKey(),
 		DefaultProviderId()).trimmed();
-	return FindTranslateProvider(stored) ? stored : TelegramProviderId();
+	// A stale or unrecognised stored id falls back to the free default (Google
+	// web), never Telegram: a bad stored value must not silently pin a free
+	// user onto the paid provider.
+	return FindTranslateProvider(stored) ? stored : DefaultProviderId();
 }
 
 bool ProviderExplicitlyChosen() {
@@ -1206,15 +1209,90 @@ void TranslateText(
 	});
 }
 
+// The provider id that serves the continuous / whole-chat translation stream.
+//
+// ToS SAFETY. This stream fires one provider request per message for the whole
+// conversation, indefinitely. Telegram's translation endpoint is a paid
+// Premium feature, so a NON-Premium account must never drive it that way. A
+// Premium account keeps exactly the provider it configured.
+//
+// For a non-Premium account, whenever the effective provider would be Telegram
+// - selected outright, or a keyed provider (DeepL / LLM) left unconfigured,
+// which would otherwise fall back to Telegram - the free keyless Google web
+// engine is used instead. Any other configured provider (a keyed DeepL / LLM
+// is the user's OWN service, not Telegram's) is left exactly as chosen.
+[[nodiscard]] static QString ContinuousProviderId(
+		not_null<Main::Session*> session) {
+	const auto id = CurrentProviderId();
+	if (session->premium()) {
+		return id;
+	}
+	return (id == TelegramProviderId() || !TranslateProviderConfigured(id))
+		? GoogleWebProviderId()
+		: id;
+}
+
+// Builds the engine for the continuous / whole-chat stream. Like
+// MakeCurrentTranslateEngine(), but ToS-safe for a non-Premium account: it
+// resolves the provider through ContinuousProviderId() and never wraps the
+// engine in the Telegram paid fallback for a non-Premium account.
+[[nodiscard]] static std::unique_ptr<TranslateEngine>
+MakeContinuousTranslateEngine(not_null<Main::Session*> session) {
+	const auto premium = session->premium();
+	const auto id = ContinuousProviderId(session);
+	auto engine = MakeTranslateEngine(id, session.get());
+	// The Telegram fallback is itself Telegram's paid endpoint, so it may only
+	// wrap a continuous engine for a Premium account. A non-Premium account is
+	// served the free engine with no paid fallback beneath it.
+	if (engine
+		&& premium
+		&& (id != TelegramProviderId())
+		&& TranslateFallbackToTelegram()) {
+		if (auto secondary = MakeTranslateEngine(
+				TelegramProviderId(),
+				session.get())) {
+			engine = std::make_unique<FallbackEngine>(
+				std::move(engine),
+				std::move(secondary));
+		}
+	}
+	if (!engine) {
+		return nullptr;
+	}
+	// Same do-not-translate wrapper as MakeCurrentTranslateEngine().
+	return std::make_unique<GlossaryEngine>(std::move(engine));
+}
+
 std::unique_ptr<Ui::TranslateProvider> CreateTranslateProvider(
 		not_null<Main::Session*> session) {
 	// The master opt-in has to gate this too: without it a Premium account
 	// with the feature OFF still had its chat translations sent to Google
 	// instead of to Telegram, which is exactly what OFF must not do.
-	if (!ContinuousTranslationAvailable() || !UsingOwnProvider()) {
+	if (!ContinuousTranslationAvailable()) {
 		return nullptr;
 	}
-	auto engine = MakeCurrentTranslateEngine(session);
+
+	// ToS SAFETY and the free-first model.
+	//
+	// This is the ONLY entry point for continuous / whole-chat translation
+	// (history/view/history_view_translate_tracker.cpp). If it answers null the
+	// tracker falls through to tdesktop's MTProto provider - Telegram's PAID
+	// endpoint.
+	//
+	// PREMIUM keeps upstream's behaviour exactly: the stream runs through the
+	// user's own engine only when UsingOwnProvider() is true, and otherwise this
+	// returns null so the paid MTProto provider serves it (Premium is entitled
+	// to it).
+	//
+	// NON-PREMIUM must never reach that paid MTProto fallback, so this never
+	// returns null for it while the feature is on: MakeContinuousTranslateEngine()
+	// always yields a free engine (Google web whenever the effective provider
+	// would be Telegram). This is what makes unlocking the whole-chat toggle for
+	// free users in ChatTranslationUnlocked() ToS-safe.
+	if (session->premium() && !UsingOwnProvider()) {
+		return nullptr;
+	}
+	auto engine = MakeContinuousTranslateEngine(session);
 	if (!engine) {
 		return nullptr;
 	}

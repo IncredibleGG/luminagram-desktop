@@ -122,12 +122,16 @@ namespace Lumina {
 // relaxation applied to only some of them leaves the user a switch that turns
 // on and a feature that then does nothing.
 //
-// The gate is relaxed ONLY when the request will not reach Telegram's servers,
-// that is only when Lumina::UsingOwnProvider() (lumina_translate_providers.h)
-// is true. With Telegram selected as the provider the Premium requirement
-// stays exactly as upstream wrote it. That distinction is what keeps this
-// fork's translation ToS-safe; it must not be blurred into a plain
-// "translation is free now" switch.
+// LuminaGram is free-first, so this is relaxed for EVERY account whenever the
+// translation feature is on (Premium stays a sufficient condition on its own).
+// That is ToS-safe only because the request is kept off Telegram's paid
+// servers for a non-Premium account: Lumina::CreateTranslateProvider()
+// (lumina_translate_providers.cpp) resolves the continuous stream to the free
+// keyless Google web engine whenever the chosen provider would otherwise be
+// Telegram, and never lets it fall through to the paid MTProto provider.
+// Unlocking this WITHOUT that guarantee would be taking Telegram's paid
+// feature for free, so the two move together: this note and that resolution
+// are one design.
 [[nodiscard]] bool ChatTranslationUnlocked(not_null<Main::Session*> session);
 [[nodiscard]] rpl::producer<bool> ChatTranslationUnlockedValue(
 	not_null<Main::Session*> session);

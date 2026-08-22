@@ -503,11 +503,13 @@ QSize Document::countOptimalSize() {
 		const auto session = &history->session();
 		const auto transcribes = &session->api().transcribes();
 		const auto media = _parent->data()->media();
-		// LuminaGram: our own voice-to-text (Apple on mac, free) makes the
-		// transcribe button useful without Premium, so bypass the stock premium/
-		// trial gate whenever it is enabled and an engine is configured.
-		const auto luminaCanTranscribe = Lumina::VoiceToTextEnabled()
-			&& Lumina::TranscriberConfigured(Lumina::CurrentTranscriberId());
+		// LuminaGram: our own voice-to-text (Apple on mac, whisper.cpp on
+		// Win/Linux, both free & on-device) makes the transcribe button useful
+		// without Premium, so bypass the stock premium/trial gate. The button is
+		// shown whenever a free on-device engine is selected - even before its
+		// model is downloaded, since the click fetches it on demand - while a
+		// needs-key cloud engine still requires its key.
+		const auto luminaCanTranscribe = Lumina::VoiceToTextButtonAvailable();
 		if ((media && media->ttlSeconds())
 			|| _realParent->isScheduled()
 			|| _realParent->isAdminLogEntry()
@@ -1387,9 +1389,12 @@ TextState Document::textState(
 			const auto y = st.padding.top() - topMinus;
 			if (QRect(QPoint(x, y), size).contains(point)) {
 				// LuminaGram: route the transcribe button to our free voice-to-text
-				// (Apple on mac) instead of the stock premium transcribe when enabled.
-				if (Lumina::VoiceToTextEnabled()
-					&& Lumina::TranscriberConfigured(Lumina::CurrentTranscriberId())) {
+				// (Apple on mac / whisper.cpp on Win+Linux) instead of the stock
+				// premium transcribe. Same predicate as the visibility gate in
+				// countOptimalSize(), so a visible button always routes here - the
+				// click fetches the on-device model on demand - rather than falling
+				// through to the paid path.
+				if (Lumina::VoiceToTextButtonAvailable()) {
 					const auto id = _realParent->fullId();
 					result.link = std::make_shared<LambdaClickHandler>([=](
 							ClickContext context) {

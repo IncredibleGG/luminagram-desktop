@@ -33,6 +33,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "history/view/history_view_cursor_state.h"
 #include "history/view/history_view_reply.h"
 #include "history/view/history_view_transcribe_button.h"
+#include "lumina/lumina_voice_to_text.h"
+#include "lumina/lumina_transcribers.h"
 #include "history/view/media/history_view_document.h" // TTLVoiceStops
 #include "history/view/media/history_view_ephemeral_plate.h"
 #include "history/view/media/history_view_media_common.h"
@@ -57,6 +59,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "data/data_streaming.h"
 #include "data/data_document.h"
 #include "data/data_file_click_handler.h"
+#include "core/click_handler_types.h" // ClickHandlerContext.
+#include "ui/click_handler.h" // LambdaClickHandler, ClickContext.
 #include "data/data_file_origin.h"
 #include "data/data_document_media.h"
 #include "data/data_web_page.h"
@@ -1607,7 +1611,27 @@ TextState Gif::textState(QPoint point, StateRequest request) const {
 			}
 		}
 		if (_transcribe && _transcribe->contains(point)) {
-			result.link = _transcribe->link();
+			// LuminaGram: route the round-video transcribe button to our free
+			// voice-to-text (Apple on mac / whisper.cpp on Win+Linux) instead of
+			// the stock premium transcribe, mirroring history_view_document.cpp.
+			// Same predicate as ensureTranscribeButton()'s un-gate, so a visible
+			// button always routes here (the click fetches the on-device model on
+			// demand); otherwise fall back to the stock paid path.
+			if (Lumina::VoiceToTextButtonAvailable()) {
+				const auto id = _realParent->fullId();
+				result.link = std::make_shared<LambdaClickHandler>([=](
+						ClickContext context) {
+					const auto my = context.other.value<ClickHandlerContext>();
+					if (const auto controller = my.sessionWindow.get()) {
+						if (const auto item
+								= controller->session().data().message(id)) {
+							Lumina::ShowVoiceToText(controller, item);
+						}
+					}
+				});
+			} else {
+				result.link = _transcribe->link();
+			}
 		}
 	}
 	return result;
@@ -2614,11 +2638,18 @@ bool Gif::needCornerStatusDisplay() const {
 
 void Gif::ensureTranscribeButton() const {
 	const auto media = _parent->data()->media();
+	// LuminaGram: un-gate the round-video transcribe button for our own free
+	// on-device engine (Apple on mac, whisper.cpp on Win/Linux), same rule as
+	// the voice-note button in history_view_document.cpp. It stays visible even
+	// before the model is downloaded; the click (routed to ShowVoiceToText in
+	// textState) fetches the model on demand. Premium/trial still qualifies so
+	// the stock paid path keeps working when the free engine is unavailable.
 	if (_data->isVideoMessage()
 		&& (!media || !media->ttlSeconds())
 		&& !_parent->data()->isScheduled()
 		&& !_parent->data()->isAdminLogEntry()
-		&& (_data->session().premium()
+		&& (Lumina::VoiceToTextButtonAvailable()
+			|| _data->session().premium()
 			|| _data->session().api().transcribes().trialsSupport())) {
 		if (!_transcribe) {
 			_transcribe = std::make_unique<TranscribeButton>(

@@ -73,8 +73,10 @@ struct TranslateProviderInfo {
 [[nodiscard]] const TranslateProviderInfo *FindTranslateProvider(
 	const QString &id);
 
-// Always the id of a provider that exists: an *unknown* stored value resolves
-// to TelegramProviderId(), while an unset one resolves to DefaultProviderId().
+// Always the id of a provider that exists. Both an unset and an unrecognised
+// stored value resolve to DefaultProviderId() (the free Google web engine): a
+// stale or invalid stored id must never silently pin a free user to Telegram's
+// paid provider.
 [[nodiscard]] QString CurrentProviderId();
 void SetCurrentProviderId(const QString &id);
 

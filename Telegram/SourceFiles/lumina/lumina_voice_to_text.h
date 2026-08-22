@@ -45,19 +45,20 @@ struct MessageMenuContext;
 //    library plus a 50 MB model on three platforms, and the settings page
 //    says out loud that it is not here rather than pretending otherwise.
 //
-//  * The result is shown in a box, not under the bubble. Android writes into
-//    TLRPC.Message.voiceTranscription and reuses Telegram's own render path.
-//    Desktop has no equivalent seam: Api::Transcribes keeps its results in a
-//    private map with no way in other than its own MTProto request, and
-//    HistoryView::Document::countOptimalSize() throws the transcribe button
-//    and its text away outright for an account with no Premium and no trial
-//    quota - which is exactly the account this feature exists for. Reusing
-//    that slot would mean editing api/api_transcribes.{h,cpp},
-//    history/view/media/history_view_document.cpp and
-//    history/view/media/history_view_gif.cpp, four upstream files on the
-//    hottest paths in the app, to bolt a local result into a mechanism built
-//    around a server round trip. A box is the same shape tdesktop already
-//    uses for on-demand translation, and it costs no upstream edits at all.
+//  * The transcript is shown in a box, not inline under the bubble. Android
+//    writes into TLRPC.Message.voiceTranscription and reuses Telegram's own
+//    render path; desktop has no equivalent seam, because Api::Transcribes
+//    keeps its results in a private map reachable only through its own MTProto
+//    request, so we do NOT reuse that inline slot for the transcript itself.
+//    We DO reuse the stock on-bubble transcribe button: countOptimalSize() in
+//    history/view/media/history_view_document.cpp (voice notes) and
+//    ensureTranscribeButton() in history/view/media/history_view_gif.cpp
+//    (round videos) are edited to un-gate that button for on-device free
+//    engines - visible even before the model is downloaded, see
+//    VoiceToTextButtonAvailable() - and to reroute its click to
+//    ShowVoiceToText() below. One left-click on the bubble opens this box; no
+//    Premium, no trial, and no api/api_transcribes.{h,cpp} change. A box is
+//    the same shape tdesktop already uses for on-demand translation.
 //
 //  * The chat's own translation is never deferred to. Android skips its
 //    translation step when the dialog is already being translated, because
@@ -70,6 +71,16 @@ struct MessageMenuContext;
 [[nodiscard]] bool VoiceToTextEnabled();
 void SetVoiceToTextEnabled(bool value);
 [[nodiscard]] rpl::producer<> VoiceToTextEnabledChanges();
+
+// True when the on-bubble transcribe button should be offered for the current
+// engine. Deliberately LOOSER than TranscriberConfigured(): an on-device free
+// engine (Apple on mac, whisper.cpp on Win/Linux; needsKey == false) qualifies
+// even when its model is not downloaded yet, because the click path
+// (ShowVoiceToText) fetches the model on demand - otherwise the button would
+// stay hidden until the user had already transcribed once via the right-click
+// menu. A needs-key cloud engine still requires its key, so the button never
+// offers a control that could only fail silently.
+[[nodiscard]] bool VoiceToTextButtonAvailable();
 
 // Android's `sttAutoTranslate`, default ON as there.
 [[nodiscard]] bool VoiceToTextAutoTranslate();

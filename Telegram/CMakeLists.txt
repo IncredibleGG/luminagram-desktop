@@ -2012,8 +2012,6 @@ PRIVATE
     lumina/lumina_translate_send.h
     lumina/lumina_translate_settings.cpp
     lumina/lumina_translate_settings.h
-    lumina/lumina_translate_sync.cpp
-    lumina/lumina_translate_sync.h
     lumina/lumina_translate_toggle.cpp
     lumina/lumina_translate_toggle.h
     lumina/lumina_undo_send.cpp

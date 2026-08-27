@@ -13,6 +13,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "dialogs/dialogs_key.h"
 #include "history/history.h"
 #include "history/history_item.h"
+#include "lumina/lumina_locale.h"
 #include "lumina/lumina_settings.h"
 #include "main/main_session.h"
 #include "ui/toast/toast.h"
@@ -24,9 +25,6 @@ namespace Lumina {
 namespace {
 
 const auto kKeyEnabled = u"scamKeywordWarning"_q;
-
-const auto kHintText = u"⚠ This message mentions money or verification and "
-	u"comes from someone not in your contacts — be careful of scams."_q;
 
 // Android shows its bulletin for 4 seconds
 // (ChatActivity.luminaCheckScamKeywordWarning). Keep that, and keep the hint
@@ -221,7 +219,7 @@ void ScamWatch::showHint() {
 	const auto controller = _controller;
 	crl::on_main(controller, [=] {
 		controller->showToast(Ui::Toast::Config{
-			.text = TextWithEntities{ kHintText },
+			.text = TextWithEntities{ Tr(u"LuminaScamWatchHint"_q) },
 			.duration = kToastDuration,
 		});
 	});

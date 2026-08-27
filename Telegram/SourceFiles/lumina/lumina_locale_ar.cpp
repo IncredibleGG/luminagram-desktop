@@ -636,6 +636,20 @@ namespace {
 			u"LuminaGram فورًا ويعرض النص المفرّغ أولًا ثم الترجمة. لا "
 			u"تُجرى أي ترجمة إذا كان النص بلغة القراءة لديك، وإذا فشلت "
 			u"الترجمة يبقى النص المفرّغ ظاهرًا."_q },
+		// LuminaGram: crypto-paste guard, scam-keyword hint,
+		// voice-send confirm, and About-box wording.
+		{ u"LuminaClipCryptoTitle"_q, u"تحقّق من عنوان العملة المشفّرة"_q },
+		{ u"LuminaClipCryptoBody"_q, u"يبدو هذا عنوان محفظة عملات مشفّرة. يمكن لبرمجية خبيثة أن تستبدل بصمت العنوان المنسوخ بعنوان محتال، لذا تحقّق منه حرفًا حرفًا مقابل العنوان الذي قصدت لصقه."_q },
+		{ u"LuminaClipCryptoPaste"_q, u"لصق على أي حال"_q },
+		{ u"LuminaScamWatchHint"_q, u"⚠ تذكر هذه الرسالة المال أو التحقق، وهي من شخص ليس في جهات اتصالك — احذر من عمليات الاحتيال."_q },
+		{ u"LuminaVoiceConfirmSendVideoDiscard"_q, u"إرسال رسالة الفيديو هذه؟ الإلغاء يتجاهل التسجيل."_q },
+		{ u"LuminaVoiceConfirmSendVoiceDiscard"_q, u"إرسال الرسالة الصوتية هذه؟ الإلغاء يتجاهل التسجيل."_q },
+		{ u"LuminaVoiceConfirmSendVideo"_q, u"إرسال رسالة الفيديو هذه؟"_q },
+		{ u"LuminaVoiceConfirmSendVoice"_q, u"إرسال الرسالة الصوتية هذه؟"_q },
+		{ u"LuminaVoiceConfirmBoxTitle"_q, u"إرسال هذه الرسالة؟"_q },
+		{ u"LuminaBrandAboutIntro"_q, u"نسخة مستقلة مشتقّة من Telegram Desktop.\nغير تابعة لـ Telegram ولا معتمَدة منها."_q },
+		{ u"LuminaBrandAboutSummaryPre"_q, u"نسخة مستقلة مشتقّة من Telegram Desktop، مبنية على "_q },
+		{ u"LuminaBrandAboutSummaryPost"_q, u".\nغير تابعة لـ Telegram ولا معتمَدة منها ولا برعايتها."_q },
 	};
 }
 

@@ -12,6 +12,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "base/weak_qptr.h"
 #include "chat_helpers/compose/compose_show.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_locale.h"
 #include "lumina/lumina_settings.h"
 #include "ui/boxes/confirm_box.h"
 #include "ui/layers/box_content.h"
@@ -46,14 +47,12 @@ struct ConfirmState {
 [[nodiscard]] QString ConfirmText(bool round, bool discardOnCancel) {
 	if (discardOnCancel) {
 		return round
-			? u"Send this video message? Cancelling discards the "
-				"recording."_q
-			: u"Send this voice message? Cancelling discards the "
-				"recording."_q;
+			? Tr(u"LuminaVoiceConfirmSendVideoDiscard"_q)
+			: Tr(u"LuminaVoiceConfirmSendVoiceDiscard"_q);
 	}
 	return round
-		? u"Send this video message?"_q
-		: u"Send this voice message?"_q;
+		? Tr(u"LuminaVoiceConfirmSendVideo"_q)
+		: Tr(u"LuminaVoiceConfirmSendVoice"_q);
 }
 
 } // namespace
@@ -118,7 +117,7 @@ bool RequestVoiceSendConfirm(VoiceSendConfirmRequest &&request) {
 			close();
 		},
 		.confirmText = tr::lng_send_button(),
-		.title = u"Send this message?"_q,
+		.title = Tr(u"LuminaVoiceConfirmBoxTitle"_q),
 	}));
 
 	// Nothing is recorded as pending until the box is actually up, and both

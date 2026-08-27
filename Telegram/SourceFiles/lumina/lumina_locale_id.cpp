@@ -931,6 +931,20 @@ namespace {
 			u"Jika transkrip sudah dalam bahasa bacaan Anda, tidak ada "
 			u"yang diterjemahkan dan kuota tidak terpakai, dan bila "
 			u"terjemahan gagal transkrip tetap tampil."_q },
+		// LuminaGram: crypto-paste guard, scam-keyword hint,
+		// voice-send confirm, and About-box wording.
+		{ u"LuminaClipCryptoTitle"_q, u"Periksa alamat kripto ini"_q },
+		{ u"LuminaClipCryptoBody"_q, u"Ini tampak seperti alamat dompet kripto. Malware dapat diam-diam mengganti alamat yang disalin dengan milik penipu, jadi periksa karakter demi karakter dengan alamat yang ingin Anda tempel."_q },
+		{ u"LuminaClipCryptoPaste"_q, u"Tetap tempel"_q },
+		{ u"LuminaScamWatchHint"_q, u"⚠ Pesan ini menyebut uang atau verifikasi dan berasal dari seseorang yang tidak ada di kontak Anda — waspadai penipuan."_q },
+		{ u"LuminaVoiceConfirmSendVideoDiscard"_q, u"Kirim pesan video ini? Membatalkan akan membuang rekaman."_q },
+		{ u"LuminaVoiceConfirmSendVoiceDiscard"_q, u"Kirim pesan suara ini? Membatalkan akan membuang rekaman."_q },
+		{ u"LuminaVoiceConfirmSendVideo"_q, u"Kirim pesan video ini?"_q },
+		{ u"LuminaVoiceConfirmSendVoice"_q, u"Kirim pesan suara ini?"_q },
+		{ u"LuminaVoiceConfirmBoxTitle"_q, u"Kirim pesan ini?"_q },
+		{ u"LuminaBrandAboutIntro"_q, u"Fork independen dari Telegram Desktop.\nTidak berafiliasi dengan atau didukung oleh Telegram."_q },
+		{ u"LuminaBrandAboutSummaryPre"_q, u"Fork independen dari Telegram Desktop, dibangun di atas "_q },
+		{ u"LuminaBrandAboutSummaryPost"_q, u".\nTidak berafiliasi dengan, didukung, atau disponsori oleh Telegram."_q },
 	};
 }
 

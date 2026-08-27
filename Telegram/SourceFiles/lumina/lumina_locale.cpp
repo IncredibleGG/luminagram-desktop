@@ -799,6 +799,20 @@ struct Registration {
 			u"is translated when the transcript is already in your "
 			u"reading language, so no quota is spent, and a translation "
 			u"that fails still leaves the transcript on screen."_q },
+		// LuminaGram: crypto-paste guard, scam-keyword hint,
+		// voice-send confirm, and About-box wording.
+		{ u"LuminaClipCryptoTitle"_q, u"Check this crypto address"_q },
+		{ u"LuminaClipCryptoBody"_q, u"This looks like a crypto wallet address. Malware can silently replace a copied address with a scammer's, so check it character by character against the one you meant to paste."_q },
+		{ u"LuminaClipCryptoPaste"_q, u"Paste anyway"_q },
+		{ u"LuminaScamWatchHint"_q, u"⚠ This message mentions money or verification and comes from someone not in your contacts — be careful of scams."_q },
+		{ u"LuminaVoiceConfirmSendVideoDiscard"_q, u"Send this video message? Cancelling discards the recording."_q },
+		{ u"LuminaVoiceConfirmSendVoiceDiscard"_q, u"Send this voice message? Cancelling discards the recording."_q },
+		{ u"LuminaVoiceConfirmSendVideo"_q, u"Send this video message?"_q },
+		{ u"LuminaVoiceConfirmSendVoice"_q, u"Send this voice message?"_q },
+		{ u"LuminaVoiceConfirmBoxTitle"_q, u"Send this message?"_q },
+		{ u"LuminaBrandAboutIntro"_q, u"An independent fork of Telegram Desktop.\nNot affiliated with or endorsed by Telegram."_q },
+		{ u"LuminaBrandAboutSummaryPre"_q, u"An independent fork of Telegram Desktop, built on the "_q },
+		{ u"LuminaBrandAboutSummaryPost"_q, u".\nNot affiliated with, endorsed by or sponsored by Telegram."_q },
 	};
 	return result;
 }

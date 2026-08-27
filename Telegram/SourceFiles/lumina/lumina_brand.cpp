@@ -9,6 +9,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include "core/version.h"
 #include "lang/lang_keys.h"
+#include "lumina/lumina_locale.h"
 
 namespace Lumina {
 namespace {
@@ -94,17 +95,15 @@ QString BrandedLangValue(ushort key, QString value) {
 }
 
 QString BrandIntroAbout() {
-	return u"An independent fork of Telegram Desktop.\n"
-		u"Not affiliated with or endorsed by Telegram."_q;
+	return Tr(u"LuminaBrandAboutIntro"_q);
 }
 
 TextWithEntities BrandAboutSummary(TextWithEntities apiLink) {
 	auto result = TextWithEntities{
-		u"An independent fork of Telegram Desktop, built on the "_q
+		Tr(u"LuminaBrandAboutSummaryPre"_q)
 	};
 	result.append(std::move(apiLink));
-	result.append(u".\nNot affiliated with, endorsed by or sponsored "
-		u"by Telegram."_q);
+	result.append(Tr(u"LuminaBrandAboutSummaryPost"_q));
 	return result;
 }
 

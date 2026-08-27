@@ -639,6 +639,20 @@ namespace {
 			u"çeviriyi gösterir. Metin zaten okuma dilindeyse çeviri "
 			u"yapılmaz ve kota harcanmaz; çeviri başarısız olursa metin "
 			u"yine de ekranda kalır."_q },
+		// LuminaGram: crypto-paste guard, scam-keyword hint,
+		// voice-send confirm, and About-box wording.
+		{ u"LuminaClipCryptoTitle"_q, u"Bu kripto adresini kontrol edin"_q },
+		{ u"LuminaClipCryptoBody"_q, u"Bu bir kripto cüzdan adresine benziyor. Kötü amaçlı yazılım, kopyalanan adresi sessizce bir dolandırıcının adresiyle değiştirebilir; bu yüzden yapıştırmak istediğiniz adresle karakter karakter karşılaştırın."_q },
+		{ u"LuminaClipCryptoPaste"_q, u"Yine de yapıştır"_q },
+		{ u"LuminaScamWatchHint"_q, u"⚠ Bu mesajda para veya doğrulamadan söz ediliyor ve kişilerinizde olmayan birinden geliyor — dolandırıcılığa karşı dikkatli olun."_q },
+		{ u"LuminaVoiceConfirmSendVideoDiscard"_q, u"Bu görüntülü mesaj gönderilsin mi? İptal, kaydı siler."_q },
+		{ u"LuminaVoiceConfirmSendVoiceDiscard"_q, u"Bu sesli mesaj gönderilsin mi? İptal, kaydı siler."_q },
+		{ u"LuminaVoiceConfirmSendVideo"_q, u"Bu görüntülü mesaj gönderilsin mi?"_q },
+		{ u"LuminaVoiceConfirmSendVoice"_q, u"Bu sesli mesaj gönderilsin mi?"_q },
+		{ u"LuminaVoiceConfirmBoxTitle"_q, u"Bu mesaj gönderilsin mi?"_q },
+		{ u"LuminaBrandAboutIntro"_q, u"Telegram Desktop’un bağımsız bir çatalı.\nTelegram ile bağlantılı değildir ve onaylanmamıştır."_q },
+		{ u"LuminaBrandAboutSummaryPre"_q, u"Telegram Desktop’un bağımsız bir çatalı, şunun üzerine kuruludur: "_q },
+		{ u"LuminaBrandAboutSummaryPost"_q, u".\nTelegram ile bağlantılı, onaylanmış ya da sponsorlanmış değildir."_q },
 	};
 }
 

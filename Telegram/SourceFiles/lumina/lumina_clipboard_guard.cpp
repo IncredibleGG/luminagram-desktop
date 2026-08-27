@@ -11,6 +11,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "core/application.h"
 #include "core/mime_type.h"
 #include "lang/lang_text_entity.h"
+#include "lumina/lumina_locale.h"
 #include "lumina/lumina_settings.h"
 #include "ui/boxes/confirm_box.h"
 #include "ui/text/text_utilities.h"
@@ -96,10 +97,7 @@ bool InterceptCryptoAddressPaste(
 	if (!window) {
 		return false;
 	}
-	auto text = tr::marked(
-		u"This looks like a crypto wallet address. Malware can silently "
-		"replace a copied address with a scammer's, so check it character by "
-		"character against the one you meant to paste."_q);
+	auto text = tr::marked(Tr(u"LuminaClipCryptoBody"_q));
 	text.append(u"\n\n"_q).append(
 		Ui::Text::Wrapped(tr::marked(address), EntityType::Code));
 	const auto weak = base::weak_qptr<Ui::InputField>(field);
@@ -111,8 +109,8 @@ bool InterceptCryptoAddressPaste(
 			}
 			close();
 		},
-		.confirmText = u"Paste anyway"_q,
-		.title = u"Check this crypto address"_q,
+		.confirmText = Tr(u"LuminaClipCryptoPaste"_q),
+		.title = Tr(u"LuminaClipCryptoTitle"_q),
 	}));
 	return true;
 }

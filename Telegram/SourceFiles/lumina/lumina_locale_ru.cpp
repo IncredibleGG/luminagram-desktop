@@ -1003,6 +1003,20 @@ namespace {
 			u"перевод. Когда язык совпадает с языком чтения, перевод "
 			u"пропускается и квота не тратится, а при ошибке перевода "
 			u"расшифровка всё равно остаётся на экране."_q },
+		// LuminaGram: crypto-paste guard, scam-keyword hint,
+		// voice-send confirm, and About-box wording.
+		{ u"LuminaClipCryptoTitle"_q, u"Проверьте этот криптоадрес"_q },
+		{ u"LuminaClipCryptoBody"_q, u"Похоже на адрес криптокошелька. Вредоносная программа может незаметно подменить скопированный адрес на адрес мошенника, поэтому сверьте его символ за символом с тем, который вы собирались вставить."_q },
+		{ u"LuminaClipCryptoPaste"_q, u"Всё равно вставить"_q },
+		{ u"LuminaScamWatchHint"_q, u"⚠ В этом сообщении упоминаются деньги или подтверждение, и оно от того, кого нет в ваших контактах, — остерегайтесь мошенников."_q },
+		{ u"LuminaVoiceConfirmSendVideoDiscard"_q, u"Отправить это видеосообщение? Отмена удалит запись."_q },
+		{ u"LuminaVoiceConfirmSendVoiceDiscard"_q, u"Отправить это голосовое сообщение? Отмена удалит запись."_q },
+		{ u"LuminaVoiceConfirmSendVideo"_q, u"Отправить это видеосообщение?"_q },
+		{ u"LuminaVoiceConfirmSendVoice"_q, u"Отправить это голосовое сообщение?"_q },
+		{ u"LuminaVoiceConfirmBoxTitle"_q, u"Отправить это сообщение?"_q },
+		{ u"LuminaBrandAboutIntro"_q, u"Независимый форк Telegram Desktop.\nНе связан с Telegram и не одобрен им."_q },
+		{ u"LuminaBrandAboutSummaryPre"_q, u"Независимый форк Telegram Desktop, построенный на "_q },
+		{ u"LuminaBrandAboutSummaryPost"_q, u".\nНе связан с Telegram, не одобрен и не спонсируется им."_q },
 	};
 }
 

@@ -849,6 +849,20 @@ namespace {
 		{ u"LuminaSttAutoTranslateInfo"_q, u"语音转出的文字如果不是你的阅读语言，会自动接着翻译，"
 			u"先显示转录原文，再显示译文。转录语言和阅读语言相同就"
 			u"直接跳过，不浪费额度；翻译失败时仍会保留转录原文。"_q },
+		// LuminaGram: crypto-paste guard, scam-keyword hint,
+		// voice-send confirm, and About-box wording.
+		{ u"LuminaClipCryptoTitle"_q, u"核对这个加密货币地址"_q },
+		{ u"LuminaClipCryptoBody"_q, u"这看起来像是一个加密货币钱包地址。恶意软件可能会悄悄把你复制的地址替换成骗子的地址，所以请逐字符核对，确认它就是你要粘贴的地址。"_q },
+		{ u"LuminaClipCryptoPaste"_q, u"仍要粘贴"_q },
+		{ u"LuminaScamWatchHint"_q, u"⚠ 这条消息提到了钱款或验证，且来自不在你联系人中的人——小心诈骗。"_q },
+		{ u"LuminaVoiceConfirmSendVideoDiscard"_q, u"发送这条视频消息？取消将丢弃录制内容。"_q },
+		{ u"LuminaVoiceConfirmSendVoiceDiscard"_q, u"发送这条语音消息？取消将丢弃录制内容。"_q },
+		{ u"LuminaVoiceConfirmSendVideo"_q, u"发送这条视频消息？"_q },
+		{ u"LuminaVoiceConfirmSendVoice"_q, u"发送这条语音消息？"_q },
+		{ u"LuminaVoiceConfirmBoxTitle"_q, u"发送这条消息？"_q },
+		{ u"LuminaBrandAboutIntro"_q, u"Telegram Desktop 的独立分支。\n与 Telegram 无关联，也未获其认可。"_q },
+		{ u"LuminaBrandAboutSummaryPre"_q, u"Telegram Desktop 的独立分支，构建于 "_q },
+		{ u"LuminaBrandAboutSummaryPost"_q, u"。\n与 Telegram 无关联、未获其认可，也未获其赞助。"_q },
 	};
 }
 

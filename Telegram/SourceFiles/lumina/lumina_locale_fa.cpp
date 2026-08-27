@@ -625,6 +625,20 @@ namespace {
 			u"سپس ترجمه را نشان می‌دهد. اگر زبان متن همان زبان خواندن "
 			u"شما باشد ترجمه انجام نمی‌شود و سهمیه هدر نمی‌رود؛ اگر "
 			u"ترجمه شکست بخورد، متن اصلی باقی می‌ماند."_q },
+		// LuminaGram: crypto-paste guard, scam-keyword hint,
+		// voice-send confirm, and About-box wording.
+		{ u"LuminaClipCryptoTitle"_q, u"این آدرس ارز دیجیتال را بررسی کنید"_q },
+		{ u"LuminaClipCryptoBody"_q, u"این به نظر آدرس یک کیف‌پول ارز دیجیتال می‌رسد. بدافزار می‌تواند بی‌سروصدا آدرس کپی‌شده را با آدرس یک کلاهبردار جایگزین کند، پس آن را نویسه‌به‌نویسه با آدرسی که می‌خواستید بچسبانید مقایسه کنید."_q },
+		{ u"LuminaClipCryptoPaste"_q, u"به‌هرحال بچسبان"_q },
+		{ u"LuminaScamWatchHint"_q, u"⚠ این پیام به پول یا تأیید هویت اشاره می‌کند و از کسی است که در مخاطبان شما نیست — مراقب کلاهبرداری باشید."_q },
+		{ u"LuminaVoiceConfirmSendVideoDiscard"_q, u"این پیام ویدیویی ارسال شود؟ لغو کردن، ضبط را دور می‌ریزد."_q },
+		{ u"LuminaVoiceConfirmSendVoiceDiscard"_q, u"این پیام صوتی ارسال شود؟ لغو کردن، ضبط را دور می‌ریزد."_q },
+		{ u"LuminaVoiceConfirmSendVideo"_q, u"این پیام ویدیویی ارسال شود؟"_q },
+		{ u"LuminaVoiceConfirmSendVoice"_q, u"این پیام صوتی ارسال شود؟"_q },
+		{ u"LuminaVoiceConfirmBoxTitle"_q, u"این پیام ارسال شود؟"_q },
+		{ u"LuminaBrandAboutIntro"_q, u"یک انشعاب مستقل از Telegram Desktop.\nوابسته به Telegram نیست و از سوی آن تأیید نشده است."_q },
+		{ u"LuminaBrandAboutSummaryPre"_q, u"یک انشعاب مستقل از Telegram Desktop، ساخته‌شده بر پایهٔ "_q },
+		{ u"LuminaBrandAboutSummaryPost"_q, u".\nوابسته به Telegram نیست و از سوی آن تأیید یا حمایت مالی نشده است."_q },
 	};
 }
 

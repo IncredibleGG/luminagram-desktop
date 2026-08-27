@@ -934,6 +934,20 @@ namespace {
 			u"transcrição já estiver no seu idioma de leitura, nada é "
 			u"traduzido e nenhuma cota é gasta, e se a tradução falhar "
 			u"a transcrição continua na tela."_q },
+		// LuminaGram: crypto-paste guard, scam-keyword hint,
+		// voice-send confirm, and About-box wording.
+		{ u"LuminaClipCryptoTitle"_q, u"Verifique este endereço de criptomoeda"_q },
+		{ u"LuminaClipCryptoBody"_q, u"Isto parece um endereço de carteira de criptomoeda. Um malware pode substituir silenciosamente um endereço copiado pelo de um golpista, então confira caractere por caractere com o que você pretendia colar."_q },
+		{ u"LuminaClipCryptoPaste"_q, u"Colar mesmo assim"_q },
+		{ u"LuminaScamWatchHint"_q, u"⚠ Esta mensagem menciona dinheiro ou verificação e vem de alguém que não está nos seus contatos — cuidado com golpes."_q },
+		{ u"LuminaVoiceConfirmSendVideoDiscard"_q, u"Enviar esta videomensagem? Cancelar descarta a gravação."_q },
+		{ u"LuminaVoiceConfirmSendVoiceDiscard"_q, u"Enviar esta mensagem de voz? Cancelar descarta a gravação."_q },
+		{ u"LuminaVoiceConfirmSendVideo"_q, u"Enviar esta videomensagem?"_q },
+		{ u"LuminaVoiceConfirmSendVoice"_q, u"Enviar esta mensagem de voz?"_q },
+		{ u"LuminaVoiceConfirmBoxTitle"_q, u"Enviar esta mensagem?"_q },
+		{ u"LuminaBrandAboutIntro"_q, u"Uma bifurcação independente do Telegram Desktop.\nSem afiliação ou endosso do Telegram."_q },
+		{ u"LuminaBrandAboutSummaryPre"_q, u"Uma bifurcação independente do Telegram Desktop, baseada na "_q },
+		{ u"LuminaBrandAboutSummaryPost"_q, u".\nSem afiliação, endosso ou patrocínio do Telegram."_q },
 	};
 }
 

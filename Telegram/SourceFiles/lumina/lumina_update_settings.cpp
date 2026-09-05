@@ -7,8 +7,10 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "lumina/lumina_update_settings.h"
 
+#include "base/unique_qptr.h"
 #include "boxes/about_box.h"
 #include "core/application.h"
+#include "core/launcher.h"
 #include "core/update_checker.h"
 #include "core/version.h"
 #include "lang/lang_keys.h"
@@ -17,11 +19,14 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/text/format_values.h"
 #include "ui/vertical_list.h"
 #include "ui/widgets/buttons.h"
+#include "ui/widgets/popup_menu.h"
 #include "ui/wrap/slide_wrap.h"
 #include "ui/wrap/vertical_layout.h"
 
 #include "styles/style_lumina.h"
 #include "styles/style_settings.h"
+
+#include <QtGui/QCursor>
 
 namespace Lumina {
 namespace {
@@ -29,10 +34,10 @@ namespace {
 // The channel a build follows, which is also the set of feed entries it is
 // willing to see: ParseCommonMap() in core/update_checker.cpp asks for
 // "stable" only, adds "beta" when cInstallBetaVersion() is set, and adds
-// "alpha" on top for an alpha build. LuminaGram publishes "stable" and
-// nothing else, so the other two resolve back to it - the name is reported
-// rather than corrected, because a build that says "Beta" while taking
-// stable packages is the honest description of that state.
+// "alpha" on top for an alpha build. LuminaGram now publishes a real beta
+// channel alongside stable, so a build with cInstallBetaVersion() set sees
+// and installs the feed's beta entries; alpha stays a build-time channel
+// with no published feed of its own.
 [[nodiscard]] QString UpdateChannelName() {
 	if (cAlphaVersion()) {
 		return u"Alpha"_q;
@@ -55,27 +60,64 @@ namespace {
 void AddUpdateRows(not_null<Ui::VerticalLayout*> container) {
 	Ui::AddSkip(container);
 
-	// A fact, not a control. The row has always been inert - the attribute
-	// below predates this - but while it was painted like its neighbours, with
-	// the channel in the accent colour every pressable value row on these
-	// pages uses, it read as a switch that ignores clicks. Giving it a real
-	// action was the alternative and it would have been a lie: as
-	// UpdateChannelName() above says, this fork publishes "stable" and nothing
-	// else, so every entry in a channel picker would install the same
-	// packages. st::luminaSettingsFactRow states the channel in ordinary
-	// secondary text instead.
-	const auto version = ::Settings::AddButtonWithLabel(
-		container,
-		tr::lng_settings_current_version(
-			lt_version,
-			rpl::single(currentVersionText())),
-		rpl::single(UpdateChannelName()),
-		st::luminaSettingsFactRow);
-	version->setAttribute(Qt::WA_TransparentForMouseEvents);
+	// The channel row. When the updater is compiled out, or this is an alpha
+	// build - a build-time channel no in-app switch can leave - the channel
+	// is an inert fact, spelled out in ordinary secondary text so it does not
+	// read as a control that ignores clicks. Otherwise it is a real picker:
+	// LuminaGram now publishes a beta channel alongside stable, the desktop
+	// updater already asks the feed for beta entries when cInstallBetaVersion()
+	// is set, so switching here changes which build the next check offers.
+	if (Core::UpdaterDisabled() || cAlphaVersion()) {
+		const auto version = ::Settings::AddButtonWithLabel(
+			container,
+			tr::lng_settings_current_version(
+				lt_version,
+				rpl::single(currentVersionText())),
+			rpl::single(UpdateChannelName()),
+			st::luminaSettingsFactRow);
+		version->setAttribute(Qt::WA_TransparentForMouseEvents);
 
-	if (Core::UpdaterDisabled()) {
-		Ui::AddSkip(container);
-		return;
+		if (Core::UpdaterDisabled()) {
+			Ui::AddSkip(container);
+			return;
+		}
+	} else {
+		// The label is driven by a stream primed just below and fired again
+		// after a switch - the same idiom the "check now" row uses for its
+		// status - so the shown channel refreshes in place, no page rebuild.
+		const auto channel = Ui::CreateChild<rpl::event_stream<QString>>(
+			container.get());
+		const auto version = ::Settings::AddButtonWithLabel(
+			container,
+			tr::lng_settings_current_version(
+				lt_version,
+				rpl::single(currentVersionText())),
+			channel->events(),
+			st::settingsButtonNoIcon);
+		const auto menu = version->lifetime().make_state<
+			base::unique_qptr<Ui::PopupMenu>>();
+		const auto choose = [=](bool beta) {
+			if (beta == cInstallBetaVersion()) {
+				return;
+			}
+			cSetInstallBetaVersion(beta);
+			Core::Launcher::Instance().writeInstallBetaVersionsSetting();
+			channel->fire(UpdateChannelName());
+
+			// Kick a check off the same shared updater the rest of this block
+			// drives, exactly as the "check now" row below does, so the other
+			// channel's build is offered right away.
+			Core::UpdateChecker checker;
+			cSetLastUpdateCheck(0);
+			checker.start();
+		};
+		version->setClickedCallback([=] {
+			*menu = base::make_unique_q<Ui::PopupMenu>(version.get());
+			(*menu)->addAction(u"Stable"_q, [=] { choose(false); });
+			(*menu)->addAction(u"Beta"_q, [=] { choose(true); });
+			(*menu)->popup(QCursor::pos());
+		});
+		channel->fire(UpdateChannelName());
 	}
 
 	const auto toggle = container->add(object_ptr<Ui::SettingsButton>(

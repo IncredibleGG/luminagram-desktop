@@ -3,6 +3,10 @@ name: Windows.
 on:
   workflow_dispatch:
   push:
+    # Pushes to the canary branches run only canary.yml, see there.
+    branches-ignore:
+      - public-canary
+      - private-canary
     paths-ignore:
       - 'docs/**'
       - '**.md'
@@ -267,3 +271,4 @@ jobs:
         with:
           name: ${{ env.ARTIFACT_NAME }}
           path: artifact\
+          retention-days: 1

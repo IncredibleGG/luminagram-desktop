@@ -39,6 +39,25 @@ constexpr auto kSystemUnlockDelay = crl::time(1000);
 
 } // namespace
 
+PasscodeAttempt TryPasscode(const QString &passcode) {
+	if (passcode.isEmpty()) {
+		return PasscodeAttempt::Empty;
+	} else if (!passcodeCanTry()) {
+		return PasscodeAttempt::Flood;
+	}
+	const auto utf8 = passcode.toUtf8();
+	auto &domain = Core::App().domain();
+	const auto correct = domain.started()
+		? domain.local().checkPasscode(utf8)
+		: (domain.start(utf8) == Storage::StartResult::Success);
+	if (!correct) {
+		cSetPasscodeBadTries(cPasscodeBadTries() + 1);
+		cSetPasscodeLastTry(crl::now());
+		return PasscodeAttempt::Wrong;
+	}
+	return PasscodeAttempt::Correct;
+}
+
 LockWidget::LockWidget(QWidget *parent, not_null<Controller*> window)
 : RpWidget(parent)
 , _window(window) {
@@ -276,23 +295,16 @@ void PasscodeLockWidget::paintContent(QPainter &p) {
 }
 
 void PasscodeLockWidget::submit() {
-	if (_passcode->text().isEmpty()) {
+	switch (TryPasscode(_passcode->text())) {
+	case PasscodeAttempt::Empty:
 		_passcode->showError();
 		return;
-	}
-	if (!passcodeCanTry()) {
+	case PasscodeAttempt::Flood:
 		_error = tr::lng_flood_error(tr::now);
 		_passcode->showError();
 		update();
 		return;
-	}
-
-	const auto passcode = _passcode->text().toUtf8();
-	auto &domain = Core::App().domain();
-	const auto correct = domain.started()
-		? domain.local().checkPasscode(passcode)
-		: (domain.start(passcode) == Storage::StartResult::Success);
-	if (!correct) {
+	case PasscodeAttempt::Wrong:
 		// LuminaGram fake-crash duress unlock: a SECOND, purely local code
 		// that ends the process instead of unlocking, leaving the screen as if
 		// the app had crashed. Strictly gated - it fires only when the feature
@@ -300,36 +312,40 @@ void PasscodeLockWidget::submit() {
 		// that code. Anything else, including an ordinary wrong passcode,
 		// falls through to the bad-try handling below and behaves normally.
 		//
-		// Placed on the already-failed path, which is where this port differs
-		// from Android (PasscodeView.processDone() tests the duress code
-		// BEFORE SharedConfig.checkPasscode). Two reasons, both about what
-		// happens when the duress code and the passcode end up equal - which
-		// no settings page can prevent, because the passcode can be changed
+		// Placed on the already-failed path (the PasscodeAttempt::Wrong case,
+		// reached only after TryPasscode() has checked and rejected the code),
+		// which is where this port differs from Android
+		// (PasscodeView.processDone() tests the duress code BEFORE
+		// SharedConfig.checkPasscode). Two reasons, both about what happens
+		// when the duress code and the passcode end up equal - which no
+		// settings page can prevent, because the passcode can be changed
 		// afterwards, on a different page, by someone who has forgotten the
 		// duress code exists:
 		//
-		//  * here, the passcode always wins, so a collision merely stops the
-		//    duress code from firing. In Android's order a collision fires the
-		//    fake crash on every correct unlock, locking the user out of their
-		//    own account permanently, with nothing but "log out" left on the
-		//    screen. Its settings screen has to refuse the collision to stay
-		//    safe; ours refuses it too, but is not relying on that;
+		//  * here, the passcode always wins (a correct code returns
+		//    PasscodeAttempt::Correct and never reaches this case), so a
+		//    collision merely stops the duress code from firing. In Android's
+		//    order a collision fires the fake crash on every correct unlock,
+		//    locking the user out of their own account permanently, with
+		//    nothing but "log out" left on the screen. Its settings screen has
+		//    to refuse the collision to stay safe; ours refuses it too, but is
+		//    not relying on that;
 		//  * nothing LuminaGram does can delay, block or break a legitimate
 		//    unlock, because by the time any of it runs the passcode has
 		//    already been checked and rejected.
 		//
-		// The flood gate above still applies first, exactly as on Android, so
-		// the duress code does not work while the user is locked out for
-		// retrying too fast. Deliberately nothing is logged here.
+		// The flood gate still applies first (PasscodeAttempt::Flood is
+		// returned before Wrong), exactly as on Android, so the duress code
+		// does not work while the user is locked out for retrying too fast.
+		// Deliberately nothing is logged here.
 		if (Lumina::FakeCrashCodeMatches(_passcode->text())) {
 			Lumina::TriggerFakeCrash(); // Does not return.
 		}
-		cSetPasscodeBadTries(cPasscodeBadTries() + 1);
-		cSetPasscodeLastTry(crl::now());
 		error();
 		return;
+	case PasscodeAttempt::Correct:
+		break;
 	}
-
 	Core::App().unlockPasscode(); // Destroys this widget.
 }
 

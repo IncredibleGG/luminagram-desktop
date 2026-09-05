@@ -4687,7 +4687,7 @@ void ApiWrap::sendMessage(
 		std::optional<MsgId> localMessageId) {
 	const auto history = message.action.history;
 	const auto peer = history->peer;
-	const auto &textWithTags = message.textWithTags;
+	auto &textWithTags = message.textWithTags;
 
 	auto action = message.action;
 	action.generateLocal = true;

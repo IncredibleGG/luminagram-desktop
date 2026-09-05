@@ -2144,8 +2144,6 @@ void ChatWidget::sendingFilesConfirmed(
 
 	const auto compress = bundle->way.sendImagesAsPhotos();
 	const auto type = compress ? SendMediaType::Photo : SendMediaType::File;
-	auto action = prepareSendAction(options);
-	action.clearDraft = false;
 
 	// LuminaGram: the caption send seam (F-06). Same placement as the text seam
 	// in sendTextWithTags() below - after the sending-files, ephemeral and Stars

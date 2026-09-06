@@ -1210,7 +1210,7 @@ bool TranslateSendLanguageIsAuto() {
 }
 
 bool DualLanguageDisplay() {
-	return Settings::Instance().getBool(kKeyDualLanguage, false);
+	return Settings::Instance().getBool(kKeyDualLanguage, true);
 }
 
 void SetDualLanguageDisplay(bool value) {

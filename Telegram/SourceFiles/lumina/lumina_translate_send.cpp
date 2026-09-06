@@ -39,6 +39,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <QtCore/QJsonValue>
 #include <crl/crl_on_main.h>
 
+#include <algorithm>
+#include <optional>
+
 namespace Lumina {
 namespace {
 
@@ -153,6 +156,173 @@ struct PreviewCache {
 	return result;
 }
 
+// Tag-preserving translation ---------------------------------------------
+//
+// A formatted outgoing message carries its mention / bold / custom-emoji
+// ranges as {offset, length, id} tags into TextWithTags::text, in UTF-16 code
+// units - the same unit QString indexes in, so a custom-emoji span that is a
+// surrogate pair needs no special handling as long as every length below is
+// taken from QString too.
+//
+// Translating the text would move every character and leave those offsets
+// pointing at the wrong ones, which is why a tagged message used to be refused.
+// Instead each tagged span is replaced, before translation, by a sentinel
+// token built from Private Use Area markers that translation engines pass
+// through unchanged; the text around it is translated; and on write-back each
+// sentinel is swapped back for its original span text verbatim (so a mention's
+// display name is never translated) with a fresh tag offset measured against
+// the rebuilt string.
+//
+// The markers are U+F8FE / U+F8FD, one UTF-16 unit each and never whitespace,
+// so trimming the protected string cannot eat one. The digits between them are
+// the span's index, and the closing marker keeps one token from ever being a
+// prefix of another (\uF8FE 1 \uF8FD is not inside \uF8FE 1 2 \uF8FD).
+//
+// They sit at the TOP of the BMP private-use area on purpose. The glossary
+// masker (lumina_glossary.cpp) wraps every engine (GlossaryEngine in
+// lumina_translate_providers.cpp) and, whenever the outgoing text carries a
+// glossary term, a textual @mention or a URL, replaces each with a placeholder
+// numbered from U+E000 UPWARD and then, on the reply, rewrites every character
+// in [U+E000, U+E000 + count) back. Markers low in that area (U+E000 / U+E001)
+// would be indices 0 and 1 and get clobbered on exactly the messages this
+// feature is for; the round-trip check below would then fall back to as-typed
+// every time. From the top, the glossary would have to mask ~6400 spans in one
+// message - impossible under the length limit - to reach them, so the two
+// schemes coexist and a message can be both glossary-masked and tag-protected.
+struct ProtectedSpan {
+	QString sentinel; // The token that stands in for this span.
+	QString text;     // The original span substring, reinserted verbatim.
+	QString id;       // The tag id to rebuild the span with.
+};
+
+[[nodiscard]] QChar SentinelOpen() {
+	return QChar(char16_t(0xF8FE));
+}
+
+[[nodiscard]] QChar SentinelClose() {
+	return QChar(char16_t(0xF8FD));
+}
+
+[[nodiscard]] QString SentinelToken(int index) {
+	return SentinelOpen() + QString::number(index) + SentinelClose();
+}
+
+// Builds the sentinel-bearing string to translate and the ordered span map to
+// rebuild from. Returns false - and the caller then sends the message as typed
+// - when the tags cannot be protected unambiguously: a marker already present
+// in the text, a non-positive length, an out-of-range offset, or two spans
+// that overlap. Adjacent spans are fine; nested / overlapping ones are not.
+[[nodiscard]] bool BuildProtectedSource(
+		const QString &source,
+		const TextWithTags::Tags &tags,
+		QString &outProtected,
+		std::vector<ProtectedSpan> &outSpans) {
+	outSpans.clear();
+	if (source.contains(SentinelOpen()) || source.contains(SentinelClose())) {
+		return false;
+	}
+	auto sorted = std::vector<TextWithTags::Tag>(tags.begin(), tags.end());
+	std::sort(sorted.begin(), sorted.end(), [](
+			const TextWithTags::Tag &a,
+			const TextWithTags::Tag &b) {
+		return a.offset < b.offset;
+	});
+	const auto sourceLength = int(source.size());
+	auto built = QString();
+	built.reserve(source.size());
+	auto cursor = 0;
+	auto index = 0;
+	for (const auto &tag : sorted) {
+		// In range, positive, and starting at or after the previous span ended.
+		// `tag.offset < cursor` rejects an overlap as well as bad ordering.
+		if (tag.length <= 0
+			|| tag.offset < cursor
+			|| tag.offset + tag.length > sourceLength) {
+			return false;
+		}
+		built += source.mid(cursor, tag.offset - cursor);
+		const auto sentinel = SentinelToken(index);
+		built += sentinel;
+		outSpans.push_back(ProtectedSpan{
+			.sentinel = sentinel,
+			.text = source.mid(tag.offset, tag.length),
+			.id = tag.id,
+		});
+		cursor = tag.offset + tag.length;
+		++index;
+	}
+	built += source.mid(cursor);
+	outProtected = built.trimmed();
+
+	// Trimming removes only leading / trailing whitespace and a sentinel is
+	// never whitespace, so each must still be present exactly once. Verify it
+	// rather than assume it.
+	for (const auto &span : outSpans) {
+		if (outProtected.count(span.sentinel) != 1) {
+			return false;
+		}
+	}
+	return !outSpans.empty();
+}
+
+struct RebuiltTranslation {
+	QString text;
+	TextWithTags::Tags tags;
+};
+
+// The write-back half. Given the provider's answer and the span map, reinserts
+// each span and rebuilds its tag. Returns nullopt - and the caller then sends
+// the message as typed - unless every sentinel survived exactly once, in the
+// same left-to-right order, and every rebuilt tag lands in range. This is the
+// conservative gate the feature's safety rests on: a mangled round-trip is
+// never turned into a message with wrong tag offsets.
+[[nodiscard]] std::optional<RebuiltTranslation> RebuildTaggedTranslation(
+		const QString &translated,
+		const std::vector<ProtectedSpan> &spans) {
+	auto positions = std::vector<int>();
+	positions.reserve(spans.size());
+	auto previousEnd = -1;
+	for (const auto &span : spans) {
+		if (translated.count(span.sentinel) != 1) {
+			return std::nullopt;
+		}
+		const auto at = int(translated.indexOf(span.sentinel));
+		if (at <= previousEnd) {
+			// Reordered relative to a previous sentinel, or overlapping it.
+			return std::nullopt;
+		}
+		positions.push_back(at);
+		previousEnd = at + int(span.sentinel.size()) - 1;
+	}
+	auto result = RebuiltTranslation();
+	result.text.reserve(translated.size());
+	result.tags.reserve(int(spans.size()));
+	auto cursor = 0;
+	for (auto i = 0, count = int(spans.size()); i != count; ++i) {
+		const auto at = positions[i];
+		result.text += translated.mid(cursor, at - cursor);
+		const auto offset = int(result.text.size());
+		result.text += spans[i].text;
+		result.tags.push_back(TextWithTags::Tag{
+			.offset = offset,
+			.length = int(spans[i].text.size()),
+			.id = spans[i].id,
+		});
+		cursor = at + int(spans[i].sentinel.size());
+	}
+	result.text += translated.mid(cursor);
+
+	const auto total = int(result.text.size());
+	for (const auto &tag : result.tags) {
+		if (tag.offset < 0
+			|| tag.length <= 0
+			|| tag.offset + tag.length > total) {
+			return std::nullopt;
+		}
+	}
+	return result;
+}
+
 // One held send. `text` points into the Api::MessageToSend that `proceed`
 // owns, which is what lumina_send_pipeline.h promises: rewriting it just
 // before invoking `proceed` is the supported way to change an outgoing message
@@ -167,6 +337,19 @@ struct Request {
 	Fn<void()> proceed;
 	base::Timer watchdog;
 	uint64 generation = 0;
+
+	// Tag-preserving translation state, set in CreateRequest() and read in
+	// ApplyTranslation() / FinishRequest(). `hadTags` is true for any message
+	// that arrived with tags; `spans` is non-empty only when those tags were
+	// protected successfully, and `protectedSource` is then the sentinel-bearing
+	// string sent to the provider. `rebuiltTags` is filled once the round-trip
+	// verifies (ApplyTranslation), and `hasRebuilt` tells FinishRequest() to
+	// apply it. See BuildProtectedSource() / RebuildTaggedTranslation().
+	bool hadTags = false;
+	QString protectedSource;
+	std::vector<ProtectedSpan> spans;
+	bool hasRebuilt = false;
+	TextWithTags::Tags rebuiltTags;
 };
 
 // Deliberately leaked, exactly as the hold in lumina_undo_send.cpp is and for
@@ -280,6 +463,8 @@ void FinishRequest(
 	const auto text = request->text;
 	const auto original = request->original;
 	const auto history = request->history.get();
+	const auto hasRebuilt = request->hasRebuilt;
+	auto rebuiltTags = std::move(request->rebuiltTags);
 	Requests().remove(key);
 	ScheduleDrain(key);
 	if (!proceed) {
@@ -294,6 +479,13 @@ void FinishRequest(
 	}
 	if (text && !translated.isEmpty() && (translated != original)) {
 		text->text = translated;
+		if (hasRebuilt) {
+			// A formatted message: the tags were rebuilt against `translated` in
+			// ApplyTranslation(), where `translated` was set to the rebuilt text
+			// with every protected span reinserted verbatim. Assigning text and
+			// tags together is what keeps a mention pointing at the right span.
+			text->tags = rebuiltTags;
+		}
 
 		// Not for a caption. The store behind this hook is keyed on the message
 		// id ApiWrap::sendMessage() mints, and a media send never goes near
@@ -352,6 +544,32 @@ void ArmCaptionBoxGuard(const QString &key, uint64 generation) {
 	created->text = &text;
 	created->proceed = std::move(proceed);
 	created->generation = generation;
+
+	// Tag-preserving translation. A formatted message carries its mention /
+	// bold / custom-emoji ranges as offsets into `text.text`; translating the
+	// text would leave them pointing at the wrong characters, which is why a
+	// tagged message used to be refused outright. Instead protect each tagged
+	// span behind a sentinel token the translator passes through, so only the
+	// surrounding text is translated, and rebuild the tags later.
+	//
+	// `hadTags` is remembered separately from `spans`: if the tags cannot be
+	// protected safely (an overlap, or a marker already in the text), spans
+	// stays empty and the write-back must NOT rewrite the text - rewriting it
+	// with the old offsets is the exact bug this replaces - so the message goes
+	// out as typed instead.
+	if (!text.tags.isEmpty()) {
+		created->hadTags = true;
+		auto protectedSource = QString();
+		auto spans = std::vector<ProtectedSpan>();
+		if (BuildProtectedSource(
+				text.text,
+				text.tags,
+				protectedSource,
+				spans)) {
+			created->protectedSource = protectedSource;
+			created->spans = std::move(spans);
+		}
+	}
 	Requests().emplace(key, std::move(created));
 	return generation;
 }
@@ -383,7 +601,14 @@ void StartTranslation(
 	const auto history = request->history.get();
 	const auto session = history ? &history->session() : nullptr;
 	const auto original = request->original;
-	TranslateText(session, original, target, [=](TranslateResult result) {
+	// A formatted message is translated with its tagged spans replaced by
+	// sentinel tokens (see CreateRequest / BuildProtectedSource); an
+	// unformatted one, and a formatted one whose tags could not be protected,
+	// is translated as its plain text exactly as before.
+	const auto toSend = request->spans.empty()
+		? original
+		: request->protectedSource;
+	TranslateText(session, toSend, target, [=](TranslateResult result) {
 		const auto text = result.failed()
 			? QString()
 			: result.text.trimmed();
@@ -409,14 +634,44 @@ void ApplyTranslation(
 		FinishRequest(key, generation, QString());
 		return;
 	}
-	if (!TranslationFits(request->history.get(), translated)) {
+
+	// For a formatted message `translated` still holds the sentinel tokens the
+	// provider translated around. Turn it into the text that will actually be
+	// sent - every protected span reinserted verbatim, the tags rebuilt against
+	// it - before anything shows it or measures it. `finalText` stays equal to
+	// `translated` for an unformatted message.
+	auto finalText = translated;
+	if (request->hadTags) {
+		if (request->spans.empty()) {
+			// Tags were present but could not be protected (see
+			// BuildProtectedSource): the text must never be rewritten with the
+			// old offsets, so send it as typed.
+			FinishRequest(key, generation, QString());
+			return;
+		}
+		auto rebuilt = RebuildTaggedTranslation(translated, request->spans);
+		if (!rebuilt) {
+			// The sentinel round-trip did not verify - a marker missing,
+			// duplicated, or reordered. Never guess: send the message as typed.
+			FinishRequest(key, generation, QString());
+			return;
+		}
+		finalText = rebuilt->text;
+		request->rebuiltTags = std::move(rebuilt->tags);
+		request->hasRebuilt = true;
+	}
+	if (finalText == request->original) {
+		FinishRequest(key, generation, QString());
+		return;
+	}
+	if (!TranslationFits(request->history.get(), finalText)) {
 		FinishRequest(key, generation, QString());
 		return;
 	}
 	if (TranslateBeforeSendConfirm()) {
-		ShowTranslationConfirm(key, generation, translated);
+		ShowTranslationConfirm(key, generation, finalText);
 	} else {
-		FinishRequest(key, generation, translated);
+		FinishRequest(key, generation, finalText);
 	}
 }
 
@@ -697,6 +952,10 @@ void FlushQueue(const QString &key, uint64 id) {
 	if (!target.isEmpty()) {
 		const auto &preview = Preview();
 		const auto reuse = (preview.dialog == key)
+			// The W2-D preview translates plain composer text and carries no
+			// tags, so it cannot be reused for a formatted message - that has to
+			// go through the sentinel path in StartTranslation().
+			&& text.tags.isEmpty()
 			&& (preview.source == original)
 			&& (preview.target == target)
 			&& !preview.translated.isEmpty()
@@ -857,12 +1116,15 @@ bool Intercept(
 	const auto original = text.text.trimmed();
 
 	// A tagged message carries bold / mention / custom-emoji ranges as
-	// character offsets into this exact string. Replacing the string would
-	// leave every one of them pointing at the wrong characters, or past the
-	// end, and it fails silently rather than loudly. Dropping the user's
-	// formatting instead is no better, so a formatted message is sent as
-	// typed.
-	if (original.isEmpty() || !text.tags.isEmpty()) {
+	// character offsets into this exact string. Translating the text used to
+	// mean those offsets pointed at the wrong characters, so a formatted
+	// message was refused here and sent as typed. It no longer is: the pipeline
+	// protects each tagged span behind a sentinel token, translates only the
+	// text around it, and rebuilds the tags on write-back (CreateRequest /
+	// ApplyTranslation / FinishRequest). Anything it cannot verify falls back
+	// to sending as typed, so a mention is never dropped or mispositioned. An
+	// empty message is still nothing to translate.
+	if (original.isEmpty()) {
 		return true;
 	}
 	const auto key = DialogKey(history);

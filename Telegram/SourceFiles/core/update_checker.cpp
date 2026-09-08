@@ -907,7 +907,7 @@ bool ParseCommonMap(
 			return false;
 		}
 		const auto map = (*it).toObject();
-		const auto key = testing ? "testing" : "released";
+		const auto key = (testing || cInstallBetaVersion()) ? "testing" : "released";
 		const auto version = map.constFind(key);
 		if (version == map.constEnd()) {
 			continue;

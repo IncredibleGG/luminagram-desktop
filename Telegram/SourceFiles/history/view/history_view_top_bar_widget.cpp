@@ -27,6 +27,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "lumina/lumina_chat_language_menu.h"
 #include "lumina/lumina_locale.h"
 #include "lumina/lumina_translate_toggle.h"
+#include "lumina/lumina_translate_send.h"
 #include "ui/controls/userpic_button.h"
 #include "ui/wrap/fade_wrap.h"
 #include "ui/widgets/buttons.h"
@@ -381,7 +382,9 @@ void TopBarWidget::showTranslateMenu() {
 
 void TopBarWidget::updateTranslateToggleState() {
 	const auto history = _activeChat.key.history();
-	const auto translating = history && Lumina::ChatTranslating(history);
+	const auto translating = history
+		&& (Lumina::ChatTranslating(history)
+			|| Lumina::TranslateBeforeSendActive(history));
 	const auto iconOverride = translating
 		? &st::luminaTopBarTranslateActive
 		: nullptr;

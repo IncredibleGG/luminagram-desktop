@@ -1017,6 +1017,14 @@ void TopBarWidget::setActiveChat(
 				updateTranslateToggleState();
 				updateControlsVisibility();
 			}, _activeChatLifetime);
+
+			// The incoming stream above misses the outgoing (translate-before-send)
+			// switch, so the button colour would go stale until an unrelated
+			// refresh. Watch that switch too.
+			Lumina::DialogSendTranslateChanges(
+			) | rpl::on_next([=] {
+				updateTranslateToggleState();
+			}, _activeChatLifetime);
 		}
 
 		if (const auto topic = _activeChat.key.topic()) {

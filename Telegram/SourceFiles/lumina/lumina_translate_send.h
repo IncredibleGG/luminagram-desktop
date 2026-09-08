@@ -10,6 +10,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "api/api_common.h" // Api::SendOptions.
 
 #include <QtCore/QString>
+#include <rpl/producer.h>
 
 #include <memory>
 
@@ -240,6 +241,11 @@ void SetDialogSendLanguage(not_null<History*> history, const QString &code);
 // per-chat switch the send-button menu does.
 [[nodiscard]] bool DialogSendTranslateOn(not_null<History*> history);
 void SetDialogSendTranslateOn(not_null<History*> history, bool on);
+
+// Fires when any chat's outgoing (translate-before-send) switch flips, so
+// UI that reflects TranslateBeforeSendActive() (e.g. the top-bar button colour)
+// can refresh - the incoming ChatTranslateStateChanges() does not cover it.
+[[nodiscard]] rpl::producer<> DialogSendTranslateChanges();
 
 // The language an outgoing message in this chat would be translated into, or
 // an empty string when there is nothing to translate into yet: the feature is

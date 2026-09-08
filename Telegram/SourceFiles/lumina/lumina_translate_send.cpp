@@ -1246,6 +1246,10 @@ bool TranslateBeforeSendActive(not_null<History*> history) {
 		&& DialogSendTranslateOn(history);
 }
 
+rpl::producer<> DialogSendTranslateChanges() {
+	return Settings::Instance().changesFor(DialogSendActiveKey());
+}
+
 bool DialogSendTranslateOn(not_null<History*> history) {
 	return Settings::Instance().getObject(
 		DialogSendActiveKey()

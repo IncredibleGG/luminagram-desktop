@@ -195,13 +195,14 @@ void StartTranscription(
 		.content = std::move(content),
 		.fileName = roundVideo ? u"round.mp4"_q : u"voice.ogg"_q,
 		.mimeType = roundVideo ? u"video/mp4"_q : u"audio/ogg"_q,
-		// Leave the spoken language to the engine: whisper (Win/Linux) always
-		// auto-detects (params.language="auto"); Apple (mac) has no auto-detect
-		// and falls back to the device locale when the hint is empty. We must NOT
-		// pass ReadingLanguage() here -- that is the TRANSLATE TARGET, so setting a
-		// chat to "translate to Japanese" made a Chinese voice transcribe as
-		// Japanese gibberish. Empty = detect / device locale.
-		.langHint = QString(),
+		// The spoken-language hint for Apple's recogniser (mac). whisper
+		// (Win/Linux) ignores it and auto-detects. Use the APP UI language, i.e.
+		// the user's own language: it is right for the user's own voice and for a
+		// same-language chat, and unlike the earlier choices it is stable. NOT
+		// ReadingLanguage() (that is the TRANSLATE TARGET -- a chat set to Japanese
+		// made Chinese voice transcribe as Japanese), and NOT empty (that let Apple
+		// use the DEVICE locale, e.g. English, turning Chinese voice into English).
+		.langHint = InterfaceLanguageCode(),
 		.roundVideo = roundVideo,
 	}, crl::guard(box, [=](TranscribeResult result) {
 		if (result.failed()) {
@@ -487,8 +488,8 @@ void InlineTranscribe(
 		.content = std::move(content),
 		.fileName = roundVideo ? u"round.mp4"_q : u"voice.ogg"_q,
 		.mimeType = roundVideo ? u"video/mp4"_q : u"audio/ogg"_q,
-		// Spoken language, not the translate target - see the box path.
-		.langHint = QString(),
+		// App UI language as the spoken-language hint - see the box path.
+		.langHint = InterfaceLanguageCode(),
 		.roundVideo = roundVideo,
 	}, crl::guard(session, [=](TranscribeResult result) {
 		if (result.failed()) {

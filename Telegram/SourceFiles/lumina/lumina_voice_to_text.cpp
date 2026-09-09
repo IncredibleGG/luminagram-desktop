@@ -86,18 +86,17 @@ const auto kKeyAutoTranslate = u"sttAutoTranslate"_q;
 	return stored.isEmpty() ? InterfaceLanguageCode() : stored;
 }
 
-// The spoken-language hint for the transcriber. Mirrors Android (#32): use the
-// CHAT's language - the one Telegram detected from the chat's own text - so a
-// Chinese contact's voice is transcribed with the Chinese recogniser no matter
-// the user's own language or the Mac system locale. Falls back to the app UI
-// language when nothing was detected. Only Apple (mac) uses this hint; whisper
-// (Win/Linux) auto-detects and ignores it. NEVER the translate target.
+// The spoken-language hint for Apple's recogniser (mac). Apple cannot detect
+// the audio language, so it must be told one. Use the APP's own UI language -
+// the user's language - exactly like the working reference Swiftgram does
+// (LocalAudioTranscription.swift transcribes with , not the device
+// locale). NOT the device/system locale (this user's Mac resolves it to
+// English/Malay from a zh + Malaysia-region + Malay-in-list setup), and NOT the
+// chat's detected language (unreliable - it came back Malay for a Chinese
+// group), and NEVER the translate target. whisper (Win/Linux) ignores this and
+// auto-detects.
 [[nodiscard]] QString LangHintForItem(HistoryItem *item) {
-	if (item) {
-		if (const auto from = item->history()->translateOfferedFrom()) {
-			return from.twoLetterCode();
-		}
-	}
+	(void)item;
 	return InterfaceLanguageCode();
 }
 
@@ -592,7 +591,7 @@ bool VoiceToTextButtonAvailable() {
 }
 
 bool VoiceToTextAutoTranslate() {
-	return Settings::Instance().getBool(kKeyAutoTranslate, true);
+	return Settings::Instance().getBool(kKeyAutoTranslate, false);
 }
 
 void SetVoiceToTextAutoTranslate(bool value) {

@@ -20,6 +20,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "data/data_session.h"
 #include "history/history.h"
 #include "history/history_item.h"
+#include "spellcheck/spellcheck_types.h"
 #include "lang/lang_keys.h"
 #include "lumina/lumina_locale.h"
 #include "lumina/lumina_message_menu.h"
@@ -83,6 +84,21 @@ const auto kKeyAutoTranslate = u"sttAutoTranslate"_q;
 [[nodiscard]] QString ReadingLanguage() {
 	const auto stored = NormalizeLanguageCode(ReadLanguageCode());
 	return stored.isEmpty() ? InterfaceLanguageCode() : stored;
+}
+
+// The spoken-language hint for the transcriber. Mirrors Android (#32): use the
+// CHAT's language - the one Telegram detected from the chat's own text - so a
+// Chinese contact's voice is transcribed with the Chinese recogniser no matter
+// the user's own language or the Mac system locale. Falls back to the app UI
+// language when nothing was detected. Only Apple (mac) uses this hint; whisper
+// (Win/Linux) auto-detects and ignores it. NEVER the translate target.
+[[nodiscard]] QString LangHintForItem(HistoryItem *item) {
+	if (item) {
+		if (const auto from = item->history()->translateOfferedFrom()) {
+			return from.twoLetterCode();
+		}
+	}
+	return InterfaceLanguageCode();
 }
 
 struct State {
@@ -178,7 +194,8 @@ void StartTranscription(
 		not_null<Ui::GenericBox*> box,
 		not_null<Main::Session*> session,
 		not_null<State*> state,
-		not_null<DocumentData*> document) {
+		not_null<DocumentData*> document,
+		const QString &langHint) {
 	auto content = ReadContent(document, state->media);
 	if (content.isEmpty()) {
 		state->status = ErrorText(TranscribeError::Unavailable);
@@ -195,14 +212,7 @@ void StartTranscription(
 		.content = std::move(content),
 		.fileName = roundVideo ? u"round.mp4"_q : u"voice.ogg"_q,
 		.mimeType = roundVideo ? u"video/mp4"_q : u"audio/ogg"_q,
-		// The spoken-language hint for Apple's recogniser (mac). whisper
-		// (Win/Linux) ignores it and auto-detects. Use the APP UI language, i.e.
-		// the user's own language: it is right for the user's own voice and for a
-		// same-language chat, and unlike the earlier choices it is stable. NOT
-		// ReadingLanguage() (that is the TRANSLATE TARGET -- a chat set to Japanese
-		// made Chinese voice transcribe as Japanese), and NOT empty (that let Apple
-		// use the DEVICE locale, e.g. English, turning Chinese voice into English).
-		.langHint = InterfaceLanguageCode(),
+		.langHint = langHint,
 		.roundVideo = roundVideo,
 	}, crl::guard(box, [=](TranscribeResult result) {
 		if (result.failed()) {
@@ -238,7 +248,7 @@ void StartWhenLoaded(
 		state->status = ErrorText(TranscribeError::Unavailable);
 		return;
 	}
-	StartTranscription(box, session, state, document);
+	StartTranscription(box, session, state, document, LangHintForItem(item));
 }
 
 void Start(
@@ -255,7 +265,7 @@ void Start(
 	}
 	state->media = document->createMediaView();
 	if (state->media->loaded()) {
-		StartTranscription(box, session, state, document);
+		StartTranscription(box, session, state, document, LangHintForItem(item));
 		return;
 	}
 
@@ -488,8 +498,7 @@ void InlineTranscribe(
 		.content = std::move(content),
 		.fileName = roundVideo ? u"round.mp4"_q : u"voice.ogg"_q,
 		.mimeType = roundVideo ? u"video/mp4"_q : u"audio/ogg"_q,
-		// App UI language as the spoken-language hint - see the box path.
-		.langHint = InterfaceLanguageCode(),
+		.langHint = LangHintForItem(session->data().message(itemId)),
 		.roundVideo = roundVideo,
 	}, crl::guard(session, [=](TranscribeResult result) {
 		if (result.failed()) {
